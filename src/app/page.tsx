@@ -55,9 +55,14 @@ export default function LandingPage() {
   const handleGoogle = async () => {
     const supabase = createClient();
     setLoading(true);
+    // Use current origin for the callback — works on both localhost and production
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: {
+        redirectTo: `${origin}/auth/callback`,
+        queryParams: { prompt: "select_account" },
+      },
     });
     if (error) {
       // Google not enabled yet — show friendly message

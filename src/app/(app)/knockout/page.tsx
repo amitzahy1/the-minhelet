@@ -1,0 +1,253 @@
+"use client";
+
+import { useState, useCallback } from "react";
+import { useBettingStore } from "@/stores/betting-store";
+import { GROUPS } from "@/lib/tournament/groups";
+
+// Flags
+const F: Record<string,string> = {
+  MAR:"🇲🇦",PER:"🇵🇪",CAN:"🇨🇦",BFA:"🇧🇫",FRA:"🇫🇷",COL:"🇨🇴",HON:"🇭🇳",NZL:"🇳🇿",
+  ARG:"🇦🇷",MEX:"🇲🇽",UZB:"🇺🇿",IDN:"🇮🇩",JPN:"🇯🇵",AUS:"🇦🇺",BHR:"🇧🇭",TBD:"🏳️",
+  BRA:"🇧🇷",ECU:"🇪🇨",JAM:"🇯🇲",BOL:"🇧🇴",ESP:"🇪🇸",CHI:"🇨🇱",CMR:"🇨🇲",ALB:"🇦🇱",
+  ENG:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",SEN:"🇸🇳",DEN:"🇩🇰",KSA:"🇸🇦",POR:"🇵🇹",IRN:"🇮🇷",PAR:"🇵🇾",CIV:"🇨🇮",
+  GER:"🇩🇪",URU:"🇺🇾",USA:"🇺🇸",WAL:"🏴󠁧󠁢󠁷󠁬󠁳󠁿",NED:"🇳🇱",KOR:"🇰🇷",PAN:"🇵🇦",CRC:"🇨🇷",
+  ITA:"🇮🇹",SRB:"🇷🇸",TUN:"🇹🇳",TRI:"🇹🇹",BEL:"🇧🇪",CRO:"🇭🇷",NGA:"🇳🇬",QAT:"🇶🇦",
+};
+
+// For now: use seed order (1st in group = index 0, 2nd = index 1) as placeholder R32 matchups
+// In production this would use the 495-scenario allocation table
+const R32_MATCHUPS = [
+  // Left half
+  { key: "r32l_0", h: "A1", a: "B2" }, { key: "r32l_1", h: "C1", a: "D2" },
+  { key: "r32l_2", h: "E1", a: "F2" }, { key: "r32l_3", h: "G1", a: "H2" },
+  { key: "r32l_4", h: "B1", a: "A2" }, { key: "r32l_5", h: "D1", a: "C2" },
+  { key: "r32l_6", h: "F1", a: "E2" }, { key: "r32l_7", h: "H1", a: "G2" },
+  // Right half
+  { key: "r32r_0", h: "I1", a: "J2" }, { key: "r32r_1", h: "K1", a: "L2" },
+  { key: "r32r_2", h: "J1", a: "I2" }, { key: "r32r_3", h: "L1", a: "K2" },
+  { key: "r32r_4", h: "I1", a: "L2" }, { key: "r32r_5", h: "K1", a: "J2" },
+  { key: "r32r_6", h: "L1", a: "I2" }, { key: "r32r_7", h: "J1", a: "K2" },
+];
+
+// Resolve "A1" to actual team code from group standings
+function resolveSlot(slot: string, groups: Record<string, { order: number[] }>): string | null {
+  const groupLetter = slot[0];
+  const position = parseInt(slot[1]) - 1; // "A1" → group A, position 0
+  const group = groups[groupLetter];
+  if (!group) return null;
+  const teamIndex = group.order[position];
+  const groupTeams = GROUPS[groupLetter];
+  if (!groupTeams || teamIndex === undefined) return null;
+  return groupTeams[teamIndex]?.code || null;
+}
+
+interface MatchProps {
+  matchKey: string;
+  team1Code: string | null;
+  team2Code: string | null;
+  size?: "sm" | "md";
+}
+
+function BracketMatch({ matchKey, team1Code, team2Code, size = "md" }: MatchProps) {
+  const match = useBettingStore((s) => s.knockout[matchKey]);
+  const setMatch = useBettingStore((s) => s.setKnockoutMatch);
+  const py = size === "sm" ? "py-1.5" : "py-2";
+
+  const setScore = (side: 1 | 2, delta: number) => {
+    const s1 = side === 1 ? Math.max(0, (match?.score1 ?? 0) + delta) : (match?.score1 ?? 0);
+    const s2 = side === 2 ? Math.max(0, (match?.score2 ?? 0) + delta) : (match?.score2 ?? 0);
+    const winner = s1 > s2 ? team1Code : s2 > s1 ? team2Code : match?.winner || null;
+    setMatch(matchKey, { score1: s1, score2: s2, winner });
+  };
+
+  const selectWinner = (code: string) => {
+    setMatch(matchKey, { ...match, winner: code });
+  };
+
+  if (!team1Code || !team2Code) {
+    return (
+      <div className="bg-gray-50/80 rounded-lg border border-dashed border-gray-200">
+        <div className={`px-2.5 ${py} text-sm text-gray-300 border-b border-dashed border-gray-200`}>ממתין...</div>
+        <div className={`px-2.5 ${py} text-sm text-gray-300`}>ממתין...</div>
+      </div>
+    );
+  }
+
+  const stepper = (side: 1 | 2, score: number | null) => (
+    <div className="flex items-center gap-0 rounded border border-gray-200 bg-white overflow-hidden" onClick={e => e.stopPropagation()}>
+      <button onClick={() => setScore(side, -1)} className="w-6 h-6 flex items-center justify-center text-gray-400 hover:bg-gray-100 text-xs font-bold">−</button>
+      <span className="w-5 h-6 flex items-center justify-center font-bold text-xs tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{score ?? 0}</span>
+      <button onClick={() => setScore(side, 1)} className="w-6 h-6 flex items-center justify-center text-gray-400 hover:bg-gray-100 text-xs font-bold">+</button>
+    </div>
+  );
+
+  const isWinner1 = match?.winner === team1Code;
+  const isWinner2 = match?.winner === team2Code;
+  const isTie = match?.score1 !== null && match?.score2 !== null && match?.score1 === match?.score2;
+
+  return (
+    <div className={`bg-white rounded-lg border overflow-hidden transition-all ${match?.winner ? "border-green-300 shadow-sm" : "border-gray-200 shadow-sm hover:shadow-md"}`}>
+      <div onClick={() => selectWinner(team1Code)} className={`flex items-center gap-1.5 px-2 ${py} w-full cursor-pointer border-b border-gray-100 transition-colors ${isWinner1 ? "bg-green-50" : "hover:bg-gray-50"}`}>
+        <span className="text-sm">{F[team1Code]}</span>
+        <span className={`text-sm font-bold flex-1 ${isWinner1 ? "text-green-700" : "text-gray-800"}`}>{team1Code}</span>
+        {stepper(1, match?.score1 ?? null)}
+        {isWinner1 && <span className="text-green-500 text-xs font-bold ms-0.5">✓</span>}
+      </div>
+      <div onClick={() => selectWinner(team2Code)} className={`flex items-center gap-1.5 px-2 ${py} w-full cursor-pointer transition-colors ${isWinner2 ? "bg-green-50" : "hover:bg-gray-50"}`}>
+        <span className="text-sm">{F[team2Code]}</span>
+        <span className={`text-sm font-bold flex-1 ${isWinner2 ? "text-green-700" : "text-gray-800"}`}>{team2Code}</span>
+        {stepper(2, match?.score2 ?? null)}
+        {isWinner2 && <span className="text-green-500 text-xs font-bold ms-0.5">✓</span>}
+      </div>
+      {isTie && (
+        <div className="text-center py-1 bg-amber-50 border-t border-amber-200">
+          <span className="text-[10px] text-amber-700 font-bold">תיקו — לחצו על מי שעולה</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Connector() {
+  return <div className="w-3 shrink-0 flex items-center"><div className="w-full border-t border-gray-200"></div></div>;
+}
+
+function RoundCol({ label, children, width }: { label: string; children: React.ReactNode; width: string }) {
+  return (
+    <div className={`flex flex-col ${width} shrink-0`}>
+      <div className="text-center mb-3">
+        <p className="text-xs font-black text-gray-600 uppercase tracking-widest" style={{ fontFamily: "var(--font-inter)" }}>{label}</p>
+      </div>
+      <div className="flex flex-col gap-1 flex-1 justify-around">{children}</div>
+    </div>
+  );
+}
+
+export default function KnockoutPage() {
+  const groups = useBettingStore((s) => s.groups);
+  const knockout = useBettingStore((s) => s.knockout);
+  const filledKnockout = Object.values(knockout).filter(m => m.winner).length;
+
+  // Resolve R32 teams from group standings
+  const getR32Team = (slot: string) => resolveSlot(slot, groups);
+
+  // Get winner of a knockout match
+  const getWinner = (key: string) => knockout[key]?.winner || null;
+
+  return (
+    <div className="max-w-full mx-auto px-4 py-6 pb-24">
+      <div className="mb-4">
+        <h1 className="text-3xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>עץ הנוק-אאוט</h1>
+        <p className="text-lg text-gray-600 mt-1">לחצו על נבחרת כדי לבחור מי עולה, +/- להזנת תוצאה</p>
+      </div>
+
+      <div className="mb-4 flex items-center gap-4 flex-wrap">
+        <div className="flex items-center gap-2 bg-white rounded-lg border border-gray-200 px-3 py-2 shadow-sm">
+          <span className="text-sm font-bold text-gray-700">התקדמות:</span>
+          <span className="text-sm font-black text-blue-600" style={{ fontFamily: "var(--font-inter)" }}>{filledKnockout}/31</span>
+          <div className="w-20 h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-full bg-blue-500 rounded-full" style={{ width: `${(filledKnockout / 31) * 100}%` }}></div>
+          </div>
+        </div>
+        <p className="text-sm text-gray-500">המנצחת עוברת אוטומטית לשלב הבא</p>
+      </div>
+
+      {/* Bracket */}
+      <div className="overflow-x-auto pb-4" dir="ltr">
+        <div className="flex items-stretch justify-center gap-0 mx-auto" style={{ minHeight: "700px", minWidth: "1150px" }}>
+
+          {/* R32 Left */}
+          <RoundCol label="R32" width="w-[120px]">
+            {R32_MATCHUPS.slice(0, 8).map(m => (
+              <BracketMatch key={m.key} matchKey={m.key} team1Code={getR32Team(m.h)} team2Code={getR32Team(m.a)} size="sm" />
+            ))}
+          </RoundCol>
+          <Connector />
+
+          {/* R16 Left */}
+          <RoundCol label="R16" width="w-[130px]">
+            {[0,1,2,3].map(i => (
+              <BracketMatch key={`r16l_${i}`} matchKey={`r16l_${i}`}
+                team1Code={getWinner(`r32l_${i*2}`)} team2Code={getWinner(`r32l_${i*2+1}`)} />
+            ))}
+          </RoundCol>
+          <Connector />
+
+          {/* QF Left */}
+          <RoundCol label="QF" width="w-[130px]">
+            {[0,1].map(i => (
+              <BracketMatch key={`qfl_${i}`} matchKey={`qfl_${i}`}
+                team1Code={getWinner(`r16l_${i*2}`)} team2Code={getWinner(`r16l_${i*2+1}`)} />
+            ))}
+          </RoundCol>
+          <Connector />
+
+          {/* SF Left */}
+          <RoundCol label="SF" width="w-[130px]">
+            <BracketMatch matchKey="sfl_0" team1Code={getWinner("qfl_0")} team2Code={getWinner("qfl_1")} />
+          </RoundCol>
+          <Connector />
+
+          {/* FINAL */}
+          <div className="flex flex-col items-center justify-center w-[150px] shrink-0 mx-1">
+            <div className="mb-3 text-center">
+              <div className="w-14 h-14 mx-auto rounded-full bg-gradient-to-br from-amber-100 to-amber-200 border-2 border-amber-300 flex items-center justify-center mb-2 shadow-lg">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#92400E" strokeWidth="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20 17 22M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+              </div>
+              <p className="text-sm font-black text-amber-800 uppercase tracking-wider" style={{ fontFamily: "var(--font-inter)" }}>FINAL</p>
+            </div>
+            <div className="w-full">
+              <BracketMatch matchKey="final" team1Code={getWinner("sfl_0")} team2Code={getWinner("sfr_0")} />
+            </div>
+            <div className="mt-3 w-full rounded-xl border-2 border-amber-300 bg-gradient-to-br from-amber-50 to-amber-100/50 p-3 text-center shadow-sm">
+              {knockout.final?.winner ? (
+                <>
+                  <p className="text-sm text-amber-700 font-semibold">אלוף העולם 2026</p>
+                  <div className="flex items-center justify-center gap-2 mt-1">
+                    <span className="text-2xl">{F[knockout.final.winner]}</span>
+                    <span className="text-xl font-black text-amber-900">{knockout.final.winner}</span>
+                  </div>
+                </>
+              ) : (
+                <><p className="text-sm text-amber-600 font-semibold">אלוף העולם 2026</p><p className="text-xl font-black text-amber-900 mt-0.5">?</p></>
+              )}
+            </div>
+          </div>
+
+          <Connector />
+
+          {/* SF Right */}
+          <RoundCol label="SF" width="w-[130px]">
+            <BracketMatch matchKey="sfr_0" team1Code={getWinner("qfr_0")} team2Code={getWinner("qfr_1")} />
+          </RoundCol>
+          <Connector />
+
+          {/* QF Right */}
+          <RoundCol label="QF" width="w-[130px]">
+            {[0,1].map(i => (
+              <BracketMatch key={`qfr_${i}`} matchKey={`qfr_${i}`}
+                team1Code={getWinner(`r16r_${i*2}`)} team2Code={getWinner(`r16r_${i*2+1}`)} />
+            ))}
+          </RoundCol>
+          <Connector />
+
+          {/* R16 Right */}
+          <RoundCol label="R16" width="w-[130px]">
+            {[0,1,2,3].map(i => (
+              <BracketMatch key={`r16r_${i}`} matchKey={`r16r_${i}`}
+                team1Code={getWinner(`r32r_${i*2}`)} team2Code={getWinner(`r32r_${i*2+1}`)} />
+            ))}
+          </RoundCol>
+          <Connector />
+
+          {/* R32 Right */}
+          <RoundCol label="R32" width="w-[120px]">
+            {R32_MATCHUPS.slice(8, 16).map(m => (
+              <BracketMatch key={m.key} matchKey={m.key} team1Code={getR32Team(m.h)} team2Code={getR32Team(m.a)} size="sm" />
+            ))}
+          </RoundCol>
+        </div>
+      </div>
+    </div>
+  );
+}

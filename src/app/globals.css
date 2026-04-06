@@ -126,5 +126,26 @@
   }
   html {
     @apply font-sans;
+    /*
+     * Responsive base font size:
+     * Mobile (<640px): 13.5px (smaller screens)
+     * Small laptop (640-1024px): 14px
+     * Desktop (1024-1440px): 14.5px
+     * Large desktop (>1440px): 16px (default)
+     * This scales ALL rem-based sizes proportionally
+     */
+    font-size: 13.5px;
+  }
+  @media (min-width: 640px) {
+    html { font-size: 14px; }
+  }
+  @media (min-width: 1024px) {
+    html { font-size: 14.5px; }
+  }
+  @media (min-width: 1440px) {
+    html { font-size: 15px; }
+  }
+  @media (min-width: 1920px) {
+    html { font-size: 16px; }
   }
 }

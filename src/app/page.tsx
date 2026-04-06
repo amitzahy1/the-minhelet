@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 
-// League secret code — only people with this code can join
-const LEAGUE_SECRET = "minhelet26";
+// League code verified server-side via /api/verify-code
 
 export default function LandingPage() {
   const router = useRouter();
@@ -42,14 +41,26 @@ export default function LandingPage() {
     );
   }
 
-  const verifyCode = () => {
-    if (leagueCode.trim().toLowerCase() === LEAGUE_SECRET) {
-      setCodeError(false);
-      setShowSignup(true); // Code step always leads to signup
-      setStep("auth");
-    } else {
+  const verifyCode = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/verify-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: leagueCode }),
+      });
+      const data = await res.json();
+      if (data.valid) {
+        setCodeError(false);
+        setShowSignup(true);
+        setStep("auth");
+      } else {
+        setCodeError(true);
+      }
+    } catch {
       setCodeError(true);
     }
+    setLoading(false);
   };
 
   const handleGoogle = async () => {

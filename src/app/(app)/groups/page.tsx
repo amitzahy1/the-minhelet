@@ -182,16 +182,16 @@ function GroupView({ groupId }: { groupId: string }) {
                   }`}>
                     <div className="flex items-center gap-1.5 flex-1 min-w-0">
                       <span className="text-lg shrink-0">{getFlag(ht.code)}</span>
-                      <span className="text-sm font-bold text-gray-900 truncate">{ht.name_he}</span>
+                      <span className="text-xs sm:text-sm font-bold text-gray-900">{ht.code}</span>
                     </div>
-                    <div className="flex items-center gap-1 shrink-0 mx-2">
+                    <div className="flex items-center gap-1 shrink-0 mx-1 sm:mx-2">
                       <ScoreStepper value={groupState.scores[i].home} onChange={(v) => handleScore(i, "home", v)} />
                       <span className="text-gray-300 text-sm">:</span>
                       <ScoreStepper value={groupState.scores[i].away} onChange={(v) => handleScore(i, "away", v)} />
                     </div>
                     <div className="flex items-center gap-1.5 flex-1 min-w-0 justify-end">
+                      <span className="text-xs sm:text-sm font-bold text-gray-900">{at.code}</span>
                       <span className="text-lg shrink-0">{getFlag(at.code)}</span>
-                      <span className="text-sm font-bold text-gray-900 truncate">{at.name_he}</span>
                     </div>
                   </div>
                 );
@@ -223,20 +223,20 @@ export default function GroupsPage() {
       </div>
 
       {/* Compact progress */}
-      <div className="mb-4 flex items-center gap-3 overflow-x-auto">
+      <div className="mb-4 flex items-center gap-3 flex-wrap">
         <div className="flex items-center gap-2 bg-white rounded-lg border border-gray-200 px-3 py-2 shadow-sm shrink-0">
           <div className="w-16 h-2 bg-gray-100 rounded-full overflow-hidden">
             <div className={`h-full rounded-full ${completedGroups === 12 ? "bg-green-500" : "bg-blue-500"}`} style={{ width: `${(totalFilled / 72) * 100}%` }}></div>
           </div>
           <span className="text-xs font-bold text-gray-500" style={{ fontFamily: "var(--font-inter)" }}>{completedGroups}/12</span>
         </div>
-        <div className="flex gap-1.5">
+        <div className="flex gap-1 sm:gap-1.5 flex-wrap">
           {GROUP_LETTERS.map((letter, i) => {
             const filled = useBettingStore.getState().getGroupFilledCount(letter);
             const done = filled === 6;
             return (
               <button key={letter} onClick={() => setCurrentGroupIndex(i)}
-                className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${
+                className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg text-[11px] sm:text-xs font-bold transition-all ${
                   i === currentGroupIndex ? "bg-gray-900 text-white shadow-md scale-110" :
                   done ? "bg-green-100 text-green-700 border border-green-200" :
                   filled > 0 ? "bg-blue-50 text-blue-600 border border-blue-200" :

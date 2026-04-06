@@ -21,11 +21,17 @@ const secularOne = Secular_One({
 });
 
 export const metadata: Metadata = {
-  title: "WC2026 — World Cup Prediction Pool",
-  description:
-    "Private prediction platform for FIFA World Cup 2026. Build your bracket, predict match scores, compete with friends.",
+  title: "The Minhelet — WC2026",
+  description: "פלטפורמת ההימורים הפרטית למונדיאל 2026. בנו את העץ, נחשו תוצאות, התחרו עם חברים.",
   icons: {
     icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
+  openGraph: {
+    title: "The Minhelet — FIFA World Cup 2026",
+    description: "פלטפורמת ההימורים הפרטית למונדיאל 2026",
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    type: "website",
   },
 };
 

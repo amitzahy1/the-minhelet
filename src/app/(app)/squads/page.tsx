@@ -4,12 +4,12 @@ import { useState } from "react";
 import { ALL_TEAMS } from "@/lib/tournament/groups";
 
 const F: Record<string,string> = {
-  MAR:"🇲🇦",PER:"🇵🇪",CAN:"🇨🇦",BFA:"🇧🇫",FRA:"🇫🇷",COL:"🇨🇴",HON:"🇭🇳",NZL:"🇳🇿",
-  ARG:"🇦🇷",MEX:"🇲🇽",UZB:"🇺🇿",IDN:"🇮🇩",JPN:"🇯🇵",AUS:"🇦🇺",BHR:"🇧🇭",TBD:"🏳️",
-  BRA:"🇧🇷",ECU:"🇪🇨",JAM:"🇯🇲",BOL:"🇧🇴",ESP:"🇪🇸",CHI:"🇨🇱",CMR:"🇨🇲",ALB:"🇦🇱",
-  ENG:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",SEN:"🇸🇳",DEN:"🇩🇰",KSA:"🇸🇦",POR:"🇵🇹",IRN:"🇮🇷",PAR:"🇵🇾",CIV:"🇨🇮",
-  GER:"🇩🇪",URU:"🇺🇾",USA:"🇺🇸",WAL:"🏴󠁧󠁢󠁷󠁬󠁳󠁿",NED:"🇳🇱",KOR:"🇰🇷",PAN:"🇵🇦",CRC:"🇨🇷",
-  ITA:"🇮🇹",SRB:"🇷🇸",TUN:"🇹🇳",TRI:"🇹🇹",BEL:"🇧🇪",CRO:"🇭🇷",NGA:"🇳🇬",QAT:"🇶🇦",
+  MEX:"🇲🇽",KOR:"🇰🇷",CZE:"🇨🇿",RSA:"🇿🇦",CAN:"🇨🇦",QAT:"🇶🇦",SUI:"🇨🇭",BIH:"🇧🇦",
+  BRA:"🇧🇷",MAR:"🇲🇦",SCO:"🏴󠁧󠁢󠁳󠁣󠁴󠁿",HAI:"🇭🇹",USA:"🇺🇸",PAR:"🇵🇾",TUR:"🇹🇷",AUS:"🇦🇺",
+  GER:"🇩🇪",ECU:"🇪🇨",CIV:"🇨🇮",CUR:"🇨🇼",NED:"🇳🇱",JPN:"🇯🇵",SWE:"🇸🇪",TUN:"🇹🇳",
+  BEL:"🇧🇪",IRN:"🇮🇷",EGY:"🇪🇬",NZL:"🇳🇿",ESP:"🇪🇸",URU:"🇺🇾",KSA:"🇸🇦",CPV:"🇨🇻",
+  FRA:"🇫🇷",SEN:"🇸🇳",NOR:"🇳🇴",IRQ:"🇮🇶",ARG:"🇦🇷",AUT:"🇦🇹",ALG:"🇩🇿",JOR:"🇯🇴",
+  POR:"🇵🇹",COL:"🇨🇴",UZB:"🇺🇿",COD:"🇨🇩",ENG:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",CRO:"🇭🇷",GHA:"🇬🇭",PAN:"🇵🇦",
 };
 
 interface Player { name: string; nameEn: string; num: number; club: string; pos: string }
@@ -143,10 +143,11 @@ export default function SquadsPage() {
       <div className="mb-6">
         <select value={selected} onChange={e => setSelected(e.target.value)}
           className="w-full sm:w-auto px-4 py-3 rounded-xl border border-gray-200 bg-white text-base font-bold shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-          {Object.keys(SQUADS).map(code => {
-            const t = ALL_TEAMS.find(tt => tt.code === code);
-            return <option key={code} value={code}>{F[code]} {t?.name_he} ({code})</option>;
-          })}
+          {ALL_TEAMS.map(t => (
+            <option key={t.code} value={t.code}>
+              {F[t.code] || "🏳️"} {t.name_he} ({t.code}) {SQUADS[t.code] ? "✓" : ""}
+            </option>
+          ))}
         </select>
       </div>
 

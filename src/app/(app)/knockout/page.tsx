@@ -123,6 +123,75 @@ function RoundCol({ label, children, width }: { label: string; children: React.R
   );
 }
 
+// Mobile view — shows one round at a time with tabs
+function MobileKnockoutView({ r32l, r32r, getR32Team, getWinner, knockout, finalMatch, ...overrides }: any) {
+  const [round, setRound] = useState("R32");
+  const rounds = ["R32", "R16", "QF", "SF", "Final"];
+
+  return (
+    <div>
+      {/* Round tabs */}
+      <div className="flex gap-1 mb-4 overflow-x-auto">
+        {rounds.map(r => (
+          <button key={r} onClick={() => setRound(r)}
+            className={`px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap transition-all ${
+              round === r ? "bg-gray-900 text-white shadow-md" : "bg-gray-100 text-gray-500"
+            }`}>{r === "Final" ? "גמר" : r}</button>
+        ))}
+      </div>
+
+      {/* Matches for selected round */}
+      <div className="space-y-2">
+        {round === "R32" && (
+          <>
+            <p className="text-sm text-gray-500 mb-2">16 משחקים — שמינית גמר</p>
+            {[...r32l, ...r32r].map((m: any) => (
+              <BracketMatch key={m.key} matchKey={m.key} team1Code={getR32Team(m.h)} team2Code={getR32Team(m.a)} size="md" />
+            ))}
+          </>
+        )}
+        {round === "R16" && (
+          <>
+            <p className="text-sm text-gray-500 mb-2">8 משחקים — רבע</p>
+            {[0,1,2,3].map(i => (
+              <BracketMatch key={`r16l_${i}`} matchKey={`r16l_${i}`} team1Code={getWinner(`r32l_${i*2}`)} team2Code={getWinner(`r32l_${i*2+1}`)} />
+            ))}
+            {[0,1,2,3].map(i => (
+              <BracketMatch key={`r16r_${i}`} matchKey={`r16r_${i}`} team1Code={getWinner(`r32r_${i*2}`)} team2Code={getWinner(`r32r_${i*2+1}`)} />
+            ))}
+          </>
+        )}
+        {round === "QF" && (
+          <>
+            <p className="text-sm text-gray-500 mb-2">4 משחקים — רבע גמר</p>
+            {[0,1].map(i => <BracketMatch key={`qfl_${i}`} matchKey={`qfl_${i}`} team1Code={getWinner(`r16l_${i*2}`)} team2Code={getWinner(`r16l_${i*2+1}`)} />)}
+            {[0,1].map(i => <BracketMatch key={`qfr_${i}`} matchKey={`qfr_${i}`} team1Code={getWinner(`r16r_${i*2}`)} team2Code={getWinner(`r16r_${i*2+1}`)} />)}
+          </>
+        )}
+        {round === "SF" && (
+          <>
+            <p className="text-sm text-gray-500 mb-2">2 משחקים — חצי גמר</p>
+            <BracketMatch matchKey="sfl_0" team1Code={getWinner("qfl_0")} team2Code={getWinner("qfl_1")} />
+            <BracketMatch matchKey="sfr_0" team1Code={getWinner("qfr_0")} team2Code={getWinner("qfr_1")} />
+          </>
+        )}
+        {round === "Final" && (
+          <>
+            <p className="text-sm text-gray-500 mb-2">גמר המונדיאל</p>
+            <BracketMatch matchKey="final" team1Code={getWinner("sfl_0")} team2Code={getWinner("sfr_0")} />
+            {knockout.final?.winner && (
+              <div className="mt-4 rounded-xl border-2 border-amber-300 bg-amber-50 p-4 text-center">
+                <p className="text-base text-amber-700 font-bold">אלוף העולם 2026</p>
+                <p className="text-2xl font-black text-amber-900 mt-1">{F[knockout.final.winner]} {knockout.final.winner}</p>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function KnockoutPage() {
   const groups = useBettingStore((s) => s.groups);
   const knockout = useBettingStore((s) => s.knockout);
@@ -152,8 +221,17 @@ export default function KnockoutPage() {
         <p className="text-sm text-gray-500">המנצחת עוברת אוטומטית לשלב הבא</p>
       </div>
 
-      {/* Bracket */}
-      <div className="overflow-x-auto pb-4" dir="ltr">
+      {/* Mobile: Round-by-round tabs */}
+      <div className="sm:hidden mb-4">
+        <MobileKnockoutView
+          r32l={R32_MATCHUPS.slice(0, 8)} r32r={R32_MATCHUPS.slice(8, 16)}
+          getR32Team={getR32Team} getWinner={getWinner}
+          knockout={knockout}
+        />
+      </div>
+
+      {/* Desktop: Full bracket tree */}
+      <div className="hidden sm:block overflow-x-auto pb-4" dir="ltr">
         <div className="flex items-stretch justify-center gap-0 mx-auto" style={{ minHeight: "700px", minWidth: "1150px" }}>
 
           {/* R32 Left */}

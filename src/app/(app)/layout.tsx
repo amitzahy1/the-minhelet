@@ -18,8 +18,8 @@ const Icons = {
 // Sub-pages under "הימורי משתמש"
 const BETTING_PAGES = [
   { href: "/groups", label: "שלב הבתים", step: 1 },
-  { href: "/special-bets", label: "הימורים מיוחדים", step: 2 },
-  { href: "/knockout", label: "עץ טורניר", step: 3 },
+  { href: "/knockout", label: "עץ טורניר", step: 2 },
+  { href: "/special-bets", label: "הימורים מיוחדים", step: 3 },
 ];
 
 const NAV_ITEMS = [
@@ -72,8 +72,8 @@ function OnboardingWizard({ onDismiss, onStart }: { onDismiss: () => void; onSta
               <div className="space-y-3">
                 {[
                   { step: "1", title: "שלב הבתים", desc: "הזינו תוצאות ל-72 משחקים בבתים", color: "bg-blue-50 border-blue-200 text-blue-700" },
-                  { step: "2", title: "הימורים מיוחדים", desc: "מי זוכה, עולות, מלך שערים ועוד", color: "bg-purple-50 border-purple-200 text-purple-700" },
-                  { step: "3", title: "עץ הנוק-אאוט", desc: "תוצאות מהשמינית ועד הגמר", color: "bg-amber-50 border-amber-200 text-amber-700" },
+                  { step: "2", title: "עץ הנוק-אאוט", desc: "תוצאות מהשמינית ועד הגמר", color: "bg-amber-50 border-amber-200 text-amber-700" },
+                  { step: "3", title: "הימורים מיוחדים", desc: "מי זוכה, עולות, מלך שערים ועוד", color: "bg-purple-50 border-purple-200 text-purple-700" },
                 ].map(s => (
                   <div key={s.step} className={`flex items-center gap-3 rounded-xl border p-3 ${s.color}`}>
                     <span className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-sm font-black shadow-sm">{s.step}</span>
@@ -320,24 +320,39 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      {/* === BETTING PAGES SUB-NAV (shown on groups/special-bets/knockout) === */}
+      {/* === BETTING PAGES SUB-NAV (shown on groups/knockout/special-bets) === */}
       {isBettingPage && (
-        <div className="bg-white border-b border-gray-200 shadow-sm">
-          <div className="max-w-7xl mx-auto px-4 flex items-center gap-1 py-2 overflow-x-auto">
-            <span className="text-sm font-bold text-gray-400 me-2 shrink-0">הימורי משתמש:</span>
-            {BETTING_PAGES.map(p => (
-              <Link key={p.href} href={p.href}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap transition-all ${
-                  pathname === p.href
-                    ? "bg-blue-50 text-blue-700 border border-blue-200"
-                    : "text-gray-500 hover:bg-gray-100"
-                }`}>
-                <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${
-                  pathname === p.href ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-500"
-                }`}>{p.step}</span>
-                {p.label}
-              </Link>
-            ))}
+        <div className="bg-gradient-to-l from-blue-50 to-indigo-50 border-b border-blue-200">
+          <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2.5">
+            <div className="flex items-center gap-0 sm:gap-1">
+              {BETTING_PAGES.map((p, i) => {
+                const isActive = pathname === p.href;
+                const currentIdx = BETTING_PAGES.findIndex(bp => bp.href === pathname);
+                const isPast = i < currentIdx;
+                return (
+                  <div key={p.href} className="flex items-center flex-1">
+                    <Link href={p.href}
+                      className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-bold w-full justify-center transition-all ${
+                        isActive
+                          ? "bg-white text-blue-700 shadow-md border border-blue-200"
+                          : isPast
+                          ? "text-green-600 hover:bg-white/50"
+                          : "text-gray-500 hover:bg-white/50"
+                      }`}>
+                      <span className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-black shrink-0 ${
+                        isActive ? "bg-blue-600 text-white" :
+                        isPast ? "bg-green-500 text-white" :
+                        "bg-gray-300 text-white"
+                      }`}>{isPast ? "✓" : p.step}</span>
+                      <span className="truncate">{p.label}</span>
+                    </Link>
+                    {i < BETTING_PAGES.length - 1 && (
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-300 shrink-0 mx-0.5 hidden sm:block"><path d="M9 18l6-6-6-6"/></svg>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}

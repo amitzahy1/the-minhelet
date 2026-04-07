@@ -16,7 +16,8 @@ export async function updateSession(request: NextRequest) {
     (path) =>
       request.nextUrl.pathname === path ||
       request.nextUrl.pathname.startsWith("/join/") ||
-      request.nextUrl.pathname.startsWith("/design-preview")
+      request.nextUrl.pathname.startsWith("/design-preview") ||
+      request.nextUrl.pathname.startsWith("/api/")
   );
 
   if (isPublicPath) {

@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useBettingStore } from "@/stores/betting-store";
 import { createClient } from "@/lib/supabase/client";
+import { DeadlineCountdown } from "@/components/shared/DeadlineCountdown";
 
 const Icons = {
   bets: (a: boolean) => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={a ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6M9 15l3 3 3-3"/></svg>,
@@ -281,6 +282,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     <p className="text-xs text-gray-400">{userEmail}</p>
                   </div>
                   <Link href="/admin" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 font-medium" onClick={() => setShowUserMenu(false)}>ניהול מערכת</Link>
+                  <Link href="/admin-guide" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 font-medium" onClick={() => setShowUserMenu(false)}>מדריך למנהלים</Link>
                   <button onClick={handleLogout} className="block w-full text-start px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 font-medium">התנתקות</button>
                 </div>
               </>
@@ -324,8 +326,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       {/* === BETTING PAGES SUB-NAV (shown on groups/knockout/special-bets) === */}
       {isBettingPage && (
         <div className="bg-gradient-to-l from-blue-50 to-indigo-50 border-b border-blue-200">
-          <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2.5">
-            <div className="flex items-center gap-0 sm:gap-1">
+          <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2.5 flex items-center gap-3">
+            <div className="flex items-center gap-0 sm:gap-1 flex-1">
               {BETTING_PAGES.map((p, i) => {
                 const isActive = pathname === p.href;
                 const currentIdx = BETTING_PAGES.findIndex(bp => bp.href === pathname);
@@ -354,6 +356,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 );
               })}
             </div>
+            <DeadlineCountdown />
           </div>
         </div>
       )}

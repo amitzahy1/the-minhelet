@@ -12,7 +12,7 @@ import * as path from "path";
 const API_KEY = process.env.API_FOOTBALL_KEY || "bf9c9c08ac73c3896876105278ea7a2c";
 const API_HOST = "v3.football.api-sports.io";
 
-// All 48 WC2026 national team IDs from API-Football
+// Verified API-Football national team IDs (from direct API search)
 const TEAM_IDS: Record<string, number> = {
   // Group A
   MEX: 16, KOR: 17, CZE: 770, RSA: 1531,
@@ -21,7 +21,7 @@ const TEAM_IDS: Record<string, number> = {
   // Group C
   BRA: 6, MAR: 31, SCO: 1108, HAI: 1536,
   // Group D
-  USA: 2384, PAR: 2380, TUR: 803, AUS: 20,
+  USA: 2384, PAR: 2380, TUR: 777, AUS: 20,
   // Group E
   GER: 25, ECU: 2382, CIV: 1532, CUR: 5531,
   // Group F
@@ -64,7 +64,7 @@ interface ApiSquadResponse {
   }[];
 }
 
-async function fetchSquad(teamId: number): Promise<ApiPlayer[]> {
+async function fetchSquad(teamId: number): Promise<{ players: ApiPlayer[]; logo?: string }> {
   const url = `https://${API_HOST}/players/squads?team=${teamId}`;
   const res = await fetch(url, {
     headers: {
@@ -74,11 +74,15 @@ async function fetchSquad(teamId: number): Promise<ApiPlayer[]> {
 
   if (!res.ok) {
     console.error(`  HTTP ${res.status} for team ${teamId}`);
-    return [];
+    return { players: [] };
   }
 
   const data: ApiSquadResponse = await res.json();
-  return data.response?.[0]?.players || [];
+  const entry = data.response?.[0];
+  return {
+    players: entry?.players || [],
+    logo: entry?.team?.logo,
+  };
 }
 
 function sleep(ms: number) {
@@ -86,11 +90,27 @@ function sleep(ms: number) {
 }
 
 async function main() {
+  // Check which teams we already have from a previous run
+  const outPath = path.join(__dirname, "..", "src", "lib", "tournament", "squads-api.json");
+  let existing: Record<string, unknown> = {};
+  try {
+    existing = JSON.parse(fs.readFileSync(outPath, "utf-8"));
+  } catch { /* first run */ }
+
+  const alreadyFetched = Object.keys(existing);
+  const codes = Object.keys(TEAM_IDS).filter(c => !alreadyFetched.includes(c));
+
   console.log("🏟️  WC2026 Squad Updater");
   console.log(`📡 API: ${API_HOST}`);
-  console.log(`🔑 Key: ${API_KEY.slice(0, 8)}...`);
-  console.log(`⚽ Teams: ${Object.keys(TEAM_IDS).length}`);
+  console.log(`⚽ Total teams: ${Object.keys(TEAM_IDS).length}`);
+  console.log(`✅ Already fetched: ${alreadyFetched.length}`);
+  console.log(`📥 Remaining: ${codes.length}`);
   console.log("");
+
+  if (codes.length === 0) {
+    console.log("All teams already fetched! Delete squads-api.json to re-fetch.");
+    return;
+  }
 
   const allSquads: Record<string, {
     players: {
@@ -100,18 +120,19 @@ async function main() {
       photo: string;
       age: number;
     }[];
-  }> = {};
+    logo?: string;
+  }> = existing as typeof allSquads;
 
-  const codes = Object.keys(TEAM_IDS);
   let fetched = 0;
   let failed = 0;
+  const logos: Record<string, string> = {};
 
   for (const code of codes) {
     const teamId = TEAM_IDS[code];
     process.stdout.write(`  [${fetched + 1}/${codes.length}] ${code} (ID: ${teamId})... `);
 
     try {
-      const players = await fetchSquad(teamId);
+      const { players, logo } = await fetchSquad(teamId);
       if (players.length > 0) {
         allSquads[code] = {
           players: players.map((p) => ({
@@ -121,7 +142,9 @@ async function main() {
             photo: p.photo,
             age: p.age,
           })),
+          logo,
         };
+        if (logo) logos[code] = logo;
         console.log(`✅ ${players.length} players`);
       } else {
         console.log(`⚠️  no players found`);
@@ -133,16 +156,16 @@ async function main() {
     }
 
     fetched++;
-    // Rate limit: ~1 request per second to be safe
-    if (fetched < codes.length) await sleep(1200);
+    // Rate limit: ~1.5 request per second to be safe
+    if (fetched < codes.length) await sleep(1500);
   }
 
   console.log("");
   console.log(`✅ Fetched: ${fetched - failed}/${codes.length}`);
   console.log(`❌ Failed: ${failed}`);
+  console.log(`📊 Total in DB: ${Object.keys(allSquads).length}`);
 
   // Write output
-  const outPath = path.join(__dirname, "..", "src", "lib", "tournament", "squads-api.json");
   fs.writeFileSync(outPath, JSON.stringify(allSquads, null, 2), "utf-8");
   console.log(`\n💾 Saved to: ${outPath}`);
 
@@ -154,10 +177,22 @@ async function main() {
 
   for (const [code, squad] of Object.entries(allSquads)) {
     tsContent += `  ${code}: {\n`;
+    const seen = new Set<string>();
     for (const p of squad.players) {
-      tsContent += `    "${p.nameEn}": "${p.photo}",\n`;
+      // Handle duplicate names by appending number
+      let key = p.nameEn;
+      if (seen.has(key)) key = `${key} #${p.num}`;
+      seen.add(key);
+      tsContent += `    "${key}": "${p.photo}",\n`;
     }
     tsContent += `  },\n`;
+  }
+  tsContent += `};\n\n`;
+
+  // Team logos
+  tsContent += `export const TEAM_LOGOS: Record<string, string> = {\n`;
+  for (const [code, logo] of Object.entries(logos)) {
+    tsContent += `  ${code}: "${logo}",\n`;
   }
   tsContent += `};\n`;
 

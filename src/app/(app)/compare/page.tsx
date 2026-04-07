@@ -181,9 +181,9 @@ export default function ComparePage() {
                   <th className="py-3 px-2 text-center">כסחנית</th>
                   <th className="py-3 px-2 text-center">בית פורה</th>
                   <th className="py-3 px-2 text-center">בית יבש</th>
-                  <th className="py-3 px-2 text-center">מאצ׳אפ 1</th>
-                  <th className="py-3 px-2 text-center">מאצ׳אפ 2</th>
-                  <th className="py-3 px-2 text-center">מאצ׳אפ 3</th>
+                  <th className="py-3 px-2 text-center">Mbappé vs Vinícius</th>
+                  <th className="py-3 px-2 text-center">Bellingham vs Yamal</th>
+                  <th className="py-3 px-2 text-center">Messi vs Ronaldo</th>
                   <th className="py-3 px-2 text-center">פנדלים</th>
                 </tr>
               </thead>
@@ -202,7 +202,7 @@ export default function ComparePage() {
                     <td className={`py-2 px-2 text-center text-xs ${getValueColor(b.matchup1, specColors)}`}>{b.matchup1}</td>
                     <td className={`py-2 px-2 text-center text-xs ${getValueColor(b.matchup2, specColors)}`}>{b.matchup2}</td>
                     <td className={`py-2 px-2 text-center text-xs ${getValueColor(b.matchup3, specColors)}`}>{b.matchup3}</td>
-                    <td className="py-2 px-2 text-center text-xs">{b.penalties === "OVER" ? "מעל" : b.penalties === "UNDER" ? "מתחת" : b.penalties}</td>
+                    <td className={`py-2 px-2 text-center text-xs ${getValueColor(b.penalties, specColors)}`}>{b.penalties === "OVER" ? "מעל" : b.penalties === "UNDER" ? "מתחת" : b.penalties}</td>
                   </tr>
                 ))}
               </tbody>

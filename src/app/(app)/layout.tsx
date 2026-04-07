@@ -167,12 +167,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     useBettingStore.persist.rehydrate();
-    // Dark mode: default OFF, only enable if user explicitly chose it
-    if (localStorage.getItem("wc2026-dark-mode") === "true") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
+    // Ensure light mode
+    document.documentElement.classList.remove("dark");
     const supabase = createClient();
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) {
@@ -202,13 +198,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const isBettingPage = BETTING_PAGES.some(p => pathname === p.href);
 
   return (
-    <div className="min-h-screen pb-20 sm:pb-0 bg-[#F8F9FB] dark:bg-gray-900 dark:text-gray-100" style={{ fontFamily: "var(--font-assistant), sans-serif" }} dir="rtl">
+    <div className="min-h-screen pb-20 sm:pb-0 bg-[#F8F9FB]" style={{ fontFamily: "var(--font-assistant), sans-serif" }} dir="rtl">
 
       {/* === ONBOARDING WIZARD (multi-step) === */}
       {showOnboarding && <OnboardingWizard onDismiss={dismissOnboarding} onStart={() => { dismissOnboarding(); router.push("/groups"); }} />}
 
       {/* === DESKTOP NAV === */}
-      <header className="sticky top-0 z-50 bg-white/90 dark:bg-gray-800/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 shadow-sm hidden sm:block">
+      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm hidden sm:block">
         <div className="max-w-7xl mx-auto flex items-center justify-between h-16 lg:h-20 px-4 lg:px-6">
           <Link href="/" className="flex items-center gap-3">
             <img src="/logo.png" alt="The Minhelet" className="w-14 h-14 lg:w-20 lg:h-20 rounded-full object-cover shadow-lg" />
@@ -289,15 +285,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   </div>
                   <Link href="/admin" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 font-medium" onClick={() => setShowUserMenu(false)}>ניהול מערכת</Link>
                   <Link href="/admin-guide" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 font-medium" onClick={() => setShowUserMenu(false)}>מדריך למנהלים</Link>
-                  <div className="px-4 py-2 border-t border-gray-100 flex items-center justify-between">
-                    <span className="text-sm text-gray-500">מצב כהה</span>
-                    <button onClick={() => {
-                      const isDark = document.documentElement.classList.toggle("dark");
-                      localStorage.setItem("wc2026-dark-mode", isDark ? "true" : "false");
-                    }} className="w-10 h-6 rounded-full bg-gray-200 dark:bg-blue-600 relative transition-colors">
-                      <span className="absolute top-0.5 start-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform dark:translate-x-4 rtl:dark:-translate-x-4"></span>
-                    </button>
-                  </div>
                   <button onClick={handleLogout} className="block w-full text-start px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 font-medium border-t border-gray-100">התנתקות</button>
                 </div>
               </>
@@ -307,7 +294,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </header>
 
       {/* === MOBILE TOP BAR === */}
-      <header className="sticky top-0 z-50 bg-white/90 dark:bg-gray-800/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 shadow-sm sm:hidden">
+      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm sm:hidden">
         <div className="flex items-center justify-between h-14 px-4">
           <Link href="/" className="flex items-center gap-2">
             <img src="/logo.png" alt="The Minhelet" className="w-10 h-10 rounded-full object-cover shadow-sm" />
@@ -392,7 +379,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </button>
 
       {/* === MOBILE BOTTOM NAV === */}
-      <nav className="fixed bottom-0 inset-x-0 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-700 flex justify-around items-center h-16 z-50 sm:hidden shadow-[0_-2px_8px_rgba(0,0,0,0.06)]" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
+      <nav className="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-gray-200 flex justify-around items-center h-16 z-50 sm:hidden shadow-[0_-2px_8px_rgba(0,0,0,0.06)]" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
         {/* Betting pages grouped */}
         <Link href="/groups"
           className={`flex flex-col items-center gap-0.5 py-1 ${isBettingPage ? "text-blue-600" : "text-gray-400"}`}>

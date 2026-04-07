@@ -139,7 +139,16 @@ export default function StandingsPage() {
           </div>
         </div>
 
-        {/* Table header */}
+        {/* Table header — mobile */}
+        <div className="flex sm:hidden items-center px-4 py-2 text-xs text-gray-500 bg-gray-50 border-b border-gray-200 font-semibold" style={{ fontFamily: "var(--font-inter)" }}>
+          <span className="w-8 text-center">#</span>
+          <span className="w-9 me-2"></span>
+          <span className="me-3 flex-1 text-start">שחקן</span>
+          <span className="w-12 text-center">היום</span>
+          <span className="w-16 text-center">סה״כ</span>
+          <span className="w-8 text-center">שינוי</span>
+        </div>
+        {/* Table header — desktop */}
         <div className="hidden sm:flex items-center px-4 py-2 text-xs text-gray-500 bg-gray-50 border-b border-gray-200 font-semibold" style={{ fontFamily: "var(--font-inter)" }}>
           <span className="w-8 text-center">#</span>
           <span className="w-10 me-2"></span>
@@ -150,7 +159,7 @@ export default function StandingsPage() {
           <span className="w-20 text-center">מגמה</span>
           <span className="w-12 text-center">היום</span>
           <span className="w-16 text-center">סה״כ</span>
-          <span className="w-8"></span>
+          <span className="w-8 text-center">שינוי</span>
         </div>
 
         {[...PLAYERS].sort((a, b) => b[activeTab] - a[activeTab]).map((p, i) => {
@@ -166,7 +175,7 @@ export default function StandingsPage() {
               <span className="w-8 text-center font-bold text-base text-gray-400">
                 {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : i + 1}
               </span>
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold me-2 ${
+              <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold me-2 ${
                 i === 0 ? "bg-amber-100 text-amber-700 ring-2 ring-amber-300" :
                 i === 1 ? "bg-gray-200 text-gray-600" :
                 i === 2 ? "bg-orange-100 text-orange-700" : "bg-gray-100 text-gray-500"

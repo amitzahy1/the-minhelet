@@ -27,6 +27,7 @@ export const metadata: Metadata = {
     icon: "/favicon.ico",
     apple: "/apple-touch-icon.png",
   },
+  manifest: "/manifest.json",
   openGraph: {
     title: "The Minhelet — FIFA World Cup 2026",
     description: "פלטפורמת ההימורים הפרטית למונדיאל 2026",

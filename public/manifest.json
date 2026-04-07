@@ -1,0 +1,16 @@
+{
+  "name": "The Minhelet — WC2026",
+  "short_name": "Minhelet",
+  "description": "פלטפורמת ההימורים הפרטית למונדיאל 2026",
+  "start_url": "/standings",
+  "display": "standalone",
+  "background_color": "#F8F9FB",
+  "theme_color": "#0F172A",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "/logo.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ],
+  "lang": "he",
+  "dir": "rtl"
+}

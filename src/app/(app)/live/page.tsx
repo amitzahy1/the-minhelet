@@ -1,5 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
+import { useConfetti } from "@/hooks/useConfetti";
+
 // Live page — shows matches from last 24h and next 12h
 // In production: real-time updates from API-Football via Supabase Realtime
 
@@ -40,6 +43,16 @@ const FINISHED = [
 ];
 
 export default function LivePage() {
+  const fireConfetti = useConfetti();
+
+  // Fire confetti when page loads and there's an exact score match
+  useEffect(() => {
+    const hasExact = LIVE_MATCHES.some(m => m.yourStatus === "exact");
+    if (hasExact) {
+      const timer = setTimeout(fireConfetti, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [fireConfetti]);
   return (
     <div className="max-w-3xl mx-auto px-4 py-6 pb-24">
       <div className="mb-6">

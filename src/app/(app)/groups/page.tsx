@@ -222,6 +222,18 @@ export default function GroupsPage() {
         <p className="text-base text-gray-600 mt-1">סדרו את הקבוצות, הזינו תוצאות — הטבלה מתעדכנת אוטומטית לפי חוקי FIFA</p>
       </div>
 
+      {/* Peer pressure — who hasn't finished? */}
+      {completedGroups < 12 && (
+        <div className="mb-4 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-center gap-2">
+          <span className="text-lg">⚡</span>
+          <p className="text-sm font-bold text-amber-800">
+            {completedGroups === 0
+              ? "אף אחד עוד לא התחיל — תהיו הראשונים!"
+              : `השלמת ${completedGroups}/12 בתים. ${12 - completedGroups} בתים נותרו — אל תישארו מאחור!`}
+          </p>
+        </div>
+      )}
+
       {/* Compact progress */}
       <div className="mb-4 flex items-center gap-3 flex-wrap">
         <div className="flex items-center gap-2 bg-white rounded-lg border border-gray-200 px-3 py-2 shadow-sm shrink-0">

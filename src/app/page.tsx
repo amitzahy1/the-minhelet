@@ -41,7 +41,7 @@ export default function LandingPage() {
           transition={{ duration: 1.5, repeat: Infinity }}
           className="flex flex-col items-center gap-4"
         >
-          <img src="/logo.png" alt="" className="w-20 h-20 rounded-full object-cover" />
+          <img src="/logo.png" alt="" className="w-28 h-28 rounded-full object-cover" />
           <span className="text-white text-lg font-bold">טוען...</span>
         </motion.div>
       </div>

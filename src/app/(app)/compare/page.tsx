@@ -181,9 +181,9 @@ export default function ComparePage() {
                   <th className="py-3 px-2 text-center">כסחנית</th>
                   <th className="py-3 px-2 text-center">בית פורה</th>
                   <th className="py-3 px-2 text-center">בית יבש</th>
-                  <th className="py-3 px-2 text-center">Mbappé vs Vinícius</th>
-                  <th className="py-3 px-2 text-center">Bellingham vs Yamal</th>
-                  <th className="py-3 px-2 text-center">Messi vs Ronaldo</th>
+                  <th className="py-3 px-1 text-center text-[9px]">Mbappé<br/>vs Vinícius</th>
+                  <th className="py-3 px-1 text-center text-[9px]">Bellingham<br/>vs Yamal</th>
+                  <th className="py-3 px-1 text-center text-[9px]">Messi<br/>vs Ronaldo</th>
                   <th className="py-3 px-2 text-center">פנדלים</th>
                 </tr>
               </thead>

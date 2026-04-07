@@ -144,6 +144,7 @@ export default function StandingsPage() {
           <span className="w-8 text-center">#</span>
           <span className="w-9 me-2"></span>
           <span className="me-3 flex-1 text-start">שחקן</span>
+          <span className="w-12 text-center text-blue-600">{TABS.find(t => t.key === activeTab)?.label || ""}</span>
           <span className="w-12 text-center">היום</span>
           <span className="w-16 text-center">סה״כ</span>
           <span className="w-8 text-center">שינוי</span>
@@ -185,6 +186,11 @@ export default function StandingsPage() {
                 {p.isYou && <span className="text-xs text-blue-500 ms-1.5 bg-blue-100 rounded px-1.5 py-0.5 font-bold">אתה</span>}
                 <PlayerTooltip player={p} visible={hoveredPlayer === p.id} />
               </div>
+              {/* Mobile: show only the active tab value */}
+              <span className={`w-12 text-center text-sm font-bold text-blue-600 sm:hidden`} style={{ fontFamily: "var(--font-inter)" }}>
+                {activeTab === "matchPts" ? p.matchPts : activeTab === "advPts" ? p.advPts : activeTab === "specPts" ? p.specPts : ""}
+              </span>
+              {/* Desktop: show all 3 + sparkline */}
               <span className={`w-14 text-center text-sm font-medium hidden sm:block ${activeTab === "matchPts" ? "text-blue-600 font-bold" : "text-gray-600"}`} style={{ fontFamily: "var(--font-inter)" }}>{p.matchPts}</span>
               <span className={`w-14 text-center text-sm font-medium hidden sm:block ${activeTab === "advPts" ? "text-blue-600 font-bold" : "text-gray-600"}`} style={{ fontFamily: "var(--font-inter)" }}>{p.advPts}</span>
               <span className={`w-14 text-center text-sm font-medium hidden sm:block ${activeTab === "specPts" ? "text-blue-600 font-bold" : "text-gray-600"}`} style={{ fontFamily: "var(--font-inter)" }}>{p.specPts}</span>

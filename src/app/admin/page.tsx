@@ -661,7 +661,7 @@ function SystemStatus() {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-base">סטטוס מערכת</CardTitle>
+            <CardTitle className="text-lg font-bold">סטטוס מערכת</CardTitle>
             <Button onClick={checkAll} disabled={checking} variant="outline" size="sm">
               {checking ? "בודק..." : "בדוק עכשיו"}
             </Button>
@@ -676,17 +676,17 @@ function SystemStatus() {
                   !st ? "border-gray-200 bg-gray-50" :
                   st.ok ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"
                 }`}>
-                  <span className="text-lg">{s.icon}</span>
+                  <span className="text-2xl">{s.icon}</span>
                   <div className="flex-1">
-                    <p className="font-bold text-sm text-gray-900">{s.label}</p>
-                    <p className={`text-xs ${st?.ok ? "text-green-700" : st ? "text-red-700" : "text-gray-400"}`}>
+                    <p className="font-bold text-lg text-gray-900">{s.label}</p>
+                    <p className={`text-sm font-medium ${st?.ok ? "text-green-700" : st ? "text-red-700" : "text-gray-400"}`}>
                       {st?.message || "ממתין לבדיקה..."}
                     </p>
                   </div>
                   {st && (
                     <div className="text-end">
-                      <span className={`inline-block w-3 h-3 rounded-full ${st.ok ? "bg-green-500" : "bg-red-500"}`}></span>
-                      {st.lastUpdate && <p className="text-[10px] text-gray-400 mt-0.5">{st.lastUpdate}</p>}
+                      <span className={`inline-block w-4 h-4 rounded-full ${st.ok ? "bg-green-500" : "bg-red-500"}`}></span>
+                      {st.lastUpdate && <p className="text-xs text-gray-400 mt-1">{st.lastUpdate}</p>}
                     </div>
                   )}
                 </div>

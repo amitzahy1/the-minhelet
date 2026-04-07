@@ -53,11 +53,11 @@ function Sparkline({ data, highlight }: { data: number[]; highlight?: boolean })
 }
 
 // Hover tooltip for detailed breakdown
-function PlayerTooltip({ player, visible }: { player: typeof PLAYERS[0]; visible: boolean }) {
+function PlayerTooltip({ player, visible, openUp = false }: { player: typeof PLAYERS[0]; visible: boolean; openUp?: boolean }) {
   if (!visible) return null;
   const b = player.breakdown;
   return (
-    <div className="absolute z-50 top-full mt-1 end-0 w-72 bg-white rounded-xl shadow-lg border border-gray-200 p-4 text-sm" dir="rtl">
+    <div className={`absolute z-50 end-0 w-72 bg-white rounded-xl shadow-lg border border-gray-200 p-4 text-sm ${openUp ? "bottom-full mb-1" : "top-full mt-1"}`} dir="rtl">
       <p className="font-bold text-base mb-3 border-b border-gray-100 pb-2 text-gray-900">{player.name} — פירוט {player.total} נקודות</p>
       <div className="space-y-2.5">
         <div>
@@ -213,7 +213,7 @@ export default function StandingsPage() {
               <div className="me-3 flex-1 min-w-0 relative">
                 <span className="font-bold text-base text-gray-900 cursor-pointer hover:text-blue-600 transition-colors">{p.name}</span>
                 {p.isYou && <span className="text-xs text-blue-500 ms-1.5 bg-blue-100 rounded px-1.5 py-0.5 font-bold">אתה</span>}
-                <PlayerTooltip player={p} visible={hoveredPlayer === p.id} />
+                <PlayerTooltip player={p} visible={hoveredPlayer === p.id} openUp={i >= PLAYERS.length - 4} />
               </div>
               {/* Mobile: show only the active tab value */}
               <span className={`w-12 text-center text-sm font-bold text-blue-600 sm:hidden`} style={{ fontFamily: "var(--font-inter)" }}>

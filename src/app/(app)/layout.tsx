@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useBettingStore } from "@/stores/betting-store";
 import { createClient } from "@/lib/supabase/client";
+import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { DeadlineCountdown } from "@/components/shared/DeadlineCountdown";
 
 const Icons = {
@@ -363,7 +364,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
       )}
 
-      <main>{children}</main>
+      <main><ErrorBoundary>{children}</ErrorBoundary></main>
 
       {/* === FLOATING HELP BUTTON === */}
       <button

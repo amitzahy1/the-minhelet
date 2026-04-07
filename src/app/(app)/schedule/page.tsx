@@ -1,4 +1,5 @@
 "use client";
+import { LoadingPage } from "@/components/shared/LoadingAnimation";
 
 import { useState, useEffect } from "react";
 
@@ -115,7 +116,7 @@ export default function SchedulePage() {
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-gray-400">טוען לוח משחקים...</div>
+        <LoadingPage />
       ) : matches.length === 0 ? (
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8 text-center">
           <p className="text-gray-500">לוח המשחקים יתעדכן מ-Football-Data.org כשיהיה זמין</p>

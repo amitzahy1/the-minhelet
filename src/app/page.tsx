@@ -36,7 +36,14 @@ export default function LandingPage() {
   if (checkingAuth) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: "#0a0f1a" }}>
-        <div className="text-white text-lg font-medium animate-pulse">טוען...</div>
+        <motion.div
+          animate={{ scale: [1, 1.1, 1], opacity: [0.7, 1, 0.7] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+          className="flex flex-col items-center gap-4"
+        >
+          <img src="/logo.png" alt="" className="w-20 h-20 rounded-full object-cover" />
+          <span className="text-white text-lg font-bold">טוען...</span>
+        </motion.div>
       </div>
     );
   }

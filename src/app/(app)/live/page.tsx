@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useConfetti } from "@/hooks/useConfetti";
+import { RegretMeter } from "@/components/shared/RegretMeter";
 
 // Live page — shows matches from last 24h and next 12h
 // In production: real-time updates from API-Football via Supabase Realtime
@@ -182,6 +183,13 @@ export default function LivePage() {
                   {m.yourStatus === "exact" ? "מדויקת! " : "טוטו נכון "}{m.pts}
                 </span>
               </div>
+              {m.yourStatus !== "exact" && (
+                <RegretMeter
+                  yourPrediction={{ home: parseInt(m.yourPrediction.split("-")[0]) || 0, away: parseInt(m.yourPrediction.split("-")[1]) || 0 }}
+                  actualResult={{ home: m.home.goals, away: m.away.goals }}
+                  stage="GROUP"
+                />
+              )}
             </div>
           ))}
         </div>

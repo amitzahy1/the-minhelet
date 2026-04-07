@@ -167,9 +167,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     useBettingStore.persist.rehydrate();
-    // Restore dark mode
+    // Dark mode: default OFF, only enable if user explicitly chose it
     if (localStorage.getItem("wc2026-dark-mode") === "true") {
       document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
     }
     const supabase = createClient();
     supabase.auth.getUser().then(({ data: { user } }) => {

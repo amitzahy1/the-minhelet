@@ -1,6 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
+
+// Color coding: count how many bettors picked the same value, assign color based on popularity
+const POPULARITY_COLORS = [
+  "", // 1 person (unique) — no color
+  "bg-blue-50", // 2 people
+  "bg-blue-100", // 3 people
+  "bg-green-50", // 4 people
+  "bg-green-100", // 5 people
+  "bg-amber-50", // 6+
+  "bg-amber-100",
+  "bg-purple-50",
+  "bg-purple-100",
+  "bg-red-50",
+];
+
+function getPopularityColor(value: string, allValues: string[]): string {
+  if (!value) return "";
+  const count = allValues.filter(v => v === value).length;
+  if (count <= 1) return "";
+  return POPULARITY_COLORS[Math.min(count - 1, POPULARITY_COLORS.length - 1)] || "bg-purple-50";
+}
 
 // Mock data — in production comes from Supabase
 const BETTORS = [
@@ -82,14 +103,14 @@ export default function ComparePage() {
                     <td className="py-2 px-2 font-bold text-gray-900 sticky start-0 bg-inherit z-10 border-e border-gray-100 whitespace-nowrap w-16 max-w-[4rem] truncate text-xs">
                       {b.name} {b.isYou && <span className="text-[10px] text-blue-500 bg-blue-100 rounded px-1 ms-0.5">אתה</span>}
                     </td>
-                    <td className="py-2 px-2 text-center font-bold text-amber-700 text-xs">{F[b.winner]} {b.winner}</td>
-                    <td className="py-2 px-2 text-center text-xs">{F[b.finalist1]} {b.finalist1}</td>
-                    <td className="py-2 px-2 text-center text-xs">{F[b.finalist2]} {b.finalist2}</td>
+                    <td className={`py-2 px-2 text-center font-bold text-amber-700 text-xs ${getPopularityColor(b.winner, BETTORS.map(x=>x.winner))}`}>{F[b.winner]} {b.winner}</td>
+                    <td className={`py-2 px-2 text-center text-xs ${getPopularityColor(b.finalist1, BETTORS.flatMap(x=>[x.finalist1,x.finalist2]))}`}>{F[b.finalist1]} {b.finalist1}</td>
+                    <td className={`py-2 px-2 text-center text-xs ${getPopularityColor(b.finalist2, BETTORS.flatMap(x=>[x.finalist1,x.finalist2]))}`}>{F[b.finalist2]} {b.finalist2}</td>
                     {b.sf.map((t, i) => (
-                      <td key={`sf${i}`} className="py-2 px-2 text-center text-gray-600 text-xs">{F[t]} {t}</td>
+                      <td key={`sf${i}`} className={`py-2 px-2 text-center text-gray-600 text-xs ${getPopularityColor(t, BETTORS.flatMap(x=>x.sf))}`}>{F[t]} {t}</td>
                     ))}
                     {b.qf.map((t, i) => (
-                      <td key={`qf${i}`} className="py-2 px-2 text-center text-gray-500 text-[10px]">{F[t]} {t}</td>
+                      <td key={`qf${i}`} className={`py-2 px-2 text-center text-gray-500 text-[10px] ${getPopularityColor(t, BETTORS.flatMap(x=>x.qf))}`}>{F[t]} {t}</td>
                     ))}
                   </tr>
                 ))}
@@ -134,16 +155,16 @@ export default function ComparePage() {
                     <td className="py-2 px-2 font-bold text-gray-900 sticky start-0 bg-inherit z-10 border-e border-gray-100 whitespace-nowrap w-16 max-w-[4rem] truncate text-xs">
                       {b.name} {b.isYou && <span className="text-[10px] text-blue-500 bg-blue-100 rounded px-1 ms-0.5">אתה</span>}
                     </td>
-                    <td className="py-2 px-2 text-center text-xs font-medium">{b.topScorer}</td>
-                    <td className="py-2 px-2 text-center text-xs font-medium">{b.topAssists}</td>
-                    <td className="py-2 px-2 text-center text-xs">{F[b.bestAttack]} {b.bestAttack}</td>
-                    <td className="py-2 px-2 text-center text-xs">{F[b.dirtiestTeam]} {b.dirtiestTeam}</td>
-                    <td className="py-2 px-2 text-center text-xs">{b.prolificGroup}</td>
-                    <td className="py-2 px-2 text-center text-xs">{b.driestGroup}</td>
-                    <td className="py-2 px-2 text-center text-xs">{b.matchup1}</td>
-                    <td className="py-2 px-2 text-center text-xs">{b.matchup2}</td>
-                    <td className="py-2 px-2 text-center text-xs">{b.matchup3}</td>
-                    <td className="py-2 px-2 text-center text-xs">{b.penalties}</td>
+                    <td className={`py-2 px-2 text-center text-xs font-medium ${getPopularityColor(b.topScorer, BETTORS.map(x=>x.topScorer))}`}>{b.topScorer}</td>
+                    <td className={`py-2 px-2 text-center text-xs font-medium ${getPopularityColor(b.topAssists, BETTORS.map(x=>x.topAssists))}`}>{b.topAssists}</td>
+                    <td className={`py-2 px-2 text-center text-xs ${getPopularityColor(b.bestAttack, BETTORS.map(x=>x.bestAttack))}`}>{F[b.bestAttack]} {b.bestAttack}</td>
+                    <td className={`py-2 px-2 text-center text-xs ${getPopularityColor(b.dirtiestTeam, BETTORS.map(x=>x.dirtiestTeam))}`}>{F[b.dirtiestTeam]} {b.dirtiestTeam}</td>
+                    <td className={`py-2 px-2 text-center text-xs ${getPopularityColor(b.prolificGroup, BETTORS.map(x=>x.prolificGroup))}`}>{b.prolificGroup}</td>
+                    <td className={`py-2 px-2 text-center text-xs ${getPopularityColor(b.driestGroup, BETTORS.map(x=>x.driestGroup))}`}>{b.driestGroup}</td>
+                    <td className={`py-2 px-2 text-center text-xs ${getPopularityColor(b.matchup1, BETTORS.map(x=>x.matchup1))}`}>{b.matchup1}</td>
+                    <td className={`py-2 px-2 text-center text-xs ${getPopularityColor(b.matchup2, BETTORS.map(x=>x.matchup2))}`}>{b.matchup2}</td>
+                    <td className={`py-2 px-2 text-center text-xs ${getPopularityColor(b.matchup3, BETTORS.map(x=>x.matchup3))}`}>{b.matchup3}</td>
+                    <td className="py-2 px-2 text-center text-xs">{b.penalties === "OVER" ? "מעל" : b.penalties === "UNDER" ? "מתחת" : b.penalties}</td>
                   </tr>
                 ))}
               </tbody>

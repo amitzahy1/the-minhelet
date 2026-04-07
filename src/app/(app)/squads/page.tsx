@@ -85,7 +85,7 @@ export default function SquadsPage() {
           className="w-full sm:w-auto px-4 py-3 rounded-xl border border-gray-200 bg-white text-base font-bold shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
           {ALL_TEAMS.map(t => (
             <option key={t.code} value={t.code}>
-              {F[t.code] || "🏳️"} {t.name_he} ({t.code}) {availableSquads.includes(t.code) ? "✓" : ""}
+              {F[t.code] || "🏳️"} {t.name_he} ({t.code})
             </option>
           ))}
         </select>

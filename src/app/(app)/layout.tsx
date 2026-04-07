@@ -214,7 +214,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <img src="/logo.png" alt="The Minhelet" className="w-14 h-14 lg:w-20 lg:h-20 rounded-full object-cover shadow-lg" />
             <div className="flex flex-col">
               <span className="font-bold text-base lg:text-xl text-gray-900 leading-tight tracking-tight" style={{ fontFamily: "var(--font-secular)" }}>THE MINHELET</span>
-              <span className="text-xs lg:text-sm text-gray-400 tracking-wide font-medium" style={{ fontFamily: "var(--font-inter)" }}>FIFA WORLD CUP 2026</span>
+              <span className="text-xs lg:text-sm text-gray-400 tracking-wide font-medium" style={{ fontFamily: "var(--font-inter)" }}>WORLD CUP 2026</span>
             </div>
           </Link>
 

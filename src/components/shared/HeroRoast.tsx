@@ -35,87 +35,27 @@ export function HeroRoast({ hero, roast, matchday }: HeroRoastProps) {
       className="rounded-2xl overflow-hidden border border-gray-200 shadow-md mb-6"
       dir="rtl"
     >
-      {/* Optional matchday header */}
-      {matchday && (
-        <div className="bg-gray-900 text-center py-2">
-          <span className="text-xs font-bold text-gray-300 tracking-wider uppercase">
-            {matchday}
-          </span>
+      <div className="flex items-center gap-3 px-4 py-2.5">
+        {/* Hero */}
+        <div className="flex-1 flex items-center gap-2 bg-green-50 rounded-lg px-3 py-2 border border-green-200">
+          <span className="text-lg">👑</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] text-green-600 font-bold">גיבור היום</p>
+            <p className="text-sm font-black text-gray-900 truncate">{hero.name}</p>
+          </div>
+          <span className="text-sm font-black text-green-600" style={{ fontFamily: "var(--font-inter)" }}>+{hero.points}</span>
         </div>
-      )}
-
-      <div className="grid grid-cols-2">
-        {/* Hero side */}
-        <motion.div
-          initial={{ x: 30, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.4 }}
-          className="bg-gradient-to-bl from-green-400 via-green-500 to-emerald-600 p-5 flex flex-col items-center justify-center text-center relative"
-        >
-          <span className="text-4xl mb-1">👑</span>
-          <p className="text-xs font-bold text-green-100 uppercase tracking-wider mb-1">
-            גיבור היום
-          </p>
-          <p
-            className="text-xl font-black text-white"
-            style={{ fontFamily: "var(--font-secular)" }}
-          >
-            {hero.name}
-          </p>
-          <p
-            className="text-3xl font-black text-white mt-1"
-            style={{ fontFamily: "var(--font-inter)" }}
-          >
-            +{hero.points}
-          </p>
-          <p className="text-xs text-green-100 font-semibold">נקודות</p>
-          {hero.highlight && (
-            <motion.p
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-              className="mt-2 text-xs font-bold bg-white/20 rounded-full px-3 py-1 text-white"
-            >
-              {hero.highlight}
-            </motion.p>
-          )}
-        </motion.div>
-
-        {/* Roast side */}
-        <motion.div
-          initial={{ x: -30, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ delay: 0.3, duration: 0.4 }}
-          className="bg-gradient-to-br from-red-500 via-red-600 to-rose-700 p-5 flex flex-col items-center justify-center text-center relative"
-        >
-          <span className="text-4xl mb-1">💀</span>
-          <p className="text-xs font-bold text-red-200 uppercase tracking-wider mb-1">
-            שחקן הלילה
-          </p>
-          <p
-            className="text-xl font-black text-white"
-            style={{ fontFamily: "var(--font-secular)" }}
-          >
-            {roast.name}
-          </p>
-          <p
-            className="text-3xl font-black text-white mt-1"
-            style={{ fontFamily: "var(--font-inter)" }}
-          >
-            +{roast.points}
-          </p>
-          <p className="text-xs text-red-200 font-semibold">נקודות</p>
-          {roast.highlight && (
-            <motion.p
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7 }}
-              className="mt-2 text-xs font-bold bg-white/20 rounded-full px-3 py-1 text-white"
-            >
-              {roast.highlight}
-            </motion.p>
-          )}
-        </motion.div>
+        {/* Matchday */}
+        {matchday && <span className="text-[10px] text-gray-400 font-bold shrink-0">{matchday}</span>}
+        {/* Roast */}
+        <div className="flex-1 flex items-center gap-2 bg-red-50 rounded-lg px-3 py-2 border border-red-200">
+          <span className="text-lg">💀</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] text-red-500 font-bold">שחקן הלילה</p>
+            <p className="text-sm font-black text-gray-900 truncate">{roast.name}</p>
+          </div>
+          <span className="text-sm font-black text-red-500" style={{ fontFamily: "var(--font-inter)" }}>+{roast.points}</span>
+        </div>
       </div>
     </motion.div>
   );

@@ -1,7 +1,10 @@
 "use client";
 
+import { PageTransition } from "@/components/shared/PageTransition";
+
 export default function RulesPage() {
   return (
+    <PageTransition>
     <div className="max-w-3xl mx-auto px-4 py-6 pb-24">
       <h1 className="text-3xl font-black text-gray-900 mb-6" style={{ fontFamily: "var(--font-secular)" }}>חוקים וניקוד</h1>
 
@@ -144,5 +147,6 @@ export default function RulesPage() {
         </section>
       </div>
     </div>
+    </PageTransition>
   );
 }

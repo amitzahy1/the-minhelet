@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ALL_TEAMS } from "@/lib/tournament/groups";
 import { SQUADS_DATA, getSquad, getAvailableSquads } from "@/lib/tournament/squads-data";
 import { getTeamColor } from "@/lib/team-colors";
+import { PageTransition } from "@/components/shared/PageTransition";
 
 const F: Record<string,string> = {
   MEX:"🇲🇽",KOR:"🇰🇷",CZE:"🇨🇿",RSA:"🇿🇦",CAN:"🇨🇦",QAT:"🇶🇦",SUI:"🇨🇭",BIH:"🇧🇦",
@@ -73,6 +74,7 @@ export default function SquadsPage() {
   const startersForPitch = starters.length >= 11 ? starters : (squad?.players.filter(p => p.starter) || []);
 
   return (
+    <PageTransition>
     <div className="max-w-5xl mx-auto px-4 py-6 pb-24">
       <div className="mb-5">
         <h1 className="text-3xl font-black text-gray-900 dark:text-white" style={{ fontFamily: "var(--font-secular)" }}>נבחרות וסגלים</h1>
@@ -205,5 +207,6 @@ export default function SquadsPage() {
         </div>
       )}
     </div>
+    </PageTransition>
   );
 }

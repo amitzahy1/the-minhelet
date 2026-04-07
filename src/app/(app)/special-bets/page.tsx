@@ -2,6 +2,7 @@
 
 import { useBettingStore } from "@/stores/betting-store";
 import { ALL_TEAMS } from "@/lib/tournament/groups";
+import { PageTransition } from "@/components/shared/PageTransition";
 
 const GROUPS = ["A","B","C","D","E","F","G","H","I","J","K","L"];
 
@@ -89,6 +90,7 @@ export default function SpecialBetsPage() {
     sb.dirtiestTeam, ...sb.matchups, sb.penaltiesOverUnder].filter(Boolean).length;
 
   return (
+    <PageTransition>
     <div className="max-w-4xl mx-auto px-4 py-6 pb-24">
       <div className="mb-6">
         <h1 className="text-3xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>הימורים מיוחדים</h1>
@@ -216,5 +218,6 @@ export default function SpecialBetsPage() {
         </SectionCard>
       </div>
     </div>
+    </PageTransition>
   );
 }

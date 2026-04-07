@@ -1,7 +1,10 @@
 "use client";
 
+import { PageTransition } from "@/components/shared/PageTransition";
+
 export default function AdminGuidePage() {
   return (
+    <PageTransition>
     <div className="max-w-3xl mx-auto px-4 py-6 pb-24" dir="rtl">
       <h1 className="text-3xl font-black text-gray-900 mb-6" style={{ fontFamily: "var(--font-secular)" }}>מדריך למנהלים</h1>
 
@@ -133,6 +136,7 @@ export default function AdminGuidePage() {
         ))}
       </Section>
     </div>
+    </PageTransition>
   );
 }
 

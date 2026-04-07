@@ -3,6 +3,7 @@
 import { useState, useCallback, memo } from "react";
 import { useBettingStore } from "@/stores/betting-store";
 import { GROUPS } from "@/lib/tournament/groups";
+import { PageTransition } from "@/components/shared/PageTransition";
 
 // Flags
 const F: Record<string,string> = {
@@ -213,6 +214,7 @@ export default function KnockoutPage() {
   const getWinner = (key: string) => knockout[key]?.winner || null;
 
   return (
+    <PageTransition>
     <div className="max-w-full mx-auto px-4 py-6 pb-24">
       <div className="mb-4">
         <h1 className="text-3xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>עץ הנוק-אאוט</h1>
@@ -336,5 +338,6 @@ export default function KnockoutPage() {
         </div>
       </div>
     </div>
+    </PageTransition>
   );
 }

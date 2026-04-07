@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { PredictionHeatmap } from "@/components/shared/PredictionHeatmap";
 
 // Color coding: each unique value gets a FIXED color — same pick = same color everywhere
 const VALUE_COLORS = [
@@ -64,7 +65,7 @@ const F: Record<string,string> = {
   KSA:"🇸🇦",DEN:"🇩🇰",
 };
 
-type View = "advancement" | "specials" | "groups" | "similarity";
+type View = "advancement" | "specials" | "groups" | "similarity" | "heatmap";
 
 export default function ComparePage() {
   const [view, setView] = useState<View>("advancement");
@@ -101,6 +102,7 @@ export default function ComparePage() {
           { key: "specials" as View, label: "הימורים מיוחדים" },
           { key: "groups" as View, label: "עולות מהבתים" },
           { key: "similarity" as View, label: "דמיון בין מהמרים" },
+          { key: "heatmap" as View, label: "מפת חום" },
         ].map(tab => (
           <button key={tab.key} onClick={() => setView(tab.key)}
             className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
@@ -324,6 +326,30 @@ export default function ComparePage() {
                 );
               })()}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* === HEATMAP VIEW === */}
+      {view === "heatmap" && (
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
+          <div className="px-5 py-4 bg-gradient-to-l from-white via-amber-50/30 to-orange-50/40 border-b border-amber-100/50">
+            <h3 className="text-lg font-bold text-gray-900">מפת חום — דיוק בבתים</h3>
+            <p className="text-sm text-gray-500">כמה כל מהמר צדק בניחושי העולות מכל בית</p>
+          </div>
+          <div className="p-4">
+            <PredictionHeatmap data={BETTORS.map(b => ({
+              name: b.name,
+              groups: Object.fromEntries(
+                Object.entries(b.groups).map(([group]) => {
+                  // Calculate a mock accuracy per group for each bettor
+                  // Use a deterministic formula based on bettor name + group
+                  const seed = b.name.length * 17 + group.charCodeAt(0) * 13;
+                  const accuracy = [0, 25, 50, 75, 100][seed % 5];
+                  return [group, accuracy];
+                })
+              ),
+            }))} />
           </div>
         </div>
       )}

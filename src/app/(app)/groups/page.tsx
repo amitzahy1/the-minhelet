@@ -6,6 +6,8 @@ import { GROUPS as GROUPS_RAW } from "@/lib/tournament/groups";
 import { calculateStandings } from "@/lib/tournament/standings";
 import { validateGroup } from "@/lib/validation/engine";
 import { FLAGS as __FLAGS } from "@/lib/flags";
+import { SwipeableGroups } from "@/components/shared/SwipeableGroups";
+import { SlotMachineScore } from "@/components/shared/SlotMachineScore";
 import type { GroupMatchPrediction } from "@/types";
 
 // Groups data from tournament config
@@ -19,13 +21,13 @@ function generateMatchups(codes: string[]) {
 function ScoreStepper({ value, onChange }: { value: number | null; onChange: (v: number) => void }) {
   return (
     <div className="flex items-center gap-0 rounded border border-gray-200 overflow-hidden">
-      <button onClick={() => onChange(Math.max(0, (value ?? 0) - 1))}
-        className="w-7 h-8 flex items-center justify-center bg-gray-50 text-gray-400 text-sm font-bold hover:bg-gray-100 active:bg-gray-200">−</button>
+      <button onClick={() => onChange(Math.max(0, (value ?? 0) - 1))} aria-label="הפחת"
+        className="w-9 h-10 flex items-center justify-center bg-gray-50 text-gray-400 text-sm font-bold hover:bg-gray-100 active:bg-gray-200">−</button>
       <span className="w-7 h-8 flex items-center justify-center font-bold text-base tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>
-        {value !== null ? value : <span className="text-gray-300 text-sm">-</span>}
+        {value !== null ? <SlotMachineScore value={value ?? 0} /> : <span className="text-gray-300 text-sm">-</span>}
       </span>
-      <button onClick={() => onChange((value ?? -1) + 1)}
-        className="w-7 h-8 flex items-center justify-center bg-gray-50 text-gray-400 text-sm font-bold hover:bg-gray-100 active:bg-gray-200">+</button>
+      <button onClick={() => onChange((value ?? -1) + 1)} aria-label="הוסף"
+        className="w-9 h-10 flex items-center justify-center bg-gray-50 text-gray-400 text-sm font-bold hover:bg-gray-100 active:bg-gray-200">+</button>
     </div>
   );
 }
@@ -278,7 +280,12 @@ export default function GroupsPage() {
       </div>
 
       {/* Group view */}
-      <GroupView groupId={groupId} />
+      <SwipeableGroups
+        onSwipeLeft={() => setCurrentGroupIndex(Math.min(11, currentGroupIndex + 1))}
+        onSwipeRight={() => setCurrentGroupIndex(Math.max(0, currentGroupIndex - 1))}
+      >
+        <GroupView groupId={groupId} />
+      </SwipeableGroups>
 
       {/* Next button */}
       {currentGroupIndex < 11 && (

@@ -4,6 +4,10 @@ import { useEffect, useState, useMemo } from "react";
 import { useConfetti } from "@/hooks/useConfetti";
 import { RegretMeter } from "@/components/shared/RegretMeter";
 import { getFlag } from "@/lib/flags";
+import { PullToRefresh } from "@/components/shared/PullToRefresh";
+import { MatchReactions, MOCK_REACTIONS } from "@/components/shared/MatchReactions";
+import WhosAlive from "@/components/shared/WhosAlive";
+import PredictionReveals from "@/components/shared/PredictionReveals";
 
 // Live page — shows matches from last 24h and next 12h
 // In production: real-time updates from API-Football via Supabase Realtime
@@ -71,7 +75,7 @@ const BETTOR_PICKS: Record<string, Record<number, string>> = {
 
 export default function LivePage() {
   const fireConfetti = useConfetti();
-  const [activeTab, setActiveTab] = useState<"live" | "whatif">("live");
+  const [activeTab, setActiveTab] = useState<"live" | "whatif" | "alive" | "reveals">("live");
 
   useEffect(() => {
     const hasExact = LIVE_MATCHES.some(m => m.yourStatus === "exact");
@@ -82,6 +86,7 @@ export default function LivePage() {
   }, [fireConfetti]);
 
   return (
+    <PullToRefresh onRefresh={async () => { await new Promise(r => setTimeout(r, 1500)); }}>
     <div className="max-w-3xl mx-auto px-4 py-6 pb-24">
       {/* Page header + tabs */}
       <div className="mb-6">
@@ -89,24 +94,29 @@ export default function LivePage() {
           <span className="w-3 h-3 rounded-full bg-red-500 animate-pulse"></span>
           <h1 className="text-3xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>לייב</h1>
         </div>
-        <div className="flex gap-2">
-          <button onClick={() => setActiveTab("live")}
-            className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all ${
-              activeTab === "live" ? "bg-gray-900 text-white shadow-md" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
-            }`}>
-            משחקים חיים
-          </button>
-          <button onClick={() => setActiveTab("whatif")}
-            className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all ${
-              activeTab === "whatif" ? "bg-gray-900 text-white shadow-md" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
-            }`}>
-            מה אם...?
-          </button>
+        <div className="flex gap-2 flex-wrap">
+          {([
+            { key: "live" as const, label: "משחקים חיים" },
+            { key: "whatif" as const, label: "מה אם...?" },
+            { key: "alive" as const, label: "מי חי?" },
+            { key: "reveals" as const, label: "חשיפת אלופות" },
+          ]).map(tab => (
+            <button key={tab.key} onClick={() => setActiveTab(tab.key)}
+              className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all ${
+                activeTab === tab.key ? "bg-gray-900 text-white shadow-md" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+              }`}>
+              {tab.label}
+            </button>
+          ))}
         </div>
       </div>
 
-      {activeTab === "live" ? <LiveTab /> : <WhatIfTab />}
+      {activeTab === "live" && <LiveTab />}
+      {activeTab === "whatif" && <WhatIfTab />}
+      {activeTab === "alive" && <WhosAliveTab />}
+      {activeTab === "reveals" && <PredictionRevealsTab />}
     </div>
+    </PullToRefresh>
   );
 }
 
@@ -230,6 +240,12 @@ function LiveTab() {
                     <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-400"></span> טעה</span>
                   </div>
                 </div>
+                {/* Match Reactions */}
+                <MatchReactions
+                  matchId={String(m.id)}
+                  reactions={MOCK_REACTIONS.reactions}
+                  comments={MOCK_REACTIONS.comments}
+                />
               </div>
             ))}
           </div>
@@ -461,4 +477,92 @@ function WhatIfTab() {
       )}
     </>
   );
+}
+
+const WHOS_ALIVE_DATA = [
+  {
+    name: "אמית",
+    champion: "ARG",
+    semifinalists: ["ARG", "GER", "FRA", "BRA"],
+    quarterfinalists: ["ARG", "GER", "FRA", "BRA", "ESP", "ENG", "NED", "POR"],
+    alive: ["ARG", "FRA", "BRA", "ESP", "ENG", "NED", "POR"],
+    dead: ["GER"],
+  },
+  {
+    name: "דני",
+    champion: "ARG",
+    semifinalists: ["ARG", "FRA", "BRA", "GER"],
+    quarterfinalists: ["ARG", "FRA", "BRA", "GER", "ESP", "POR", "ENG", "NED"],
+    alive: ["ARG", "FRA", "BRA", "ESP", "ENG", "NED"],
+    dead: ["GER", "POR"],
+  },
+  {
+    name: "יוני",
+    champion: "FRA",
+    semifinalists: ["FRA", "BRA", "ENG", "ARG"],
+    quarterfinalists: ["FRA", "BRA", "ENG", "ARG", "GER", "ESP", "NED", "POR"],
+    alive: ["FRA", "BRA", "ENG", "ARG", "ESP", "NED", "POR"],
+    dead: ["GER"],
+  },
+  {
+    name: "רון ב",
+    champion: "ENG",
+    semifinalists: ["ENG", "FRA", "BRA", "POR"],
+    quarterfinalists: ["ENG", "FRA", "BRA", "POR", "ARG", "GER", "ESP", "NED"],
+    alive: ["ENG", "FRA", "BRA", "ARG", "ESP", "NED"],
+    dead: ["POR", "GER"],
+  },
+  {
+    name: "רון ג",
+    champion: "ESP",
+    semifinalists: ["ESP", "ARG", "FRA", "BRA"],
+    quarterfinalists: ["ESP", "ARG", "FRA", "BRA", "GER", "ENG", "NED", "POR"],
+    alive: ["ESP", "ARG", "FRA", "BRA", "ENG", "NED", "POR"],
+    dead: ["GER"],
+  },
+  {
+    name: "רועי",
+    champion: "GER",
+    semifinalists: ["GER", "FRA", "ARG", "BRA"],
+    quarterfinalists: ["GER", "FRA", "ARG", "BRA", "ESP", "ENG", "NED", "POR"],
+    alive: ["FRA", "ARG", "BRA", "ESP", "ENG", "NED", "POR"],
+    dead: ["GER"],
+  },
+  {
+    name: "עידן",
+    champion: "FRA",
+    semifinalists: ["FRA", "ARG", "BRA", "ENG"],
+    quarterfinalists: ["FRA", "ARG", "BRA", "ENG", "GER", "ESP", "NED", "POR"],
+    alive: ["FRA", "ARG", "BRA", "ENG", "ESP", "NED", "POR"],
+    dead: ["GER"],
+  },
+  {
+    name: "אוהד",
+    champion: "ARG",
+    semifinalists: ["ARG", "BRA", "FRA", "ESP"],
+    quarterfinalists: ["ARG", "BRA", "FRA", "ESP", "GER", "ENG", "NED", "POR"],
+    alive: ["ARG", "BRA", "FRA", "ESP", "ENG", "NED", "POR"],
+    dead: ["GER"],
+  },
+];
+
+function WhosAliveTab() {
+  return <WhosAlive bettors={WHOS_ALIVE_DATA} />;
+}
+
+const PREDICTION_REVEALS_DATA = [
+  { name: "דני", champion: "ARG", championName: "ארגנטינה" },
+  { name: "יוני", champion: "FRA", championName: "צרפת" },
+  { name: "דור דסא", champion: "BRA", championName: "ברזיל" },
+  { name: "אמית", champion: "ARG", championName: "ארגנטינה" },
+  { name: "רון ב", champion: "ENG", championName: "אנגליה" },
+  { name: "רון ג", champion: "ESP", championName: "ספרד" },
+  { name: "רועי", champion: "GER", championName: "גרמניה" },
+  { name: "עידן", champion: "FRA", championName: "צרפת" },
+  { name: "אוהד", champion: "ARG", championName: "ארגנטינה" },
+  { name: "אורי", champion: "BRA", championName: "ברזיל" },
+];
+
+function PredictionRevealsTab() {
+  return <PredictionReveals predictions={PREDICTION_REVEALS_DATA} isLocked={true} />;
 }

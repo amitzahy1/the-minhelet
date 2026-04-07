@@ -5,6 +5,10 @@ import { useBettingStore } from "@/stores/betting-store";
 import { exportBetsToCSV, exportBetsToJSON, downloadFile } from "@/lib/backup";
 import { shareLeaderboard, openWhatsApp } from "@/lib/share";
 import { CompletionTracker, type PlayerCompletion } from "@/components/shared/CompletionTracker";
+import { HeroRoast } from "@/components/shared/HeroRoast";
+import { RadarChart } from "@/components/shared/RadarChart";
+import { LeaderboardRace } from "@/components/shared/LeaderboardRace";
+import { PointsSankey } from "@/components/shared/PointsSankey";
 
 // Mock completion data — in production this comes from Supabase
 const COMPLETION_DATA: PlayerCompletion[] = [
@@ -106,6 +110,7 @@ export default function StandingsPage() {
   const totalFilled = useBettingStore((s) => s.getTotalFilledMatches());
   const [hoveredPlayer, setHoveredPlayer] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<SortKey>("total");
+  const [radarPlayerId, setRadarPlayerId] = useState<string>("4"); // default to אמית
 
   const handleExportCSV = () => {
     const state = useBettingStore.getState();
@@ -146,6 +151,20 @@ export default function StandingsPage() {
       </div>
 
       <CompletionTracker players={COMPLETION_DATA} />
+
+      {/* Hero & Roast of the day */}
+      {(() => {
+        const sorted = [...PLAYERS].sort((a, b) => parseInt(b.today) - parseInt(a.today));
+        const heroPlayer = sorted[0];
+        const roastPlayer = sorted[sorted.length - 1];
+        return (
+          <HeroRoast
+            hero={{ name: heroPlayer.name, points: parseInt(heroPlayer.today), highlight: `${heroPlayer.exact} מדויקות!` }}
+            roast={{ name: roastPlayer.name, points: parseInt(roastPlayer.today), highlight: `רק ${roastPlayer.today} — יום קשה` }}
+            matchday="יום משחק 3"
+          />
+        );
+      })()}
 
       {/* Main leaderboard */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden hover:shadow-lg transition-all mb-6">
@@ -270,6 +289,89 @@ export default function StandingsPage() {
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* Player Radar Chart */}
+      {(() => {
+        const radarPlayer = PLAYERS.find((p) => p.id === radarPlayerId) ?? PLAYERS.find((p) => p.isYou)!;
+        const leader = [...PLAYERS].sort((a, b) => b.total - a.total)[0];
+        // Compute max values for normalization
+        const maxToto = Math.max(...PLAYERS.map((p) => parseInt(p.toto)));
+        const maxExact = Math.max(...PLAYERS.map((p) => p.exact));
+        const maxGroups = Math.max(...PLAYERS.map((p) => p.breakdown.totoGroup + p.breakdown.exactGroup));
+        const maxKnockout = Math.max(...PLAYERS.map((p) => p.breakdown.totoKnockout + p.breakdown.exactKnockout));
+        const maxSpecials = Math.max(...PLAYERS.map((p) => p.specPts));
+        const normalize = (p: typeof PLAYERS[0]) => ({
+          name: p.name,
+          toto: Math.round((parseInt(p.toto) / maxToto) * 100),
+          exact: Math.round((p.exact / maxExact) * 100),
+          groups: Math.round(((p.breakdown.totoGroup + p.breakdown.exactGroup) / maxGroups) * 100),
+          knockout: Math.round(((p.breakdown.totoKnockout + p.breakdown.exactKnockout) / maxKnockout) * 100),
+          specials: Math.round((p.specPts / maxSpecials) * 100),
+        });
+        return (
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden hover:shadow-lg transition-all mb-6">
+            <div className="px-5 py-4 bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/40 border-b border-blue-100/50 flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-bold text-gray-800">פרופיל שחקן</h2>
+                <p className="text-sm text-gray-500">השוואה מול המוביל</p>
+              </div>
+              <select
+                value={radarPlayerId}
+                onChange={(e) => setRadarPlayerId(e.target.value)}
+                className="text-sm font-bold border border-gray-200 rounded-lg px-3 py-1.5 text-gray-700 bg-white"
+                dir="rtl"
+              >
+                {PLAYERS.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="p-5">
+              <RadarChart player={normalize(radarPlayer)} leader={normalize(leader)} />
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Leaderboard Race */}
+      <div className="mb-6">
+        <h2 className="text-lg font-bold text-gray-900 mb-3">מירוץ הנקודות</h2>
+        {(() => {
+          const COLORS = ["#3B82F6", "#10B981", "#F59E0B", "#8B5CF6", "#EF4444", "#EC4899", "#06B6D4", "#F97316", "#6366F1", "#14B8A6", "#E11D48"];
+          const raceData = PLAYERS.map((p, idx) => {
+            // Generate mock 10-matchday history ending at the player's total
+            const steps = 10;
+            const history = Array.from({ length: steps }, (_, i) =>
+              Math.round((p.total / steps) * (i + 1) + (Math.sin(idx + i) * 8))
+            );
+            history[steps - 1] = p.total; // ensure final value matches
+            return { name: p.name, color: COLORS[idx % COLORS.length], history };
+          });
+          const matchdays = Array.from({ length: 10 }, (_, i) => `יום ${i + 1}`);
+          return <LeaderboardRace data={raceData} matchdays={matchdays} />;
+        })()}
+      </div>
+
+      {/* Points Sankey */}
+      <div className="mb-6">
+        <h2 className="text-lg font-bold text-gray-900 mb-3">מאיפה הנקודות שלך?</h2>
+        {(() => {
+          const me = PLAYERS.find((p) => p.isYou)!;
+          return (
+            <PointsSankey
+              player={{
+                name: me.name,
+                toto: me.breakdown.totoGroup + me.breakdown.totoKnockout,
+                exact: me.breakdown.exactGroup + me.breakdown.exactKnockout,
+                groups: me.breakdown.groupAdvExact + me.breakdown.groupAdvPartial,
+                knockout: me.breakdown.advQF + me.breakdown.advSF + me.breakdown.advFinal,
+                specials: me.specPts,
+                total: me.total,
+              }}
+            />
+          );
+        })()}
       </div>
 
       {/* Category leaders */}

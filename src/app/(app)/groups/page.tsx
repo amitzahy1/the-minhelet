@@ -5,6 +5,7 @@ import { useBettingStore } from "@/stores/betting-store";
 import { GROUPS as GROUPS_RAW } from "@/lib/tournament/groups";
 import { calculateStandings } from "@/lib/tournament/standings";
 import { validateGroup } from "@/lib/validation/engine";
+import { FLAGS as __FLAGS } from "@/lib/flags";
 import type { GroupMatchPrediction } from "@/types";
 
 // Groups data from tournament config
@@ -69,14 +70,7 @@ function GroupView({ groupId }: { groupId: string }) {
 
   const getTeam = (code: string) => teams.find(t => t.code === code)!;
   const getFlag = (code: string) => {
-    const FLAGS: Record<string, string> = {
-      MAR:"🇲🇦",PER:"🇵🇪",CAN:"🇨🇦",BFA:"🇧🇫",FRA:"🇫🇷",COL:"🇨🇴",HON:"🇭🇳",NZL:"🇳🇿",
-      ARG:"🇦🇷",MEX:"🇲🇽",UZB:"🇺🇿",IDN:"🇮🇩",JPN:"🇯🇵",AUS:"🇦🇺",BHR:"🇧🇭",TBD:"🏳️",
-      BRA:"🇧🇷",ECU:"🇪🇨",JAM:"🇯🇲",BOL:"🇧🇴",ESP:"🇪🇸",CHI:"🇨🇱",CMR:"🇨🇲",ALB:"🇦🇱",
-      ENG:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",SEN:"🇸🇳",DEN:"🇩🇰",KSA:"🇸🇦",POR:"🇵🇹",IRN:"🇮🇷",PAR:"🇵🇾",CIV:"🇨🇮",
-      GER:"🇩🇪",URU:"🇺🇾",USA:"🇺🇸",WAL:"🏴󠁧󠁢󠁷󠁬󠁳󠁿",NED:"🇳🇱",KOR:"🇰🇷",PAN:"🇵🇦",CRC:"🇨🇷",
-      ITA:"🇮🇹",SRB:"🇷🇸",TUN:"🇹🇳",TRI:"🇹🇹",BEL:"🇧🇪",CRO:"🇭🇷",NGA:"🇳🇬",QAT:"🇶🇦",
-    };
+    const FLAGS = __FLAGS;
     return FLAGS[code] || "🏳️";
   };
 

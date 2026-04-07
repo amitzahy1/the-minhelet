@@ -6,9 +6,8 @@ import { exportBetsToCSV, exportBetsToJSON, downloadFile } from "@/lib/backup";
 import { shareLeaderboard, openWhatsApp } from "@/lib/share";
 
 // Mock leaderboard data — in production this comes from Supabase scoring_log
-// The Oracle (AI) is always included as a virtual player
 const PLAYERS = [
-  { id: "oracle", name: "The Oracle 🤖", matchPts: 80, advPts: 48, specPts: 14, total: 142, today: "+8", delta: 0, toto: "57%", exact: 10, streak: 3, bestDay: "+16", isOracle: true,
+  { id: "bot", name: "הבוט 🤖", matchPts: 80, advPts: 48, specPts: 14, total: 142, today: "+8", delta: 0, toto: "57%", exact: 10, streak: 3, bestDay: "+16",
     breakdown: { totoGroup: 30, exactGroup: 8, totoKnockout: 28, exactKnockout: 14, groupAdvExact: 28, groupAdvPartial: 6, advQF: 8, advSF: 6, advFinal: 0, winner: 0, topScorer: 0, topAssists: 0, bestAttack: 6, specials: 8 } },
   { id: "1", name: "דני", matchPts: 95, advPts: 52, specPts: 21, total: 168, today: "+12", delta: 3, toto: "65%", exact: 16, streak: 8, bestDay: "+18",
     breakdown: { totoGroup: 36, exactGroup: 12, totoKnockout: 30, exactKnockout: 17, groupAdvExact: 30, groupAdvPartial: 9, advQF: 16, advSF: 12, advFinal: 0, winner: 0, topScorer: 0, topAssists: 0, bestAttack: 0, specials: 6 } },
@@ -181,7 +180,7 @@ export default function StandingsPage() {
           return (
             <div key={p.id}
               className={`relative flex items-center px-4 py-3 border-b border-gray-100 last:border-0 transition-colors ${
-                p.isYou ? "bg-blue-50/50" : (p as any).isOracle ? "bg-purple-50/40" : "hover:bg-gray-50/50"
+                p.isYou ? "bg-blue-50/50" : "hover:bg-gray-50/50"
               }`}
               onMouseEnter={() => setHoveredPlayer(p.id)}
               onMouseLeave={() => setHoveredPlayer(null)}

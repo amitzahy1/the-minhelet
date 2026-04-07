@@ -606,22 +606,20 @@ function UserManagement() {
   }, []);
 
   async function loadUsers() {
-    const supabase = createClient();
-    // Get profiles
-    const { data: profiles } = await supabase.from("profiles").select("id, display_name, avatar_url, created_at");
-
-    // Get hidden users from localStorage (or Supabase in production)
-    const hiddenUsers = JSON.parse(localStorage.getItem("wc2026-hidden-users") || "[]");
-
-    if (profiles) {
-      setUsers(profiles.map(p => ({
-        id: p.id,
-        email: "",
-        name: p.display_name || "ללא שם",
-        visible: !hiddenUsers.includes(p.id),
-        lastLogin: p.created_at ? new Date(p.created_at).toLocaleDateString("he-IL") : "",
-      })));
-    }
+    try {
+      const res = await fetch("/api/admin/users");
+      const data = await res.json();
+      const hiddenUsers = JSON.parse(localStorage.getItem("wc2026-hidden-users") || "[]");
+      if (data.users) {
+        setUsers(data.users.map((u: any) => ({
+          id: u.id,
+          email: u.email || "",
+          name: u.name || u.email?.split("@")[0] || "ללא שם",
+          visible: !hiddenUsers.includes(u.id),
+          lastLogin: u.created_at ? new Date(u.created_at).toLocaleDateString("he-IL") : "",
+        })));
+      }
+    } catch { /* ignore */ }
     setLoading(false);
   }
 
@@ -1037,16 +1035,33 @@ function AdminsList() {
   }, []);
 
   async function loadAdmins() {
-    const supabase = createClient();
-    const { data } = await supabase.from("admins").select("email, role");
-    setAdmins(data || []);
+    try {
+      const res = await fetch("/api/admin/users");
+      const data = await res.json();
+      // Filter to only show admins — fetch admins list separately
+      const supabase = createClient();
+      const { data: adminData } = await supabase.from("admins").select("email, role");
+      setAdmins(adminData || []);
+    } catch {
+      // Fallback: try direct Supabase
+      const supabase = createClient();
+      const { data } = await supabase.from("admins").select("email, role");
+      setAdmins(data || []);
+    }
   }
 
   async function addAdmin() {
     if (!newEmail) return;
     setLoading(true);
-    const supabase = createClient();
-    await supabase.from("admins").insert({ email: newEmail, role: "LEAGUE_ADMIN" });
+    try {
+      const res = await fetch("/api/admin/add-admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: newEmail }),
+      });
+      const data = await res.json();
+      if (data.error) { alert(`שגיאה: ${data.error}`); }
+    } catch { alert("שגיאת רשת"); }
     setNewEmail("");
     await loadAdmins();
     setLoading(false);

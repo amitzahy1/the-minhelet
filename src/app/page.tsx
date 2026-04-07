@@ -71,7 +71,7 @@ export default function LandingPage() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${origin}/auth/callback`,
+        redirectTo: `${origin}/auth/callback?next=${showSignup ? "/groups" : "/standings"}`,
         queryParams: { prompt: "select_account" },
       },
     });
@@ -102,7 +102,7 @@ export default function LandingPage() {
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) { setError("אימייל או סיסמה שגויים"); setLoading(false); }
-      else { router.push("/standings"); }
+      else { router.push(showSignup ? "/groups" : "/standings"); }
     }
   };
 

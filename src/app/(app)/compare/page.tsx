@@ -2,25 +2,45 @@
 
 import { useState, useMemo } from "react";
 
-// Color coding: count how many bettors picked the same value, assign color based on popularity
-const POPULARITY_COLORS = [
-  "", // 1 person (unique) — no color
-  "bg-blue-50", // 2 people
-  "bg-blue-100", // 3 people
-  "bg-green-50", // 4 people
-  "bg-green-100", // 5 people
-  "bg-amber-50", // 6+
-  "bg-amber-100",
-  "bg-purple-50",
-  "bg-purple-100",
-  "bg-red-50",
+// Color coding: each unique value gets a FIXED color — same pick = same color everywhere
+const VALUE_COLORS = [
+  "bg-blue-100 text-blue-800",
+  "bg-green-100 text-green-800",
+  "bg-amber-100 text-amber-800",
+  "bg-purple-100 text-purple-800",
+  "bg-pink-100 text-pink-800",
+  "bg-cyan-100 text-cyan-800",
+  "bg-orange-100 text-orange-800",
+  "bg-indigo-100 text-indigo-800",
+  "bg-lime-100 text-lime-800",
+  "bg-rose-100 text-rose-800",
+  "bg-teal-100 text-teal-800",
+  "bg-sky-100 text-sky-800",
+  "bg-emerald-100 text-emerald-800",
+  "bg-violet-100 text-violet-800",
+  "bg-fuchsia-100 text-fuchsia-800",
+  "bg-yellow-100 text-yellow-800",
 ];
 
-function getPopularityColor(value: string, allValues: string[]): string {
+// Build a color map: each unique value that appears 2+ times gets a fixed color
+function buildColorMap(allValues: string[]): Record<string, string> {
+  const counts: Record<string, number> = {};
+  for (const v of allValues) { if (v) counts[v] = (counts[v] || 0) + 1; }
+
+  const map: Record<string, string> = {};
+  let colorIdx = 0;
+  // Sort by frequency (most popular first) so popular picks get the best colors
+  const sorted = Object.entries(counts).filter(([,c]) => c >= 2).sort((a,b) => b[1] - a[1]);
+  for (const [value] of sorted) {
+    map[value] = VALUE_COLORS[colorIdx % VALUE_COLORS.length];
+    colorIdx++;
+  }
+  return map;
+}
+
+function getValueColor(value: string, colorMap: Record<string, string>): string {
   if (!value) return "";
-  const count = allValues.filter(v => v === value).length;
-  if (count <= 1) return "";
-  return POPULARITY_COLORS[Math.min(count - 1, POPULARITY_COLORS.length - 1)] || "bg-purple-50";
+  return colorMap[value] || "";
 }
 
 // Mock data — in production comes from Supabase
@@ -48,6 +68,24 @@ type View = "advancement" | "specials" | "groups";
 
 export default function ComparePage() {
   const [view, setView] = useState<View>("advancement");
+
+  // Build color maps for each category
+  const advColors = useMemo(() => buildColorMap([
+    ...BETTORS.map(b=>b.winner), ...BETTORS.flatMap(b=>[b.finalist1,b.finalist2]),
+    ...BETTORS.flatMap(b=>b.sf), ...BETTORS.flatMap(b=>b.qf),
+  ]), []);
+  const specColors = useMemo(() => buildColorMap([
+    ...BETTORS.map(b=>b.topScorer), ...BETTORS.map(b=>b.topAssists),
+    ...BETTORS.map(b=>b.bestAttack), ...BETTORS.map(b=>b.dirtiestTeam),
+    ...BETTORS.map(b=>b.prolificGroup), ...BETTORS.map(b=>b.driestGroup),
+    ...BETTORS.map(b=>b.matchup1), ...BETTORS.map(b=>b.matchup2),
+    ...BETTORS.map(b=>b.matchup3), ...BETTORS.map(b=>b.penalties),
+  ]), []);
+  const groupColors = useMemo(() => {
+    const all: string[] = [];
+    BETTORS.forEach(b => Object.values(b.groups).forEach(g => all.push(...g)));
+    return buildColorMap(all);
+  }, []);
 
   return (
     <div className="max-w-full mx-auto px-4 py-6 pb-24">
@@ -103,14 +141,14 @@ export default function ComparePage() {
                     <td className="py-2 px-2 font-bold text-gray-900 sticky start-0 bg-inherit z-10 border-e border-gray-100 whitespace-nowrap w-16 max-w-[4rem] truncate text-xs">
                       {b.name} {b.isYou && <span className="text-[10px] text-blue-500 bg-blue-100 rounded px-1 ms-0.5">אתה</span>}
                     </td>
-                    <td className={`py-2 px-2 text-center font-bold text-amber-700 text-xs ${getPopularityColor(b.winner, BETTORS.map(x=>x.winner))}`}>{F[b.winner]} {b.winner}</td>
-                    <td className={`py-2 px-2 text-center text-xs ${getPopularityColor(b.finalist1, BETTORS.flatMap(x=>[x.finalist1,x.finalist2]))}`}>{F[b.finalist1]} {b.finalist1}</td>
-                    <td className={`py-2 px-2 text-center text-xs ${getPopularityColor(b.finalist2, BETTORS.flatMap(x=>[x.finalist1,x.finalist2]))}`}>{F[b.finalist2]} {b.finalist2}</td>
+                    <td className={`py-2 px-2 text-center font-bold text-amber-700 text-xs ${getValueColor(b.winner, advColors)}`}>{F[b.winner]} {b.winner}</td>
+                    <td className={`py-2 px-2 text-center text-xs ${getValueColor(b.finalist1, advColors)}`}>{F[b.finalist1]} {b.finalist1}</td>
+                    <td className={`py-2 px-2 text-center text-xs ${getValueColor(b.finalist2, advColors)}`}>{F[b.finalist2]} {b.finalist2}</td>
                     {b.sf.map((t, i) => (
-                      <td key={`sf${i}`} className={`py-2 px-2 text-center text-gray-600 text-xs ${getPopularityColor(t, BETTORS.flatMap(x=>x.sf))}`}>{F[t]} {t}</td>
+                      <td key={`sf${i}`} className={`py-2 px-2 text-center text-gray-600 text-xs ${getValueColor(t, advColors)}`}>{F[t]} {t}</td>
                     ))}
                     {b.qf.map((t, i) => (
-                      <td key={`qf${i}`} className={`py-2 px-2 text-center text-gray-500 text-[10px] ${getPopularityColor(t, BETTORS.flatMap(x=>x.qf))}`}>{F[t]} {t}</td>
+                      <td key={`qf${i}`} className={`py-2 px-2 text-center text-gray-500 text-[10px] ${getValueColor(t, advColors)}`}>{F[t]} {t}</td>
                     ))}
                   </tr>
                 ))}
@@ -155,15 +193,15 @@ export default function ComparePage() {
                     <td className="py-2 px-2 font-bold text-gray-900 sticky start-0 bg-inherit z-10 border-e border-gray-100 whitespace-nowrap w-16 max-w-[4rem] truncate text-xs">
                       {b.name} {b.isYou && <span className="text-[10px] text-blue-500 bg-blue-100 rounded px-1 ms-0.5">אתה</span>}
                     </td>
-                    <td className={`py-2 px-2 text-center text-xs font-medium ${getPopularityColor(b.topScorer, BETTORS.map(x=>x.topScorer))}`}>{b.topScorer}</td>
-                    <td className={`py-2 px-2 text-center text-xs font-medium ${getPopularityColor(b.topAssists, BETTORS.map(x=>x.topAssists))}`}>{b.topAssists}</td>
-                    <td className={`py-2 px-2 text-center text-xs ${getPopularityColor(b.bestAttack, BETTORS.map(x=>x.bestAttack))}`}>{F[b.bestAttack]} {b.bestAttack}</td>
-                    <td className={`py-2 px-2 text-center text-xs ${getPopularityColor(b.dirtiestTeam, BETTORS.map(x=>x.dirtiestTeam))}`}>{F[b.dirtiestTeam]} {b.dirtiestTeam}</td>
-                    <td className={`py-2 px-2 text-center text-xs ${getPopularityColor(b.prolificGroup, BETTORS.map(x=>x.prolificGroup))}`}>{b.prolificGroup}</td>
-                    <td className={`py-2 px-2 text-center text-xs ${getPopularityColor(b.driestGroup, BETTORS.map(x=>x.driestGroup))}`}>{b.driestGroup}</td>
-                    <td className={`py-2 px-2 text-center text-xs ${getPopularityColor(b.matchup1, BETTORS.map(x=>x.matchup1))}`}>{b.matchup1}</td>
-                    <td className={`py-2 px-2 text-center text-xs ${getPopularityColor(b.matchup2, BETTORS.map(x=>x.matchup2))}`}>{b.matchup2}</td>
-                    <td className={`py-2 px-2 text-center text-xs ${getPopularityColor(b.matchup3, BETTORS.map(x=>x.matchup3))}`}>{b.matchup3}</td>
+                    <td className={`py-2 px-2 text-center text-xs font-medium ${getValueColor(b.topScorer, specColors)}`}>{b.topScorer}</td>
+                    <td className={`py-2 px-2 text-center text-xs font-medium ${getValueColor(b.topAssists, specColors)}`}>{b.topAssists}</td>
+                    <td className={`py-2 px-2 text-center text-xs ${getValueColor(b.bestAttack, specColors)}`}>{F[b.bestAttack]} {b.bestAttack}</td>
+                    <td className={`py-2 px-2 text-center text-xs ${getValueColor(b.dirtiestTeam, specColors)}`}>{F[b.dirtiestTeam]} {b.dirtiestTeam}</td>
+                    <td className={`py-2 px-2 text-center text-xs ${getValueColor(b.prolificGroup, specColors)}`}>{b.prolificGroup}</td>
+                    <td className={`py-2 px-2 text-center text-xs ${getValueColor(b.driestGroup, specColors)}`}>{b.driestGroup}</td>
+                    <td className={`py-2 px-2 text-center text-xs ${getValueColor(b.matchup1, specColors)}`}>{b.matchup1}</td>
+                    <td className={`py-2 px-2 text-center text-xs ${getValueColor(b.matchup2, specColors)}`}>{b.matchup2}</td>
+                    <td className={`py-2 px-2 text-center text-xs ${getValueColor(b.matchup3, specColors)}`}>{b.matchup3}</td>
                     <td className="py-2 px-2 text-center text-xs">{b.penalties === "OVER" ? "מעל" : b.penalties === "UNDER" ? "מתחת" : b.penalties}</td>
                   </tr>
                 ))}
@@ -197,8 +235,8 @@ export default function ComparePage() {
                       return (
                         <tr key={b.name} className={`border-t border-gray-100 ${b.isYou ? "bg-blue-50/40" : "hover:bg-gray-50"}`}>
                           <td className="py-2.5 px-2 font-bold text-gray-900 sticky start-0 bg-inherit z-10 border-e border-gray-100 whitespace-nowrap w-16 max-w-[4rem] truncate text-xs">{b.name}</td>
-                          <td className="py-2.5 px-3 text-center font-medium">{F[picks[0]]} {picks[0]}</td>
-                          <td className="py-2.5 px-3 text-center font-medium">{F[picks[1]]} {picks[1]}</td>
+                          <td className={`py-2.5 px-3 text-center font-medium ${getValueColor(picks[0], groupColors)}`}>{F[picks[0]]} {picks[0]}</td>
+                          <td className={`py-2.5 px-3 text-center font-medium ${getValueColor(picks[1], groupColors)}`}>{F[picks[1]]} {picks[1]}</td>
                         </tr>
                       );
                     })}

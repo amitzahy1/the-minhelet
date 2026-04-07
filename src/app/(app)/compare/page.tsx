@@ -4,16 +4,16 @@ import { useState } from "react";
 
 // Mock data — in production comes from Supabase
 const BETTORS = [
-  { name: "דני", winner: "ARG", finalist1: "ARG", finalist2: "FRA", sf: ["ARG","FRA","BRA","GER"], topScorer: "Mbappé", topAssists: "De Bruyne", bestAttack: "FRA", dirtiestTeam: "ARG", groups: { A: ["MAR","PER"], B: ["FRA","COL"], C: ["ARG","MEX"], I: ["GER","USA"] } },
-  { name: "יוני", winner: "FRA", finalist1: "FRA", finalist2: "BRA", sf: ["FRA","BRA","ENG","ARG"], topScorer: "Mbappé", topAssists: "Bellingham", bestAttack: "BRA", dirtiestTeam: "URU", groups: { A: ["MAR","CAN"], B: ["FRA","COL"], C: ["ARG","MEX"], I: ["GER","URU"] } },
-  { name: "דור דסא", winner: "BRA", finalist1: "BRA", finalist2: "ARG", sf: ["BRA","ARG","ESP","GER"], topScorer: "Vinícius", topAssists: "Messi", bestAttack: "ARG", dirtiestTeam: "MAR", groups: { A: ["MAR","PER"], B: ["FRA","HON"], C: ["ARG","UZB"], I: ["USA","GER"] } },
-  { name: "אמית", winner: "ARG", finalist1: "ARG", finalist2: "GER", sf: ["ARG","GER","FRA","BRA"], topScorer: "Messi", topAssists: "De Bruyne", bestAttack: "ARG", dirtiestTeam: "MAR", groups: { A: ["MAR","PER"], B: ["FRA","COL"], C: ["ARG","MEX"], I: ["GER","USA"] }, isYou: true },
-  { name: "רון ב", winner: "ENG", finalist1: "ENG", finalist2: "FRA", sf: ["ENG","FRA","BRA","POR"], topScorer: "Kane", topAssists: "Saka", bestAttack: "ENG", dirtiestTeam: "SEN", groups: { A: ["MAR","CAN"], B: ["FRA","COL"], C: ["ARG","MEX"], I: ["GER","USA"] } },
-  { name: "רון ג", winner: "ESP", finalist1: "ESP", finalist2: "ARG", sf: ["ESP","ARG","FRA","BRA"], topScorer: "Yamal", topAssists: "Pedri", bestAttack: "ESP", dirtiestTeam: "CMR", groups: { A: ["MAR","PER"], B: ["FRA","COL"], C: ["MEX","ARG"], I: ["GER","URU"] } },
-  { name: "רועי", winner: "GER", finalist1: "GER", finalist2: "FRA", sf: ["GER","FRA","ARG","BRA"], topScorer: "Musiala", topAssists: "Wirtz", bestAttack: "GER", dirtiestTeam: "KSA", groups: { A: ["MAR","PER"], B: ["FRA","COL"], C: ["ARG","MEX"], I: ["GER","USA"] } },
-  { name: "עידן", winner: "FRA", finalist1: "FRA", finalist2: "ARG", sf: ["FRA","ARG","BRA","ENG"], topScorer: "Mbappé", topAssists: "Griezmann", bestAttack: "FRA", dirtiestTeam: "URU", groups: { A: ["MAR","CAN"], B: ["FRA","COL"], C: ["ARG","MEX"], I: ["GER","USA"] } },
-  { name: "אוהד", winner: "ARG", finalist1: "ARG", finalist2: "BRA", sf: ["ARG","BRA","FRA","ESP"], topScorer: "Lautaro", topAssists: "Mac Allister", bestAttack: "ARG", dirtiestTeam: "CMR", groups: { A: ["MAR","PER"], B: ["FRA","COL"], C: ["ARG","MEX"], I: ["GER","USA"] } },
-  { name: "אורי", winner: "BRA", finalist1: "BRA", finalist2: "FRA", sf: ["BRA","FRA","ARG","GER"], topScorer: "Vinícius", topAssists: "Rodrygo", bestAttack: "BRA", dirtiestTeam: "MAR", groups: { A: ["MAR","PER"], B: ["FRA","COL"], C: ["ARG","MEX"], I: ["GER","URU"] } },
+  { name: "דני", winner: "ARG", finalist1: "ARG", finalist2: "FRA", sf: ["ARG","FRA","BRA","GER"], qf: ["ARG","FRA","BRA","GER","ESP","POR","ENG","NED"], topScorer: "Mbappé", topAssists: "De Bruyne", bestAttack: "FRA", dirtiestTeam: "ARG", prolificGroup: "C", driestGroup: "G", matchup1: "1", matchup2: "2", matchup3: "1", penalties: "OVER", groups: { A: ["MEX","KOR"], B: ["SUI","CAN"], C: ["BRA","MAR"], D: ["USA","TUR"], E: ["GER","ECU"], F: ["NED","JPN"], G: ["BEL","IRN"], H: ["ESP","URU"], I: ["FRA","SEN"], J: ["ARG","AUT"], K: ["POR","COL"], L: ["ENG","CRO"] } },
+  { name: "יוני", winner: "FRA", finalist1: "FRA", finalist2: "BRA", sf: ["FRA","BRA","ENG","ARG"], qf: ["FRA","BRA","ENG","ARG","GER","ESP","NED","POR"], topScorer: "Mbappé", topAssists: "Bellingham", bestAttack: "BRA", dirtiestTeam: "URU", prolificGroup: "K", driestGroup: "B", matchup1: "1", matchup2: "1", matchup3: "X", penalties: "UNDER", groups: { A: ["MEX","CZE"], B: ["SUI","CAN"], C: ["BRA","MAR"], D: ["USA","AUS"], E: ["GER","CIV"], F: ["NED","JPN"], G: ["BEL","EGY"], H: ["ESP","URU"], I: ["FRA","NOR"], J: ["ARG","AUT"], K: ["POR","COL"], L: ["ENG","CRO"] } },
+  { name: "דור דסא", winner: "BRA", finalist1: "BRA", finalist2: "ARG", sf: ["BRA","ARG","ESP","GER"], qf: ["BRA","ARG","ESP","GER","FRA","ENG","NED","POR"], topScorer: "Vinícius", topAssists: "Messi", bestAttack: "ARG", dirtiestTeam: "MAR", prolificGroup: "J", driestGroup: "A", matchup1: "2", matchup2: "2", matchup3: "1", penalties: "OVER", groups: { A: ["KOR","MEX"], B: ["SUI","QAT"], C: ["BRA","MAR"], D: ["USA","TUR"], E: ["GER","ECU"], F: ["JPN","NED"], G: ["BEL","IRN"], H: ["ESP","URU"], I: ["FRA","SEN"], J: ["ARG","ALG"], K: ["POR","COL"], L: ["ENG","GHA"] } },
+  { name: "אמית", winner: "ARG", finalist1: "ARG", finalist2: "GER", sf: ["ARG","GER","FRA","BRA"], qf: ["ARG","GER","FRA","BRA","ESP","ENG","NED","POR"], topScorer: "Messi", topAssists: "De Bruyne", bestAttack: "ARG", dirtiestTeam: "MAR", prolificGroup: "C", driestGroup: "G", matchup1: "1", matchup2: "2", matchup3: "1", penalties: "OVER", groups: { A: ["MEX","KOR"], B: ["SUI","CAN"], C: ["BRA","MAR"], D: ["USA","TUR"], E: ["GER","ECU"], F: ["NED","JPN"], G: ["BEL","IRN"], H: ["ESP","URU"], I: ["FRA","SEN"], J: ["ARG","AUT"], K: ["POR","COL"], L: ["ENG","CRO"] }, isYou: true },
+  { name: "רון ב", winner: "ENG", finalist1: "ENG", finalist2: "FRA", sf: ["ENG","FRA","BRA","POR"], qf: ["ENG","FRA","BRA","POR","ARG","GER","ESP","NED"], topScorer: "Kane", topAssists: "Saka", bestAttack: "ENG", dirtiestTeam: "SEN", prolificGroup: "L", driestGroup: "B", matchup1: "2", matchup2: "1", matchup3: "2", penalties: "UNDER", groups: { A: ["MEX","CZE"], B: ["SUI","CAN"], C: ["BRA","SCO"], D: ["USA","AUS"], E: ["GER","ECU"], F: ["NED","JPN"], G: ["BEL","EGY"], H: ["ESP","URU"], I: ["FRA","SEN"], J: ["ARG","AUT"], K: ["POR","COL"], L: ["ENG","CRO"] } },
+  { name: "רון ג", winner: "ESP", finalist1: "ESP", finalist2: "ARG", sf: ["ESP","ARG","FRA","BRA"], qf: ["ESP","ARG","FRA","BRA","GER","ENG","NED","POR"], topScorer: "Yamal", topAssists: "Pedri", bestAttack: "ESP", dirtiestTeam: "GHA", prolificGroup: "J", driestGroup: "A", matchup1: "1", matchup2: "2", matchup3: "X", penalties: "OVER", groups: { A: ["MEX","KOR"], B: ["SUI","BIH"], C: ["BRA","MAR"], D: ["USA","TUR"], E: ["GER","CIV"], F: ["NED","JPN"], G: ["BEL","IRN"], H: ["ESP","URU"], I: ["FRA","SEN"], J: ["ARG","ALG"], K: ["POR","COL"], L: ["ENG","CRO"] } },
+  { name: "רועי", winner: "GER", finalist1: "GER", finalist2: "FRA", sf: ["GER","FRA","ARG","BRA"], qf: ["GER","FRA","ARG","BRA","ESP","ENG","NED","POR"], topScorer: "Musiala", topAssists: "Wirtz", bestAttack: "GER", dirtiestTeam: "KSA", prolificGroup: "E", driestGroup: "G", matchup1: "1", matchup2: "1", matchup3: "2", penalties: "UNDER", groups: { A: ["MEX","KOR"], B: ["SUI","CAN"], C: ["BRA","MAR"], D: ["USA","TUR"], E: ["GER","ECU"], F: ["NED","JPN"], G: ["BEL","IRN"], H: ["ESP","URU"], I: ["FRA","SEN"], J: ["ARG","AUT"], K: ["POR","COL"], L: ["ENG","CRO"] } },
+  { name: "עידן", winner: "FRA", finalist1: "FRA", finalist2: "ARG", sf: ["FRA","ARG","BRA","ENG"], qf: ["FRA","ARG","BRA","ENG","GER","ESP","NED","POR"], topScorer: "Mbappé", topAssists: "Griezmann", bestAttack: "FRA", dirtiestTeam: "URU", prolificGroup: "C", driestGroup: "B", matchup1: "1", matchup2: "X", matchup3: "1", penalties: "OVER", groups: { A: ["MEX","CZE"], B: ["SUI","CAN"], C: ["BRA","MAR"], D: ["USA","AUS"], E: ["GER","ECU"], F: ["NED","JPN"], G: ["BEL","EGY"], H: ["ESP","URU"], I: ["FRA","NOR"], J: ["ARG","AUT"], K: ["POR","COL"], L: ["ENG","CRO"] } },
+  { name: "אוהד", winner: "ARG", finalist1: "ARG", finalist2: "BRA", sf: ["ARG","BRA","FRA","ESP"], qf: ["ARG","BRA","FRA","ESP","GER","ENG","NED","POR"], topScorer: "Lautaro", topAssists: "Mac Allister", bestAttack: "ARG", dirtiestTeam: "GHA", prolificGroup: "K", driestGroup: "A", matchup1: "1", matchup2: "2", matchup3: "1", penalties: "OVER", groups: { A: ["MEX","KOR"], B: ["SUI","CAN"], C: ["BRA","MAR"], D: ["USA","TUR"], E: ["GER","ECU"], F: ["NED","JPN"], G: ["BEL","IRN"], H: ["ESP","URU"], I: ["FRA","SEN"], J: ["ARG","AUT"], K: ["POR","COL"], L: ["ENG","CRO"] } },
+  { name: "אורי", winner: "BRA", finalist1: "BRA", finalist2: "FRA", sf: ["BRA","FRA","ARG","GER"], qf: ["BRA","FRA","ARG","GER","ESP","ENG","NED","POR"], topScorer: "Vinícius", topAssists: "Rodrygo", bestAttack: "BRA", dirtiestTeam: "MAR", prolificGroup: "C", driestGroup: "G", matchup1: "2", matchup2: "1", matchup3: "1", penalties: "UNDER", groups: { A: ["MEX","KOR"], B: ["SUI","CAN"], C: ["BRA","MAR"], D: ["USA","TUR"], E: ["GER","ECU"], F: ["NED","JPN"], G: ["BEL","IRN"], H: ["ESP","URU"], I: ["FRA","SEN"], J: ["ARG","AUT"], K: ["POR","COL"], L: ["ENG","GHA"] } },
 ];
 
 const F: Record<string,string> = {
@@ -59,26 +59,37 @@ export default function ComparePage() {
               <thead>
                 <tr className="bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/40 border-b border-blue-100/50 text-xs font-bold text-gray-600" style={{ fontFamily: "var(--font-inter)" }}>
                   <th className="py-3 px-2 text-start sticky start-0 bg-white z-10 border-e border-gray-100 w-16 max-w-[4rem]">מהמר</th>
-                  <th className="py-3 px-3 text-center">זוכה</th>
-                  <th className="py-3 px-3 text-center">עולה לגמר 1</th>
-                  <th className="py-3 px-3 text-center">עולה לגמר 2</th>
-                  <th className="py-3 px-3 text-center">חצי 1</th>
-                  <th className="py-3 px-3 text-center">חצי 2</th>
-                  <th className="py-3 px-3 text-center">חצי 3</th>
-                  <th className="py-3 px-3 text-center">חצי 4</th>
+                  <th className="py-3 px-2 text-center">זוכה</th>
+                  <th className="py-3 px-2 text-center">גמר 1</th>
+                  <th className="py-3 px-2 text-center">גמר 2</th>
+                  <th className="py-3 px-2 text-center">חצי 1</th>
+                  <th className="py-3 px-2 text-center">חצי 2</th>
+                  <th className="py-3 px-2 text-center">חצי 3</th>
+                  <th className="py-3 px-2 text-center">חצי 4</th>
+                  <th className="py-3 px-2 text-center">רבע 1</th>
+                  <th className="py-3 px-2 text-center">רבע 2</th>
+                  <th className="py-3 px-2 text-center">רבע 3</th>
+                  <th className="py-3 px-2 text-center">רבע 4</th>
+                  <th className="py-3 px-2 text-center">רבע 5</th>
+                  <th className="py-3 px-2 text-center">רבע 6</th>
+                  <th className="py-3 px-2 text-center">רבע 7</th>
+                  <th className="py-3 px-2 text-center">רבע 8</th>
                 </tr>
               </thead>
               <tbody>
                 {BETTORS.map(b => (
                   <tr key={b.name} className={`border-t border-gray-100 ${b.isYou ? "bg-blue-50/40" : "hover:bg-gray-50"}`}>
-                    <td className="py-3 px-2 font-bold text-gray-900 sticky start-0 bg-inherit z-10 border-e border-gray-100 whitespace-nowrap w-16 max-w-[4rem] truncate text-xs">
+                    <td className="py-2 px-2 font-bold text-gray-900 sticky start-0 bg-inherit z-10 border-e border-gray-100 whitespace-nowrap w-16 max-w-[4rem] truncate text-xs">
                       {b.name} {b.isYou && <span className="text-[10px] text-blue-500 bg-blue-100 rounded px-1 ms-0.5">אתה</span>}
                     </td>
-                    <td className="py-3 px-3 text-center font-bold text-amber-700">{F[b.winner]} {b.winner}</td>
-                    <td className="py-3 px-3 text-center">{F[b.finalist1]} {b.finalist1}</td>
-                    <td className="py-3 px-3 text-center">{F[b.finalist2]} {b.finalist2}</td>
+                    <td className="py-2 px-2 text-center font-bold text-amber-700 text-xs">{F[b.winner]} {b.winner}</td>
+                    <td className="py-2 px-2 text-center text-xs">{F[b.finalist1]} {b.finalist1}</td>
+                    <td className="py-2 px-2 text-center text-xs">{F[b.finalist2]} {b.finalist2}</td>
                     {b.sf.map((t, i) => (
-                      <td key={i} className="py-3 px-3 text-center text-gray-600">{F[t]} {t}</td>
+                      <td key={`sf${i}`} className="py-2 px-2 text-center text-gray-600 text-xs">{F[t]} {t}</td>
+                    ))}
+                    {b.qf.map((t, i) => (
+                      <td key={`qf${i}`} className="py-2 px-2 text-center text-gray-500 text-[10px]">{F[t]} {t}</td>
                     ))}
                   </tr>
                 ))}
@@ -105,22 +116,34 @@ export default function ComparePage() {
               <thead>
                 <tr className="bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/40 border-b border-blue-100/50 text-xs font-bold text-gray-600" style={{ fontFamily: "var(--font-inter)" }}>
                   <th className="py-3 px-2 text-start sticky start-0 bg-white z-10 border-e border-gray-100 w-16 max-w-[4rem]">מהמר</th>
-                  <th className="py-3 px-3 text-center">מלך שערים</th>
-                  <th className="py-3 px-3 text-center">מלך בישולים</th>
-                  <th className="py-3 px-3 text-center">התקפה טובה</th>
-                  <th className="py-3 px-3 text-center">כסחנית</th>
+                  <th className="py-3 px-2 text-center">מלך שערים</th>
+                  <th className="py-3 px-2 text-center">מלך בישולים</th>
+                  <th className="py-3 px-2 text-center">התקפה</th>
+                  <th className="py-3 px-2 text-center">כסחנית</th>
+                  <th className="py-3 px-2 text-center">בית פורה</th>
+                  <th className="py-3 px-2 text-center">בית יבש</th>
+                  <th className="py-3 px-2 text-center">מאצ׳אפ 1</th>
+                  <th className="py-3 px-2 text-center">מאצ׳אפ 2</th>
+                  <th className="py-3 px-2 text-center">מאצ׳אפ 3</th>
+                  <th className="py-3 px-2 text-center">פנדלים</th>
                 </tr>
               </thead>
               <tbody>
                 {BETTORS.map(b => (
                   <tr key={b.name} className={`border-t border-gray-100 ${b.isYou ? "bg-blue-50/40" : "hover:bg-gray-50"}`}>
-                    <td className="py-3 px-2 font-bold text-gray-900 sticky start-0 bg-inherit z-10 border-e border-gray-100 whitespace-nowrap w-16 max-w-[4rem] truncate text-xs">
+                    <td className="py-2 px-2 font-bold text-gray-900 sticky start-0 bg-inherit z-10 border-e border-gray-100 whitespace-nowrap w-16 max-w-[4rem] truncate text-xs">
                       {b.name} {b.isYou && <span className="text-[10px] text-blue-500 bg-blue-100 rounded px-1 ms-0.5">אתה</span>}
                     </td>
-                    <td className="py-3 px-3 text-center font-medium">{b.topScorer}</td>
-                    <td className="py-3 px-3 text-center font-medium">{b.topAssists}</td>
-                    <td className="py-3 px-3 text-center">{F[b.bestAttack]} {b.bestAttack}</td>
-                    <td className="py-3 px-3 text-center">{F[b.dirtiestTeam]} {b.dirtiestTeam}</td>
+                    <td className="py-2 px-2 text-center text-xs font-medium">{b.topScorer}</td>
+                    <td className="py-2 px-2 text-center text-xs font-medium">{b.topAssists}</td>
+                    <td className="py-2 px-2 text-center text-xs">{F[b.bestAttack]} {b.bestAttack}</td>
+                    <td className="py-2 px-2 text-center text-xs">{F[b.dirtiestTeam]} {b.dirtiestTeam}</td>
+                    <td className="py-2 px-2 text-center text-xs">{b.prolificGroup}</td>
+                    <td className="py-2 px-2 text-center text-xs">{b.driestGroup}</td>
+                    <td className="py-2 px-2 text-center text-xs">{b.matchup1}</td>
+                    <td className="py-2 px-2 text-center text-xs">{b.matchup2}</td>
+                    <td className="py-2 px-2 text-center text-xs">{b.matchup3}</td>
+                    <td className="py-2 px-2 text-center text-xs">{b.penalties}</td>
                   </tr>
                 ))}
               </tbody>
@@ -132,7 +155,7 @@ export default function ComparePage() {
       {/* === GROUPS VIEW === */}
       {view === "groups" && (
         <div className="space-y-4">
-          {["A", "B", "C", "I"].map(groupId => (
+          {["A","B","C","D","E","F","G","H","I","J","K","L"].map(groupId => (
             <div key={groupId} className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
               <div className="px-5 py-3 bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/40 border-b border-blue-100/50">
                 <h3 className="text-base font-bold text-gray-800">בית {groupId} — מי העלה את מי?</h3>
@@ -163,7 +186,7 @@ export default function ComparePage() {
               </div>
             </div>
           ))}
-          <p className="text-sm text-gray-400 text-center">* מוצגים בתים לדוגמה — כל 12 הבתים יוצגו לאחר נעילת ההימורים</p>
+          <p className="text-sm text-gray-400 text-center">כל 12 הבתים — מקומות 1 ו-2 שכל מהמר בחר</p>
         </div>
       )}
     </div>

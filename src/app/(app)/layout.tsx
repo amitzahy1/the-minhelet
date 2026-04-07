@@ -200,13 +200,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const isBettingPage = BETTING_PAGES.some(p => pathname === p.href);
 
   return (
-    <div className="min-h-screen pb-20 sm:pb-0" style={{ background: "#F8F9FB", fontFamily: "var(--font-assistant), sans-serif" }} dir="rtl">
+    <div className="min-h-screen pb-20 sm:pb-0 bg-[#F8F9FB] dark:bg-gray-900 dark:text-gray-100" style={{ fontFamily: "var(--font-assistant), sans-serif" }} dir="rtl">
 
       {/* === ONBOARDING WIZARD (multi-step) === */}
       {showOnboarding && <OnboardingWizard onDismiss={dismissOnboarding} onStart={() => { dismissOnboarding(); router.push("/groups"); }} />}
 
       {/* === DESKTOP NAV === */}
-      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm hidden sm:block">
+      <header className="sticky top-0 z-50 bg-white/90 dark:bg-gray-800/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 shadow-sm hidden sm:block">
         <div className="max-w-7xl mx-auto flex items-center justify-between h-16 lg:h-20 px-4 lg:px-6">
           <Link href="/" className="flex items-center gap-3">
             <img src="/logo.png" alt="The Minhelet" className="w-14 h-14 lg:w-20 lg:h-20 rounded-full object-cover shadow-lg" />
@@ -305,7 +305,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </header>
 
       {/* === MOBILE TOP BAR === */}
-      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm sm:hidden">
+      <header className="sticky top-0 z-50 bg-white/90 dark:bg-gray-800/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 shadow-sm sm:hidden">
         <div className="flex items-center justify-between h-14 px-4">
           <Link href="/" className="flex items-center gap-2">
             <img src="/logo.png" alt="The Minhelet" className="w-10 h-10 rounded-full object-cover shadow-sm" />
@@ -390,7 +390,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </button>
 
       {/* === MOBILE BOTTOM NAV === */}
-      <nav className="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-gray-200 flex justify-around items-center h-16 z-50 sm:hidden shadow-[0_-2px_8px_rgba(0,0,0,0.06)]" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
+      <nav className="fixed bottom-0 inset-x-0 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-700 flex justify-around items-center h-16 z-50 sm:hidden shadow-[0_-2px_8px_rgba(0,0,0,0.06)]" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
         {/* Betting pages grouped */}
         <Link href="/groups"
           className={`flex flex-col items-center gap-0.5 py-1 ${isBettingPage ? "text-blue-600" : "text-gray-400"}`}>

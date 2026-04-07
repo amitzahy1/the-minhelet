@@ -134,7 +134,7 @@ export default function WhatIfPage() {
             <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
               <p className="text-3xl font-black text-red-600" style={{ fontFamily: "var(--font-inter)" }}>{losersCount}</p>
               <p className="text-sm font-bold text-red-700">מהמרים מפסידים</p>
-              <p className="text-xs text-red-600">העץ שלהם נפגע</p>
+              <p className="text-xs text-red-600">הנבחרת שלהם נפסלת מהעץ</p>
             </div>
           </div>
 
@@ -157,14 +157,14 @@ export default function WhatIfPage() {
                     <p className="font-bold text-sm text-gray-900">{i.name} {i.isYou && <span className="text-xs text-blue-500 bg-blue-100 rounded px-1 ms-1">אתה</span>}</p>
                     <p className="text-xs text-gray-500">
                       ניחש: {getFlag(i.pick)} {i.pick}
-                      {i.upset && " — אפסט!"}
+                      {i.upset && " — הפתעה! ניחש הפוך"}
                     </p>
                   </div>
                   <div className="text-end">
                     {i.correct ? (
                       <span className="text-sm font-bold text-green-600">+{i.pointsGained} נק׳</span>
                     ) : (
-                      <span className="text-sm font-bold text-red-500">העץ נפגע</span>
+                      <span className="text-sm font-bold text-red-500">הנבחרת שניחש נפסלת — 0 נק׳ על עולות בשלב הזה</span>
                     )}
                   </div>
                 </div>

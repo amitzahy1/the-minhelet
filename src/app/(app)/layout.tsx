@@ -27,7 +27,6 @@ const BETTING_PAGES = [
 const NAV_ITEMS = [
   { href: "/standings", label: "דירוג", iconKey: "leaderboard" as const },
   { href: "/compare", label: "השוואה", iconKey: "compare" as const },
-  { href: "/what-if", label: "מה אם?", iconKey: "compare" as const },
   { href: "/schedule", label: "לו״ז", iconKey: "live" as const },
   { href: "/live", label: "לייב", iconKey: "live" as const },
   { href: "/squads", label: "נבחרות", iconKey: "squads" as const },

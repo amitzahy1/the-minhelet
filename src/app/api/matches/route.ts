@@ -19,7 +19,7 @@ export async function GET() {
     }
 
     const data = await res.json();
-    const matches = (data.matches || []).map((m: any) => ({
+    const matches = (data.matches || []).map((m: { id: number; utcDate: string; homeTeam?: { shortName?: string; name?: string; tla?: string }; awayTeam?: { shortName?: string; name?: string; tla?: string }; group?: string; stage?: string; status?: string; score?: { fullTime?: { home?: number; away?: number } } }) => ({
       id: m.id,
       date: m.utcDate,
       homeTeam: m.homeTeam?.shortName || m.homeTeam?.name || "TBD",

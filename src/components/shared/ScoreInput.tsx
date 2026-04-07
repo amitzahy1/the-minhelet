@@ -3,6 +3,12 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+function triggerHaptic(style: "light" | "medium" = "light") {
+  if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+    navigator.vibrate(style === "light" ? 10 : 20);
+  }
+}
+
 interface ScoreInputProps {
   value: number;
   onChange: (value: number) => void;
@@ -17,14 +23,20 @@ export function ScoreInput({
   size = "md",
 }: ScoreInputProps) {
   const decrement = () => {
-    if (value > 0) onChange(value - 1);
+    if (value > 0) {
+      triggerHaptic("light");
+      onChange(value - 1);
+    }
   };
 
   const increment = () => {
-    if (value < 20) onChange(value + 1);
+    if (value < 20) {
+      triggerHaptic("light");
+      onChange(value + 1);
+    }
   };
 
-  const buttonSize = size === "sm" ? "h-8 w-8" : "h-10 w-10";
+  const buttonSize = size === "sm" ? "h-11 w-11" : "h-11 w-11";
   const textSize = size === "sm" ? "text-lg w-8" : "text-2xl w-10";
 
   return (
@@ -36,6 +48,7 @@ export function ScoreInput({
         onClick={decrement}
         disabled={disabled || value <= 0}
         type="button"
+        aria-label="הפחת תוצאה"
       >
         -
       </Button>
@@ -54,6 +67,7 @@ export function ScoreInput({
         onClick={increment}
         disabled={disabled}
         type="button"
+        aria-label="הוסף תוצאה"
       >
         +
       </Button>

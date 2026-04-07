@@ -265,7 +265,7 @@ export default function GroupsPage() {
       <div className="flex items-center justify-between mb-4">
         <button onClick={() => setCurrentGroupIndex(Math.max(0, currentGroupIndex - 1))} disabled={currentGroupIndex === 0}
           className={`px-3 py-2 rounded-lg text-sm font-medium ${currentGroupIndex === 0 ? "text-gray-300" : "text-gray-600 hover:bg-gray-100"}`}>
-          → בית {currentGroupIndex > 0 ? GROUP_LETTERS[currentGroupIndex - 1] : ""}
+          בית {currentGroupIndex > 0 ? GROUP_LETTERS[currentGroupIndex - 1] : ""} →
         </button>
         <div className="text-center">
           <h2 className="text-xl font-bold text-gray-900">בית {groupId}</h2>
@@ -273,7 +273,7 @@ export default function GroupsPage() {
         </div>
         <button onClick={() => setCurrentGroupIndex(Math.min(11, currentGroupIndex + 1))} disabled={currentGroupIndex === 11}
           className={`px-3 py-2 rounded-lg text-sm font-medium ${currentGroupIndex === 11 ? "text-gray-300" : "text-gray-600 hover:bg-gray-100"}`}>
-          בית {currentGroupIndex < 11 ? GROUP_LETTERS[currentGroupIndex + 1] : ""} ←
+          ← בית {currentGroupIndex < 11 ? GROUP_LETTERS[currentGroupIndex + 1] : ""}
         </button>
       </div>
 
@@ -285,7 +285,7 @@ export default function GroupsPage() {
         <div className="mt-6 text-center">
           <button onClick={() => setCurrentGroupIndex(currentGroupIndex + 1)}
             className="px-8 py-3 rounded-xl bg-gray-900 text-white font-medium text-sm hover:bg-gray-800 transition-colors shadow-sm">
-            המשך לבית {GROUP_LETTERS[currentGroupIndex + 1]} ←
+            ← המשך לבית {GROUP_LETTERS[currentGroupIndex + 1]}
           </button>
         </div>
       )}

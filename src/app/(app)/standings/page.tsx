@@ -4,6 +4,15 @@ import { useState } from "react";
 import { useBettingStore } from "@/stores/betting-store";
 import { exportBetsToCSV, exportBetsToJSON, downloadFile } from "@/lib/backup";
 import { shareLeaderboard, openWhatsApp } from "@/lib/share";
+import { CompletionTracker, type PlayerCompletion } from "@/components/shared/CompletionTracker";
+
+// Mock completion data — in production this comes from Supabase
+const COMPLETION_DATA: PlayerCompletion[] = [
+  { name: "דני", completion: { groups: 75, knockout: 0, specials: 100 } },
+  { name: "רון ב", completion: { groups: 100, knockout: 100, specials: 40 } },
+  { name: "עידן", completion: { groups: 50, knockout: 0, specials: 0 } },
+  { name: "אמית", completion: { groups: 100, knockout: 100, specials: 100 } },
+];
 
 // Mock leaderboard data — in production this comes from Supabase scoring_log
 const PLAYERS = [
@@ -48,31 +57,37 @@ function PlayerTooltip({ player, visible }: { player: typeof PLAYERS[0]; visible
   if (!visible) return null;
   const b = player.breakdown;
   return (
-    <div className="absolute z-50 top-full mt-1 end-0 w-72 bg-gray-900 text-white rounded-xl shadow-2xl p-4 text-sm" dir="rtl">
-      <p className="font-black text-base mb-3 border-b border-gray-700 pb-2">{player.name} — פירוט {player.total} נקודות</p>
-      <div className="space-y-1.5">
-        <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">הימורי משחקים ({player.matchPts})</p>
-        <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-xs">
-          <span className="text-gray-300">טוטו בתים</span><span className="font-bold text-end" style={{ fontFamily: "var(--font-inter)" }}>{b.totoGroup}</span>
-          <span className="text-gray-300">מדויקת בתים</span><span className="font-bold text-end" style={{ fontFamily: "var(--font-inter)" }}>{b.exactGroup}</span>
-          <span className="text-gray-300">טוטו נוק-אאוט</span><span className="font-bold text-end" style={{ fontFamily: "var(--font-inter)" }}>{b.totoKnockout}</span>
-          <span className="text-gray-300">מדויקת נוק-אאוט</span><span className="font-bold text-end" style={{ fontFamily: "var(--font-inter)" }}>{b.exactKnockout}</span>
+    <div className="absolute z-50 top-full mt-1 end-0 w-72 bg-white rounded-xl shadow-lg border border-gray-200 p-4 text-sm" dir="rtl">
+      <p className="font-bold text-base mb-3 border-b border-gray-100 pb-2 text-gray-900">{player.name} — פירוט {player.total} נקודות</p>
+      <div className="space-y-2.5">
+        <div>
+          <p className="text-xs text-gray-400 font-bold mb-1">הימורי משחקים ({player.matchPts})</p>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+            <span className="text-gray-500">טוטו בתים</span><span className="font-bold text-end text-gray-800" style={{ fontFamily: "var(--font-inter)" }}>{b.totoGroup}</span>
+            <span className="text-gray-500">מדויקת בתים</span><span className="font-bold text-end text-gray-800" style={{ fontFamily: "var(--font-inter)" }}>{b.exactGroup}</span>
+            <span className="text-gray-500">טוטו נוק-אאוט</span><span className="font-bold text-end text-gray-800" style={{ fontFamily: "var(--font-inter)" }}>{b.totoKnockout}</span>
+            <span className="text-gray-500">מדויקת נוק-אאוט</span><span className="font-bold text-end text-gray-800" style={{ fontFamily: "var(--font-inter)" }}>{b.exactKnockout}</span>
+          </div>
         </div>
-        <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mt-2">הימורי עולות ({player.advPts})</p>
-        <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-xs">
-          <span className="text-gray-300">עולות מדויקות</span><span className="font-bold text-end" style={{ fontFamily: "var(--font-inter)" }}>{b.groupAdvExact}</span>
-          <span className="text-gray-300">עולות חלקיות</span><span className="font-bold text-end" style={{ fontFamily: "var(--font-inter)" }}>{b.groupAdvPartial}</span>
-          <span className="text-gray-300">רבע גמר</span><span className="font-bold text-end" style={{ fontFamily: "var(--font-inter)" }}>{b.advQF}</span>
-          <span className="text-gray-300">חצי גמר</span><span className="font-bold text-end" style={{ fontFamily: "var(--font-inter)" }}>{b.advSF}</span>
-          <span className="text-gray-300">גמר</span><span className="font-bold text-end" style={{ fontFamily: "var(--font-inter)" }}>{b.advFinal}</span>
-          <span className="text-gray-300">זוכה</span><span className="font-bold text-end" style={{ fontFamily: "var(--font-inter)" }}>{b.winner}</span>
+        <div>
+          <p className="text-xs text-gray-400 font-bold mb-1">הימורי עולות ({player.advPts})</p>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+            <span className="text-gray-500">עולות מדויקות</span><span className="font-bold text-end text-gray-800" style={{ fontFamily: "var(--font-inter)" }}>{b.groupAdvExact}</span>
+            <span className="text-gray-500">עולות חלקיות</span><span className="font-bold text-end text-gray-800" style={{ fontFamily: "var(--font-inter)" }}>{b.groupAdvPartial}</span>
+            <span className="text-gray-500">רבע גמר</span><span className="font-bold text-end text-gray-800" style={{ fontFamily: "var(--font-inter)" }}>{b.advQF}</span>
+            <span className="text-gray-500">חצי גמר</span><span className="font-bold text-end text-gray-800" style={{ fontFamily: "var(--font-inter)" }}>{b.advSF}</span>
+            <span className="text-gray-500">גמר</span><span className="font-bold text-end text-gray-800" style={{ fontFamily: "var(--font-inter)" }}>{b.advFinal}</span>
+            <span className="text-gray-500">זוכה</span><span className="font-bold text-end text-gray-800" style={{ fontFamily: "var(--font-inter)" }}>{b.winner}</span>
+          </div>
         </div>
-        <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mt-2">מיוחדים ({player.specPts})</p>
-        <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-xs">
-          <span className="text-gray-300">מלך שערים</span><span className="font-bold text-end" style={{ fontFamily: "var(--font-inter)" }}>{b.topScorer}</span>
-          <span className="text-gray-300">מלך בישולים</span><span className="font-bold text-end" style={{ fontFamily: "var(--font-inter)" }}>{b.topAssists}</span>
-          <span className="text-gray-300">התקפה טובה</span><span className="font-bold text-end" style={{ fontFamily: "var(--font-inter)" }}>{b.bestAttack}</span>
-          <span className="text-gray-300">אחרים</span><span className="font-bold text-end" style={{ fontFamily: "var(--font-inter)" }}>{b.specials}</span>
+        <div>
+          <p className="text-xs text-gray-400 font-bold mb-1">מיוחדים ({player.specPts})</p>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+            <span className="text-gray-500">מלך שערים</span><span className="font-bold text-end text-gray-800" style={{ fontFamily: "var(--font-inter)" }}>{b.topScorer}</span>
+            <span className="text-gray-500">מלך בישולים</span><span className="font-bold text-end text-gray-800" style={{ fontFamily: "var(--font-inter)" }}>{b.topAssists}</span>
+            <span className="text-gray-500">התקפה טובה</span><span className="font-bold text-end text-gray-800" style={{ fontFamily: "var(--font-inter)" }}>{b.bestAttack}</span>
+            <span className="text-gray-500">אחרים</span><span className="font-bold text-end text-gray-800" style={{ fontFamily: "var(--font-inter)" }}>{b.specials}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -129,6 +144,8 @@ export default function StandingsPage() {
           </button>
         </div>
       </div>
+
+      <CompletionTracker players={COMPLETION_DATA} />
 
       {/* Main leaderboard */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden hover:shadow-lg transition-all mb-6">

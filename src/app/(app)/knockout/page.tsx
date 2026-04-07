@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, memo } from "react";
 import { useBettingStore } from "@/stores/betting-store";
 import { GROUPS } from "@/lib/tournament/groups";
 
@@ -48,7 +48,7 @@ interface MatchProps {
   size?: "sm" | "md";
 }
 
-function BracketMatch({ matchKey, team1Code, team2Code, size = "md" }: MatchProps) {
+const BracketMatch = memo(function BracketMatch({ matchKey, team1Code, team2Code, size = "md" }: MatchProps) {
   const match = useBettingStore((s) => s.knockout[matchKey]);
   const setMatch = useBettingStore((s) => s.setKnockoutMatch);
   const py = size === "sm" ? "py-1.5" : "py-2";
@@ -75,9 +75,9 @@ function BracketMatch({ matchKey, team1Code, team2Code, size = "md" }: MatchProp
 
   const stepper = (side: 1 | 2, score: number | null) => (
     <div className="flex items-center gap-0 rounded border border-gray-200 bg-white overflow-hidden" onClick={e => e.stopPropagation()}>
-      <button onClick={() => setScore(side, -1)} className="w-6 h-6 flex items-center justify-center text-gray-400 hover:bg-gray-100 text-xs font-bold">−</button>
-      <span className="w-5 h-6 flex items-center justify-center font-bold text-xs tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{score ?? 0}</span>
-      <button onClick={() => setScore(side, 1)} className="w-6 h-6 flex items-center justify-center text-gray-400 hover:bg-gray-100 text-xs font-bold">+</button>
+      <button onClick={() => setScore(side, -1)} aria-label="הפחת תוצאה" className="w-8 h-8 flex items-center justify-center text-gray-400 hover:bg-gray-100 text-xs font-bold">−</button>
+      <span className="w-5 h-8 flex items-center justify-center font-bold text-xs tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{score ?? 0}</span>
+      <button onClick={() => setScore(side, 1)} aria-label="הוסף תוצאה" className="w-8 h-8 flex items-center justify-center text-gray-400 hover:bg-gray-100 text-xs font-bold">+</button>
     </div>
   );
 
@@ -106,7 +106,7 @@ function BracketMatch({ matchKey, team1Code, team2Code, size = "md" }: MatchProp
       )}
     </div>
   );
-}
+});
 
 function Connector() {
   return <div className="w-3 shrink-0 flex items-center"><div className="w-full border-t border-gray-200"></div></div>;
@@ -124,7 +124,16 @@ function RoundCol({ label, children, width }: { label: string; children: React.R
 }
 
 // Mobile view — shows one round at a time with tabs
-function MobileKnockoutView({ r32l, r32r, getR32Team, getWinner, knockout, finalMatch, ...overrides }: any) {
+interface MobileKnockoutViewProps {
+  r32l: typeof R32_MATCHUPS;
+  r32r: typeof R32_MATCHUPS;
+  getR32Team: (slot: string) => string | null;
+  getWinner: (matchKey: string) => string | null;
+  knockout: Record<string, { score1: number | null; score2: number | null; winner: string | null }>;
+  finalMatch?: { score1: number | null; score2: number | null; winner: string | null };
+}
+
+function MobileKnockoutView({ r32l, r32r, getR32Team, getWinner, knockout, finalMatch }: MobileKnockoutViewProps) {
   const [round, setRound] = useState("R32");
   const rounds = ["R32", "R16", "QF", "SF", "Final"];
 
@@ -145,7 +154,7 @@ function MobileKnockoutView({ r32l, r32r, getR32Team, getWinner, knockout, final
         {round === "R32" && (
           <>
             <p className="text-sm text-gray-500 mb-2">16 משחקים — שמינית גמר</p>
-            {[...r32l, ...r32r].map((m: any) => (
+            {[...r32l, ...r32r].map((m) => (
               <BracketMatch key={m.key} matchKey={m.key} team1Code={getR32Team(m.h)} team2Code={getR32Team(m.a)} size="md" />
             ))}
           </>

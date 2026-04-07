@@ -12,6 +12,16 @@ const F: Record<string,string> = {
   POR:"🇵🇹",COL:"🇨🇴",UZB:"🇺🇿",COD:"🇨🇩",ENG:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",CRO:"🇭🇷",GHA:"🇬🇭",PAN:"🇵🇦",
 };
 
+// Hebrew team names
+const HE: Record<string,string> = {
+  MEX:"מקסיקו",KOR:"דרום קוריאה",CZE:"צ׳כיה",RSA:"דרום אפריקה",CAN:"קנדה",QAT:"קטאר",SUI:"שווייץ",BIH:"בוסניה",
+  BRA:"ברזיל",MAR:"מרוקו",SCO:"סקוטלנד",HAI:"האיטי",USA:"ארה״ב",PAR:"פרגוואי",TUR:"טורקיה",AUS:"אוסטרליה",
+  GER:"גרמניה",ECU:"אקוודור",CIV:"חוף השנהב",CUR:"קוראסאו",NED:"הולנד",JPN:"יפן",SWE:"שוודיה",TUN:"תוניסיה",
+  BEL:"בלגיה",IRN:"איראן",EGY:"מצרים",NZL:"ניו זילנד",ESP:"ספרד",URU:"אורוגוואי",KSA:"סעודיה",CPV:"כף ורדה",
+  FRA:"צרפת",SEN:"סנגל",NOR:"נורבגיה",IRQ:"עיראק",ARG:"ארגנטינה",AUT:"אוסטריה",ALG:"אלג׳יריה",JOR:"ירדן",
+  POR:"פורטוגל",COL:"קולומביה",UZB:"אוזבקיסטן",COD:"קונגו",ENG:"אנגליה",CRO:"קרואטיה",GHA:"גאנה",PAN:"פנמה",
+};
+
 interface Match {
   id: number;
   date: string;
@@ -120,18 +130,18 @@ export default function SchedulePage() {
               </h2>
               <div className="space-y-2">
                 {dayMatches.map(m => (
-                  <div key={m.id} className="bg-white rounded-xl border border-gray-200 shadow-sm px-4 py-3 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg">{F[m.homeTla] || "🏳️"}</span>
-                      <span className="font-bold text-sm">{m.homeTeam}</span>
+                  <div key={m.id} className="bg-white rounded-xl border border-gray-200 shadow-sm px-4 py-3 grid grid-cols-[1fr_80px_1fr] items-center">
+                    <div className="flex items-center gap-2 justify-end">
+                      <span className="font-bold text-sm text-end">{HE[m.homeTla] || m.homeTeam}</span>
+                      <span className="text-lg shrink-0">{F[m.homeTla] || "🏳️"}</span>
                     </div>
                     <div className="text-center">
-                      <p className="text-lg font-black text-gray-900" style={{ fontFamily: "var(--font-inter)" }}>{toIsraelTimeShort(m.date)}</p>
+                      <p className="text-base font-black text-gray-900 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{toIsraelTimeShort(m.date)}</p>
                       <p className="text-[10px] text-gray-400">{m.group?.replace("GROUP_", "בית ") || m.stage}</p>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-sm">{m.awayTeam}</span>
-                      <span className="text-lg">{F[m.awayTla] || "🏳️"}</span>
+                    <div className="flex items-center gap-2 justify-start">
+                      <span className="text-lg shrink-0">{F[m.awayTla] || "🏳️"}</span>
+                      <span className="font-bold text-sm">{HE[m.awayTla] || m.awayTeam}</span>
                     </div>
                   </div>
                 ))}

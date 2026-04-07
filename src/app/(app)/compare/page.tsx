@@ -58,7 +58,7 @@ export default function ComparePage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/40 border-b border-blue-100/50 text-xs font-bold text-gray-600" style={{ fontFamily: "var(--font-inter)" }}>
-                  <th className="py-3 px-4 text-start sticky start-0 bg-white z-10 border-e border-gray-100">מהמר</th>
+                  <th className="py-3 px-2 text-start sticky start-0 bg-white z-10 border-e border-gray-100 w-16 max-w-[4rem]">מהמר</th>
                   <th className="py-3 px-3 text-center">זוכה</th>
                   <th className="py-3 px-3 text-center">עולה לגמר 1</th>
                   <th className="py-3 px-3 text-center">עולה לגמר 2</th>
@@ -71,8 +71,8 @@ export default function ComparePage() {
               <tbody>
                 {BETTORS.map(b => (
                   <tr key={b.name} className={`border-t border-gray-100 ${b.isYou ? "bg-blue-50/40" : "hover:bg-gray-50"}`}>
-                    <td className="py-3 px-4 font-bold text-gray-900 sticky start-0 bg-inherit z-10 border-e border-gray-100">
-                      {b.name} {b.isYou && <span className="text-xs text-blue-500 bg-blue-100 rounded px-1 ms-1">אתה</span>}
+                    <td className="py-3 px-2 font-bold text-gray-900 sticky start-0 bg-inherit z-10 border-e border-gray-100 whitespace-nowrap w-16 max-w-[4rem] truncate text-xs">
+                      {b.name} {b.isYou && <span className="text-[10px] text-blue-500 bg-blue-100 rounded px-1 ms-0.5">אתה</span>}
                     </td>
                     <td className="py-3 px-3 text-center font-bold text-amber-700">{F[b.winner]} {b.winner}</td>
                     <td className="py-3 px-3 text-center">{F[b.finalist1]} {b.finalist1}</td>
@@ -104,7 +104,7 @@ export default function ComparePage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/40 border-b border-blue-100/50 text-xs font-bold text-gray-600" style={{ fontFamily: "var(--font-inter)" }}>
-                  <th className="py-3 px-4 text-start sticky start-0 bg-white z-10 border-e border-gray-100">מהמר</th>
+                  <th className="py-3 px-2 text-start sticky start-0 bg-white z-10 border-e border-gray-100 w-16 max-w-[4rem]">מהמר</th>
                   <th className="py-3 px-3 text-center">מלך שערים</th>
                   <th className="py-3 px-3 text-center">מלך בישולים</th>
                   <th className="py-3 px-3 text-center">התקפה טובה</th>
@@ -114,8 +114,8 @@ export default function ComparePage() {
               <tbody>
                 {BETTORS.map(b => (
                   <tr key={b.name} className={`border-t border-gray-100 ${b.isYou ? "bg-blue-50/40" : "hover:bg-gray-50"}`}>
-                    <td className="py-3 px-4 font-bold text-gray-900 sticky start-0 bg-inherit z-10 border-e border-gray-100">
-                      {b.name} {b.isYou && <span className="text-xs text-blue-500 bg-blue-100 rounded px-1 ms-1">אתה</span>}
+                    <td className="py-3 px-2 font-bold text-gray-900 sticky start-0 bg-inherit z-10 border-e border-gray-100 whitespace-nowrap w-16 max-w-[4rem] truncate text-xs">
+                      {b.name} {b.isYou && <span className="text-[10px] text-blue-500 bg-blue-100 rounded px-1 ms-0.5">אתה</span>}
                     </td>
                     <td className="py-3 px-3 text-center font-medium">{b.topScorer}</td>
                     <td className="py-3 px-3 text-center font-medium">{b.topAssists}</td>
@@ -141,7 +141,7 @@ export default function ComparePage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="text-xs text-gray-500 font-semibold border-b border-gray-200">
-                      <th className="py-2 px-4 text-start sticky start-0 bg-white z-10 border-e border-gray-100">מהמר</th>
+                      <th className="py-2 px-2 text-start sticky start-0 bg-white z-10 border-e border-gray-100 w-16 max-w-[4rem]">מהמר</th>
                       <th className="py-2 px-3 text-center">מקום 1</th>
                       <th className="py-2 px-3 text-center">מקום 2</th>
                     </tr>
@@ -152,7 +152,7 @@ export default function ComparePage() {
                       if (!picks) return null;
                       return (
                         <tr key={b.name} className={`border-t border-gray-100 ${b.isYou ? "bg-blue-50/40" : "hover:bg-gray-50"}`}>
-                          <td className="py-2.5 px-4 font-bold text-gray-900 sticky start-0 bg-inherit z-10 border-e border-gray-100">{b.name}</td>
+                          <td className="py-2.5 px-2 font-bold text-gray-900 sticky start-0 bg-inherit z-10 border-e border-gray-100 whitespace-nowrap w-16 max-w-[4rem] truncate text-xs">{b.name}</td>
                           <td className="py-2.5 px-3 text-center font-medium">{F[picks[0]]} {picks[0]}</td>
                           <td className="py-2.5 px-3 text-center font-medium">{F[picks[1]]} {picks[1]}</td>
                         </tr>

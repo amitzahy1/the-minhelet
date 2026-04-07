@@ -167,6 +167,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     useBettingStore.persist.rehydrate();
+    // Restore dark mode
+    if (localStorage.getItem("wc2026-dark-mode") === "true") {
+      document.documentElement.classList.add("dark");
+    }
     const supabase = createClient();
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) {
@@ -283,7 +287,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   </div>
                   <Link href="/admin" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 font-medium" onClick={() => setShowUserMenu(false)}>ניהול מערכת</Link>
                   <Link href="/admin-guide" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 font-medium" onClick={() => setShowUserMenu(false)}>מדריך למנהלים</Link>
-                  <button onClick={handleLogout} className="block w-full text-start px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 font-medium">התנתקות</button>
+                  <div className="px-4 py-2 border-t border-gray-100 flex items-center justify-between">
+                    <span className="text-sm text-gray-500">מצב כהה</span>
+                    <button onClick={() => {
+                      const isDark = document.documentElement.classList.toggle("dark");
+                      localStorage.setItem("wc2026-dark-mode", isDark ? "true" : "false");
+                    }} className="w-10 h-6 rounded-full bg-gray-200 dark:bg-blue-600 relative transition-colors">
+                      <span className="absolute top-0.5 start-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform dark:translate-x-4 rtl:dark:-translate-x-4"></span>
+                    </button>
+                  </div>
+                  <button onClick={handleLogout} className="block w-full text-start px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 font-medium border-t border-gray-100">התנתקות</button>
                 </div>
               </>
             )}
@@ -389,6 +402,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           { href: "/standings", label: "דירוג", iconKey: "leaderboard" as const },
           { href: "/compare", label: "השוואה", iconKey: "compare" as const },
           { href: "/live", label: "לייב", iconKey: "live" as const },
+          { href: "/schedule", label: "לו״ז", iconKey: "live" as const },
           { href: "/squads", label: "נבחרות", iconKey: "squads" as const },
         ].map((item) => {
           const isActive = pathname === item.href;

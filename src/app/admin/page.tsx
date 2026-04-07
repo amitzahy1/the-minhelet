@@ -1036,18 +1036,10 @@ function AdminsList() {
 
   async function loadAdmins() {
     try {
-      const res = await fetch("/api/admin/users");
+      const res = await fetch("/api/admin/list-admins");
       const data = await res.json();
-      // Filter to only show admins — fetch admins list separately
-      const supabase = createClient();
-      const { data: adminData } = await supabase.from("admins").select("email, role");
-      setAdmins(adminData || []);
-    } catch {
-      // Fallback: try direct Supabase
-      const supabase = createClient();
-      const { data } = await supabase.from("admins").select("email, role");
-      setAdmins(data || []);
-    }
+      setAdmins(data.admins || []);
+    } catch { /* ignore */ }
   }
 
   async function addAdmin() {

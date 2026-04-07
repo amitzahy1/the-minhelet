@@ -161,7 +161,7 @@ export default function ComparePage() {
             <p className="text-sm font-bold text-gray-700 mb-2">הבחירות הפופולריות:</p>
             <div className="flex gap-4 text-sm">
               <span>זוכה: <strong className="text-amber-700">{F["ARG"]} ARG (4 מהמרים)</strong></span>
-              <span>גמרנית: <strong>{F["FRA"]} FRA (7 מהמרים)</strong></span>
+              <span>עולה לגמר: <strong>{F["FRA"]} FRA (7 מהמרים)</strong></span>
               <span>מלך שערים: <strong>Mbappé (3)</strong></span>
             </div>
           </div>

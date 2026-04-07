@@ -111,15 +111,45 @@ export default function LivePage() {
                     <p className="text-sm text-green-600 font-semibold mt-1">אם נגמר ככה: <strong>{m.potentialPts} נקודות</strong></p>
                   )}
                 </div>
-                {/* Friends */}
-                <div className="border-t border-gray-100 px-5 py-2.5">
-                  <p className="text-sm text-gray-500 mb-1 font-medium">חברים:</p>
-                  <div className="flex gap-4 text-sm text-gray-600">
-                    {m.friends.map(f => (
-                      <span key={f.name}>{f.name}: <strong className={f.pred === `${m.home.goals}-${m.away.goals}` ? "text-green-600" : ""}>{f.pred}</strong>
-                        {f.pred === `${m.home.goals}-${m.away.goals}` && " 🎯"}
-                      </span>
-                    ))}
+                {/* What you need */}
+                {m.yourStatus !== "exact" && (
+                  <div className="border-t border-blue-100 px-5 py-2 bg-blue-50/50">
+                    <p className="text-sm text-blue-700 font-bold">
+                      {(() => {
+                        const [ph, pa] = m.yourPrediction.split("-").map(Number);
+                        const ah = m.home.goals, aa = m.away.goals;
+                        if (ph === ah && pa !== aa) return `אתה צריך שהתוצאה תישאר ${ah} ו${m.away.name} ${pa > aa ? `תבקיע עוד ${pa-aa}` : `תספוג ${aa-pa}`}`;
+                        if (pa === aa && ph !== ah) return `אתה צריך ש${m.home.name} ${ph > ah ? `תבקיע עוד ${ph-ah}` : `תספוג ${ah-ph}`}`;
+                        return `אתה צריך ${ph}-${pa} — ${ph > ah ? `עוד גול ל${m.home.name}` : `גול ל${m.away.name}`}`;
+                      })()}
+                    </p>
+                  </div>
+                )}
+                {/* All bettors predictions — color coded */}
+                <div className="border-t border-gray-100 px-5 py-3">
+                  <p className="text-xs text-gray-500 mb-2 font-bold">כל המהמרים:</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                    {[...m.friends, { name: "אמית", pred: m.yourPrediction }].map(f => {
+                      const [fh, fa] = f.pred.split("-").map(Number);
+                      const isExact = fh === m.home.goals && fa === m.away.goals;
+                      const predResult = fh > fa ? "1" : fa > fh ? "2" : "X";
+                      const actualResult = m.home.goals > m.away.goals ? "1" : m.away.goals > m.home.goals ? "2" : "X";
+                      const isToto = predResult === actualResult;
+                      const bgColor = isExact ? "bg-green-100 border-green-300 text-green-800" :
+                                     isToto ? "bg-gray-100 border-gray-300 text-gray-700" :
+                                     "bg-red-50 border-red-200 text-red-700";
+                      return (
+                        <div key={f.name} className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg border text-xs font-bold ${bgColor}`}>
+                          <span>{f.name}</span>
+                          <span style={{ fontFamily: "var(--font-inter)" }}>{f.pred} {isExact && "🎯"}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="flex gap-3 mt-2 text-[10px] text-gray-400">
+                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-400"></span> מדויקת</span>
+                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-gray-400"></span> כיוון נכון</span>
+                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-400"></span> טעה</span>
                   </div>
                 </div>
               </div>

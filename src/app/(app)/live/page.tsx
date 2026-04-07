@@ -113,16 +113,50 @@ export default function LivePage() {
                 </div>
                 {/* What you need */}
                 {m.yourStatus !== "exact" && (
-                  <div className="border-t border-blue-100 px-5 py-2 bg-blue-50/50">
-                    <p className="text-sm text-blue-700 font-bold">
-                      {(() => {
-                        const [ph, pa] = m.yourPrediction.split("-").map(Number);
-                        const ah = m.home.goals, aa = m.away.goals;
-                        if (ph === ah && pa !== aa) return `אתה צריך שהתוצאה תישאר ${ah} ו${m.away.name} ${pa > aa ? `תבקיע עוד ${pa-aa}` : `תספוג ${aa-pa}`}`;
-                        if (pa === aa && ph !== ah) return `אתה צריך ש${m.home.name} ${ph > ah ? `תבקיע עוד ${ph-ah}` : `תספוג ${ah-ph}`}`;
-                        return `אתה צריך ${ph}-${pa} — ${ph > ah ? `עוד גול ל${m.home.name}` : `גול ל${m.away.name}`}`;
-                      })()}
-                    </p>
+                  <div className="border-t border-blue-100 px-5 py-2.5 bg-blue-50/50">
+                    {(() => {
+                      const [ph, pa] = m.yourPrediction.split("-").map(Number);
+                      const ah = m.home.goals, aa = m.away.goals;
+                      // Check: is the current result matching toto direction?
+                      const predDir = ph > pa ? "1" : pa > ph ? "2" : "X";
+                      const actDir = ah > aa ? "1" : aa > ah ? "2" : "X";
+                      const hasToto = predDir === actDir;
+                      // How far from exact?
+                      const homeDiff = ph - ah;
+                      const awayDiff = pa - aa;
+
+                      let mainText = "";
+                      let subText = "";
+
+                      if (homeDiff === 0 && awayDiff === 0) {
+                        // Exact — shouldn't reach here
+                        mainText = "תוצאה מדויקת!";
+                      } else if (hasToto) {
+                        // Correct direction, not exact
+                        mainText = "כיוון נכון! ";
+                        if (homeDiff !== 0 && awayDiff !== 0) {
+                          mainText += `צריך ${ph}-${pa} למדויקת`;
+                        } else if (homeDiff !== 0) {
+                          mainText += `צריך ${homeDiff > 0 ? `עוד ${homeDiff} גול ל${m.home.name}` : `ש${m.home.name} תספוג ${-homeDiff} פחות`} למדויקת`;
+                        } else {
+                          mainText += `צריך ${awayDiff > 0 ? `עוד ${awayDiff} גול ל${m.away.name}` : `ש${m.away.name} תספוג ${-awayDiff} פחות`} למדויקת`;
+                        }
+                        subText = `(+2 נק׳ על כיוון, +1 על מדויקת)`;
+                      } else {
+                        // Wrong direction
+                        if (predDir === "1") mainText = `ניחשת ניצחון ל${m.home.name} — צריך שתתקדם`;
+                        else if (predDir === "2") mainText = `ניחשת ניצחון ל${m.away.name} — צריך שתתקדם`;
+                        else mainText = `ניחשת תיקו — צריך השוואה`;
+                        subText = `(כרגע 0 נק׳ על המשחק הזה)`;
+                      }
+
+                      return (
+                        <>
+                          <p className="text-sm font-bold text-blue-700">{mainText}</p>
+                          {subText && <p className="text-xs text-blue-500 mt-0.5">{subText}</p>}
+                        </>
+                      );
+                    })()}
                   </div>
                 )}
                 {/* All bettors predictions — color coded */}

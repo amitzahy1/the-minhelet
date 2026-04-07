@@ -2,6 +2,7 @@
 import { LoadingPage } from "@/components/shared/LoadingAnimation";
 
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Flags for all 48 teams
 const F: Record<string,string> = {
@@ -23,6 +24,49 @@ const HE: Record<string,string> = {
   POR:"פורטוגל",COL:"קולומביה",UZB:"אוזבקיסטן",COD:"קונגו",ENG:"אנגליה",CRO:"קרואטיה",GHA:"גאנה",PAN:"פנמה",
 };
 
+// Mock bettor predictions — in production from Supabase
+const MOCK_PREDICTIONS: Record<string, Record<string, string>> = {
+  "דני": {},
+  "יוני": {},
+  "דור דסא": {},
+  "אמית": {},
+  "רון ב": {},
+  "רון ג": {},
+  "רועי": {},
+  "עידן": {},
+  "אוהד": {},
+  "אורי": {},
+};
+
+// Mock special bets per bettor
+const MOCK_SPECIAL_BETS: Record<string, {
+  winner: string;
+  topScorer: { team: string; player: string };
+  topAssists: { team: string; player: string };
+  bestAttack: string;
+  dirtiestTeam: string;
+}> = {
+  "דני": { winner: "ARG", topScorer: { team: "ARG", player: "Lautaro" }, topAssists: { team: "FRA", player: "Griezmann" }, bestAttack: "BRA", dirtiestTeam: "URU" },
+  "יוני": { winner: "FRA", topScorer: { team: "FRA", player: "Mbappé" }, topAssists: { team: "ESP", player: "Pedri" }, bestAttack: "ARG", dirtiestTeam: "MAR" },
+  "דור דסא": { winner: "ARG", topScorer: { team: "BRA", player: "Vinícius Jr." }, topAssists: { team: "GER", player: "Musiala" }, bestAttack: "FRA", dirtiestTeam: "KSA" },
+  "אמית": { winner: "ARG", topScorer: { team: "ARG", player: "Messi" }, topAssists: { team: "ARG", player: "Messi" }, bestAttack: "GER", dirtiestTeam: "MAR" },
+  "רון ב": { winner: "BRA", topScorer: { team: "ENG", player: "Kane" }, topAssists: { team: "BRA", player: "Rodrygo" }, bestAttack: "ESP", dirtiestTeam: "IRN" },
+  "רון ג": { winner: "FRA", topScorer: { team: "POR", player: "Ronaldo" }, topAssists: { team: "FRA", player: "Mbappé" }, bestAttack: "ARG", dirtiestTeam: "AUS" },
+  "רועי": { winner: "ESP", topScorer: { team: "ESP", player: "Morata" }, topAssists: { team: "ENG", player: "Bellingham" }, bestAttack: "FRA", dirtiestTeam: "URU" },
+  "עידן": { winner: "ARG", topScorer: { team: "ARG", player: "Álvarez" }, topAssists: { team: "POR", player: "B. Fernandes" }, bestAttack: "ARG", dirtiestTeam: "CRO" },
+  "אוהד": { winner: "BRA", topScorer: { team: "GER", player: "Havertz" }, topAssists: { team: "NED", player: "Gakpo" }, bestAttack: "BRA", dirtiestTeam: "SEN" },
+  "אורי": { winner: "ENG", topScorer: { team: "ENG", player: "Kane" }, topAssists: { team: "ENG", player: "Saka" }, bestAttack: "ENG", dirtiestTeam: "QAT" },
+};
+
+// Generate mock score predictions for each bettor per match
+function getMockPrediction(bettor: string, matchId: number, homeTla: string, awayTla: string): string {
+  // Deterministic pseudo-random based on bettor name + match id
+  const seed = bettor.charCodeAt(0) + matchId * 7;
+  const h = (seed % 4);
+  const a = ((seed * 3 + 1) % 3);
+  return `${h}-${a}`;
+}
+
 interface Match {
   id: number;
   date: string;
@@ -34,10 +78,134 @@ interface Match {
   stage: string;
 }
 
+function MatchBetsPanel({ match }: { match: Match }) {
+  const home = match.homeTla;
+  const away = match.awayTla;
+  const groupLetter = match.group?.replace("GROUP_", "") || "";
+  const bettors = Object.keys(MOCK_PREDICTIONS);
+
+  // Find related special bets for this match's teams
+  const relatedBets: { bettor: string; type: string; detail: string }[] = [];
+
+  for (const bettor of bettors) {
+    const sb = MOCK_SPECIAL_BETS[bettor];
+    if (!sb) continue;
+
+    // Winner bet
+    if (sb.winner === home || sb.winner === away) {
+      relatedBets.push({ bettor, type: "אלוף", detail: `${F[sb.winner]} ${HE[sb.winner]}` });
+    }
+    // Top scorer from these teams
+    if (sb.topScorer.team === home || sb.topScorer.team === away) {
+      relatedBets.push({ bettor, type: "מלך שערים", detail: `${sb.topScorer.player} (${F[sb.topScorer.team]} ${HE[sb.topScorer.team]})` });
+    }
+    // Top assists from these teams
+    if (sb.topAssists.team === home || sb.topAssists.team === away) {
+      relatedBets.push({ bettor, type: "מלך בישולים", detail: `${sb.topAssists.player} (${F[sb.topAssists.team]} ${HE[sb.topAssists.team]})` });
+    }
+    // Best attack
+    if (sb.bestAttack === home || sb.bestAttack === away) {
+      relatedBets.push({ bettor, type: "התקפה הכי טובה", detail: `${F[sb.bestAttack]} ${HE[sb.bestAttack]}` });
+    }
+    // Dirtiest team
+    if (sb.dirtiestTeam === home || sb.dirtiestTeam === away) {
+      relatedBets.push({ bettor, type: "הכי כסחנית", detail: `${F[sb.dirtiestTeam]} ${HE[sb.dirtiestTeam]}` });
+    }
+  }
+
+  // Group related bets by type
+  const groupedBets: Record<string, { bettor: string; detail: string }[]> = {};
+  for (const rb of relatedBets) {
+    if (!groupedBets[rb.type]) groupedBets[rb.type] = [];
+    groupedBets[rb.type].push({ bettor: rb.bettor, detail: rb.detail });
+  }
+
+  return (
+    <motion.div
+      initial={{ height: 0, opacity: 0 }}
+      animate={{ height: "auto", opacity: 1 }}
+      exit={{ height: 0, opacity: 0 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
+      className="overflow-hidden"
+    >
+      <div className="border-t border-gray-100 bg-gray-50/70 px-4 py-3 space-y-4">
+        {/* Score predictions */}
+        <div>
+          <p className="text-xs font-bold text-gray-500 mb-2">ניחושי תוצאה</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+            {bettors.map(bettor => {
+              const pred = getMockPrediction(bettor, match.id, home, away);
+              return (
+                <div key={bettor} className="flex items-center justify-between px-2.5 py-1.5 bg-white rounded-lg border border-gray-200 text-xs">
+                  <span className="font-bold text-gray-800">{bettor}</span>
+                  <span className="font-black text-gray-900 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{pred}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Related special bets */}
+        {Object.keys(groupedBets).length > 0 && (
+          <div>
+            <p className="text-xs font-bold text-gray-500 mb-2">הימורים מיוחדים הקשורים למשחק</p>
+            <div className="space-y-2">
+              {Object.entries(groupedBets).map(([type, entries]) => (
+                <div key={type} className="bg-white rounded-lg border border-gray-200 px-3 py-2">
+                  <p className="text-xs font-bold text-blue-600 mb-1.5">{type}</p>
+                  <div className="space-y-1">
+                    {entries.map((e, i) => (
+                      <div key={i} className="flex items-center justify-between text-xs">
+                        <span className="text-gray-700 font-medium">{e.bettor}</span>
+                        <span className="text-gray-500">{e.detail}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Group info */}
+        {groupLetter && (
+          <div>
+            <p className="text-xs font-bold text-gray-500 mb-2">הימורים על בית {groupLetter}</p>
+            <div className="bg-white rounded-lg border border-gray-200 px-3 py-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                {bettors.slice(0, 6).map((bettor, i) => {
+                  // Mock group order predictions
+                  const mockOrder = i % 2 === 0
+                    ? [home, away, "---", "---"]
+                    : [away, home, "---", "---"];
+                  return (
+                    <div key={bettor} className="text-xs">
+                      <p className="font-bold text-gray-800 mb-0.5">{bettor}</p>
+                      <div className="flex gap-1 text-gray-500">
+                        {mockOrder.map((t, j) => (
+                          <span key={j} className={`${j < 2 ? "font-medium text-green-700" : "text-gray-300"}`}>
+                            {j + 1}. {t === "---" ? "..." : (F[t] || t)}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="text-[10px] text-gray-400 mt-1.5">1-2 = עולות מהבית</p>
+            </div>
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
 export default function SchedulePage() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("ALL");
+  const [expandedMatch, setExpandedMatch] = useState<number | null>(null);
 
   useEffect(() => {
     fetchMatches();
@@ -52,19 +220,6 @@ export default function SchedulePage() {
       // Fallback — use static sample
     }
     setLoading(false);
-  }
-
-  // Convert UTC to Israel time
-  function toIsraelTime(utcDate: string): string {
-    const d = new Date(utcDate);
-    return d.toLocaleString("he-IL", {
-      timeZone: "Asia/Jerusalem",
-      weekday: "short",
-      day: "numeric",
-      month: "short",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
   }
 
   function toIsraelTimeShort(utcDate: string): string {
@@ -99,7 +254,7 @@ export default function SchedulePage() {
     <div className="max-w-3xl mx-auto px-4 py-6 pb-24" dir="rtl">
       <div className="mb-5">
         <h1 className="text-3xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>לוח משחקים</h1>
-        <p className="text-base text-gray-600 mt-1">כל 104 המשחקים בשעון ישראל</p>
+        <p className="text-base text-gray-600 mt-1">כל 104 המשחקים בשעון ישראל · לחצו על משחק לפרטים</p>
       </div>
 
       {/* Filter */}
@@ -130,22 +285,35 @@ export default function SchedulePage() {
                 {toIsraelDate(dayMatches[0].date)}
               </h2>
               <div className="space-y-2">
-                {dayMatches.map(m => (
-                  <div key={m.id} className="bg-white rounded-xl border border-gray-200 shadow-sm px-4 py-3 grid grid-cols-[1fr_80px_1fr] items-center">
-                    <div className="flex items-center gap-2 justify-end">
-                      <span className="font-bold text-sm text-end">{HE[m.homeTla] || m.homeTeam}</span>
-                      <span className="text-lg shrink-0">{F[m.homeTla] || "🏳️"}</span>
+                {dayMatches.map(m => {
+                  const isExpanded = expandedMatch === m.id;
+                  return (
+                    <div key={m.id} className={`bg-white rounded-xl border shadow-sm overflow-hidden transition-all ${
+                      isExpanded ? "border-blue-300 shadow-md" : "border-gray-200 hover:border-gray-300"
+                    }`}>
+                      <div
+                        onClick={() => setExpandedMatch(isExpanded ? null : m.id)}
+                        className="px-4 py-3 grid grid-cols-[1fr_80px_1fr] items-center cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2 justify-end">
+                          <span className="font-bold text-sm text-end">{HE[m.homeTla] || m.homeTeam}</span>
+                          <span className="text-lg shrink-0">{F[m.homeTla] || "🏳️"}</span>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-base font-black text-gray-900 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{toIsraelTimeShort(m.date)}</p>
+                          <p className="text-[10px] text-gray-400">{m.group?.replace("GROUP_", "בית ") || m.stage}</p>
+                        </div>
+                        <div className="flex items-center gap-2 justify-start">
+                          <span className="text-lg shrink-0">{F[m.awayTla] || "🏳️"}</span>
+                          <span className="font-bold text-sm">{HE[m.awayTla] || m.awayTeam}</span>
+                        </div>
+                      </div>
+                      <AnimatePresence>
+                        {isExpanded && <MatchBetsPanel match={m} />}
+                      </AnimatePresence>
                     </div>
-                    <div className="text-center">
-                      <p className="text-base font-black text-gray-900 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{toIsraelTimeShort(m.date)}</p>
-                      <p className="text-[10px] text-gray-400">{m.group?.replace("GROUP_", "בית ") || m.stage}</p>
-                    </div>
-                    <div className="flex items-center gap-2 justify-start">
-                      <span className="text-lg shrink-0">{F[m.awayTla] || "🏳️"}</span>
-                      <span className="font-bold text-sm">{HE[m.awayTla] || m.awayTeam}</span>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ))}

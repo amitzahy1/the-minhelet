@@ -248,27 +248,64 @@ export const useBettingStore = create<BettingState & BettingActions>()(
 
 // Auto-save on every change (debounced) — localStorage + Supabase
 let saveTimeout: ReturnType<typeof setTimeout> | null = null;
+let hasPendingChanges = false;
+
+async function performSave(state: BettingState) {
+  // 1. Save to localStorage backup
+  try {
+    const today = new Date().toISOString().split("T")[0];
+    const key = `wc2026-backup-${today}`;
+    localStorage.setItem(key, JSON.stringify({
+      exportedAt: new Date().toISOString(),
+      groups: state.groups,
+      knockout: state.knockout,
+      specialBets: state.specialBets,
+    }));
+  } catch { /* localStorage full or unavailable */ }
+
+  // 2. Save to Supabase (if logged in)
+  try {
+    const { saveBetsToSupabase } = await import("@/lib/supabase/sync");
+    const result = await saveBetsToSupabase(state);
+    if (!result.success) {
+      console.error("Supabase save failed:", result.error);
+    }
+  } catch (e) {
+    console.error("Failed to save to Supabase:", e);
+  }
+
+  hasPendingChanges = false;
+}
+
 if (typeof window !== "undefined") {
   useBettingStore.subscribe((state) => {
+    hasPendingChanges = true;
     if (saveTimeout) clearTimeout(saveTimeout);
-    saveTimeout = setTimeout(async () => {
-      // 1. Save to localStorage backup
+    saveTimeout = setTimeout(() => performSave(state), 5000);
+  });
+
+  // Force-save on page unload to prevent data loss
+  window.addEventListener("beforeunload", () => {
+    if (hasPendingChanges) {
+      const state = useBettingStore.getState();
+      // Synchronous localStorage save (best effort)
       try {
         const today = new Date().toISOString().split("T")[0];
-        const key = `wc2026-backup-${today}`;
-        localStorage.setItem(key, JSON.stringify({
+        localStorage.setItem(`wc2026-backup-${today}`, JSON.stringify({
           exportedAt: new Date().toISOString(),
           groups: state.groups,
           knockout: state.knockout,
           specialBets: state.specialBets,
         }));
       } catch { /* ignore */ }
-
-      // 2. Save to Supabase (if logged in)
+      // Attempt async Supabase save via sendBeacon (fire-and-forget)
       try {
-        const { saveBetsToSupabase } = await import("@/lib/supabase/sync");
-        await saveBetsToSupabase(state);
-      } catch { /* ignore — user might not be logged in */ }
-    }, 5000); // Save 5 seconds after last change
+        navigator.sendBeacon("/api/sync-beacon", JSON.stringify({
+          groups: state.groups,
+          knockout: state.knockout,
+          specialBets: state.specialBets,
+        }));
+      } catch { /* ignore */ }
+    }
   });
 }

@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { verifyAdmin } from "../verify-admin";
 
 export async function GET() {
+  const adminEmail = await verifyAdmin();
+  if (!adminEmail) return NextResponse.json({ admins: [], error: "Unauthorized" }, { status: 403 });
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !serviceKey) return NextResponse.json({ admins: [] });

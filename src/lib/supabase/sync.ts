@@ -83,7 +83,7 @@ export async function saveBetsToSupabase(
     most_prolific_group: state.specialBets.prolificGroup || null,
     driest_group: state.specialBets.driestGroup || null,
     dirtiest_team: state.specialBets.dirtiestTeam || null,
-    matchup_pick: state.specialBets.matchups[0] || null,
+    matchup_pick: state.specialBets.matchups.filter(Boolean).join(",") || null,
     penalties_over_under: state.specialBets.penaltiesOverUnder || null,
   };
 
@@ -180,7 +180,7 @@ export async function loadBetsFromSupabase(
         prolificGroup: special?.most_prolific_group || "",
         driestGroup: special?.driest_group || "",
         dirtiestTeam: special?.dirtiest_team || "",
-        matchups: [special?.matchup_pick || "", "", ""],
+        matchups: special?.matchup_pick ? special.matchup_pick.split(",").concat(["", "", ""]).slice(0, 3) : ["", "", ""],
         penaltiesOverUnder: special?.penalties_over_under || "",
         mostGoalsMatchStage: "",
         firstRedCardTeam: "",

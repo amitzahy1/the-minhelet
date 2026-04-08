@@ -11,7 +11,7 @@ export async function GET() {
   try {
     const res = await fetch(`${BASE_URL}/competitions/WC/matches?season=2026`, {
       headers: { "X-Auth-Token": token },
-      next: { revalidate: 3600 }, // Cache 1 hour
+      next: { revalidate: 300 }, // Cache 5 minutes (was 1hr — too stale for live matches)
     });
 
     if (!res.ok) {

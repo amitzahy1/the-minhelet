@@ -5,7 +5,8 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   // If there's a "next" param (e.g., from invite link), redirect there after auth
-  const next = searchParams.get("next") ?? "/standings";
+  const rawNext = searchParams.get("next");
+  const next = rawNext && rawNext.startsWith("/") ? rawNext : "/standings";
 
   if (code) {
     const supabase = await createClient();

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useBettingStore } from "@/stores/betting-store";
 import { exportBetsToCSV, exportBetsToJSON, downloadFile } from "@/lib/backup";
 import { shareLeaderboard, openWhatsApp } from "@/lib/share";
@@ -9,9 +9,10 @@ import { HeroRoast } from "@/components/shared/HeroRoast";
 import { RadarChart } from "@/components/shared/RadarChart";
 import { LeaderboardRace } from "@/components/shared/LeaderboardRace";
 import { PointsSankey } from "@/components/shared/PointsSankey";
+import { useSharedData } from "@/hooks/useSharedData";
 
 // Mock completion data — in production this comes from Supabase
-const COMPLETION_DATA: PlayerCompletion[] = [
+const MOCK_COMPLETION_DATA: PlayerCompletion[] = [
   { name: "דני", completion: { groups: 75, knockout: 0, specials: 100 } },
   { name: "רון ב", completion: { groups: 100, knockout: 100, specials: 40 } },
   { name: "עידן", completion: { groups: 50, knockout: 0, specials: 0 } },
@@ -19,7 +20,7 @@ const COMPLETION_DATA: PlayerCompletion[] = [
 ];
 
 // Mock leaderboard data — in production this comes from Supabase scoring_log
-const PLAYERS = [
+const MOCK_PLAYERS = [
   { id: "bot", name: "הבוט 🤖", matchPts: 80, advPts: 48, specPts: 14, total: 142, today: "+8", delta: 0, toto: "57%", exact: 10, streak: 3, bestDay: "+16",
     breakdown: { totoGroup: 30, exactGroup: 8, totoKnockout: 28, exactKnockout: 14, groupAdvExact: 28, groupAdvPartial: 6, advQF: 8, advSF: 6, advFinal: 0, winner: 0, topScorer: 0, topAssists: 0, bestAttack: 6, specials: 8 } },
   { id: "1", name: "דני", matchPts: 95, advPts: 52, specPts: 21, total: 168, today: "+12", delta: 3, toto: "65%", exact: 16, streak: 8, bestDay: "+18",
@@ -57,7 +58,7 @@ function Sparkline({ data, highlight }: { data: number[]; highlight?: boolean })
 }
 
 // Hover tooltip for detailed breakdown
-function PlayerTooltip({ player, visible, openUp = false }: { player: typeof PLAYERS[0]; visible: boolean; openUp?: boolean }) {
+function PlayerTooltip({ player, visible, openUp = false }: { player: typeof MOCK_PLAYERS[0]; visible: boolean; openUp?: boolean }) {
   if (!visible) return null;
   const b = player.breakdown;
   return (
@@ -106,11 +107,98 @@ const TABS: { label: string; key: SortKey }[] = [
   { label: "מיוחדים", key: "specPts" },
 ];
 
+// --- Scoring reason → breakdown bucket mapping ---
+const REASON_TO_BUCKET: Record<string, keyof typeof MOCK_PLAYERS[0]["breakdown"]> = {
+  toto_group: "totoGroup",
+  exact_group: "exactGroup",
+  toto_knockout: "totoKnockout",
+  exact_knockout: "exactKnockout",
+  group_adv_exact: "groupAdvExact",
+  group_adv_partial: "groupAdvPartial",
+  adv_qf: "advQF",
+  adv_sf: "advSF",
+  adv_final: "advFinal",
+  winner: "winner",
+  top_scorer: "topScorer",
+  top_assists: "topAssists",
+  best_attack: "bestAttack",
+  specials: "specials",
+};
+
+// Map scoring reason to the high-level category
+function reasonToCategory(reason: string): "matchPts" | "advPts" | "specPts" {
+  if (["toto_group", "exact_group", "toto_knockout", "exact_knockout"].includes(reason)) return "matchPts";
+  if (["group_adv_exact", "group_adv_partial", "adv_qf", "adv_sf", "adv_final", "winner"].includes(reason)) return "advPts";
+  return "specPts";
+}
+
 export default function StandingsPage() {
   const totalFilled = useBettingStore((s) => s.getTotalFilledMatches());
   const [hoveredPlayer, setHoveredPlayer] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<SortKey>("total");
   const [radarPlayerId, setRadarPlayerId] = useState<string>("4"); // default to אמית
+
+  // Load real data from Supabase (falls back to empty arrays if not configured)
+  const { profiles, scoringLog } = useSharedData();
+
+  // Build real players from Supabase profiles + scoring log
+  const realPlayers = useMemo(() => {
+    if (profiles.length === 0) return [];
+
+    return profiles.map((profile, idx) => {
+      // Aggregate scoring entries for this user
+      const userEntries = scoringLog.filter((e) => e.userId === profile.id);
+
+      const breakdown = {
+        totoGroup: 0, exactGroup: 0, totoKnockout: 0, exactKnockout: 0,
+        groupAdvExact: 0, groupAdvPartial: 0, advQF: 0, advSF: 0,
+        advFinal: 0, winner: 0, topScorer: 0, topAssists: 0,
+        bestAttack: 0, specials: 0,
+      };
+
+      let matchPts = 0, advPts = 0, specPts = 0, total = 0;
+
+      for (const entry of userEntries) {
+        const bucket = REASON_TO_BUCKET[entry.reason];
+        if (bucket) {
+          breakdown[bucket] += entry.points;
+        }
+        const cat = reasonToCategory(entry.reason);
+        if (cat === "matchPts") matchPts += entry.points;
+        else if (cat === "advPts") advPts += entry.points;
+        else specPts += entry.points;
+        total += entry.points;
+      }
+
+      // Count exact-score hits and compute toto percentage
+      const exactHits = userEntries.filter((e) => e.reason === "exact_group" || e.reason === "exact_knockout").length;
+      const totoHits = userEntries.filter((e) =>
+        ["toto_group", "exact_group", "toto_knockout", "exact_knockout"].includes(e.reason)
+      ).length;
+      const matchCount = totoHits + userEntries.filter((e) => e.reason === "miss").length;
+      const totoPct = matchCount > 0 ? Math.round((totoHits / matchCount) * 100) : 0;
+
+      return {
+        id: profile.id,
+        name: profile.displayName,
+        matchPts,
+        advPts,
+        specPts,
+        total,
+        today: "+0",
+        delta: 0,
+        toto: `${totoPct}%`,
+        exact: exactHits,
+        streak: 0,
+        bestDay: "+0",
+        isYou: false as boolean,
+        breakdown,
+      };
+    });
+  }, [profiles, scoringLog]);
+
+  const PLAYERS = realPlayers.length > 0 ? realPlayers : MOCK_PLAYERS;
+  const COMPLETION_DATA = MOCK_COMPLETION_DATA; // TODO: build from real data when available
 
   const handleExportCSV = () => {
     const state = useBettingStore.getState();

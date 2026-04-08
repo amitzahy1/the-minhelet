@@ -3,11 +3,13 @@
 import { useEffect, useState, useMemo } from "react";
 import { useConfetti } from "@/hooks/useConfetti";
 import { RegretMeter } from "@/components/shared/RegretMeter";
-import { getFlag } from "@/lib/flags";
+import { getFlag, getTeamNameHe } from "@/lib/flags";
 import { PullToRefresh } from "@/components/shared/PullToRefresh";
 import { MatchReactions, MOCK_REACTIONS } from "@/components/shared/MatchReactions";
 import WhosAlive from "@/components/shared/WhosAlive";
 import PredictionReveals from "@/components/shared/PredictionReveals";
+import { useSharedData } from "@/hooks/useSharedData";
+import type { MatchPrediction, BettorBracket, BettorAdvancement } from "@/lib/supabase/shared-data";
 
 // Live page — shows matches from last 24h and next 12h
 // In production: real-time updates from API-Football via Supabase Realtime
@@ -17,7 +19,7 @@ const F: Record<string,string> = {
   KSA:"🇸🇦",IDN:"🇮🇩",JPN:"🇯🇵",MAR:"🇲🇦",UZB:"🇺🇿",CAN:"🇨🇦",SEN:"🇸🇳",DEN:"🇩🇰",
 };
 
-const LIVE_MATCHES = [
+const MOCK_LIVE_MATCHES = [
   { id: 1, status: "live", minute: "72'", stage: "בית C · סיבוב 2",
     home: { code: "ARG", name: "ארגנטינה", goals: 2 },
     away: { code: "KSA", name: "ערב הסעודית", goals: 0 },
@@ -32,14 +34,14 @@ const LIVE_MATCHES = [
   },
 ];
 
-const UPCOMING = [
+const MOCK_UPCOMING = [
   { id: 3, status: "upcoming", time: "19:00", stage: "בית D · סיבוב 2",
     home: { code: "JPN", name: "יפן" }, away: { code: "MAR", name: "מרוקו" }, yourPrediction: null },
   { id: 4, status: "upcoming", time: "22:00", stage: "בית D · סיבוב 2",
     home: { code: "CAN", name: "קנדה" }, away: { code: "SEN", name: "סנגל" }, yourPrediction: "1-0" },
 ];
 
-const FINISHED = [
+const MOCK_FINISHED = [
   { id: 5, status: "finished", stage: "בית B · סיבוב 1",
     home: { code: "FRA", name: "צרפת", goals: 3 }, away: { code: "DEN", name: "דנמרק", goals: 1 },
     yourPrediction: "2-1", yourStatus: "toto", pts: "+2" },
@@ -49,7 +51,7 @@ const FINISHED = [
 ];
 
 // What-If data
-const WHATIF_MATCHES = [
+const MOCK_WHATIF_MATCHES = [
   { id: 1, home: "ARG", away: "CZE", stage: "R32", homeName: "ארגנטינה", awayName: "צ׳כיה" },
   { id: 2, home: "FRA", away: "NOR", stage: "R32", homeName: "צרפת", awayName: "נורבגיה" },
   { id: 3, home: "BRA", away: "SWE", stage: "R32", homeName: "ברזיל", awayName: "שוודיה" },
@@ -60,7 +62,7 @@ const WHATIF_MATCHES = [
   { id: 8, home: "NED", away: "TUN", stage: "R32", homeName: "הולנד", awayName: "תוניסיה" },
 ];
 
-const BETTOR_PICKS: Record<string, Record<number, string>> = {
+const MOCK_BETTOR_PICKS: Record<string, Record<number, string>> = {
   "דני": { 1: "ARG", 2: "FRA", 3: "BRA", 4: "ESP", 5: "GER", 6: "ENG", 7: "POR", 8: "NED" },
   "יוני": { 1: "ARG", 2: "FRA", 3: "BRA", 4: "ESP", 5: "GER", 6: "ENG", 7: "POR", 8: "NED" },
   "דור דסא": { 1: "ARG", 2: "FRA", 3: "BRA", 4: "ESP", 5: "GER", 6: "ENG", 7: "POR", 8: "NED" },
@@ -76,9 +78,10 @@ const BETTOR_PICKS: Record<string, Record<number, string>> = {
 export default function LivePage() {
   const fireConfetti = useConfetti();
   const [activeTab, setActiveTab] = useState<"live" | "whatif" | "alive" | "reveals">("live");
+  const { predictions, brackets, advancements, profiles } = useSharedData();
 
   useEffect(() => {
-    const hasExact = LIVE_MATCHES.some(m => m.yourStatus === "exact");
+    const hasExact = MOCK_LIVE_MATCHES.some(m => m.yourStatus === "exact");
     if (hasExact) {
       const timer = setTimeout(fireConfetti, 500);
       return () => clearTimeout(timer);
@@ -111,27 +114,42 @@ export default function LivePage() {
         </div>
       </div>
 
-      {activeTab === "live" && <LiveTab />}
-      {activeTab === "whatif" && <WhatIfTab />}
-      {activeTab === "alive" && <WhosAliveTab />}
-      {activeTab === "reveals" && <PredictionRevealsTab />}
+      {activeTab === "live" && <LiveTab predictions={predictions} />}
+      {activeTab === "whatif" && <WhatIfTab brackets={brackets} />}
+      {activeTab === "alive" && <WhosAliveTab advancements={advancements} />}
+      {activeTab === "reveals" && <PredictionRevealsTab advancements={advancements} />}
     </div>
     </PullToRefresh>
   );
 }
 
-function LiveTab() {
+function LiveTab({ predictions }: { predictions: MatchPrediction[] }) {
+  // Build friends list per match from real predictions, or fall back to mock
+  const hasRealPredictions = predictions.length > 0;
+
+  function getFriendsForMatch(matchId: number, mockFriends: { name: string; pred: string }[]) {
+    if (!hasRealPredictions) return mockFriends;
+    const matchPreds = predictions.filter(p => p.matchId === matchId);
+    if (matchPreds.length === 0) return mockFriends;
+    return matchPreds.map(p => ({
+      name: p.displayName,
+      pred: `${p.predictedHomeGoals}-${p.predictedAwayGoals}`,
+    }));
+  }
+
   return (
     <>
       {/* LIVE NOW */}
-      {LIVE_MATCHES.length > 0 && (
+      {MOCK_LIVE_MATCHES.length > 0 && (
         <div className="mb-8">
           <h2 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
             עכשיו בשידור חי
           </h2>
           <div className="space-y-4">
-            {LIVE_MATCHES.map(m => (
+            {MOCK_LIVE_MATCHES.map(m => {
+              const friends = getFriendsForMatch(m.id, m.friends);
+              return (
               <div key={m.id} className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                 <div className="flex items-center justify-center gap-2 py-2.5 bg-red-50 border-b border-red-100">
                   <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>
@@ -217,7 +235,7 @@ function LiveTab() {
                 <div className="border-t border-gray-100 px-5 py-3">
                   <p className="text-xs text-gray-500 mb-2 font-bold">כל המהמרים:</p>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
-                    {[...m.friends, { name: "אמית", pred: m.yourPrediction }].map(f => {
+                    {(hasRealPredictions ? friends : [...friends, { name: "אמית", pred: m.yourPrediction }]).map(f => {
                       const [fh, fa] = f.pred.split("-").map(Number);
                       const isExact = fh === m.home.goals && fa === m.away.goals;
                       const predResult = fh > fa ? "1" : fa > fh ? "2" : "X";
@@ -247,7 +265,8 @@ function LiveTab() {
                   comments={MOCK_REACTIONS.comments}
                 />
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
@@ -256,7 +275,7 @@ function LiveTab() {
       <div className="mb-8">
         <h2 className="text-lg font-bold text-gray-800 mb-3">קרוב — היום</h2>
         <div className="space-y-3">
-          {UPCOMING.map(m => (
+          {MOCK_UPCOMING.map(m => (
             <div key={m.id} className="bg-white rounded-xl border border-gray-200 shadow-sm px-5 py-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <span className="text-2xl">{F[m.home.code]}</span>
@@ -284,7 +303,7 @@ function LiveTab() {
       <div className="mb-8">
         <h2 className="text-lg font-bold text-gray-800 mb-3">הסתיימו — אתמול</h2>
         <div className="space-y-3">
-          {FINISHED.map(m => (
+          {MOCK_FINISHED.map(m => (
             <div key={m.id} className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
               <div className="px-5 py-3 flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -340,14 +359,35 @@ function LiveTab() {
   );
 }
 
-function WhatIfTab() {
-  const [selectedMatch, setSelectedMatch] = useState(WHATIF_MATCHES[0]);
+function WhatIfTab({ brackets }: { brackets: BettorBracket[] }) {
+  const [selectedMatch, setSelectedMatch] = useState(MOCK_WHATIF_MATCHES[0]);
   const [simulatedWinner, setSimulatedWinner] = useState<string | null>(null);
+
+  // Build bettor picks from real brackets data, or fall back to mock
+  const hasRealBrackets = brackets.length > 0;
+
+  const bettorPicks: Record<string, Record<number, string>> = useMemo(() => {
+    if (!hasRealBrackets) return MOCK_BETTOR_PICKS;
+    const picks: Record<string, Record<number, string>> = {};
+    for (const b of brackets) {
+      const userPicks: Record<number, string> = {};
+      for (const [matchKey, matchData] of Object.entries(b.knockoutTree)) {
+        const matchNum = parseInt(matchKey, 10);
+        if (!isNaN(matchNum) && matchData.winner) {
+          userPicks[matchNum] = matchData.winner;
+        }
+      }
+      if (Object.keys(userPicks).length > 0) {
+        picks[b.displayName] = userPicks;
+      }
+    }
+    return Object.keys(picks).length > 0 ? picks : MOCK_BETTOR_PICKS;
+  }, [brackets, hasRealBrackets]);
 
   const impact = useMemo(() => {
     if (!simulatedWinner) return null;
 
-    return Object.entries(BETTOR_PICKS).map(([name, picks]) => {
+    return Object.entries(bettorPicks).map(([name, picks]) => {
       const theirPick = picks[selectedMatch.id];
       const gotItRight = theirPick === simulatedWinner;
       const pickedFavorite = theirPick === selectedMatch.home;
@@ -364,7 +404,7 @@ function WhatIfTab() {
         isYou: name === "אמית",
       };
     }).sort((a, b) => b.pointsGained - a.pointsGained);
-  }, [selectedMatch, simulatedWinner]);
+  }, [selectedMatch, simulatedWinner, bettorPicks]);
 
   const winnersCount = impact?.filter(i => i.correct).length || 0;
   const losersCount = impact?.filter(i => !i.correct).length || 0;
@@ -379,7 +419,7 @@ function WhatIfTab() {
           <h2 className="text-lg font-bold text-gray-900">בחרו משחק</h2>
         </div>
         <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {WHATIF_MATCHES.map(m => (
+          {MOCK_WHATIF_MATCHES.map(m => (
             <button key={m.id} onClick={() => { setSelectedMatch(m); setSimulatedWinner(null); }}
               className={`flex items-center justify-between px-4 py-3 rounded-xl border transition-all ${
                 selectedMatch.id === m.id ? "border-blue-300 bg-blue-50 shadow-sm" : "border-gray-200 hover:bg-gray-50"
@@ -479,7 +519,7 @@ function WhatIfTab() {
   );
 }
 
-const WHOS_ALIVE_DATA = [
+const MOCK_WHOS_ALIVE_DATA = [
   {
     name: "אמית",
     champion: "ARG",
@@ -546,11 +586,37 @@ const WHOS_ALIVE_DATA = [
   },
 ];
 
-function WhosAliveTab() {
-  return <WhosAlive bettors={WHOS_ALIVE_DATA} />;
+function WhosAliveTab({ advancements }: { advancements: BettorAdvancement[] }) {
+  // Build WhosAlive data from real advancements, or fall back to mock
+  const bettors = useMemo(() => {
+    if (advancements.length === 0) return MOCK_WHOS_ALIVE_DATA;
+
+    const realData = advancements.map(a => {
+      const allPicked = [
+        ...a.advanceToQF,
+        ...a.advanceToSF,
+        ...a.advanceToFinal,
+        ...(a.winner ? [a.winner] : []),
+      ];
+      // For now, treat all picked teams as alive (actual alive/dead status
+      // would require tournament results data which is not yet available)
+      return {
+        name: a.displayName,
+        champion: a.winner,
+        semifinalists: a.advanceToSF,
+        quarterfinalists: a.advanceToQF,
+        alive: allPicked,
+        dead: [] as string[],
+      };
+    });
+
+    return realData.length > 0 ? realData : MOCK_WHOS_ALIVE_DATA;
+  }, [advancements]);
+
+  return <WhosAlive bettors={bettors} />;
 }
 
-const PREDICTION_REVEALS_DATA = [
+const MOCK_PREDICTION_REVEALS_DATA = [
   { name: "דני", champion: "ARG", championName: "ארגנטינה" },
   { name: "יוני", champion: "FRA", championName: "צרפת" },
   { name: "דור דסא", champion: "BRA", championName: "ברזיל" },
@@ -563,6 +629,21 @@ const PREDICTION_REVEALS_DATA = [
   { name: "אורי", champion: "BRA", championName: "ברזיל" },
 ];
 
-function PredictionRevealsTab() {
-  return <PredictionReveals predictions={PREDICTION_REVEALS_DATA} isLocked={true} />;
+function PredictionRevealsTab({ advancements }: { advancements: BettorAdvancement[] }) {
+  // Build prediction reveals from real advancements, or fall back to mock
+  const predictionData = useMemo(() => {
+    if (advancements.length === 0) return MOCK_PREDICTION_REVEALS_DATA;
+
+    const realData = advancements
+      .filter(a => a.winner)
+      .map(a => ({
+        name: a.displayName,
+        champion: a.winner,
+        championName: getTeamNameHe(a.winner),
+      }));
+
+    return realData.length > 0 ? realData : MOCK_PREDICTION_REVEALS_DATA;
+  }, [advancements]);
+
+  return <PredictionReveals predictions={predictionData} isLocked={true} />;
 }

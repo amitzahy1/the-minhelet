@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { PredictionHeatmap } from "@/components/shared/PredictionHeatmap";
+import { useSharedData } from "@/hooks/useSharedData";
 
 // Color coding: each unique value gets a FIXED color — same pick = same color everywhere
 const VALUE_COLORS = [
@@ -44,8 +45,29 @@ function getValueColor(value: string, colorMap: Record<string, string>): string 
   return colorMap[value] || "";
 }
 
+interface Bettor {
+  name: string;
+  winner: string;
+  finalist1: string;
+  finalist2: string;
+  sf: string[];
+  qf: string[];
+  topScorer: string;
+  topAssists: string;
+  bestAttack: string;
+  dirtiestTeam: string;
+  prolificGroup: string;
+  driestGroup: string;
+  matchup1: string;
+  matchup2: string;
+  matchup3: string;
+  penalties: string;
+  groups: Record<string, string[]>;
+  isYou?: boolean;
+}
+
 // Mock data — in production comes from Supabase
-const BETTORS = [
+const MOCK_BETTORS: Bettor[] = [
   { name: "דני", winner: "ARG", finalist1: "ARG", finalist2: "FRA", sf: ["ARG","FRA","BRA","GER"], qf: ["ARG","FRA","BRA","GER","ESP","POR","ENG","NED"], topScorer: "Mbappé", topAssists: "De Bruyne", bestAttack: "FRA", dirtiestTeam: "ARG", prolificGroup: "C", driestGroup: "G", matchup1: "1", matchup2: "2", matchup3: "1", penalties: "OVER", groups: { A: ["MEX","KOR"], B: ["SUI","CAN"], C: ["BRA","MAR"], D: ["USA","TUR"], E: ["GER","ECU"], F: ["NED","JPN"], G: ["BEL","IRN"], H: ["ESP","URU"], I: ["FRA","SEN"], J: ["ARG","AUT"], K: ["POR","COL"], L: ["ENG","CRO"] } },
   { name: "יוני", winner: "FRA", finalist1: "FRA", finalist2: "BRA", sf: ["FRA","BRA","ENG","ARG"], qf: ["FRA","BRA","ENG","ARG","GER","ESP","NED","POR"], topScorer: "Mbappé", topAssists: "Bellingham", bestAttack: "BRA", dirtiestTeam: "URU", prolificGroup: "K", driestGroup: "B", matchup1: "1", matchup2: "1", matchup3: "X", penalties: "UNDER", groups: { A: ["MEX","CZE"], B: ["SUI","CAN"], C: ["BRA","MAR"], D: ["USA","AUS"], E: ["GER","CIV"], F: ["NED","JPN"], G: ["BEL","EGY"], H: ["ESP","URU"], I: ["FRA","NOR"], J: ["ARG","AUT"], K: ["POR","COL"], L: ["ENG","CRO"] } },
   { name: "דור דסא", winner: "BRA", finalist1: "BRA", finalist2: "ARG", sf: ["BRA","ARG","ESP","GER"], qf: ["BRA","ARG","ESP","GER","FRA","ENG","NED","POR"], topScorer: "Vinícius", topAssists: "Messi", bestAttack: "ARG", dirtiestTeam: "MAR", prolificGroup: "J", driestGroup: "A", matchup1: "2", matchup2: "2", matchup3: "1", penalties: "OVER", groups: { A: ["KOR","MEX"], B: ["SUI","QAT"], C: ["BRA","MAR"], D: ["USA","TUR"], E: ["GER","ECU"], F: ["JPN","NED"], G: ["BEL","IRN"], H: ["ESP","URU"], I: ["FRA","SEN"], J: ["ARG","ALG"], K: ["POR","COL"], L: ["ENG","GHA"] } },
@@ -70,23 +92,90 @@ type View = "advancement" | "specials" | "groups" | "similarity" | "heatmap";
 export default function ComparePage() {
   const [view, setView] = useState<View>("advancement");
 
+  // Load real data from Supabase
+  const { brackets, specialBets, advancements } = useSharedData();
+
+  // Build real bettors from Supabase data
+  const realBettors = useMemo((): Bettor[] => {
+    if (brackets.length === 0) return [];
+
+    return brackets.map((bracket) => {
+      // Find matching special bets and advancement picks for this user
+      const sb = specialBets.find((s) => s.userId === bracket.userId);
+      const adv = advancements.find((a) => a.userId === bracket.userId);
+
+      // Extract group qualifiers (top-2 from each group)
+      const groups: Record<string, string[]> = {};
+      if (adv?.groupQualifiers) {
+        for (const [groupId, teams] of Object.entries(adv.groupQualifiers)) {
+          groups[groupId] = (teams || []).slice(0, 2);
+        }
+      } else if (bracket.groupPredictions) {
+        // Fallback: derive from group predictions order
+        for (const [groupId, pred] of Object.entries(bracket.groupPredictions)) {
+          if (pred?.order) {
+            groups[groupId] = pred.order.slice(0, 2).map(String);
+          }
+        }
+      }
+
+      // Extract knockout picks from advancement data
+      const champion = bracket.champion || adv?.winner || "";
+      const advToFinal = adv?.advanceToFinal || [];
+      const advToSF = adv?.advanceToSF || [];
+      const advToQF = adv?.advanceToQF || [];
+
+      // Determine finalist pair: champion + the other finalist
+      const finalist1 = champion;
+      const finalist2 = advToFinal.find((t) => t !== champion) || advToFinal[0] || "";
+
+      // Semi-finalists: those in advanceToSF (or advanceToFinal as fallback)
+      const sf = advToSF.length > 0 ? advToSF.slice(0, 4) : advToFinal.slice(0, 4);
+
+      // Quarter-finalists
+      const qf = advToQF.length > 0 ? advToQF.slice(0, 8) : [];
+
+      return {
+        name: bracket.displayName,
+        winner: champion,
+        finalist1,
+        finalist2,
+        sf,
+        qf,
+        topScorer: sb?.topScorerPlayer || "",
+        topAssists: sb?.topAssistsPlayer || "",
+        bestAttack: sb?.bestAttackTeam || "",
+        dirtiestTeam: sb?.dirtiestTeam || "",
+        prolificGroup: sb?.prolificGroup || "",
+        driestGroup: sb?.driestGroup || "",
+        matchup1: sb?.matchupPick?.split(",")[0] || "",
+        matchup2: sb?.matchupPick?.split(",")[1] || "",
+        matchup3: sb?.matchupPick?.split(",")[2] || "",
+        penalties: sb?.penaltiesOverUnder || "",
+        groups,
+      };
+    });
+  }, [brackets, specialBets, advancements]);
+
+  const BETTORS = realBettors.length > 0 ? realBettors : MOCK_BETTORS;
+
   // Build color maps for each category
   const advColors = useMemo(() => buildColorMap([
     ...BETTORS.map(b=>b.winner), ...BETTORS.flatMap(b=>[b.finalist1,b.finalist2]),
     ...BETTORS.flatMap(b=>b.sf), ...BETTORS.flatMap(b=>b.qf),
-  ]), []);
+  ]), [BETTORS]);
   const specColors = useMemo(() => buildColorMap([
     ...BETTORS.map(b=>b.topScorer), ...BETTORS.map(b=>b.topAssists),
     ...BETTORS.map(b=>b.bestAttack), ...BETTORS.map(b=>b.dirtiestTeam),
     ...BETTORS.map(b=>b.prolificGroup), ...BETTORS.map(b=>b.driestGroup),
     ...BETTORS.map(b=>b.matchup1), ...BETTORS.map(b=>b.matchup2),
     ...BETTORS.map(b=>b.matchup3), ...BETTORS.map(b=>b.penalties),
-  ]), []);
+  ]), [BETTORS]);
   const groupColors = useMemo(() => {
     const all: string[] = [];
     BETTORS.forEach(b => Object.values(b.groups).forEach(g => all.push(...g)));
     return buildColorMap(all);
-  }, []);
+  }, [BETTORS]);
 
   return (
     <div className="max-w-full mx-auto px-4 py-6 pb-24">

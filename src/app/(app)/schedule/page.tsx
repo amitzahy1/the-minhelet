@@ -1,5 +1,7 @@
 "use client";
 import { LoadingPage } from "@/components/shared/LoadingAnimation";
+import { useSharedData } from "@/hooks/useSharedData";
+import type { BettorProfile, BettorSpecialBets, BettorAdvancement, MatchPrediction } from "@/lib/supabase/shared-data";
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -78,38 +80,104 @@ interface Match {
   stage: string;
 }
 
-function MatchBetsPanel({ match }: { match: Match }) {
+interface MatchBetsPanelProps {
+  match: Match;
+  profiles: BettorProfile[];
+  specialBets: BettorSpecialBets[];
+  advancements: BettorAdvancement[];
+  predictions: MatchPrediction[];
+}
+
+function MatchBetsPanel({ match, profiles, specialBets, advancements, predictions }: MatchBetsPanelProps) {
   const home = match.homeTla;
   const away = match.awayTla;
   const groupLetter = match.group?.replace("GROUP_", "") || "";
-  const bettors = Object.keys(MOCK_PREDICTIONS);
+
+  // Real predictions for this match
+  const realPredictions = predictions.filter(p => p.matchId === match.id);
+  const hasPredictions = realPredictions.length > 0;
+
+  // Real special bets available?
+  const hasSpecialBets = specialBets.length > 0;
+  const hasAdvancements = advancements.length > 0;
+
+  // Bettor list: use real profiles if available, else mock
+  const bettors = hasPredictions
+    ? realPredictions.map(p => p.displayName)
+    : Object.keys(MOCK_PREDICTIONS);
 
   // Find related special bets for this match's teams
   const relatedBets: { bettor: string; type: string; detail: string }[] = [];
 
-  for (const bettor of bettors) {
-    const sb = MOCK_SPECIAL_BETS[bettor];
-    if (!sb) continue;
+  if (hasSpecialBets || hasAdvancements) {
+    // Build a unique name list from profiles for consistent display
+    const allBettorNames = Array.from(new Set([
+      ...specialBets.map(sb => sb.displayName),
+      ...advancements.map(a => a.displayName),
+    ]));
 
-    // Winner bet
-    if (sb.winner === home || sb.winner === away) {
-      relatedBets.push({ bettor, type: "אלוף", detail: `${F[sb.winner]} ${HE[sb.winner]}` });
+    for (const bettorName of allBettorNames) {
+      // Winner bet (from advancements)
+      if (hasAdvancements) {
+        const adv = advancements.find(a => a.displayName === bettorName);
+        if (adv?.winner && (adv.winner === home || adv.winner === away)) {
+          relatedBets.push({ bettor: bettorName, type: "אלוף", detail: `${F[adv.winner] || ""} ${HE[adv.winner] || adv.winner}` });
+        }
+      }
+
+      const sb = specialBets.find(s => s.displayName === bettorName);
+      if (!sb) continue;
+
+      // Top scorer — stored as "Player (TEAM)" or just a player name
+      // The real data has topScorerPlayer as a string. We check if it mentions one of the teams.
+      if (sb.topScorerPlayer) {
+        const tsp = sb.topScorerPlayer;
+        // Check if any team TLA appears in the field (e.g. "Kane (ENG)")
+        if (tsp.includes(home) || tsp.includes(away)) {
+          relatedBets.push({ bettor: bettorName, type: "מלך שערים", detail: tsp });
+        }
+      }
+
+      // Top assists
+      if (sb.topAssistsPlayer) {
+        const tap = sb.topAssistsPlayer;
+        if (tap.includes(home) || tap.includes(away)) {
+          relatedBets.push({ bettor: bettorName, type: "מלך בישולים", detail: tap });
+        }
+      }
+
+      // Best attack team
+      if (sb.bestAttackTeam && (sb.bestAttackTeam === home || sb.bestAttackTeam === away)) {
+        relatedBets.push({ bettor: bettorName, type: "התקפה הכי טובה", detail: `${F[sb.bestAttackTeam] || ""} ${HE[sb.bestAttackTeam] || sb.bestAttackTeam}` });
+      }
+
+      // Dirtiest team
+      if (sb.dirtiestTeam && (sb.dirtiestTeam === home || sb.dirtiestTeam === away)) {
+        relatedBets.push({ bettor: bettorName, type: "הכי כסחנית", detail: `${F[sb.dirtiestTeam] || ""} ${HE[sb.dirtiestTeam] || sb.dirtiestTeam}` });
+      }
     }
-    // Top scorer from these teams
-    if (sb.topScorer.team === home || sb.topScorer.team === away) {
-      relatedBets.push({ bettor, type: "מלך שערים", detail: `${sb.topScorer.player} (${F[sb.topScorer.team]} ${HE[sb.topScorer.team]})` });
-    }
-    // Top assists from these teams
-    if (sb.topAssists.team === home || sb.topAssists.team === away) {
-      relatedBets.push({ bettor, type: "מלך בישולים", detail: `${sb.topAssists.player} (${F[sb.topAssists.team]} ${HE[sb.topAssists.team]})` });
-    }
-    // Best attack
-    if (sb.bestAttack === home || sb.bestAttack === away) {
-      relatedBets.push({ bettor, type: "התקפה הכי טובה", detail: `${F[sb.bestAttack]} ${HE[sb.bestAttack]}` });
-    }
-    // Dirtiest team
-    if (sb.dirtiestTeam === home || sb.dirtiestTeam === away) {
-      relatedBets.push({ bettor, type: "הכי כסחנית", detail: `${F[sb.dirtiestTeam]} ${HE[sb.dirtiestTeam]}` });
+  } else {
+    // Fallback to mock special bets
+    const mockBettors = Object.keys(MOCK_SPECIAL_BETS);
+    for (const bettor of mockBettors) {
+      const sb = MOCK_SPECIAL_BETS[bettor];
+      if (!sb) continue;
+
+      if (sb.winner === home || sb.winner === away) {
+        relatedBets.push({ bettor, type: "אלוף", detail: `${F[sb.winner]} ${HE[sb.winner]}` });
+      }
+      if (sb.topScorer.team === home || sb.topScorer.team === away) {
+        relatedBets.push({ bettor, type: "מלך שערים", detail: `${sb.topScorer.player} (${F[sb.topScorer.team]} ${HE[sb.topScorer.team]})` });
+      }
+      if (sb.topAssists.team === home || sb.topAssists.team === away) {
+        relatedBets.push({ bettor, type: "מלך בישולים", detail: `${sb.topAssists.player} (${F[sb.topAssists.team]} ${HE[sb.topAssists.team]})` });
+      }
+      if (sb.bestAttack === home || sb.bestAttack === away) {
+        relatedBets.push({ bettor, type: "התקפה הכי טובה", detail: `${F[sb.bestAttack]} ${HE[sb.bestAttack]}` });
+      }
+      if (sb.dirtiestTeam === home || sb.dirtiestTeam === away) {
+        relatedBets.push({ bettor, type: "הכי כסחנית", detail: `${F[sb.dirtiestTeam]} ${HE[sb.dirtiestTeam]}` });
+      }
     }
   }
 
@@ -133,15 +201,23 @@ function MatchBetsPanel({ match }: { match: Match }) {
         <div>
           <p className="text-xs font-bold text-gray-500 mb-2">ניחושי תוצאה</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
-            {bettors.map(bettor => {
-              const pred = getMockPrediction(bettor, match.id, home, away);
-              return (
-                <div key={bettor} className="flex items-center justify-between px-2.5 py-1.5 bg-white rounded-lg border border-gray-200 text-xs">
-                  <span className="font-bold text-gray-800">{bettor}</span>
-                  <span className="font-black text-gray-900 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{pred}</span>
+            {hasPredictions
+              ? realPredictions.map(p => (
+                <div key={p.userId} className="flex items-center justify-between px-2.5 py-1.5 bg-white rounded-lg border border-gray-200 text-xs">
+                  <span className="font-bold text-gray-800">{p.displayName}</span>
+                  <span className="font-black text-gray-900 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{p.predictedHomeGoals}-{p.predictedAwayGoals}</span>
                 </div>
-              );
-            })}
+              ))
+              : bettors.map(bettor => {
+                const pred = getMockPrediction(bettor, match.id, home, away);
+                return (
+                  <div key={bettor} className="flex items-center justify-between px-2.5 py-1.5 bg-white rounded-lg border border-gray-200 text-xs">
+                    <span className="font-bold text-gray-800">{bettor}</span>
+                    <span className="font-black text-gray-900 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{pred}</span>
+                  </div>
+                );
+              })
+            }
           </div>
         </div>
 
@@ -206,6 +282,7 @@ export default function SchedulePage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("ALL");
   const [expandedMatch, setExpandedMatch] = useState<number | null>(null);
+  const { profiles, specialBets, advancements, predictions, loading: dataLoading } = useSharedData();
 
   useEffect(() => {
     fetchMatches();
@@ -309,7 +386,15 @@ export default function SchedulePage() {
                         </div>
                       </div>
                       <AnimatePresence>
-                        {isExpanded && <MatchBetsPanel match={m} />}
+                        {isExpanded && (
+                          <MatchBetsPanel
+                            match={m}
+                            profiles={profiles}
+                            specialBets={specialBets}
+                            advancements={advancements}
+                            predictions={predictions}
+                          />
+                        )}
                       </AnimatePresence>
                     </div>
                   );

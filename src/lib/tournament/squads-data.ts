@@ -262,9 +262,28 @@ export const SQUADS_DATA: Record<string, SquadData> = {
   },
 };
 
-// --- API-Football data (48 teams with photos) ---
+// --- API-Football data (48 teams with photos + optional club info) ---
 import apiSquads from "./squads-api.json";
-const API_DATA = apiSquads as Record<string, { players: { nameEn: string; num: number; pos: "GK"|"DEF"|"MID"|"FW"; photo: string; age: number }[]; logo?: string }>;
+const API_DATA = apiSquads as Record<string, { players: { nameEn: string; num: number; pos: "GK"|"DEF"|"MID"|"FW"; photo: string; age: number; club?: string }[]; logo?: string }>;
+
+/**
+ * Pick starters for a default 4-3-3 formation from a list of players.
+ * Selects: 1 GK, 4 DEF, 3 MID, 3 FW (by position, in order).
+ */
+function pickDefaultStarters(players: { nameEn: string; pos: string }[]): string[] {
+  const target: Record<string, number> = { GK: 1, DEF: 4, MID: 3, FW: 3 };
+  const picked: string[] = [];
+  for (const pos of ["GK", "DEF", "MID", "FW"] as const) {
+    let count = 0;
+    for (const p of players) {
+      if (p.pos === pos && count < target[pos]) {
+        picked.push(p.nameEn);
+        count++;
+      }
+    }
+  }
+  return picked;
+}
 
 // Get squad for a team — merges manual data with API data
 export function getSquad(code: string): SquadData | null {
@@ -272,31 +291,45 @@ export function getSquad(code: string): SquadData | null {
   const api = API_DATA[code];
 
   if (manual && api) {
-    // Merge: use manual structure but add photos from API
-    const photoMap = new Map(api.players.map(p => [p.nameEn, p.photo]));
+    // Merge: use manual structure but add photos + clubs from API
+    const apiMap = new Map(api.players.map(p => [p.nameEn, p]));
     return {
       ...manual,
-      players: manual.players.map(p => ({
-        ...p,
-        photo: photoMap.get(p.nameEn) || api.players.find(ap => ap.nameEn.includes(p.nameEn.split(" ").pop() || ""))?.photo || undefined,
-      })),
+      players: manual.players.map(p => {
+        const apiPlayer = apiMap.get(p.nameEn) || api.players.find(ap => ap.nameEn.includes(p.nameEn.split(" ").pop() || ""));
+        return {
+          ...p,
+          photo: apiPlayer?.photo || undefined,
+          // Keep manual club if present, otherwise use API club
+          club: p.club || apiPlayer?.club || "",
+        };
+      }),
     };
   }
 
   if (api) {
-    // API-only team: build a basic SquadData from API
+    // API-only team: build a SquadData from API with default formation + starters
+    const players = api.players.map(p => ({
+      name: p.nameEn, // No Hebrew available from API
+      nameEn: p.nameEn,
+      num: p.num,
+      club: p.club || "",
+      pos: p.pos,
+      photo: p.photo,
+    }));
+    const starterNames = pickDefaultStarters(players);
     return {
       coach: "",
       coachEn: "",
       formation: "4-3-3",
-      sources: [],
-      players: api.players.map(p => ({
-        name: p.nameEn, // No Hebrew available from API
-        nameEn: p.nameEn,
-        num: p.num,
-        club: "",
-        pos: p.pos,
-        photo: p.photo,
+      sources: [{
+        name: "Default",
+        formation: "4-3-3",
+        starters: starterNames,
+      }],
+      players: players.map(p => ({
+        ...p,
+        starter: starterNames.includes(p.nameEn),
       })),
     };
   }

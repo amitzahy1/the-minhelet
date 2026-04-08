@@ -173,11 +173,11 @@ export default function SquadsPage() {
                             <span className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ background: teamColors.primary, fontFamily: "var(--font-inter)" }}>{p.num}</span>
                           )}
                           <div className="flex-1 min-w-0">
-                            <span className="font-bold text-sm text-gray-900">{p.name !== p.nameEn ? p.name : ""}</span>
+                            <span className="font-bold text-sm text-gray-900 dark:text-gray-100">{p.name !== p.nameEn ? p.name : ""}</span>
                             <span className="text-sm text-gray-500 ms-1">{p.nameEn}</span>
+                            {p.club && <span className="block text-xs text-gray-400 mt-0.5">{p.club}</span>}
                           </div>
                           <span className="text-xs text-gray-400 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>#{p.num}</span>
-                          {p.club && <span className="text-xs text-gray-400 hidden sm:block">{p.club}</span>}
                         </div>
                       ))}
                     </div>
@@ -201,8 +201,9 @@ export default function SquadsPage() {
                           <span className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-500" style={{ fontFamily: "var(--font-inter)" }}>{p.num}</span>
                         )}
                         <div className="flex-1 min-w-0">
-                          <span className="font-bold text-sm text-gray-800">{p.name !== p.nameEn ? p.name : ""}</span>
+                          <span className="font-bold text-sm text-gray-800 dark:text-gray-200">{p.name !== p.nameEn ? p.name : ""}</span>
                           <span className="text-sm text-gray-400 ms-1">{p.nameEn}</span>
+                          {p.club && <span className="block text-xs text-gray-400 mt-0.5">{p.club}</span>}
                         </div>
                         <span className="text-xs text-gray-400">{p.pos}</span>
                         <span className="text-xs text-gray-400 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>#{p.num}</span>

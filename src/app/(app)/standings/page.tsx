@@ -381,18 +381,18 @@ export default function StandingsPage() {
       </div>
 
       {/* Player Radar Chart */}
-      {(() => {
-        const radarPlayer = PLAYERS.find((p) => p.id === radarPlayerId) ?? PLAYERS.find((p) => p.isYou)!;
+      {PLAYERS.length >= 2 && (() => {
+        const radarPlayer = PLAYERS.find((p) => p.id === radarPlayerId) || PLAYERS[0];
         const leader = [...PLAYERS].sort((a, b) => b.total - a.total)[0];
-        // Compute max values for normalization
-        const maxToto = Math.max(...PLAYERS.map((p) => parseInt(p.toto)));
-        const maxExact = Math.max(...PLAYERS.map((p) => p.exact));
-        const maxGroups = Math.max(...PLAYERS.map((p) => p.breakdown.totoGroup + p.breakdown.exactGroup));
-        const maxKnockout = Math.max(...PLAYERS.map((p) => p.breakdown.totoKnockout + p.breakdown.exactKnockout));
-        const maxSpecials = Math.max(...PLAYERS.map((p) => p.specPts));
+        if (!radarPlayer || !leader) return null;
+        const maxToto = Math.max(1, ...PLAYERS.map((p) => parseInt(p.toto) || 0));
+        const maxExact = Math.max(1, ...PLAYERS.map((p) => p.exact));
+        const maxGroups = Math.max(1, ...PLAYERS.map((p) => p.breakdown.totoGroup + p.breakdown.exactGroup));
+        const maxKnockout = Math.max(1, ...PLAYERS.map((p) => p.breakdown.totoKnockout + p.breakdown.exactKnockout));
+        const maxSpecials = Math.max(1, ...PLAYERS.map((p) => p.specPts));
         const normalize = (p: typeof PLAYERS[0]) => ({
-          name: p.name,
-          toto: Math.round((parseInt(p.toto) / maxToto) * 100),
+          name: p.name || "",
+          toto: Math.round(((parseInt(p.toto) || 0) / maxToto) * 100),
           exact: Math.round((p.exact / maxExact) * 100),
           groups: Math.round(((p.breakdown.totoGroup + p.breakdown.exactGroup) / maxGroups) * 100),
           knockout: Math.round(((p.breakdown.totoKnockout + p.breakdown.exactKnockout) / maxKnockout) * 100),
@@ -443,14 +443,15 @@ export default function StandingsPage() {
       </div>
 
       {/* Points Sankey */}
-      <div className="mb-6">
-        <h2 className="text-lg font-bold text-gray-900 mb-3">מאיפה הנקודות שלך?</h2>
-        {(() => {
-          const me = PLAYERS.find((p) => p.isYou)!;
-          return (
+      {PLAYERS.length > 0 && (() => {
+        const me = PLAYERS.find((p) => p.isYou) || PLAYERS[0];
+        if (!me) return null;
+        return (
+          <div className="mb-6">
+            <h2 className="text-lg font-bold text-gray-900 mb-3">מאיפה הנקודות של {me.name || ""}?</h2>
             <PointsSankey
               player={{
-                name: me.name,
+                name: me.name || "",
                 toto: me.breakdown.totoGroup + me.breakdown.totoKnockout,
                 exact: me.breakdown.exactGroup + me.breakdown.exactKnockout,
                 groups: me.breakdown.groupAdvExact + me.breakdown.groupAdvPartial,
@@ -459,9 +460,9 @@ export default function StandingsPage() {
                 total: me.total,
               }}
             />
-          );
-        })()}
-      </div>
+          </div>
+        );
+      })()}
 
       {/* Category leaders */}
       <div className="mb-6">

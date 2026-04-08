@@ -111,7 +111,8 @@
         "num": 5,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/35544.png",
-        "age": 27
+        "age": 27,
+        "club": "Genoa"
       },
       {
         "nameEn": "E. López",
@@ -258,7 +259,8 @@
         "num": 18,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/313383.png",
-        "age": 20
+        "age": 20,
+        "club": "Atlético Madrid"
       },
       {
         "nameEn": "G. Berterame",
@@ -272,7 +274,8 @@
         "num": 11,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/94562.png",
-        "age": 24
+        "age": 24,
+        "club": "Milan"
       },
       {
         "nameEn": "A. González",
@@ -293,7 +296,8 @@
         "num": 9,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/2887.png",
-        "age": 34
+        "age": 34,
+        "club": "Fulham"
       },
       {
         "nameEn": "D. Lainez",
@@ -395,7 +399,8 @@
         "num": 4,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/2897.png",
-        "age": 29
+        "age": 29,
+        "club": "Bayern"
       },
       {
         "nameEn": "Kim Moon-Hwan",
@@ -451,7 +456,8 @@
         "num": 23,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/280358.png",
-        "age": 22
+        "age": 22,
+        "club": "Gladbach"
       },
       {
         "nameEn": "Eom Ji-Sung",
@@ -493,14 +499,16 @@
         "num": 10,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/2906.png",
-        "age": 33
+        "age": 33,
+        "club": "Mainz"
       },
       {
         "nameEn": "Lee Kang-In",
         "num": 19,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/927.png",
-        "age": 24
+        "age": 24,
+        "club": "PSG"
       },
       {
         "nameEn": "Paik Seung-Ho",
@@ -542,7 +550,8 @@
         "num": 11,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/24888.png",
-        "age": 29
+        "age": 29,
+        "club": "Wolves"
       },
       {
         "nameEn": "Jeong Sang-Bin",
@@ -581,7 +590,8 @@
         "num": 16,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/269349.png",
-        "age": 23
+        "age": 23,
+        "club": "Braga"
       },
       {
         "nameEn": "M. Jedlička",
@@ -609,7 +619,8 @@
         "num": 5,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/1231.png",
-        "age": 33
+        "age": 33,
+        "club": "Hoffenheim"
       },
       {
         "nameEn": "T. Holeš",
@@ -623,7 +634,8 @@
         "num": 4,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/162964.png",
-        "age": 25
+        "age": 25,
+        "club": "Hoffenheim"
       },
       {
         "nameEn": "V. Jemelka",
@@ -644,14 +656,16 @@
         "num": 7,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/66407.png",
-        "age": 26
+        "age": 26,
+        "club": "Wolves"
       },
       {
         "nameEn": "M. Vitík",
         "num": 6,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/287564.png",
-        "age": 22
+        "age": 22,
+        "club": "Bologna"
       },
       {
         "nameEn": "J. Zelený",
@@ -679,7 +693,8 @@
         "num": 9,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/199871.png",
-        "age": 22
+        "age": 22,
+        "club": "Lyon"
       },
       {
         "nameEn": "T. Ladra",
@@ -707,14 +722,16 @@
         "num": 22,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/1243.png",
-        "age": 30
+        "age": 30,
+        "club": "West Ham"
       },
       {
         "nameEn": "P. Šulc",
         "num": 15,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/66387.png",
-        "age": 25
+        "age": 25,
+        "club": "Lyon"
       },
       {
         "nameEn": "T. Chorý",
@@ -742,7 +759,8 @@
         "num": 10,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/794.png",
-        "age": 29
+        "age": 29,
+        "club": "Leverkusen"
       },
       {
         "nameEn": "D. Višinský",
@@ -1086,7 +1104,8 @@
         "num": 17,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/51016.png",
-        "age": 26
+        "age": 26,
+        "club": "Villarreal"
       },
       {
         "nameEn": "M. Choinière",
@@ -1177,7 +1196,8 @@
         "num": 7,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/8489.png",
-        "age": 25
+        "age": 25,
+        "club": "Juventus"
       },
       {
         "nameEn": "P. David",
@@ -1205,7 +1225,8 @@
         "num": 9,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/2001.png",
-        "age": 30
+        "age": 30,
+        "club": "Southampton"
       },
       {
         "nameEn": "L. Millar",
@@ -1226,14 +1247,16 @@
         "num": 12,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/351587.png",
-        "age": 25
+        "age": 25,
+        "club": "Villarreal"
       },
       {
         "nameEn": "J. Russell-Rowe",
         "num": 25,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/203428.png",
-        "age": 23
+        "age": 23,
+        "club": "Toulouse"
       },
       {
         "nameEn": "J. Shaffelburg",
@@ -1416,7 +1439,8 @@
         "num": 1,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/25282.png",
-        "age": 28
+        "age": 28,
+        "club": "Dortmund"
       },
       {
         "nameEn": "Y. Mvogo",
@@ -1430,14 +1454,16 @@
         "num": 5,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/5.png",
-        "age": 30
+        "age": 30,
+        "club": "Inter"
       },
       {
         "nameEn": "A. Amenda",
         "num": 26,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/162414.png",
-        "age": 22
+        "age": 22,
+        "club": "Frankfurt"
       },
       {
         "nameEn": "A. Bajrami",
@@ -1451,21 +1477,24 @@
         "num": 18,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/48372.png",
-        "age": 27
+        "age": 27,
+        "club": "Valencia"
       },
       {
         "nameEn": "N. Elvedi",
         "num": 4,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/2803.png",
-        "age": 29
+        "age": 29,
+        "club": "Gladbach"
       },
       {
         "nameEn": "L. Jaquez",
         "num": 24,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/349344.png",
-        "age": 22
+        "age": 22,
+        "club": "Stuttgart"
       },
       {
         "nameEn": "M. Muheim",
@@ -1486,14 +1515,16 @@
         "num": 13,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/1631.png",
-        "age": 33
+        "age": 33,
+        "club": "Real Betis"
       },
       {
         "nameEn": "S. Widmer",
         "num": 3,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/48378.png",
-        "age": 32
+        "age": 32,
+        "club": "Mainz"
       },
       {
         "nameEn": "M. Aebischer",
@@ -1507,21 +1538,24 @@
         "num": 8,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/2807.png",
-        "age": 33
+        "age": 33,
+        "club": "Bologna"
       },
       {
         "nameEn": "A. Jashari",
         "num": 14,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/264705.png",
-        "age": 23
+        "age": 23,
+        "club": "Milan"
       },
       {
         "nameEn": "J. Manzambi",
         "num": 9,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/406244.png",
-        "age": 20
+        "age": 20,
+        "club": "Freiburg"
       },
       {
         "nameEn": "Joël Monteiro",
@@ -1549,21 +1583,24 @@
         "num": 8,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/1014.png",
-        "age": 24
+        "age": 24,
+        "club": "Bologna"
       },
       {
         "nameEn": "D. Sow",
         "num": 15,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/957.png",
-        "age": 28
+        "age": 28,
+        "club": "Sevilla"
       },
       {
         "nameEn": "R. Vargas",
         "num": 17,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/48471.png",
-        "age": 27
+        "age": 27,
+        "club": "Sevilla"
       },
       {
         "nameEn": "G. Xhaka",
@@ -1577,14 +1614,16 @@
         "num": 6,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/2810.png",
-        "age": 29
+        "age": 29,
+        "club": "Monaco"
       },
       {
         "nameEn": "B. Embolo",
         "num": 7,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/421.png",
-        "age": 28
+        "age": 28,
+        "club": "Rennes"
       },
       {
         "nameEn": "C. Fassnacht",
@@ -1605,7 +1644,8 @@
         "num": 11,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/48648.png",
-        "age": 25
+        "age": 25,
+        "club": "Nottingham Forest"
       },
       {
         "nameEn": "N. Okafor",
@@ -1619,7 +1659,8 @@
         "num": 22,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/163032.png",
-        "age": 23
+        "age": 23,
+        "club": "Augsburg"
       },
       {
         "nameEn": "I. Schmidt",
@@ -1658,14 +1699,16 @@
         "num": 1,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/281.png",
-        "age": 27
+        "age": 27,
+        "club": "Brentford"
       },
       {
         "nameEn": "M. Travers",
         "num": 23,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/18860.png",
-        "age": 26
+        "age": 26,
+        "club": "Everton"
       },
       {
         "nameEn": "J. Abankwah",
@@ -1679,14 +1722,16 @@
         "num": 2,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/18758.png",
-        "age": 37
+        "age": 37,
+        "club": "Everton"
       },
       {
         "nameEn": "N. Collins",
         "num": 22,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/19495.png",
-        "age": 24
+        "age": 24,
+        "club": "Brentford"
       },
       {
         "nameEn": "J. Dunne",
@@ -1707,21 +1752,24 @@
         "num": 3,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/19587.png",
-        "age": 29
+        "age": 29,
+        "club": "Southampton"
       },
       {
         "nameEn": "J. O&apos;Brien",
         "num": 5,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/270139.png",
-        "age": 24
+        "age": 24,
+        "club": "Everton"
       },
       {
         "nameEn": "D. O&apos;Shea",
         "num": 4,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/17597.png",
-        "age": 26
+        "age": 26,
+        "club": "Ipswich"
       },
       {
         "nameEn": "L. Scales",
@@ -1735,7 +1783,8 @@
         "num": 11,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/231039.png",
-        "age": 25
+        "age": 25,
+        "club": "Southampton"
       },
       {
         "nameEn": "R. Brady",
@@ -1777,7 +1826,8 @@
         "num": 14,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/18397.png",
-        "age": 27
+        "age": 27,
+        "club": "Ipswich"
       },
       {
         "nameEn": "H. Vale",
@@ -1844,7 +1894,8 @@
         "num": 0,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/70366.png",
-        "age": 29
+        "age": 29,
+        "club": "Nottingham Forest"
       },
       {
         "nameEn": "Alex Sandro",
@@ -1858,21 +1909,24 @@
         "num": 15,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/307835.png",
-        "age": 22
+        "age": 22,
+        "club": "PSG"
       },
       {
         "nameEn": "Bremer",
         "num": 14,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/30497.png",
-        "age": 28
+        "age": 28,
+        "club": "Juventus"
       },
       {
         "nameEn": "Caio Henrique",
         "num": 16,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/10316.png",
-        "age": 28
+        "age": 28,
+        "club": "Monaco"
       },
       {
         "nameEn": "Danilo",
@@ -1886,7 +1940,8 @@
         "num": 3,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/372.png",
-        "age": 27
+        "age": 27,
+        "club": "Real Madrid"
       },
       {
         "nameEn": "Fabrício Bruno",
@@ -1900,7 +1955,8 @@
         "num": 3,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/22224.png",
-        "age": 28
+        "age": 28,
+        "club": "Arsenal"
       },
       {
         "nameEn": "Ibañez",
@@ -1935,7 +1991,8 @@
         "num": 4,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/257.png",
-        "age": 31
+        "age": 31,
+        "club": "PSG"
       },
       {
         "nameEn": "Paulo Henrique",
@@ -1963,42 +2020,48 @@
         "num": 2,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/349001.png",
-        "age": 22
+        "age": 22,
+        "club": "Roma"
       },
       {
         "nameEn": "André",
         "num": 18,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/265784.png",
-        "age": 24
+        "age": 24,
+        "club": "Wolves"
       },
       {
         "nameEn": "Andrey Santos",
         "num": 8,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/305834.png",
-        "age": 21
+        "age": 21,
+        "club": "Chelsea"
       },
       {
         "nameEn": "Bruno Guimarães",
         "num": 8,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/10135.png",
-        "age": 28
+        "age": 28,
+        "club": "Newcastle"
       },
       {
         "nameEn": "Carlos Augusto",
         "num": 16,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/10238.png",
-        "age": 26
+        "age": 26,
+        "club": "Inter"
       },
       {
         "nameEn": "Casemiro",
         "num": 5,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/747.png",
-        "age": 33
+        "age": 33,
+        "club": "Man United"
       },
       {
         "nameEn": "Danilo",
@@ -2026,14 +2089,16 @@
         "num": 5,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/195103.png",
-        "age": 24
+        "age": 24,
+        "club": "Wolves"
       },
       {
         "nameEn": "Joelinton",
         "num": 17,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/723.png",
-        "age": 29
+        "age": 29,
+        "club": "Newcastle"
       },
       {
         "nameEn": "Lucas Paquetá",
@@ -2047,35 +2112,40 @@
         "num": 7,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/1165.png",
-        "age": 26
+        "age": 26,
+        "club": "Man United"
       },
       {
         "nameEn": "Endrick",
         "num": 19,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/377122.png",
-        "age": 19
+        "age": 19,
+        "club": "Lyon"
       },
       {
         "nameEn": "Estêvão",
         "num": 20,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/425733.png",
-        "age": 18
+        "age": 18,
+        "club": "Chelsea"
       },
       {
         "nameEn": "Igor Jesus",
         "num": 9,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/9366.png",
-        "age": 24
+        "age": 24,
+        "club": "Nottingham Forest"
       },
       {
         "nameEn": "João Pedro",
         "num": 9,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/10329.png",
-        "age": 24
+        "age": 24,
+        "club": "Chelsea"
       },
       {
         "nameEn": "Luiz Henrique",
@@ -2089,49 +2159,56 @@
         "num": 22,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/127769.png",
-        "age": 24
+        "age": 24,
+        "club": "Arsenal"
       },
       {
         "nameEn": "Raphinha",
         "num": 10,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/1496.png",
-        "age": 29
+        "age": 29,
+        "club": "Barcelona"
       },
       {
         "nameEn": "Rayan",
         "num": 26,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/407806.png",
-        "age": 19
+        "age": 19,
+        "club": "Bournemouth"
       },
       {
         "nameEn": "Richarlison",
         "num": 9,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/2413.png",
-        "age": 28
+        "age": 28,
+        "club": "Tottenham"
       },
       {
         "nameEn": "Rodrygo",
         "num": 10,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/10009.png",
-        "age": 24
+        "age": 24,
+        "club": "Real Madrid"
       },
       {
         "nameEn": "Thiago",
         "num": 21,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/196156.png",
-        "age": 24
+        "age": 24,
+        "club": "Brentford"
       },
       {
         "nameEn": "Vinícius Júnior",
         "num": 10,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/762.png",
-        "age": 25
+        "age": 25,
+        "club": "Real Madrid"
       },
       {
         "nameEn": "Vitor Roque",
@@ -2177,14 +2254,16 @@
         "num": 5,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/21694.png",
-        "age": 29
+        "age": 29,
+        "club": "Marseille"
       },
       {
         "nameEn": "A. Ait Boudlal",
         "num": 27,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/417830.png",
-        "age": 19
+        "age": 19,
+        "club": "Rennes"
       },
       {
         "nameEn": "I. Baouf",
@@ -2205,7 +2284,8 @@
         "num": 5,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/18814.png",
-        "age": 28
+        "age": 28,
+        "club": "Fulham"
       },
       {
         "nameEn": "S. El Karouani",
@@ -2233,7 +2313,8 @@
         "num": 2,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/9.png",
-        "age": 27
+        "age": 27,
+        "club": "PSG"
       },
       {
         "nameEn": "R. Halhal",
@@ -2247,14 +2328,16 @@
         "num": 3,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/545.png",
-        "age": 28
+        "age": 28,
+        "club": "Man United"
       },
       {
         "nameEn": "C. Riad",
         "num": 18,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/278898.png",
-        "age": 22
+        "age": 22,
+        "club": "Crystal Palace"
       },
       {
         "nameEn": "A. Salah-Eddine",
@@ -2268,14 +2351,16 @@
         "num": 21,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/129682.png",
-        "age": 25
+        "age": 25,
+        "club": "Bournemouth"
       },
       {
         "nameEn": "S. Amrabat",
         "num": 4,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/74.png",
-        "age": 29
+        "age": 29,
+        "club": "Real Betis"
       },
       {
         "nameEn": "Y. Belammari",
@@ -2289,28 +2374,32 @@
         "num": 10,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/744.png",
-        "age": 26
+        "age": 26,
+        "club": "Real Madrid"
       },
       {
         "nameEn": "N. El Aynaoui",
         "num": 24,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/277003.png",
-        "age": 24
+        "age": 24,
+        "club": "Roma"
       },
       {
         "nameEn": "B. El Khannouss",
         "num": 23,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/340573.png",
-        "age": 21
+        "age": 21,
+        "club": "Stuttgart"
       },
       {
         "nameEn": "S. El Mourabet",
         "num": 28,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/415431.png",
-        "age": 20
+        "age": 20,
+        "club": "Strasbourg"
       },
       {
         "nameEn": "M. Hrimat",
@@ -2324,7 +2413,8 @@
         "num": 8,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/129678.png",
-        "age": 25
+        "age": 25,
+        "club": "Girona"
       },
       {
         "nameEn": "I. Saibari",
@@ -2345,21 +2435,24 @@
         "num": 16,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/369544.png",
-        "age": 20
+        "age": 20,
+        "club": "Strasbourg"
       },
       {
         "nameEn": "Ilias Akhomach",
         "num": 16,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/290740.png",
-        "age": 21
+        "age": 21,
+        "club": "Rayo Vallecano"
       },
       {
         "nameEn": "E. Ben Seghir",
         "num": 13,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/343320.png",
-        "age": 20
+        "age": 20,
+        "club": "Leverkusen"
       },
       {
         "nameEn": "A. El Kaabi",
@@ -2380,14 +2473,16 @@
         "num": 17,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/181421.png",
-        "age": 24
+        "age": 24,
+        "club": "Real Betis"
       },
       {
         "nameEn": "H. Igamane",
         "num": 7,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/306979.png",
-        "age": 23
+        "age": 23,
+        "club": "Lille"
       },
       {
         "nameEn": "S. Rahimi",
@@ -2426,7 +2521,8 @@
         "num": 1,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/18933.png",
-        "age": 29
+        "age": 29,
+        "club": "Nottingham Forest"
       },
       {
         "nameEn": "L. Kelly",
@@ -2454,7 +2550,8 @@
         "num": 2,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/44871.png",
-        "age": 23
+        "age": 23,
+        "club": "Brentford"
       },
       {
         "nameEn": "M. Johnston",
@@ -2489,7 +2586,8 @@
         "num": 3,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/289.png",
-        "age": 31
+        "age": 31,
+        "club": "Liverpool"
       },
       {
         "nameEn": "J. Souttar",
@@ -2517,7 +2615,8 @@
         "num": 11,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/1125.png",
-        "age": 30
+        "age": 30,
+        "club": "Bournemouth"
       },
       {
         "nameEn": "Findlay Curtis",
@@ -2531,14 +2630,16 @@
         "num": 19,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/44814.png",
-        "age": 26
+        "age": 26,
+        "club": "Bologna"
       },
       {
         "nameEn": "B. Gilmour",
         "num": 8,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/130423.png",
-        "age": 24
+        "age": 24,
+        "club": "Napoli"
       },
       {
         "nameEn": "A. Irving",
@@ -2552,7 +2653,8 @@
         "num": 7,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/19191.png",
-        "age": 31
+        "age": 31,
+        "club": "Aston Villa"
       },
       {
         "nameEn": "K. McLean",
@@ -2566,14 +2668,16 @@
         "num": 4,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/903.png",
-        "age": 29
+        "age": 29,
+        "club": "Napoli"
       },
       {
         "nameEn": "L. Miller",
         "num": 14,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/343558.png",
-        "age": 19
+        "age": 19,
+        "club": "Udinese"
       },
       {
         "nameEn": "J. Mulligan",
@@ -2587,7 +2691,8 @@
         "num": 10,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/19524.png",
-        "age": 29
+        "age": 29,
+        "club": "Torino"
       },
       {
         "nameEn": "K. Bowie",
@@ -2608,7 +2713,8 @@
         "num": 17,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/343576.png",
-        "age": 20
+        "age": 20,
+        "club": "Bournemouth"
       },
       {
         "nameEn": "L. Dykes",
@@ -2622,7 +2728,8 @@
         "num": 18,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/8794.png",
-        "age": 26
+        "age": 26,
+        "club": "Ipswich"
       },
       {
         "nameEn": "L. Shankland",
@@ -2903,14 +3010,16 @@
         "num": 16,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/355994.png",
-        "age": 21
+        "age": 21,
+        "club": "Villarreal"
       },
       {
         "nameEn": "M. McKenzie",
         "num": 22,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/50735.png",
-        "age": 26
+        "age": 26,
+        "club": "Toulouse"
       },
       {
         "nameEn": "T. Ream",
@@ -2924,14 +3033,16 @@
         "num": 3,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/126949.png",
-        "age": 25
+        "age": 25,
+        "club": "Crystal Palace"
       },
       {
         "nameEn": "A. Robinson",
         "num": 5,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/19549.png",
-        "age": 28
+        "age": 28,
+        "club": "Fulham"
       },
       {
         "nameEn": "M. Robinson",
@@ -2945,7 +3056,8 @@
         "num": 19,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/50852.png",
-        "age": 23
+        "age": 23,
+        "club": "Gladbach"
       },
       {
         "nameEn": "J. Tolkin",
@@ -2980,7 +3092,8 @@
         "num": 15,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/133185.png",
-        "age": 24
+        "age": 24,
+        "club": "Atlético Madrid"
       },
       {
         "nameEn": "D. Luna",
@@ -2994,7 +3107,8 @@
         "num": 8,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/415.png",
-        "age": 27
+        "age": 27,
+        "club": "Juventus"
       },
       {
         "nameEn": "A. Morris",
@@ -3008,7 +3122,8 @@
         "num": 7,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/161921.png",
-        "age": 23
+        "age": 23,
+        "club": "Gladbach"
       },
       {
         "nameEn": "C. Roldan",
@@ -3029,14 +3144,16 @@
         "num": 6,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/80752.png",
-        "age": 24
+        "age": 24,
+        "club": "Lyon"
       },
       {
         "nameEn": "M. Tillman",
         "num": 17,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/162037.png",
-        "age": 23
+        "age": 23,
+        "club": "Leverkusen"
       },
       {
         "nameEn": "T. Tillman",
@@ -3050,7 +3167,8 @@
         "num": 21,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/1138.png",
-        "age": 25
+        "age": 25,
+        "club": "Marseille"
       },
       {
         "nameEn": "P. Agyemang",
@@ -3071,7 +3189,8 @@
         "num": 20,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/138835.png",
-        "age": 24
+        "age": 24,
+        "club": "Monaco"
       },
       {
         "nameEn": "R. Pepi",
@@ -3085,7 +3204,8 @@
         "num": 10,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/17.png",
-        "age": 27
+        "age": 27,
+        "club": "Milan"
       },
       {
         "nameEn": "H. Wright",
@@ -3216,7 +3336,8 @@
         "num": 19,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/70747.png",
-        "age": 21
+        "age": 21,
+        "club": "Strasbourg"
       },
       {
         "nameEn": "M. Galarza",
@@ -3230,7 +3351,8 @@
         "num": 8,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/278370.png",
-        "age": 22
+        "age": 22,
+        "club": "Brighton"
       },
       {
         "nameEn": "A. Romero",
@@ -3312,7 +3434,8 @@
         "num": 12,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/50132.png",
-        "age": 27
+        "age": 27,
+        "club": "Man United"
       },
       {
         "nameEn": "U. Çakır",
@@ -3354,7 +3477,8 @@
         "num": 2,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/22222.png",
-        "age": 28
+        "age": 28,
+        "club": "Roma"
       },
       {
         "nameEn": "M. Demiral",
@@ -3375,14 +3499,16 @@
         "num": 15,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/26300.png",
-        "age": 25
+        "age": 25,
+        "club": "Hoffenheim"
       },
       {
         "nameEn": "F. Kadıoğlu",
         "num": 20,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/1361.png",
-        "age": 26
+        "age": 26,
+        "club": "Brighton"
       },
       {
         "nameEn": "M. Müldür",
@@ -3403,7 +3529,8 @@
         "num": 10,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/1640.png",
-        "age": 31
+        "age": 31,
+        "club": "Inter"
       },
       {
         "nameEn": "M. Eskihellaç",
@@ -3417,14 +3544,16 @@
         "num": 8,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/291964.png",
-        "age": 20
+        "age": 20,
+        "club": "Real Madrid"
       },
       {
         "nameEn": "A. Karazor",
         "num": 19,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/24963.png",
-        "age": 29
+        "age": 29,
+        "club": "Stuttgart"
       },
       {
         "nameEn": "O. Kökçü",
@@ -3438,7 +3567,8 @@
         "num": 5,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/24807.png",
-        "age": 27
+        "age": 27,
+        "club": "Dortmund"
       },
       {
         "nameEn": "İ. Yüksek",
@@ -3466,7 +3596,8 @@
         "num": 13,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/388570.png",
-        "age": 21
+        "age": 21,
+        "club": "Porto"
       },
       {
         "nameEn": "İ. Kahveci",
@@ -3487,7 +3618,8 @@
         "num": 11,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/339883.png",
-        "age": 20
+        "age": 20,
+        "club": "Juventus"
       },
       {
         "nameEn": "B. Yılmaz",
@@ -3686,105 +3818,120 @@
         "num": 1,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/702.png",
-        "age": 35
+        "age": 35,
+        "club": "Hoffenheim"
       },
       {
         "nameEn": "F. Dahmen",
         "num": 21,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/25903.png",
-        "age": 27
+        "age": 27,
+        "club": "Augsburg"
       },
       {
         "nameEn": "A. Nübel",
         "num": 12,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/399.png",
-        "age": 29
+        "age": 29,
+        "club": "Stuttgart"
       },
       {
         "nameEn": "W. Anton",
         "num": 3,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/25368.png",
-        "age": 29
+        "age": 29,
+        "club": "Dortmund"
       },
       {
         "nameEn": "N. Brown",
         "num": 18,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/280074.png",
-        "age": 22
+        "age": 22,
+        "club": "Frankfurt"
       },
       {
         "nameEn": "R. Koch",
         "num": 3,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/26238.png",
-        "age": 29
+        "age": 29,
+        "club": "Frankfurt"
       },
       {
         "nameEn": "D. Raum",
         "num": 22,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/25158.png",
-        "age": 27
+        "age": 27,
+        "club": "RB Leipzig"
       },
       {
         "nameEn": "A. Rüdiger",
         "num": 2,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/2285.png",
-        "age": 32
+        "age": 32,
+        "club": "Real Madrid"
       },
       {
         "nameEn": "N. Schlotterbeck",
         "num": 15,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/26243.png",
-        "age": 26
+        "age": 26,
+        "club": "Dortmund"
       },
       {
         "nameEn": "J. Tah",
         "num": 4,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/972.png",
-        "age": 29
+        "age": 29,
+        "club": "Bayern"
       },
       {
         "nameEn": "M. Thiaw",
         "num": 26,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/163189.png",
-        "age": 24
+        "age": 24,
+        "club": "Newcastle"
       },
       {
         "nameEn": "J. Vagnoman",
         "num": 23,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/24868.png",
-        "age": 25
+        "age": 25,
+        "club": "Stuttgart"
       },
       {
         "nameEn": "N. Amiri",
         "num": 10,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/714.png",
-        "age": 29
+        "age": 29,
+        "club": "Mainz"
       },
       {
         "nameEn": "R. Andrich",
         "num": 23,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/24903.png",
-        "age": 31
+        "age": 31,
+        "club": "Leverkusen"
       },
       {
         "nameEn": "R. Baku",
         "num": 23,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/25917.png",
-        "age": 27
+        "age": 27,
+        "club": "RB Leipzig"
       },
       {
         "nameEn": "S. El Mala",
@@ -3798,56 +3945,64 @@
         "num": 8,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/511.png",
-        "age": 30
+        "age": 30,
+        "club": "Bayern"
       },
       {
         "nameEn": "P. Groß",
         "num": 5,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/18970.png",
-        "age": 34
+        "age": 34,
+        "club": "Brighton"
       },
       {
         "nameEn": "L. Karl",
         "num": 25,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/494131.png",
-        "age": 17
+        "age": 17,
+        "club": "Bayern"
       },
       {
         "nameEn": "J. Kimmich",
         "num": 6,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/502.png",
-        "age": 30
+        "age": 30,
+        "club": "Bayern"
       },
       {
         "nameEn": "F. Nmecha",
         "num": 13,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/637.png",
-        "age": 25
+        "age": 25,
+        "club": "Dortmund"
       },
       {
         "nameEn": "A. Ouédraogo",
         "num": 9,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/380978.png",
-        "age": 19
+        "age": 19,
+        "club": "RB Leipzig"
       },
       {
         "nameEn": "A. Pavlović",
         "num": 5,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/328033.png",
-        "age": 21
+        "age": 21,
+        "club": "Bayern"
       },
       {
         "nameEn": "K. Schade",
         "num": 9,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/178077.png",
-        "age": 24
+        "age": 24,
+        "club": "Brentford"
       },
       {
         "nameEn": "A. Stach",
@@ -3861,63 +4016,72 @@
         "num": 16,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/137210.png",
-        "age": 24
+        "age": 24,
+        "club": "Stuttgart"
       },
       {
         "nameEn": "F. Wirtz",
         "num": 17,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/203224.png",
-        "age": 22
+        "age": 22,
+        "club": "Liverpool"
       },
       {
         "nameEn": "K. Adeyemi",
         "num": 14,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/7334.png",
-        "age": 23
+        "age": 23,
+        "club": "Dortmund"
       },
       {
         "nameEn": "M. Beier",
         "num": 9,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/158644.png",
-        "age": 23
+        "age": 23,
+        "club": "Dortmund"
       },
       {
         "nameEn": "J. Burkardt",
         "num": 10,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/25926.png",
-        "age": 25
+        "age": 25,
+        "club": "Frankfurt"
       },
       {
         "nameEn": "C. Führich",
         "num": 14,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/24798.png",
-        "age": 27
+        "age": 27,
+        "club": "Stuttgart"
       },
       {
         "nameEn": "S. Gnabry",
         "num": 20,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/510.png",
-        "age": 30
+        "age": 30,
+        "club": "Bayern"
       },
       {
         "nameEn": "K. Havertz",
         "num": 7,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/978.png",
-        "age": 26
+        "age": 26,
+        "club": "Arsenal"
       },
       {
         "nameEn": "J. Leweling",
         "num": 7,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/128533.png",
-        "age": 24
+        "age": 24,
+        "club": "Stuttgart"
       },
       {
         "nameEn": "L. Sané",
@@ -3931,14 +4095,16 @@
         "num": 13,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/26475.png",
-        "age": 29
+        "age": 29,
+        "club": "Stuttgart"
       },
       {
         "nameEn": "N. Woltemade",
         "num": 11,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/158054.png",
-        "age": 23
+        "age": 23,
+        "club": "Newcastle"
       }
     ],
     "logo": "https://media.api-sports.io/football/teams/25.png"
@@ -3985,14 +4151,16 @@
         "num": 7,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/46731.png",
-        "age": 27
+        "age": 27,
+        "club": "Milan"
       },
       {
         "nameEn": "P. Hincapié",
         "num": 3,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/127817.png",
-        "age": 23
+        "age": 23,
+        "club": "Arsenal"
       },
       {
         "nameEn": "Y. Medina",
@@ -4013,7 +4181,8 @@
         "num": 6,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/16367.png",
-        "age": 24
+        "age": 24,
+        "club": "PSG"
       },
       {
         "nameEn": "J. Porozo",
@@ -4062,7 +4231,8 @@
         "num": 23,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/116117.png",
-        "age": 24
+        "age": 24,
+        "club": "Chelsea"
       },
       {
         "nameEn": "D. Castillo",
@@ -4153,7 +4323,8 @@
         "num": 26,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/350799.png",
-        "age": 20
+        "age": 20,
+        "club": "Stuttgart"
       },
       {
         "nameEn": "J. Mercado",
@@ -4200,7 +4371,8 @@
         "num": 16,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/601332.png",
-        "age": 19
+        "age": 19,
+        "club": "Rennes"
       },
       {
         "nameEn": "A. Mandréa",
@@ -4235,7 +4407,8 @@
         "num": 15,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/21138.png",
-        "age": 24
+        "age": 24,
+        "club": "Man City"
       },
       {
         "nameEn": "H. Baouche",
@@ -4270,7 +4443,8 @@
         "num": 21,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/2194.png",
-        "age": 30
+        "age": 30,
+        "club": "Dortmund"
       },
       {
         "nameEn": "M. Dorval",
@@ -4291,7 +4465,8 @@
         "num": 2,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/1567.png",
-        "age": 34
+        "age": 34,
+        "club": "Lille"
       },
       {
         "nameEn": "S. Nair",
@@ -4319,14 +4494,16 @@
         "num": 14,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/4399.png",
-        "age": 26
+        "age": 26,
+        "club": "Nice"
       },
       {
         "nameEn": "I. Maza",
         "num": 22,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/380587.png",
-        "age": 20
+        "age": 20,
+        "club": "Leverkusen"
       },
       {
         "nameEn": "H. Mrezigue",
@@ -4354,7 +4531,8 @@
         "num": 18,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/200139.png",
-        "age": 25
+        "age": 25,
+        "club": "Wolfsburg"
       },
       {
         "nameEn": "A. Benbouali",
@@ -4375,7 +4553,8 @@
         "num": 10,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/276670.png",
-        "age": 23
+        "age": 23,
+        "club": "Frankfurt"
       },
       {
         "nameEn": "Amin Chiakha",
@@ -4396,7 +4575,8 @@
         "num": 9,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/85041.png",
-        "age": 25
+        "age": 25,
+        "club": "Marseille"
       },
       {
         "nameEn": "A. Hadj-Moussa",
@@ -4581,14 +4761,16 @@
         "num": 13,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/37137.png",
-        "age": 27
+        "age": 27,
+        "club": "Genoa"
       },
       {
         "nameEn": "M. Flekken",
         "num": 23,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/26232.png",
-        "age": 32
+        "age": 32,
+        "club": "Leverkusen"
       },
       {
         "nameEn": "R. Roefs",
@@ -4602,21 +4784,24 @@
         "num": 1,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/129058.png",
-        "age": 23
+        "age": 23,
+        "club": "Brighton"
       },
       {
         "nameEn": "N. Aké",
         "num": 5,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/18861.png",
-        "age": 30
+        "age": 30,
+        "club": "Man City"
       },
       {
         "nameEn": "D. Dumfries",
         "num": 22,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/226.png",
-        "age": 29
+        "age": 29,
+        "club": "Inter"
       },
       {
         "nameEn": "L. Geertruida",
@@ -4637,77 +4822,88 @@
         "num": 25,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/341642.png",
-        "age": 19
+        "age": 19,
+        "club": "Chelsea"
       },
       {
         "nameEn": "J. Timber",
         "num": 3,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/38746.png",
-        "age": 24
+        "age": 24,
+        "club": "Arsenal"
       },
       {
         "nameEn": "M. de Ligt",
         "num": 6,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/532.png",
-        "age": 26
+        "age": 26,
+        "club": "Man United"
       },
       {
         "nameEn": "S. de Vrij",
         "num": 6,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/194.png",
-        "age": 33
+        "age": 33,
+        "club": "Inter"
       },
       {
         "nameEn": "V. van Dijk",
         "num": 4,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/290.png",
-        "age": 34
+        "age": 34,
+        "club": "Liverpool"
       },
       {
         "nameEn": "J. van Hecke",
         "num": 3,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/38695.png",
-        "age": 25
+        "age": 25,
+        "club": "Brighton"
       },
       {
         "nameEn": "M. van de Ven",
         "num": 15,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/152849.png",
-        "age": 24
+        "age": 24,
+        "club": "Tottenham"
       },
       {
         "nameEn": "J. Frimpong",
         "num": 12,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/152654.png",
-        "age": 25
+        "age": 25,
+        "club": "Liverpool"
       },
       {
         "nameEn": "R. Gravenberch",
         "num": 8,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/542.png",
-        "age": 23
+        "age": 23,
+        "club": "Liverpool"
       },
       {
         "nameEn": "T. Koopmeiners",
         "num": 20,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/36899.png",
-        "age": 27
+        "age": 27,
+        "club": "Juventus"
       },
       {
         "nameEn": "T. Reijnders",
         "num": 14,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/36902.png",
-        "age": 27
+        "age": 27,
+        "club": "Man City"
       },
       {
         "nameEn": "J. Schouten",
@@ -4721,7 +4917,8 @@
         "num": 7,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/162016.png",
-        "age": 22
+        "age": 22,
+        "club": "Tottenham"
       },
       {
         "nameEn": "K. Smit",
@@ -4735,7 +4932,8 @@
         "num": 26,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/38747.png",
-        "age": 24
+        "age": 24,
+        "club": "Marseille"
       },
       {
         "nameEn": "L. Valente",
@@ -4749,7 +4947,8 @@
         "num": 21,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/538.png",
-        "age": 28
+        "age": 28,
+        "club": "Barcelona"
       },
       {
         "nameEn": "B. Brobbey",
@@ -4770,21 +4969,24 @@
         "num": 9,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/203762.png",
-        "age": 22
+        "age": 22,
+        "club": "Strasbourg"
       },
       {
         "nameEn": "C. Gakpo",
         "num": 11,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/247.png",
-        "age": 26
+        "age": 26,
+        "club": "Liverpool"
       },
       {
         "nameEn": "J. Kluivert",
         "num": 19,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/792.png",
-        "age": 26
+        "age": 26,
+        "club": "Bournemouth"
       },
       {
         "nameEn": "N. Lang",
@@ -4798,14 +5000,16 @@
         "num": 18,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/249.png",
-        "age": 26
+        "age": 26,
+        "club": "Roma"
       },
       {
         "nameEn": "W. Weghorst",
         "num": 9,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/25416.png",
-        "age": 33
+        "age": 33,
+        "club": "Ajax"
       }
     ],
     "logo": "https://media.api-sports.io/football/teams/1118.png"
@@ -4866,7 +5070,8 @@
         "num": 4,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/38114.png",
-        "age": 28
+        "age": 28,
+        "club": "Ajax"
       },
       {
         "nameEn": "H. Mochizuki",
@@ -4922,14 +5127,16 @@
         "num": 10,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/2598.png",
-        "age": 27
+        "age": 27,
+        "club": "Frankfurt"
       },
       {
         "nameEn": "W. Endo",
         "num": 6,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/8500.png",
-        "age": 32
+        "age": 32,
+        "club": "Liverpool"
       },
       {
         "nameEn": "J. Fujita",
@@ -4943,7 +5150,8 @@
         "num": 15,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/2601.png",
-        "age": 29
+        "age": 29,
+        "club": "Crystal Palace"
       },
       {
         "nameEn": "S. Kitano",
@@ -4957,7 +5165,8 @@
         "num": 24,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/33889.png",
-        "age": 25
+        "age": 25,
+        "club": "Mainz"
       },
       {
         "nameEn": "R. Sato",
@@ -4992,14 +5201,16 @@
         "num": 10,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/32862.png",
-        "age": 24
+        "age": 24,
+        "club": "Real Sociedad"
       },
       {
         "nameEn": "S. Machino",
         "num": 9,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/106851.png",
-        "age": 26
+        "age": 26,
+        "club": "Gladbach"
       },
       {
         "nameEn": "D. Maeda",
@@ -5013,14 +5224,16 @@
         "num": 8,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/1101.png",
-        "age": 30
+        "age": 30,
+        "club": "Monaco"
       },
       {
         "nameEn": "K. Mitoma",
         "num": 7,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/106835.png",
-        "age": 28
+        "age": 28,
+        "club": "Brighton"
       },
       {
         "nameEn": "Keito Nakamura",
@@ -5048,7 +5261,8 @@
         "num": 22,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/422572.png",
-        "age": 20
+        "age": 20,
+        "club": "Wolfsburg"
       },
       {
         "nameEn": "Y. Soma",
@@ -5062,7 +5276,8 @@
         "num": 8,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/199143.png",
-        "age": 24
+        "age": 24,
+        "club": "Freiburg"
       },
       {
         "nameEn": "A. Ueda",
@@ -5291,7 +5506,8 @@
         "num": 22,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/81573.png",
-        "age": 26
+        "age": 26,
+        "club": "Man City"
       },
       {
         "nameEn": "Salah Mohsen",
@@ -5305,14 +5521,16 @@
         "num": 11,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/2668.png",
-        "age": 28
+        "age": 28,
+        "club": "Nantes"
       },
       {
         "nameEn": "Mohamed Salah",
         "num": 10,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/306.png",
-        "age": 33
+        "age": 33,
+        "club": "Liverpool"
       },
       {
         "nameEn": "Zizo",
@@ -5590,7 +5808,8 @@
         "num": 11,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/18931.png",
-        "age": 34
+        "age": 34,
+        "club": "Nottingham Forest"
       },
       {
         "nameEn": "O. van Hattum",
@@ -5616,147 +5835,168 @@
         "num": 1,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/19465.png",
-        "age": 30
+        "age": 30,
+        "club": "Arsenal"
       },
       {
         "nameEn": "Álex Remiro",
         "num": 13,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/47269.png",
-        "age": 30
+        "age": 30,
+        "club": "Real Sociedad"
       },
       {
         "nameEn": "Unai Simón",
         "num": 23,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/47270.png",
-        "age": 28
+        "age": 28,
+        "club": "Athletic Club"
       },
       {
         "nameEn": "Pau Cubarsí Paredes",
         "num": 4,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/396623.png",
-        "age": 18
+        "age": 18,
+        "club": "Barcelona"
       },
       {
         "nameEn": "Marc Cucurella",
         "num": 24,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/47380.png",
-        "age": 27
+        "age": 27,
+        "club": "Chelsea"
       },
       {
         "nameEn": "Álex Grimaldo",
         "num": 3,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/563.png",
-        "age": 30
+        "age": 30,
+        "club": "Leverkusen"
       },
       {
         "nameEn": "D. Huijsen",
         "num": 6,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/361497.png",
-        "age": 20
+        "age": 20,
+        "club": "Real Madrid"
       },
       {
         "nameEn": "Aymeric Laporte",
         "num": 14,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/622.png",
-        "age": 31
+        "age": 31,
+        "club": "Athletic Club"
       },
       {
         "nameEn": "Robin Le Normand",
         "num": 3,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/47301.png",
-        "age": 29
+        "age": 29,
+        "club": "Atlético Madrid"
       },
       {
         "nameEn": "Marcos Llorente",
         "num": 5,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/753.png",
-        "age": 30
+        "age": 30,
+        "club": "Atlético Madrid"
       },
       {
         "nameEn": "Cristhian Mosquera",
         "num": 2,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/333682.png",
-        "age": 21
+        "age": 21,
+        "club": "Arsenal"
       },
       {
         "nameEn": "Pedro Porro",
         "num": 12,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/47519.png",
-        "age": 26
+        "age": 26,
+        "club": "Tottenham"
       },
       {
         "nameEn": "Dani Vivian",
         "num": 4,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/47278.png",
-        "age": 26
+        "age": 26,
+        "club": "Athletic Club"
       },
       {
         "nameEn": "Pablo Barrios",
         "num": 2,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/336594.png",
-        "age": 22
+        "age": 22,
+        "club": "Atlético Madrid"
       },
       {
         "nameEn": "Fermín",
         "num": 22,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/340626.png",
-        "age": 22
+        "age": 22,
+        "club": "Barcelona"
       },
       {
         "nameEn": "Pablo Fornals",
         "num": 17,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/1697.png",
-        "age": 29
+        "age": 29,
+        "club": "Real Betis"
       },
       {
         "nameEn": "Aleix García",
         "num": 20,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/47516.png",
-        "age": 28
+        "age": 28,
+        "club": "Leverkusen"
       },
       {
         "nameEn": "Mikel Merino",
         "num": 6,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/47311.png",
-        "age": 29
+        "age": 29,
+        "club": "Arsenal"
       },
       {
         "nameEn": "Dani Olmo",
         "num": 10,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/1323.png",
-        "age": 27
+        "age": 27,
+        "club": "Barcelona"
       },
       {
         "nameEn": "Pedri",
         "num": 20,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/133609.png",
-        "age": 23
+        "age": 23,
+        "club": "Barcelona"
       },
       {
         "nameEn": "Rodri",
         "num": 16,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/44.png",
-        "age": 29
+        "age": 29,
+        "club": "Man City"
       },
       {
         "nameEn": "Jesús Rodríguez",
@@ -5770,91 +6010,104 @@
         "num": 8,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/328.png",
-        "age": 29
+        "age": 29,
+        "club": "PSG"
       },
       {
         "nameEn": "Carlos Soler",
         "num": 8,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/930.png",
-        "age": 28
+        "age": 28,
+        "club": "Real Sociedad"
       },
       {
         "nameEn": "Martín Zubimendi",
         "num": 18,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/47315.png",
-        "age": 26
+        "age": 26,
+        "club": "Arsenal"
       },
       {
         "nameEn": "Álex Baena",
         "num": 15,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/182219.png",
-        "age": 24
+        "age": 24,
+        "club": "Atlético Madrid"
       },
       {
         "nameEn": "Barrenetxea",
         "num": 26,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/47317.png",
-        "age": 24
+        "age": 24,
+        "club": "Real Sociedad"
       },
       {
         "nameEn": "Borja Iglesias",
         "num": 9,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/47348.png",
-        "age": 32
+        "age": 32,
+        "club": "Celta Vigo"
       },
       {
         "nameEn": "Lamine Yamal",
         "num": 19,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/386828.png",
-        "age": 18
+        "age": 18,
+        "club": "Barcelona"
       },
       {
         "nameEn": "Víctor Muñoz",
         "num": 25,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/338751.png",
-        "age": 22
+        "age": 22,
+        "club": "Osasuna"
       },
       {
         "nameEn": "Mikel Oyarzabal",
         "num": 21,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/47323.png",
-        "age": 28
+        "age": 28,
+        "club": "Real Sociedad"
       },
       {
         "nameEn": "Yeremy Pino",
         "num": 11,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/184226.png",
-        "age": 23
+        "age": 23,
+        "club": "Crystal Palace"
       },
       {
         "nameEn": "Samu",
         "num": 3,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/358628.png",
-        "age": 21
+        "age": 21,
+        "club": "Porto"
       },
       {
         "nameEn": "Ferran Torres",
         "num": 7,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/931.png",
-        "age": 25
+        "age": 25,
+        "club": "Barcelona"
       },
       {
         "nameEn": "Jorge de Frutos",
         "num": 2,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/128582.png",
-        "age": 28
+        "age": 28,
+        "club": "Rayo Vallecano"
       }
     ],
     "logo": "https://media.api-sports.io/football/teams/9.png"
@@ -5880,7 +6133,8 @@
         "num": 12,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/56266.png",
-        "age": 25
+        "age": 25,
+        "club": "Torino"
       },
       {
         "nameEn": "K. Martínez",
@@ -5922,7 +6176,8 @@
         "num": 4,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/101814.png",
-        "age": 26
+        "age": 26,
+        "club": "Barcelona"
       },
       {
         "nameEn": "B. Barboza",
@@ -5936,7 +6191,8 @@
         "num": 22,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/135334.png",
-        "age": 27
+        "age": 27,
+        "club": "Wolves"
       },
       {
         "nameEn": "S. Cáceres",
@@ -5950,21 +6206,24 @@
         "num": 2,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/31.png",
-        "age": 30
+        "age": 30,
+        "club": "Atlético Madrid"
       },
       {
         "nameEn": "S. Mouriño",
         "num": 16,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/311773.png",
-        "age": 23
+        "age": 23,
+        "club": "Villarreal"
       },
       {
         "nameEn": "M. Olivera",
         "num": 16,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/47254.png",
-        "age": 28
+        "age": 28,
+        "club": "Napoli"
       },
       {
         "nameEn": "J. Piquerez",
@@ -6020,7 +6279,8 @@
         "num": 6,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/863.png",
-        "age": 28
+        "age": 28,
+        "club": "Tottenham"
       },
       {
         "nameEn": "J. Daguer",
@@ -6076,21 +6336,24 @@
         "num": 5,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/51494.png",
-        "age": 24
+        "age": 24,
+        "club": "Man United"
       },
       {
         "nameEn": "F. Valverde",
         "num": 15,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/756.png",
-        "age": 27
+        "age": 27,
+        "club": "Real Madrid"
       },
       {
         "nameEn": "R. Zalazar",
         "num": 21,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/108563.png",
-        "age": 26
+        "age": 26,
+        "club": "Braga"
       },
       {
         "nameEn": "G. de Arrascaeta",
@@ -6118,14 +6381,16 @@
         "num": 26,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/278190.png",
-        "age": 24
+        "age": 24,
+        "club": "Monza"
       },
       {
         "nameEn": "M. Araújo",
         "num": 20,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/51776.png",
-        "age": 25
+        "age": 25,
+        "club": "Sporting CP"
       },
       {
         "nameEn": "A. Canobbio",
@@ -6242,7 +6507,8 @@
         "num": 12,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/44594.png",
-        "age": 26
+        "age": 26,
+        "club": "Lens"
       },
       {
         "nameEn": "Nawaf Boushal",
@@ -6527,7 +6793,8 @@
         "num": 21,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/47250.png",
-        "age": 34
+        "age": 34,
+        "club": "Getafe"
       },
       {
         "nameEn": "S. Fofana",
@@ -6679,42 +6946,48 @@
         "num": 23,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/162453.png",
-        "age": 24
+        "age": 24,
+        "club": "PSG"
       },
       {
         "nameEn": "M. Maignan",
         "num": 16,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/22221.png",
-        "age": 30
+        "age": 30,
+        "club": "Milan"
       },
       {
         "nameEn": "B. Samba",
         "num": 1,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/21628.png",
-        "age": 31
+        "age": 31,
+        "club": "Rennes"
       },
       {
         "nameEn": "L. Digne",
         "num": 3,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/2724.png",
-        "age": 32
+        "age": 32,
+        "club": "Aston Villa"
       },
       {
         "nameEn": "M. Gusto",
         "num": 2,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/161907.png",
-        "age": 22
+        "age": 22,
+        "club": "Chelsea"
       },
       {
         "nameEn": "L. Hernández",
         "num": 21,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/33.png",
-        "age": 29
+        "age": 29,
+        "club": "PSG"
       },
       {
         "nameEn": "T. Hernández",
@@ -6728,63 +7001,72 @@
         "num": 5,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/162188.png",
-        "age": 25
+        "age": 25,
+        "club": "Juventus"
       },
       {
         "nameEn": "I. Konaté",
         "num": 15,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/1145.png",
-        "age": 26
+        "age": 26,
+        "club": "Liverpool"
       },
       {
         "nameEn": "J. Koundé",
         "num": 5,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/1257.png",
-        "age": 27
+        "age": 27,
+        "club": "Barcelona"
       },
       {
         "nameEn": "M. Lacroix",
         "num": 17,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/20995.png",
-        "age": 25
+        "age": 25,
+        "club": "Crystal Palace"
       },
       {
         "nameEn": "B. Pavard",
         "num": 15,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/2725.png",
-        "age": 29
+        "age": 29,
+        "club": "Marseille"
       },
       {
         "nameEn": "W. Saliba",
         "num": 17,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/22090.png",
-        "age": 24
+        "age": 24,
+        "club": "Arsenal"
       },
       {
         "nameEn": "D. Upamecano",
         "num": 4,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/1149.png",
-        "age": 27
+        "age": 27,
+        "club": "Bayern"
       },
       {
         "nameEn": "E. Camavinga",
         "num": 6,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/2207.png",
-        "age": 23
+        "age": 23,
+        "club": "Real Madrid"
       },
       {
         "nameEn": "R. Cherki",
         "num": 24,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/156477.png",
-        "age": 22
+        "age": 22,
+        "club": "Man City"
       },
       {
         "nameEn": "N. Kanté",
@@ -6798,56 +7080,64 @@
         "num": 8,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/22147.png",
-        "age": 24
+        "age": 24,
+        "club": "Roma"
       },
       {
         "nameEn": "M. Olise",
         "num": 11,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/19617.png",
-        "age": 24
+        "age": 24,
+        "club": "Bayern"
       },
       {
         "nameEn": "A. Rabiot",
         "num": 14,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/272.png",
-        "age": 30
+        "age": 30,
+        "club": "Milan"
       },
       {
         "nameEn": "A. Tchouaméni",
         "num": 8,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/1271.png",
-        "age": 25
+        "age": 25,
+        "club": "Real Madrid"
       },
       {
         "nameEn": "K. Thuram",
         "num": 6,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/116.png",
-        "age": 24
+        "age": 24,
+        "club": "Juventus"
       },
       {
         "nameEn": "W. Zaïre-Emery",
         "num": 18,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/336657.png",
-        "age": 19
+        "age": 19,
+        "club": "PSG"
       },
       {
         "nameEn": "M. Akliouche",
         "num": 25,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/274300.png",
-        "age": 23
+        "age": 23,
+        "club": "Monaco"
       },
       {
         "nameEn": "B. Barcola",
         "num": 20,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/161904.png",
-        "age": 23
+        "age": 23,
+        "club": "PSG"
       },
       {
         "nameEn": "K. Coman",
@@ -6861,63 +7151,72 @@
         "num": 7,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/153.png",
-        "age": 28
+        "age": 28,
+        "club": "PSG"
       },
       {
         "nameEn": "D. Doué",
         "num": 20,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/343027.png",
-        "age": 20
+        "age": 20,
+        "club": "PSG"
       },
       {
         "nameEn": "H. Ekitike",
         "num": 22,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/174565.png",
-        "age": 23
+        "age": 23,
+        "club": "Liverpool"
       },
       {
         "nameEn": "R. Kolo Muani",
         "num": 12,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/21104.png",
-        "age": 27
+        "age": 27,
+        "club": "Tottenham"
       },
       {
         "nameEn": "J. Mateta",
         "num": 19,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/25927.png",
-        "age": 28
+        "age": 28,
+        "club": "Crystal Palace"
       },
       {
         "nameEn": "Kylian Mbappé",
         "num": 10,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/278.png",
-        "age": 27
+        "age": 27,
+        "club": "Real Madrid"
       },
       {
         "nameEn": "C. Nkunku",
         "num": 7,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/269.png",
-        "age": 28
+        "age": 28,
+        "club": "Milan"
       },
       {
         "nameEn": "F. Thauvin",
         "num": 8,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/1922.png",
-        "age": 32
+        "age": 32,
+        "club": "Lens"
       },
       {
         "nameEn": "M. Thuram",
         "num": 9,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/21509.png",
-        "age": 28
+        "age": 28,
+        "club": "Inter"
       }
     ],
     "logo": "https://media.api-sports.io/football/teams/2.png"
@@ -6936,7 +7235,8 @@
         "num": 1,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/20566.png",
-        "age": 26
+        "age": 26,
+        "club": "Nice"
       },
       {
         "nameEn": "É. Mendy",
@@ -6950,7 +7250,8 @@
         "num": 25,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/409303.png",
-        "age": 21
+        "age": 21,
+        "club": "West Ham"
       },
       {
         "nameEn": "I. Jakobs",
@@ -6971,28 +7272,32 @@
         "num": 24,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/313937.png",
-        "age": 21
+        "age": 21,
+        "club": "Nice"
       },
       {
         "nameEn": "N. Mendy",
         "num": 28,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/358431.png",
-        "age": 21
+        "age": 21,
+        "club": "Rayo Vallecano"
       },
       {
         "nameEn": "M. Niakhaté",
         "num": 19,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/25916.png",
-        "age": 29
+        "age": 29,
+        "club": "Lyon"
       },
       {
         "nameEn": "M. Sarr",
         "num": 2,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/276184.png",
-        "age": 20
+        "age": 20,
+        "club": "Chelsea"
       },
       {
         "nameEn": "A. Seck",
@@ -7013,7 +7318,8 @@
         "num": 8,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/374058.png",
-        "age": 21
+        "age": 21,
+        "club": "Monaco"
       },
       {
         "nameEn": "M. Camara",
@@ -7027,7 +7333,8 @@
         "num": 6,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/41552.png",
-        "age": 31
+        "age": 31,
+        "club": "Rayo Vallecano"
       },
       {
         "nameEn": "H. Diarra",
@@ -7041,35 +7348,40 @@
         "num": 15,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/81.png",
-        "age": 26
+        "age": 26,
+        "club": "Monaco"
       },
       {
         "nameEn": "I. Gueye",
         "num": 5,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/2990.png",
-        "age": 36
+        "age": 36,
+        "club": "Everton"
       },
       {
         "nameEn": "P. Gueye",
         "num": 26,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/20696.png",
-        "age": 26
+        "age": 26,
+        "club": "Villarreal"
       },
       {
         "nameEn": "P. Sarr",
         "num": 17,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/237129.png",
-        "age": 23
+        "age": 23,
+        "club": "Tottenham"
       },
       {
         "nameEn": "B. Dia",
         "num": 9,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/22015.png",
-        "age": 29
+        "age": 29,
+        "club": "Lazio"
       },
       {
         "nameEn": "M. Diakhon",
@@ -7104,7 +7416,8 @@
         "num": 11,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/283058.png",
-        "age": 24
+        "age": 24,
+        "club": "Bayern"
       },
       {
         "nameEn": "S. Mané",
@@ -7118,7 +7431,8 @@
         "num": 27,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/446249.png",
-        "age": 17
+        "age": 17,
+        "club": "PSG"
       },
       {
         "nameEn": "C. Ndiaye",
@@ -7132,7 +7446,8 @@
         "num": 13,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/18592.png",
-        "age": 25
+        "age": 25,
+        "club": "Everton"
       },
       {
         "nameEn": "O. Niang",
@@ -7153,7 +7468,8 @@
         "num": 18,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/2218.png",
-        "age": 27
+        "age": 27,
+        "club": "Crystal Palace"
       }
     ],
     "logo": "https://media.api-sports.io/football/teams/13.png"
@@ -7574,7 +7890,8 @@
         "num": 1,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/24760.png",
-        "age": 25
+        "age": 25,
+        "club": "Liverpool"
       },
       {
         "nameEn": "I. Azarovi",
@@ -7672,7 +7989,8 @@
         "num": 6,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/119795.png",
-        "age": 26
+        "age": 26,
+        "club": "Sporting CP"
       },
       {
         "nameEn": "N. Lominadze",
@@ -7728,7 +8046,8 @@
         "num": 7,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/483.png",
-        "age": 24
+        "age": 24,
+        "club": "PSG"
       },
       {
         "nameEn": "G. Kvernadze",
@@ -7756,7 +8075,8 @@
         "num": 22,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/180496.png",
-        "age": 25
+        "age": 25,
+        "club": "Villarreal"
       },
       {
         "nameEn": "I. Tabatadze",
@@ -7817,7 +8137,8 @@
         "num": 13,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/308689.png",
-        "age": 23
+        "age": 23,
+        "club": "Benfica"
       },
       {
         "nameEn": "Pico",
@@ -7976,63 +8297,72 @@
         "num": 1,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/730.png",
-        "age": 33
+        "age": 33,
+        "club": "Real Madrid"
       },
       {
         "nameEn": "S. Lammens",
         "num": 1,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/162511.png",
-        "age": 23
+        "age": 23,
+        "club": "Man United"
       },
       {
         "nameEn": "M. Penders",
         "num": 1,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/340151.png",
-        "age": 20
+        "age": 20,
+        "club": "Strasbourg"
       },
       {
         "nameEn": "M. Sels",
         "num": 13,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/2919.png",
-        "age": 33
+        "age": 33,
+        "club": "Nottingham Forest"
       },
       {
         "nameEn": "M. Vandevoordt",
         "num": 12,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/1924.png",
-        "age": 23
+        "age": 23,
+        "club": "RB Leipzig"
       },
       {
         "nameEn": "T. Castagne",
         "num": 21,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/2920.png",
-        "age": 30
+        "age": 30,
+        "club": "Fulham"
       },
       {
         "nameEn": "M. De Cuyper",
         "num": 5,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/162007.png",
-        "age": 25
+        "age": 25,
+        "club": "Brighton"
       },
       {
         "nameEn": "K. De Winter",
         "num": 16,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/162141.png",
-        "age": 23
+        "age": 23,
+        "club": "Milan"
       },
       {
         "nameEn": "Z. Debast",
         "num": 2,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/304228.png",
-        "age": 22
+        "age": 22,
+        "club": "Sporting CP"
       },
       {
         "nameEn": "B. Mechele",
@@ -8046,7 +8376,8 @@
         "num": 15,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/264.png",
-        "age": 34
+        "age": 34,
+        "club": "Lille"
       },
       {
         "nameEn": "J. Seys",
@@ -8060,14 +8391,16 @@
         "num": 3,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/204043.png",
-        "age": 25
+        "age": 25,
+        "club": "Frankfurt"
       },
       {
         "nameEn": "K. De Bruyne",
         "num": 7,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/629.png",
-        "age": 34
+        "age": 34,
+        "club": "Napoli"
       },
       {
         "nameEn": "Nathan De Cat",
@@ -8081,21 +8414,24 @@
         "num": 17,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/147859.png",
-        "age": 24
+        "age": 24,
+        "club": "Atalanta"
       },
       {
         "nameEn": "Diego Moreira",
         "num": 7,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/335056.png",
-        "age": 21
+        "age": 21,
+        "club": "Strasbourg"
       },
       {
         "nameEn": "A. Onana",
         "num": 18,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/162714.png",
-        "age": 24
+        "age": 24,
+        "club": "Aston Villa"
       },
       {
         "nameEn": "N. Raskin",
@@ -8109,14 +8445,16 @@
         "num": 22,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/1417.png",
-        "age": 26
+        "age": 26,
+        "club": "Milan"
       },
       {
         "nameEn": "Y. Tielemans",
         "num": 8,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/2926.png",
-        "age": 28
+        "age": 28,
+        "club": "Aston Villa"
       },
       {
         "nameEn": "H. Vanaken",
@@ -8130,56 +8468,64 @@
         "num": 18,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/8680.png",
-        "age": 27
+        "age": 27,
+        "club": "Nice"
       },
       {
         "nameEn": "A. Witsel",
         "num": 6,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/20.png",
-        "age": 36
+        "age": 36,
+        "club": "Girona"
       },
       {
         "nameEn": "M. Batshuayi",
         "num": 23,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/2927.png",
-        "age": 32
+        "age": 32,
+        "club": "Frankfurt"
       },
       {
         "nameEn": "J. Doku",
         "num": 11,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/1422.png",
-        "age": 23
+        "age": 23,
+        "club": "Man City"
       },
       {
         "nameEn": "M. Fofana",
         "num": 19,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/361348.png",
-        "age": 20
+        "age": 20,
+        "club": "Lyon"
       },
       {
         "nameEn": "D. Lukebakio",
         "num": 14,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/25458.png",
-        "age": 28
+        "age": 28,
+        "club": "Benfica"
       },
       {
         "nameEn": "L. Openda",
         "num": 9,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/86.png",
-        "age": 25
+        "age": 25,
+        "club": "Juventus"
       },
       {
         "nameEn": "L. Trossard",
         "num": 10,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/1946.png",
-        "age": 31
+        "age": 31,
+        "club": "Arsenal"
       },
       {
         "nameEn": "R. Vermant",
@@ -8455,7 +8801,8 @@
         "num": 1,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/22157.png",
-        "age": 32
+        "age": 32,
+        "club": "Crystal Palace"
       },
       {
         "nameEn": "F. Cambeses",
@@ -8469,21 +8816,24 @@
         "num": 23,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/19599.png",
-        "age": 33
+        "age": 33,
+        "club": "Aston Villa"
       },
       {
         "nameEn": "J. Musso",
         "num": 1,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/2465.png",
-        "age": 31
+        "age": 31,
+        "club": "Atlético Madrid"
       },
       {
         "nameEn": "G. Rulli",
         "num": 12,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/47296.png",
-        "age": 33
+        "age": 33,
+        "club": "Marseille"
       },
       {
         "nameEn": "D. Talavera",
@@ -8504,14 +8854,16 @@
         "num": 6,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/6.png",
-        "age": 26
+        "age": 26,
+        "club": "Marseille"
       },
       {
         "nameEn": "J. Foyth",
         "num": 2,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/166.png",
-        "age": 27
+        "age": 27,
+        "club": "Villarreal"
       },
       {
         "nameEn": "A. Giay",
@@ -8539,7 +8891,8 @@
         "num": 26,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/6503.png",
-        "age": 27
+        "age": 27,
+        "club": "Atlético Madrid"
       },
       {
         "nameEn": "G. Montiel",
@@ -8553,7 +8906,8 @@
         "num": 19,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/624.png",
-        "age": 37
+        "age": 37,
+        "club": "Benfica"
       },
       {
         "nameEn": "G. Rojas",
@@ -8567,56 +8921,64 @@
         "num": 13,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/30776.png",
-        "age": 27
+        "age": 27,
+        "club": "Tottenham"
       },
       {
         "nameEn": "M. Senesi",
         "num": 6,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/6610.png",
-        "age": 28
+        "age": 28,
+        "club": "Bournemouth"
       },
       {
         "nameEn": "N. Tagliafico",
         "num": 3,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/529.png",
-        "age": 33
+        "age": 33,
+        "club": "Lyon"
       },
       {
         "nameEn": "V. Barco",
         "num": 6,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/319572.png",
-        "age": 21
+        "age": 21,
+        "club": "Strasbourg"
       },
       {
         "nameEn": "E. Buendía",
         "num": 8,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/19071.png",
-        "age": 29
+        "age": 29,
+        "club": "Aston Villa"
       },
       {
         "nameEn": "E. Fernández",
         "num": 24,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/5996.png",
-        "age": 24
+        "age": 24,
+        "club": "Chelsea"
       },
       {
         "nameEn": "G. Lo Celso",
         "num": 11,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/1578.png",
-        "age": 29
+        "age": 29,
+        "club": "Real Betis"
       },
       {
         "nameEn": "A. Mac Allister",
         "num": 20,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/6716.png",
-        "age": 27
+        "age": 27,
+        "club": "Liverpool"
       },
       {
         "nameEn": "A. Moreno",
@@ -8630,7 +8992,8 @@
         "num": 14,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/6002.png",
-        "age": 27
+        "age": 27,
+        "club": "Leverkusen"
       },
       {
         "nameEn": "L. Paredes",
@@ -8665,21 +9028,24 @@
         "num": 11,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/6067.png",
-        "age": 24
+        "age": 24,
+        "club": "Atlético Madrid"
       },
       {
         "nameEn": "J. Álvarez",
         "num": 9,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/6009.png",
-        "age": 25
+        "age": 25,
+        "club": "Atlético Madrid"
       },
       {
         "nameEn": "N. González",
         "num": 15,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/26315.png",
-        "age": 27
+        "age": 27,
+        "club": "Atlético Madrid"
       },
       {
         "nameEn": "J. López",
@@ -8693,14 +9059,16 @@
         "num": 22,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/217.png",
-        "age": 28
+        "age": 28,
+        "club": "Inter"
       },
       {
         "nameEn": "Franco Mastantuono",
         "num": 22,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/449249.png",
-        "age": 18
+        "age": 18,
+        "club": "Real Madrid"
       },
       {
         "nameEn": "L. Messi",
@@ -8714,21 +9082,24 @@
         "num": 0,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/390742.png",
-        "age": 23
+        "age": 23,
+        "club": "Strasbourg"
       },
       {
         "nameEn": "G. Prestianni",
         "num": 25,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/362755.png",
-        "age": 19
+        "age": 19,
+        "club": "Benfica"
       },
       {
         "nameEn": "G. Simeone",
         "num": 17,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/323935.png",
-        "age": 23
+        "age": 23,
+        "club": "Atlético Madrid"
       }
     ],
     "logo": "https://media.api-sports.io/football/teams/26.png"
@@ -8782,14 +9153,16 @@
         "num": 8,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/505.png",
-        "age": 33
+        "age": 33,
+        "club": "Real Madrid"
       },
       {
         "nameEn": "K. Danso",
         "num": 3,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/25287.png",
-        "age": 27
+        "age": 27,
+        "club": "Tottenham"
       },
       {
         "nameEn": "M. Friedl",
@@ -8803,28 +9176,32 @@
         "num": 15,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/26240.png",
-        "age": 29
+        "age": 29,
+        "club": "Freiburg"
       },
       {
         "nameEn": "P. Mwene",
         "num": 16,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/25915.png",
-        "age": 31
+        "age": 31,
+        "club": "Mainz"
       },
       {
         "nameEn": "S. Posch",
         "num": 5,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/711.png",
-        "age": 28
+        "age": 28,
+        "club": "Mainz"
       },
       {
         "nameEn": "L. Querfeld",
         "num": 14,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/288206.png",
-        "age": 22
+        "age": 22,
+        "club": "Union Berlin"
       },
       {
         "nameEn": "M. Svoboda",
@@ -8838,49 +9215,56 @@
         "num": 19,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/715.png",
-        "age": 26
+        "age": 26,
+        "club": "RB Leipzig"
       },
       {
         "nameEn": "C. Chukwuemeka",
         "num": 17,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/138935.png",
-        "age": 22
+        "age": 22,
+        "club": "Dortmund"
       },
       {
         "nameEn": "F. Grillitsch",
         "num": 10,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/719.png",
-        "age": 30
+        "age": 30,
+        "club": "Braga"
       },
       {
         "nameEn": "K. Laimer",
         "num": 20,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/1157.png",
-        "age": 28
+        "age": 28,
+        "club": "Bayern"
       },
       {
         "nameEn": "A. Prass",
         "num": 22,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/7327.png",
-        "age": 24
+        "age": 24,
+        "club": "Hoffenheim"
       },
       {
         "nameEn": "M. Sabitzer",
         "num": 9,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/1159.png",
-        "age": 31
+        "age": 31,
+        "club": "Dortmund"
       },
       {
         "nameEn": "X. Schlager",
         "num": 4,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/1095.png",
-        "age": 28
+        "age": 28,
+        "club": "RB Leipzig"
       },
       {
         "nameEn": "R. Schmid",
@@ -8901,7 +9285,8 @@
         "num": 6,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/7328.png",
-        "age": 24
+        "age": 24,
+        "club": "RB Leipzig"
       },
       {
         "nameEn": "P. Wanner",
@@ -8915,7 +9300,8 @@
         "num": 21,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/126642.png",
-        "age": 24
+        "age": 24,
+        "club": "Wolfsburg"
       },
       {
         "nameEn": "M. Arnautović",
@@ -8936,7 +9322,8 @@
         "num": 11,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/25297.png",
-        "age": 31
+        "age": 31,
+        "club": "Augsburg"
       },
       {
         "nameEn": "M. Grüll",
@@ -8976,7 +9363,8 @@
         "num": 25,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/145060.png",
-        "age": 22
+        "age": 22,
+        "club": "Montpellier"
       },
       {
         "nameEn": "Blondy Rudolph Nna Noukeu",
@@ -9039,7 +9427,8 @@
         "num": 18,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/438281.png",
-        "age": 20
+        "age": 20,
+        "club": "Rennes"
       },
       {
         "nameEn": "D. Yongwa",
@@ -9102,14 +9491,16 @@
         "num": 28,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/505295.png",
-        "age": 19
+        "age": 19,
+        "club": "Leverkusen"
       },
       {
         "nameEn": "B. Mbeumo",
         "num": 10,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/20589.png",
-        "age": 26
+        "age": 26,
+        "club": "Man United"
       },
       {
         "nameEn": "D. Namaso",
@@ -9123,14 +9514,16 @@
         "num": 2,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/296560.png",
-        "age": 24
+        "age": 24,
+        "club": "Wolves"
       },
       {
         "nameEn": "Matah Yondjio",
         "num": 9,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/630702.png",
-        "age": 18
+        "age": 18,
+        "club": "Lille"
       }
     ],
     "logo": "https://media.api-sports.io/football/teams/1530.png"
@@ -9406,28 +9799,32 @@
         "num": 1,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/361433.png",
-        "age": 21
+        "age": 21,
+        "club": "Braga"
       },
       {
         "nameEn": "Diogo Costa",
         "num": 1,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/369.png",
-        "age": 26
+        "age": 26,
+        "club": "Porto"
       },
       {
         "nameEn": "José Sá",
         "num": 12,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/1590.png",
-        "age": 32
+        "age": 32,
+        "club": "Wolves"
       },
       {
         "nameEn": "Rui Silva",
         "num": 22,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/46672.png",
-        "age": 31
+        "age": 31,
+        "club": "Sporting CP"
       },
       {
         "nameEn": "Ricardo Velho",
@@ -9441,35 +9838,40 @@
         "num": 20,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/855.png",
-        "age": 31
+        "age": 31,
+        "club": "Barcelona"
       },
       {
         "nameEn": "Diogo Dalot",
         "num": 5,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/886.png",
-        "age": 26
+        "age": 26,
+        "club": "Man United"
       },
       {
         "nameEn": "Rúben Dias",
         "num": 3,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/567.png",
-        "age": 28
+        "age": 28,
+        "club": "Man City"
       },
       {
         "nameEn": "Gonçalo Inácio",
         "num": 14,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/265595.png",
-        "age": 24
+        "age": 24,
+        "club": "Sporting CP"
       },
       {
         "nameEn": "Nuno Mendes",
         "num": 19,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/263482.png",
-        "age": 23
+        "age": 23,
+        "club": "PSG"
       },
       {
         "nameEn": "Nélson Semedo",
@@ -9483,42 +9885,48 @@
         "num": 4,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/331832.png",
-        "age": 22
+        "age": 22,
+        "club": "Benfica"
       },
       {
         "nameEn": "Nuno Tavares",
         "num": 14,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/41577.png",
-        "age": 25
+        "age": 25,
+        "club": "Lazio"
       },
       {
         "nameEn": "Renato Veiga",
         "num": 13,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/336671.png",
-        "age": 22
+        "age": 22,
+        "club": "Villarreal"
       },
       {
         "nameEn": "Bruno Fernandes",
         "num": 8,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/1485.png",
-        "age": 31
+        "age": 31,
+        "club": "Man United"
       },
       {
         "nameEn": "Pote",
         "num": 17,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/18748.png",
-        "age": 27
+        "age": 27,
+        "club": "Sporting CP"
       },
       {
         "nameEn": "João Neves",
         "num": 15,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/335051.png",
-        "age": 21
+        "age": 21,
+        "club": "PSG"
       },
       {
         "nameEn": "Rúben Neves",
@@ -9532,42 +9940,48 @@
         "num": 18,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/41621.png",
-        "age": 27
+        "age": 27,
+        "club": "Man City"
       },
       {
         "nameEn": "João Palhinha",
         "num": 6,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/41104.png",
-        "age": 30
+        "age": 30,
+        "club": "Tottenham"
       },
       {
         "nameEn": "Samú Costa",
         "num": 6,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/190485.png",
-        "age": 25
+        "age": 25,
+        "club": "Mallorca"
       },
       {
         "nameEn": "Bernardo Silva",
         "num": 10,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/636.png",
-        "age": 31
+        "age": 31,
+        "club": "Man City"
       },
       {
         "nameEn": "Vitinha",
         "num": 23,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/128384.png",
-        "age": 25
+        "age": 25,
+        "club": "PSG"
       },
       {
         "nameEn": "Francisco Conceição",
         "num": 19,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/161585.png",
-        "age": 23
+        "age": 23,
+        "club": "Juventus"
       },
       {
         "nameEn": "Carlos Forbs",
@@ -9588,14 +10002,16 @@
         "num": 17,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/22236.png",
-        "age": 26
+        "age": 26,
+        "club": "Milan"
       },
       {
         "nameEn": "Pedro Neto",
         "num": 18,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/1864.png",
-        "age": 25
+        "age": 25,
+        "club": "Chelsea"
       },
       {
         "nameEn": "Paulinho",
@@ -9609,7 +10025,8 @@
         "num": 9,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/41585.png",
-        "age": 24
+        "age": 24,
+        "club": "PSG"
       },
       {
         "nameEn": "Cristiano Ronaldo",
@@ -9623,7 +10040,8 @@
         "num": 16,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/41112.png",
-        "age": 26
+        "age": 26,
+        "club": "Sporting CP"
       }
     ],
     "logo": "https://media.api-sports.io/football/teams/27.png"
@@ -9677,7 +10095,8 @@
         "num": 13,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/125674.png",
-        "age": 24
+        "age": 24,
+        "club": "Juventus"
       },
       {
         "nameEn": "C. Cuesta",
@@ -9698,35 +10117,40 @@
         "num": 3,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/1929.png",
-        "age": 27
+        "age": 27,
+        "club": "Bologna"
       },
       {
         "nameEn": "D. Machado",
         "num": 22,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/2483.png",
-        "age": 32
+        "age": 32,
+        "club": "Nantes"
       },
       {
         "nameEn": "Y. Mina",
         "num": 13,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/2484.png",
-        "age": 31
+        "age": 31,
+        "club": "Cagliari"
       },
       {
         "nameEn": "J. Mojica",
         "num": 17,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/64268.png",
-        "age": 33
+        "age": 33,
+        "club": "Mallorca"
       },
       {
         "nameEn": "D. Muñoz",
         "num": 2,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/13736.png",
-        "age": 29
+        "age": 29,
+        "club": "Crystal Palace"
       },
       {
         "nameEn": "A. Román",
@@ -9761,14 +10185,16 @@
         "num": 16,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/2490.png",
-        "age": 31
+        "age": 31,
+        "club": "Crystal Palace"
       },
       {
         "nameEn": "Y. Mosquera",
         "num": 15,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/195717.png",
-        "age": 24
+        "age": 24,
+        "club": "Wolves"
       },
       {
         "nameEn": "J. Portilla",
@@ -9796,7 +10222,8 @@
         "num": 6,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/195104.png",
-        "age": 25
+        "age": 25,
+        "club": "Benfica"
       },
       {
         "nameEn": "J. Rodríguez",
@@ -9852,14 +10279,16 @@
         "num": 14,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/47582.png",
-        "age": 26
+        "age": 26,
+        "club": "Real Betis"
       },
       {
         "nameEn": "L. Díaz",
         "num": 7,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/2489.png",
-        "age": 28
+        "age": 28,
+        "club": "Bayern"
       },
       {
         "nameEn": "A. Gómez",
@@ -9880,7 +10309,8 @@
         "num": 24,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/47237.png",
-        "age": 28
+        "age": 28,
+        "club": "Sporting CP"
       }
     ],
     "logo": "https://media.api-sports.io/football/teams/8.png"
@@ -10350,252 +10780,288 @@
         "num": 13,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/19088.png",
-        "age": 28
+        "age": 28,
+        "club": "Crystal Palace"
       },
       {
         "nameEn": "J. Pickford",
         "num": 1,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/2932.png",
-        "age": 31
+        "age": 31,
+        "club": "Everton"
       },
       {
         "nameEn": "A. Ramsdale",
         "num": 1,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/20355.png",
-        "age": 27
+        "age": 27,
+        "club": "Newcastle"
       },
       {
         "nameEn": "J. Steele",
         "num": 23,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/18960.png",
-        "age": 35
+        "age": 35,
+        "club": "Brighton"
       },
       {
         "nameEn": "J. Trafford",
         "num": 22,
         "pos": "GK",
         "photo": "https://media.api-sports.io/football/players/162489.png",
-        "age": 23
+        "age": 23,
+        "club": "Man City"
       },
       {
         "nameEn": "D. Burn",
         "num": 17,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/18961.png",
-        "age": 33
+        "age": 33,
+        "club": "Newcastle"
       },
       {
         "nameEn": "T. Chalobah",
         "num": 6,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/19720.png",
-        "age": 26
+        "age": 26,
+        "club": "Chelsea"
       },
       {
         "nameEn": "M. Guéhi",
         "num": 5,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/67971.png",
-        "age": 25
+        "age": 25,
+        "club": "Man City"
       },
       {
         "nameEn": "L. Hall",
         "num": 26,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/284492.png",
-        "age": 21
+        "age": 21,
+        "club": "Newcastle"
       },
       {
         "nameEn": "R. James",
         "num": 3,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/19545.png",
-        "age": 26
+        "age": 26,
+        "club": "Chelsea"
       },
       {
         "nameEn": "E. Konsa",
         "num": 2,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/19354.png",
-        "age": 28
+        "age": 28,
+        "club": "Aston Villa"
       },
       {
         "nameEn": "M. Lewis-Skelly",
         "num": 3,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/313245.png",
-        "age": 19
+        "age": 19,
+        "club": "Arsenal"
       },
       {
         "nameEn": "T. Livramento",
         "num": 25,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/158694.png",
-        "age": 23
+        "age": 23,
+        "club": "Newcastle"
       },
       {
         "nameEn": "H. Maguire",
         "num": 6,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/2935.png",
-        "age": 32
+        "age": 32,
+        "club": "Man United"
       },
       {
         "nameEn": "J. Quansah",
         "num": 2,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/158698.png",
-        "age": 22
+        "age": 22,
+        "club": "Leverkusen"
       },
       {
         "nameEn": "D. Spence",
         "num": 24,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/19235.png",
-        "age": 25
+        "age": 25,
+        "club": "Tottenham"
       },
       {
         "nameEn": "J. Stones",
         "num": 5,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/626.png",
-        "age": 31
+        "age": 31,
+        "club": "Man City"
       },
       {
         "nameEn": "F. Tomori",
         "num": 12,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/19209.png",
-        "age": 28
+        "age": 28,
+        "club": "Milan"
       },
       {
         "nameEn": "B. White",
         "num": 12,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/19959.png",
-        "age": 28
+        "age": 28,
+        "club": "Arsenal"
       },
       {
         "nameEn": "E. Anderson",
         "num": 4,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/138908.png",
-        "age": 23
+        "age": 23,
+        "club": "Nottingham Forest"
       },
       {
         "nameEn": "J. Bellingham",
         "num": 10,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/129718.png",
-        "age": 22
+        "age": 22,
+        "club": "Real Madrid"
       },
       {
         "nameEn": "E. Eze",
         "num": 19,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/19586.png",
-        "age": 27
+        "age": 27,
+        "club": "Arsenal"
       },
       {
         "nameEn": "P. Foden",
         "num": 9,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/631.png",
-        "age": 25
+        "age": 25,
+        "club": "Man City"
       },
       {
         "nameEn": "J. Garner",
         "num": 21,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/895.png",
-        "age": 24
+        "age": 24,
+        "club": "Everton"
       },
       {
         "nameEn": "M. Gibbs-White",
         "num": 16,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/18746.png",
-        "age": 25
+        "age": 25,
+        "club": "Nottingham Forest"
       },
       {
         "nameEn": "J. Henderson",
         "num": 8,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/292.png",
-        "age": 35
+        "age": 35,
+        "club": "Brentford"
       },
       {
         "nameEn": "R. Loftus-Cheek",
         "num": 18,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/2292.png",
-        "age": 29
+        "age": 29,
+        "club": "Milan"
       },
       {
         "nameEn": "K. Mainoo",
         "num": 8,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/284322.png",
-        "age": 20
+        "age": 20,
+        "club": "Man United"
       },
       {
         "nameEn": "N. O&apos;Reilly",
         "num": 3,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/307123.png",
-        "age": 20
+        "age": 20,
+        "club": "Man City"
       },
       {
         "nameEn": "C. Palmer",
         "num": 7,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/152982.png",
-        "age": 23
+        "age": 23,
+        "club": "Chelsea"
       },
       {
         "nameEn": "D. Rice",
         "num": 4,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/2937.png",
-        "age": 26
+        "age": 26,
+        "club": "Arsenal"
       },
       {
         "nameEn": "M. Rogers",
         "num": 15,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/19170.png",
-        "age": 23
+        "age": 23,
+        "club": "Aston Villa"
       },
       {
         "nameEn": "A. Scott",
         "num": 23,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/304853.png",
-        "age": 22
+        "age": 22,
+        "club": "Bournemouth"
       },
       {
         "nameEn": "A. Wharton",
         "num": 16,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/288102.png",
-        "age": 21
+        "age": 21,
+        "club": "Crystal Palace"
       },
       {
         "nameEn": "H. Barnes",
         "num": 19,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/18778.png",
-        "age": 28
+        "age": 28,
+        "club": "Newcastle"
       },
       {
         "nameEn": "J. Bowen",
         "num": 20,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/19428.png",
-        "age": 29
+        "age": 29,
+        "club": "West Ham"
       },
       {
         "nameEn": "D. Calvert-Lewin",
@@ -10609,49 +11075,56 @@
         "num": 14,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/138787.png",
-        "age": 24
+        "age": 24,
+        "club": "Newcastle"
       },
       {
         "nameEn": "H. Kane",
         "num": 9,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/184.png",
-        "age": 32
+        "age": 32,
+        "club": "Bayern"
       },
       {
         "nameEn": "N. Madueke",
         "num": 21,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/136723.png",
-        "age": 23
+        "age": 23,
+        "club": "Arsenal"
       },
       {
         "nameEn": "M. Rashford",
         "num": 11,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/909.png",
-        "age": 28
+        "age": 28,
+        "club": "Barcelona"
       },
       {
         "nameEn": "B. Saka",
         "num": 7,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/1460.png",
-        "age": 24
+        "age": 24,
+        "club": "Arsenal"
       },
       {
         "nameEn": "D. Solanke",
         "num": 18,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/18883.png",
-        "age": 28
+        "age": 28,
+        "club": "Tottenham"
       },
       {
         "nameEn": "O. Watkins",
         "num": 19,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/19366.png",
-        "age": 30
+        "age": 30,
+        "club": "Aston Villa"
       }
     ],
     "logo": "https://media.api-sports.io/football/teams/10.png"
@@ -10705,7 +11178,8 @@
         "num": 5,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/1902.png",
-        "age": 29
+        "age": 29,
+        "club": "Real Sociedad"
       },
       {
         "nameEn": "M. Erlić",
@@ -10719,14 +11193,16 @@
         "num": 4,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/129033.png",
-        "age": 23
+        "age": 23,
+        "club": "Man City"
       },
       {
         "nameEn": "M. Pongračić",
         "num": 3,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/1084.png",
-        "age": 28
+        "age": 28,
+        "club": "Fiorentina"
       },
       {
         "nameEn": "I. Smolčić",
@@ -10740,14 +11216,16 @@
         "num": 2,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/125171.png",
-        "age": 25
+        "age": 25,
+        "club": "Bayern"
       },
       {
         "nameEn": "J. Šutalo",
         "num": 6,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/14701.png",
-        "age": 25
+        "age": 25,
+        "club": "Ajax"
       },
       {
         "nameEn": "L. Vušković",
@@ -10775,91 +11253,104 @@
         "num": 18,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/14395.png",
-        "age": 28
+        "age": 28,
+        "club": "Augsburg"
       },
       {
         "nameEn": "M. Kovačić",
         "num": 8,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/2291.png",
-        "age": 31
+        "age": 31,
+        "club": "Man City"
       },
       {
         "nameEn": "L. Majer",
         "num": 7,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/1321.png",
-        "age": 27
+        "age": 27,
+        "club": "Wolfsburg"
       },
       {
         "nameEn": "L. Modrić",
         "num": 10,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/754.png",
-        "age": 40
+        "age": 40,
+        "club": "Milan"
       },
       {
         "nameEn": "N. Moro",
         "num": 8,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/1322.png",
-        "age": 27
+        "age": 27,
+        "club": "Bologna"
       },
       {
         "nameEn": "M. Pašalić",
         "num": 15,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/2763.png",
-        "age": 30
+        "age": 30,
+        "club": "Atalanta"
       },
       {
         "nameEn": "L. Sučić",
         "num": 21,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/7332.png",
-        "age": 23
+        "age": 23,
+        "club": "Real Sociedad"
       },
       {
         "nameEn": "P. Sučić",
         "num": 17,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/348205.png",
-        "age": 22
+        "age": 22,
+        "club": "Inter"
       },
       {
         "nameEn": "N. Vlašić",
         "num": 13,
         "pos": "MID",
         "photo": "https://media.api-sports.io/football/players/842.png",
-        "age": 28
+        "age": 28,
+        "club": "Torino"
       },
       {
         "nameEn": "A. Budimir",
         "num": 11,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/46746.png",
-        "age": 34
+        "age": 34,
+        "club": "Osasuna"
       },
       {
         "nameEn": "F. Ivanović",
         "num": 20,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/202951.png",
-        "age": 22
+        "age": 22,
+        "club": "Benfica"
       },
       {
         "nameEn": "A. Kramarić",
         "num": 9,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/726.png",
-        "age": 34
+        "age": 34,
+        "club": "Hoffenheim"
       },
       {
         "nameEn": "I. Matanović",
         "num": 20,
         "pos": "FW",
         "photo": "https://media.api-sports.io/football/players/202696.png",
-        "age": 22
+        "age": 22,
+        "club": "Freiburg"
       },
       {
         "nameEn": "P. Musa",
@@ -10962,7 +11453,8 @@
         "num": 21,
         "pos": "DEF",
         "photo": "https://media.api-sports.io/football/players/47250.png",
-        "age": 34
+        "age": 34,
+        "club": "Getafe"
       },
       {
         "nameEn": "S. Fofana",

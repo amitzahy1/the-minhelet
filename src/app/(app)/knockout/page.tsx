@@ -15,25 +15,36 @@ const F: Record<string,string> = {
   ITA:"🇮🇹",SRB:"🇷🇸",TUN:"🇹🇳",TRI:"🇹🇹",BEL:"🇧🇪",CRO:"🇭🇷",NGA:"🇳🇬",QAT:"🇶🇦",
 };
 
-// For now: use seed order (1st in group = index 0, 2nd = index 1) as placeholder R32 matchups
-// In production this would use the 495-scenario allocation table
+// R32 matchups based on FIFA WC2026 regulations
+// Left half: groups A-H, Right half: groups I-L + cross-group
+// Fixed matchups (W=winner, RU=runner-up from each group)
+// 3rd-place matches use "best available" slot — resolved at group stage end
 const R32_MATCHUPS = [
-  // Left half
-  { key: "r32l_0", h: "A1", a: "B2" }, { key: "r32l_1", h: "C1", a: "D2" },
-  { key: "r32l_2", h: "E1", a: "F2" }, { key: "r32l_3", h: "G1", a: "H2" },
-  { key: "r32l_4", h: "B1", a: "A2" }, { key: "r32l_5", h: "D1", a: "C2" },
-  { key: "r32l_6", h: "F1", a: "E2" }, { key: "r32l_7", h: "H1", a: "G2" },
-  // Right half
-  { key: "r32r_0", h: "I1", a: "J2" }, { key: "r32r_1", h: "K1", a: "L2" },
-  { key: "r32r_2", h: "J1", a: "I2" }, { key: "r32r_3", h: "L1", a: "K2" },
-  { key: "r32r_4", h: "I1", a: "L2" }, { key: "r32r_5", h: "K1", a: "J2" },
-  { key: "r32r_6", h: "L1", a: "I2" }, { key: "r32r_7", h: "J1", a: "K2" },
+  // Left half (M73-M80)
+  { key: "r32l_0", h: "A2", a: "B2" }, // RU vs RU
+  { key: "r32l_1", h: "E1", a: "D3" }, // W vs 3rd (placeholder — depends on Annex C)
+  { key: "r32l_2", h: "F1", a: "C2" }, // W vs RU
+  { key: "r32l_3", h: "C1", a: "F2" }, // W vs RU
+  { key: "r32l_4", h: "A1", a: "C3" }, // W vs 3rd (placeholder)
+  { key: "r32l_5", h: "H1", a: "J2" }, // W vs RU
+  { key: "r32l_6", h: "B1", a: "E3" }, // W vs 3rd (placeholder)
+  { key: "r32l_7", h: "D2", a: "G2" }, // RU vs RU
+  // Right half (M81-M88)
+  { key: "r32r_0", h: "I1", a: "F3" }, // W vs 3rd (placeholder)
+  { key: "r32r_1", h: "G1", a: "H3" }, // W vs 3rd (placeholder)
+  { key: "r32r_2", h: "K2", a: "L2" }, // RU vs RU
+  { key: "r32r_3", h: "J1", a: "H2" }, // W vs RU
+  { key: "r32r_4", h: "D1", a: "B3" }, // W vs 3rd (placeholder)
+  { key: "r32r_5", h: "L1", a: "I3" }, // W vs 3rd (placeholder)
+  { key: "r32r_6", h: "E2", a: "I2" }, // RU vs RU
+  { key: "r32r_7", h: "K1", a: "J3" }, // W vs 3rd (placeholder)
 ];
 
 // Resolve "A1" to actual team code from group standings
+// Supports: "A1" (winner), "A2" (runner-up), "A3" (3rd place)
 function resolveSlot(slot: string, groups: Record<string, { order: number[] }>): string | null {
   const groupLetter = slot[0];
-  const position = parseInt(slot[1]) - 1; // "A1" → group A, position 0
+  const position = parseInt(slot[1]) - 1; // "A1" → position 0, "A2" → 1, "A3" → 2
   const group = groups[groupLetter];
   if (!group) return null;
   const teamIndex = group.order[position];

@@ -17,7 +17,7 @@ const F: Record<string,string> = {
 
 const SOURCES = ["SofaScore", "FotMob", "Transfermarkt", "WhoScored"];
 
-function PitchFormation({ players, formation, teamColor }: { players: { nameEn: string; num: number; pos: string }[]; formation: string; teamColor: string }) {
+function PitchFormation({ players, formation, teamColor }: { players: { nameEn: string; num: number; pos: string; photo?: string }[]; formation: string; teamColor: string }) {
   const gk = players.filter(p => p.pos === "GK");
   const def = players.filter(p => p.pos === "DEF");
   const mid = players.filter(p => p.pos === "MID");
@@ -40,10 +40,14 @@ function PitchFormation({ players, formation, teamColor }: { players: { nameEn: 
         <div key={ri} className="absolute left-0 right-0 flex justify-around items-center px-4 sm:px-6" style={{ top: row.top, transform: "translateY(-50%)" }}>
           {row.data.map(p => (
             <div key={p.num} className="flex flex-col items-center gap-1">
-              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full shadow-lg flex items-center justify-center text-xs sm:text-sm font-black border-2 border-white"
-                style={{ background: teamColor, color: "white", fontFamily: "var(--font-inter)" }}>
-                {p.num}
-              </div>
+              {p.photo ? (
+                <img src={p.photo} alt={p.nameEn} className="w-11 h-11 sm:w-12 sm:h-12 rounded-full shadow-lg border-2 border-white object-cover" />
+              ) : (
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full shadow-lg flex items-center justify-center text-xs sm:text-sm font-black border-2 border-white"
+                  style={{ background: teamColor, color: "white", fontFamily: "var(--font-inter)" }}>
+                  {p.num}
+                </div>
+              )}
               <div className="bg-black/50 backdrop-blur-sm rounded-md px-1.5 py-0.5">
                 <span className="text-[9px] sm:text-xs font-bold text-white text-center block">{p.nameEn}</span>
               </div>
@@ -115,7 +119,8 @@ export default function SquadsPage() {
 
       {squad ? (
         <>
-          {/* Source selector — 4 tabs */}
+          {/* Source selector — 4 tabs (only for teams with manual source data) */}
+          {squad.sources.length > 0 && (
           <div className="mb-5">
             <p className="text-sm text-gray-500 mb-2 font-medium">מקור ההרכב המשוער:</p>
             <div className="flex gap-2 flex-wrap">
@@ -130,6 +135,7 @@ export default function SquadsPage() {
               ))}
             </div>
           </div>
+          )}
 
           <div className="grid gap-6 lg:grid-cols-2">
             {/* Pitch */}
@@ -161,12 +167,17 @@ export default function SquadsPage() {
                       </div>
                       {posPlayers.map(p => (
                         <div key={p.num} className="flex items-center gap-3 px-4 py-2.5 border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                          <span className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ background: teamColors.primary, fontFamily: "var(--font-inter)" }}>{p.num}</span>
-                          <div className="flex-1">
-                            <span className="font-bold text-sm text-gray-900 dark:text-white">{p.name}</span>
-                            <span className="text-sm text-gray-400 ms-2">{p.nameEn}</span>
+                          {p.photo ? (
+                            <img src={p.photo} alt={p.nameEn} className="w-9 h-9 rounded-full object-cover border-2 border-white shadow-sm" />
+                          ) : (
+                            <span className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ background: teamColors.primary, fontFamily: "var(--font-inter)" }}>{p.num}</span>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <span className="font-bold text-sm text-gray-900">{p.name !== p.nameEn ? p.name : ""}</span>
+                            <span className="text-sm text-gray-500 ms-1">{p.nameEn}</span>
                           </div>
-                          <span className="text-sm text-gray-400">{p.club}</span>
+                          <span className="text-xs text-gray-400 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>#{p.num}</span>
+                          {p.club && <span className="text-xs text-gray-400 hidden sm:block">{p.club}</span>}
                         </div>
                       ))}
                     </div>
@@ -183,14 +194,18 @@ export default function SquadsPage() {
                   </summary>
                   <div className="border-t border-gray-100">
                     {squad.players.filter(p => !starterNames.includes(p.nameEn) && !p.starter).map(p => (
-                      <div key={p.num} className="flex items-center gap-3 px-4 py-2.5 border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                        <span className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-500" style={{ fontFamily: "var(--font-inter)" }}>{p.num}</span>
-                        <div className="flex-1">
-                          <span className="font-bold text-sm text-gray-800">{p.name}</span>
-                          <span className="text-sm text-gray-400 ms-2">{p.nameEn}</span>
+                      <div key={`${p.num}-${p.nameEn}`} className="flex items-center gap-3 px-4 py-2.5 border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                        {p.photo ? (
+                          <img src={p.photo} alt={p.nameEn} className="w-8 h-8 rounded-full object-cover border border-gray-200" />
+                        ) : (
+                          <span className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-500" style={{ fontFamily: "var(--font-inter)" }}>{p.num}</span>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <span className="font-bold text-sm text-gray-800">{p.name !== p.nameEn ? p.name : ""}</span>
+                          <span className="text-sm text-gray-400 ms-1">{p.nameEn}</span>
                         </div>
                         <span className="text-xs text-gray-400">{p.pos}</span>
-                        <span className="text-sm text-gray-400">{p.club}</span>
+                        <span className="text-xs text-gray-400 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>#{p.num}</span>
                       </div>
                     ))}
                   </div>

@@ -11,6 +11,7 @@ export interface PlayerData {
   club: string;
   pos: "GK" | "DEF" | "MID" | "FW";
   starter?: boolean; // true = estimated starting XI
+  photo?: string; // player photo URL from API-Football
 }
 
 export interface SquadData {
@@ -261,12 +262,49 @@ export const SQUADS_DATA: Record<string, SquadData> = {
   },
 };
 
-// Get squad for a team (returns null if not available)
+// --- API-Football data (48 teams with photos) ---
+import apiSquads from "./squads-api.json";
+const API_DATA = apiSquads as Record<string, { players: { nameEn: string; num: number; pos: "GK"|"DEF"|"MID"|"FW"; photo: string; age: number }[]; logo?: string }>;
+
+// Get squad for a team — merges manual data with API data
 export function getSquad(code: string): SquadData | null {
-  return SQUADS_DATA[code] || null;
+  const manual = SQUADS_DATA[code];
+  const api = API_DATA[code];
+
+  if (manual && api) {
+    // Merge: use manual structure but add photos from API
+    const photoMap = new Map(api.players.map(p => [p.nameEn, p.photo]));
+    return {
+      ...manual,
+      players: manual.players.map(p => ({
+        ...p,
+        photo: photoMap.get(p.nameEn) || api.players.find(ap => ap.nameEn.includes(p.nameEn.split(" ").pop() || ""))?.photo || undefined,
+      })),
+    };
+  }
+
+  if (api) {
+    // API-only team: build a basic SquadData from API
+    return {
+      coach: "",
+      coachEn: "",
+      formation: "4-3-3",
+      sources: [],
+      players: api.players.map(p => ({
+        name: p.nameEn, // No Hebrew available from API
+        nameEn: p.nameEn,
+        num: p.num,
+        club: "",
+        pos: p.pos,
+        photo: p.photo,
+      })),
+    };
+  }
+
+  return manual || null;
 }
 
-// Get all teams that have squad data
+// Get all teams that have squad data (manual + API)
 export function getAvailableSquads(): string[] {
-  return Object.keys(SQUADS_DATA);
+  return [...new Set([...Object.keys(SQUADS_DATA), ...Object.keys(API_DATA)])];
 }

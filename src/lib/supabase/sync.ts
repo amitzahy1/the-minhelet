@@ -4,16 +4,45 @@
 // ============================================================================
 
 import { createClient } from "@/lib/supabase/client";
+import { GROUPS } from "@/lib/tournament/groups";
+import { calculateStandings } from "@/lib/tournament/standings";
 import type { BettingState } from "@/stores/betting-store";
+import type { GroupMatchPrediction } from "@/types";
+
+// Tournament lock deadline: June 10, 2026 17:00 Israel time (14:00 UTC)
+const LOCK_DEADLINE = new Date("2026-06-10T14:00:00Z");
+
+/**
+ * Derive third place teams from group predictions.
+ * Returns array of group letters where the user's 3rd place team might qualify.
+ */
+function deriveThirdPlaceTeams(state: BettingState): string[] {
+  const thirdPlace: string[] = [];
+  for (const [groupId, group] of Object.entries(state.groups)) {
+    if (group.order && group.order.length >= 3) {
+      const teams = GROUPS[groupId];
+      if (teams && teams[group.order[2]]) {
+        thirdPlace.push(teams[group.order[2]].code);
+      }
+    }
+  }
+  return thirdPlace;
+}
 
 /**
  * Save the user's bets to Supabase.
  * Uses upsert to create or update.
+ * Rejects saves after the lock deadline.
  */
 export async function saveBetsToSupabase(
   state: BettingState,
   leagueId?: string
 ): Promise<{ success: boolean; error?: string }> {
+  // Server-side deadline enforcement
+  if (new Date() > LOCK_DEADLINE) {
+    return { success: false, error: "ההימורים ננעלו — לא ניתן לשנות אחרי 10.06.2026 17:00" };
+  }
+
   const supabase = createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
@@ -21,12 +50,15 @@ export async function saveBetsToSupabase(
     return { success: false, error: "Not logged in" };
   }
 
+  // Derive third place qualifiers from group predictions
+  const thirdPlaceTeams = deriveThirdPlaceTeams(state);
+
   // Save to user_brackets
   const bracketData = {
     user_id: user.id,
     league_id: leagueId || "default",
     group_predictions: state.groups,
-    third_place_qualifiers: [], // TODO: derive from groups
+    third_place_qualifiers: thirdPlaceTeams,
     knockout_tree: state.knockout,
     champion: state.specialBets.winner || null,
     updated_at: new Date().toISOString(),

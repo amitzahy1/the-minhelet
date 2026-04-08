@@ -180,7 +180,7 @@ export default function StandingsPage() {
 
       return {
         id: profile.id,
-        name: profile.displayName,
+        name: profile.displayName || "ללא שם",
         matchPts,
         advPts,
         specPts,
@@ -241,14 +241,15 @@ export default function StandingsPage() {
       <CompletionTracker players={COMPLETION_DATA} />
 
       {/* Hero & Roast of the day */}
-      {(() => {
-        const sorted = [...PLAYERS].sort((a, b) => parseInt(b.today) - parseInt(a.today));
+      {PLAYERS.length >= 2 && PLAYERS[0]?.name && (() => {
+        const sorted = [...PLAYERS].sort((a, b) => parseInt(b.today || "0") - parseInt(a.today || "0"));
         const heroPlayer = sorted[0];
         const roastPlayer = sorted[sorted.length - 1];
+        if (!heroPlayer?.name || !roastPlayer?.name) return null;
         return (
           <HeroRoast
-            hero={{ name: heroPlayer.name, points: parseInt(heroPlayer.today), highlight: `${heroPlayer.exact} מדויקות!` }}
-            roast={{ name: roastPlayer.name, points: parseInt(roastPlayer.today), highlight: `רק ${roastPlayer.today} — יום קשה` }}
+            hero={{ name: heroPlayer.name, points: parseInt(heroPlayer.today || "0"), highlight: `${heroPlayer.exact} מדויקות!` }}
+            roast={{ name: roastPlayer.name, points: parseInt(roastPlayer.today || "0"), highlight: `רק ${roastPlayer.today || "0"} — יום קשה` }}
             matchday="יום משחק 3"
           />
         );
@@ -316,7 +317,7 @@ export default function StandingsPage() {
                 i === 0 ? "bg-amber-100 text-amber-700 ring-2 ring-amber-300" :
                 i === 1 ? "bg-gray-200 text-gray-600" :
                 i === 2 ? "bg-orange-100 text-orange-700" : "bg-gray-100 text-gray-500"
-              }`}>{p.name[0]}</div>
+              }`}>{p.name?.[0] || "?"}</div>
               <div className="me-3 flex-1 min-w-0 relative">
                 <span className="font-bold text-base text-gray-900 cursor-pointer hover:text-blue-600 transition-colors">{p.name}</span>
                 {p.isYou && <span className="text-xs text-blue-500 ms-1.5 bg-blue-100 rounded px-1.5 py-0.5 font-bold">אתה</span>}

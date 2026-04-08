@@ -9884,5 +9884,1589 @@
       }
     ],
     "logo": "https://media.api-sports.io/football/teams/8.png"
+  },
+  "UZB": {
+    "players": [
+      {
+        "nameEn": "M. Genesh",
+        "num": 16,
+        "pos": "GK",
+        "photo": "https://media.api-sports.io/football/players/550449.png",
+        "age": 38
+      },
+      {
+        "nameEn": "M. Genesh",
+        "num": 16,
+        "pos": "GK",
+        "photo": "https://media.api-sports.io/football/players/550543.png",
+        "age": 38
+      },
+      {
+        "nameEn": "A. Menshawy",
+        "num": 40,
+        "pos": "GK",
+        "photo": "https://media.api-sports.io/football/players/610470.png",
+        "age": 20
+      },
+      {
+        "nameEn": "S. Soliman",
+        "num": 1,
+        "pos": "GK",
+        "photo": "https://media.api-sports.io/football/players/546592.png",
+        "age": 28
+      },
+      {
+        "nameEn": "K. Abdelfattah",
+        "num": 2,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/550530.png",
+        "age": 26
+      },
+      {
+        "nameEn": "Mahmoud Alaa",
+        "num": 4,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/2650.png",
+        "age": 34
+      },
+      {
+        "nameEn": "Abdel Rahman Ramadan",
+        "num": 22,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/17096.png",
+        "age": 32
+      },
+      {
+        "nameEn": "M. Gaber",
+        "num": 42,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/630629.png",
+        "age": 18
+      },
+      {
+        "nameEn": "A. Gouda",
+        "num": 24,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/550548.png",
+        "age": 22
+      },
+      {
+        "nameEn": "Mostafa Ibrahim",
+        "num": 5,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/296650.png",
+        "age": 25
+      },
+      {
+        "nameEn": "Ahmed Mahmoud",
+        "num": 88,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/339191.png",
+        "age": 22
+      },
+      {
+        "nameEn": "Mahmoud Shabana",
+        "num": 6,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/147950.png",
+        "age": 30
+      },
+      {
+        "nameEn": "M. Sherif",
+        "num": 34,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/550483.png",
+        "age": 19
+      },
+      {
+        "nameEn": "Mohamed Magdi Kafsha",
+        "num": 10,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/16843.png",
+        "age": 29
+      },
+      {
+        "nameEn": "Ahmed Atef Otta",
+        "num": 23,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/393210.png",
+        "age": 23
+      },
+      {
+        "nameEn": "A. Atef",
+        "num": 37,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/610463.png",
+        "age": 21
+      },
+      {
+        "nameEn": "Canaria",
+        "num": 41,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/546524.png",
+        "age": 26
+      },
+      {
+        "nameEn": "Mahmoud Abdul Aati Donga",
+        "num": 26,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/16982.png",
+        "age": 33
+      },
+      {
+        "nameEn": "Karim El Deeb",
+        "num": 17,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/17010.png",
+        "age": 30
+      },
+      {
+        "nameEn": "Mahmoud Emad",
+        "num": 25,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/17211.png",
+        "age": 27
+      },
+      {
+        "nameEn": "I. Saviour",
+        "num": 23,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/448925.png",
+        "age": 23
+      },
+      {
+        "nameEn": "A. Nagy",
+        "num": 35,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/550418.png",
+        "age": null
+      },
+      {
+        "nameEn": "Naser Naser",
+        "num": 8,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/147944.png",
+        "age": 29
+      },
+      {
+        "nameEn": "Amr Saleh",
+        "num": 7,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/17131.png",
+        "age": 30
+      },
+      {
+        "nameEn": "Mohamed Toni",
+        "num": 13,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/16965.png",
+        "age": 29
+      },
+      {
+        "nameEn": "A. Alaa",
+        "num": 32,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/550417.png",
+        "age": 19
+      },
+      {
+        "nameEn": "Nour Alaa",
+        "num": 19,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/425669.png",
+        "age": 23
+      },
+      {
+        "nameEn": "Amoory",
+        "num": 39,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/628519.png",
+        "age": 20
+      },
+      {
+        "nameEn": "J. Ebuka",
+        "num": 18,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/295133.png",
+        "age": 29
+      },
+      {
+        "nameEn": "Ahmed Eid Abdel Naby",
+        "num": 33,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/390207.png",
+        "age": 26
+      },
+      {
+        "nameEn": "Fady Farid",
+        "num": 9,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/16827.png",
+        "age": 28
+      },
+      {
+        "nameEn": "Amr Gomaa",
+        "num": 30,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/494087.png",
+        "age": 26
+      },
+      {
+        "nameEn": "A. Liadi",
+        "num": 15,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/354805.png",
+        "age": 23
+      },
+      {
+        "nameEn": "Mabululu",
+        "num": 90,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/73818.png",
+        "age": 33
+      },
+      {
+        "nameEn": "Abdel Rahman Magdi",
+        "num": 27,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/2665.png",
+        "age": 28
+      },
+      {
+        "nameEn": "Abdel Ghani Mohamed",
+        "num": 14,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/269278.png",
+        "age": 23
+      },
+      {
+        "nameEn": "Islam Samir",
+        "num": 99,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/494085.png",
+        "age": 2025
+      },
+      {
+        "nameEn": "Youssry Wahid",
+        "num": 11,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/436970.png",
+        "age": 27
+      }
+    ],
+    "logo": "https://media.api-sports.io/football/teams/1572.png"
+  },
+  "COD": {
+    "players": [
+      {
+        "nameEn": "A. Guedi",
+        "num": 12,
+        "pos": "GK",
+        "photo": "https://media.api-sports.io/football/players/571879.png",
+        "age": null
+      },
+      {
+        "nameEn": "O. Mahamoud",
+        "num": 1,
+        "pos": "GK",
+        "photo": "https://media.api-sports.io/football/players/571873.png",
+        "age": 24
+      },
+      {
+        "nameEn": "S. Mouktar",
+        "num": 22,
+        "pos": "GK",
+        "photo": "https://media.api-sports.io/football/players/571880.png",
+        "age": 21
+      },
+      {
+        "nameEn": "Liban Mohamed Said",
+        "num": 12,
+        "pos": "GK",
+        "photo": "https://media.api-sports.io/football/players/339371.png",
+        "age": 24
+      },
+      {
+        "nameEn": "A. Abdi",
+        "num": 2,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/571876.png",
+        "age": null
+      },
+      {
+        "nameEn": "I. Arafat",
+        "num": 19,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/576549.png",
+        "age": null
+      },
+      {
+        "nameEn": "A. Y. Farada",
+        "num": 18,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/571807.png",
+        "age": 30
+      },
+      {
+        "nameEn": "H. Idriss",
+        "num": 3,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/571877.png",
+        "age": 28
+      },
+      {
+        "nameEn": "A. Mohamed",
+        "num": 2,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/625408.png",
+        "age": null
+      },
+      {
+        "nameEn": "I. I. Mohamed",
+        "num": 23,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/571882.png",
+        "age": 23
+      },
+      {
+        "nameEn": "A. Osman",
+        "num": 5,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/571808.png",
+        "age": null
+      },
+      {
+        "nameEn": "A. Pohe Tokpa",
+        "num": 4,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/571874.png",
+        "age": 25
+      },
+      {
+        "nameEn": "I. Warsama",
+        "num": 15,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/571881.png",
+        "age": 27
+      },
+      {
+        "nameEn": "K. Abdi",
+        "num": 8,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/625409.png",
+        "age": null
+      },
+      {
+        "nameEn": "O. Daher",
+        "num": 6,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/571878.png",
+        "age": null
+      },
+      {
+        "nameEn": "S. Djama",
+        "num": 14,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/609094.png",
+        "age": null
+      },
+      {
+        "nameEn": "A. Farah",
+        "num": 7,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/571810.png",
+        "age": null
+      },
+      {
+        "nameEn": "W. Hassan",
+        "num": 10,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/131667.png",
+        "age": 26
+      },
+      {
+        "nameEn": "Mohamed Khaire",
+        "num": 13,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/528924.png",
+        "age": null
+      },
+      {
+        "nameEn": "S. Akinbinu",
+        "num": 17,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/609058.png",
+        "age": 26
+      },
+      {
+        "nameEn": "Egal Awaleh",
+        "num": 9,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/528925.png",
+        "age": null
+      },
+      {
+        "nameEn": "G. Dadzie",
+        "num": 9,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/608958.png",
+        "age": 28
+      },
+      {
+        "nameEn": "Y. Elmi",
+        "num": 20,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/571806.png",
+        "age": 22
+      },
+      {
+        "nameEn": "M. Hassan",
+        "num": 17,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/538575.png",
+        "age": 25
+      },
+      {
+        "nameEn": "A. Omar",
+        "num": 21,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/167746.png",
+        "age": 27
+      },
+      {
+        "nameEn": "Moussa Wais",
+        "num": 11,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/514408.png",
+        "age": null
+      }
+    ],
+    "logo": "https://media.api-sports.io/football/teams/1535.png"
+  },
+  "ENG": {
+    "players": [
+      {
+        "nameEn": "D. Henderson",
+        "num": 13,
+        "pos": "GK",
+        "photo": "https://media.api-sports.io/football/players/19088.png",
+        "age": 28
+      },
+      {
+        "nameEn": "J. Pickford",
+        "num": 1,
+        "pos": "GK",
+        "photo": "https://media.api-sports.io/football/players/2932.png",
+        "age": 31
+      },
+      {
+        "nameEn": "A. Ramsdale",
+        "num": 1,
+        "pos": "GK",
+        "photo": "https://media.api-sports.io/football/players/20355.png",
+        "age": 27
+      },
+      {
+        "nameEn": "J. Steele",
+        "num": 23,
+        "pos": "GK",
+        "photo": "https://media.api-sports.io/football/players/18960.png",
+        "age": 35
+      },
+      {
+        "nameEn": "J. Trafford",
+        "num": 22,
+        "pos": "GK",
+        "photo": "https://media.api-sports.io/football/players/162489.png",
+        "age": 23
+      },
+      {
+        "nameEn": "D. Burn",
+        "num": 17,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/18961.png",
+        "age": 33
+      },
+      {
+        "nameEn": "T. Chalobah",
+        "num": 6,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/19720.png",
+        "age": 26
+      },
+      {
+        "nameEn": "M. Guéhi",
+        "num": 5,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/67971.png",
+        "age": 25
+      },
+      {
+        "nameEn": "L. Hall",
+        "num": 26,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/284492.png",
+        "age": 21
+      },
+      {
+        "nameEn": "R. James",
+        "num": 3,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/19545.png",
+        "age": 26
+      },
+      {
+        "nameEn": "E. Konsa",
+        "num": 2,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/19354.png",
+        "age": 28
+      },
+      {
+        "nameEn": "M. Lewis-Skelly",
+        "num": 3,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/313245.png",
+        "age": 19
+      },
+      {
+        "nameEn": "T. Livramento",
+        "num": 25,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/158694.png",
+        "age": 23
+      },
+      {
+        "nameEn": "H. Maguire",
+        "num": 6,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/2935.png",
+        "age": 32
+      },
+      {
+        "nameEn": "J. Quansah",
+        "num": 2,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/158698.png",
+        "age": 22
+      },
+      {
+        "nameEn": "D. Spence",
+        "num": 24,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/19235.png",
+        "age": 25
+      },
+      {
+        "nameEn": "J. Stones",
+        "num": 5,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/626.png",
+        "age": 31
+      },
+      {
+        "nameEn": "F. Tomori",
+        "num": 12,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/19209.png",
+        "age": 28
+      },
+      {
+        "nameEn": "B. White",
+        "num": 12,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/19959.png",
+        "age": 28
+      },
+      {
+        "nameEn": "E. Anderson",
+        "num": 4,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/138908.png",
+        "age": 23
+      },
+      {
+        "nameEn": "J. Bellingham",
+        "num": 10,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/129718.png",
+        "age": 22
+      },
+      {
+        "nameEn": "E. Eze",
+        "num": 19,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/19586.png",
+        "age": 27
+      },
+      {
+        "nameEn": "P. Foden",
+        "num": 9,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/631.png",
+        "age": 25
+      },
+      {
+        "nameEn": "J. Garner",
+        "num": 21,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/895.png",
+        "age": 24
+      },
+      {
+        "nameEn": "M. Gibbs-White",
+        "num": 16,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/18746.png",
+        "age": 25
+      },
+      {
+        "nameEn": "J. Henderson",
+        "num": 8,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/292.png",
+        "age": 35
+      },
+      {
+        "nameEn": "R. Loftus-Cheek",
+        "num": 18,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/2292.png",
+        "age": 29
+      },
+      {
+        "nameEn": "K. Mainoo",
+        "num": 8,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/284322.png",
+        "age": 20
+      },
+      {
+        "nameEn": "N. O&apos;Reilly",
+        "num": 3,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/307123.png",
+        "age": 20
+      },
+      {
+        "nameEn": "C. Palmer",
+        "num": 7,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/152982.png",
+        "age": 23
+      },
+      {
+        "nameEn": "D. Rice",
+        "num": 4,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/2937.png",
+        "age": 26
+      },
+      {
+        "nameEn": "M. Rogers",
+        "num": 15,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/19170.png",
+        "age": 23
+      },
+      {
+        "nameEn": "A. Scott",
+        "num": 23,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/304853.png",
+        "age": 22
+      },
+      {
+        "nameEn": "A. Wharton",
+        "num": 16,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/288102.png",
+        "age": 21
+      },
+      {
+        "nameEn": "H. Barnes",
+        "num": 19,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/18778.png",
+        "age": 28
+      },
+      {
+        "nameEn": "J. Bowen",
+        "num": 20,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/19428.png",
+        "age": 29
+      },
+      {
+        "nameEn": "D. Calvert-Lewin",
+        "num": 18,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/18766.png",
+        "age": 28
+      },
+      {
+        "nameEn": "A. Gordon",
+        "num": 14,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/138787.png",
+        "age": 24
+      },
+      {
+        "nameEn": "H. Kane",
+        "num": 9,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/184.png",
+        "age": 32
+      },
+      {
+        "nameEn": "N. Madueke",
+        "num": 21,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/136723.png",
+        "age": 23
+      },
+      {
+        "nameEn": "M. Rashford",
+        "num": 11,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/909.png",
+        "age": 28
+      },
+      {
+        "nameEn": "B. Saka",
+        "num": 7,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/1460.png",
+        "age": 24
+      },
+      {
+        "nameEn": "D. Solanke",
+        "num": 18,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/18883.png",
+        "age": 28
+      },
+      {
+        "nameEn": "O. Watkins",
+        "num": 19,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/19366.png",
+        "age": 30
+      }
+    ],
+    "logo": "https://media.api-sports.io/football/teams/10.png"
+  },
+  "CRO": {
+    "players": [
+      {
+        "nameEn": "I. Ivušić",
+        "num": 23,
+        "pos": "GK",
+        "photo": "https://media.api-sports.io/football/players/14297.png",
+        "age": 30
+      },
+      {
+        "nameEn": "D. Kotarski",
+        "num": 12,
+        "pos": "GK",
+        "photo": "https://media.api-sports.io/football/players/524.png",
+        "age": 25
+      },
+      {
+        "nameEn": "K. Letica",
+        "num": 23,
+        "pos": "GK",
+        "photo": "https://media.api-sports.io/football/players/64.png",
+        "age": 28
+      },
+      {
+        "nameEn": "D. Livaković",
+        "num": 1,
+        "pos": "GK",
+        "photo": "https://media.api-sports.io/football/players/1305.png",
+        "age": 31
+      },
+      {
+        "nameEn": "I. Pandur",
+        "num": 12,
+        "pos": "GK",
+        "photo": "https://media.api-sports.io/football/players/14268.png",
+        "age": 25
+      },
+      {
+        "nameEn": "D. Bradarić",
+        "num": 6,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/14327.png",
+        "age": 26
+      },
+      {
+        "nameEn": "D. Ćaleta-Car",
+        "num": 5,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/1902.png",
+        "age": 29
+      },
+      {
+        "nameEn": "M. Erlić",
+        "num": 25,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/30827.png",
+        "age": 27
+      },
+      {
+        "nameEn": "J. Gvardiol",
+        "num": 4,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/129033.png",
+        "age": 23
+      },
+      {
+        "nameEn": "M. Pongračić",
+        "num": 3,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/1084.png",
+        "age": 28
+      },
+      {
+        "nameEn": "I. Smolčić",
+        "num": 4,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/14266.png",
+        "age": 25
+      },
+      {
+        "nameEn": "J. Stanišić",
+        "num": 2,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/125171.png",
+        "age": 25
+      },
+      {
+        "nameEn": "J. Šutalo",
+        "num": 6,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/14701.png",
+        "age": 25
+      },
+      {
+        "nameEn": "L. Vušković",
+        "num": 22,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/387521.png",
+        "age": 18
+      },
+      {
+        "nameEn": "M. Baturina",
+        "num": 16,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/295026.png",
+        "age": 22
+      },
+      {
+        "nameEn": "T. Fruk",
+        "num": 19,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/284869.png",
+        "age": 24
+      },
+      {
+        "nameEn": "K. Jakić",
+        "num": 18,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/14395.png",
+        "age": 28
+      },
+      {
+        "nameEn": "M. Kovačić",
+        "num": 8,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/2291.png",
+        "age": 31
+      },
+      {
+        "nameEn": "L. Majer",
+        "num": 7,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/1321.png",
+        "age": 27
+      },
+      {
+        "nameEn": "L. Modrić",
+        "num": 10,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/754.png",
+        "age": 40
+      },
+      {
+        "nameEn": "N. Moro",
+        "num": 8,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/1322.png",
+        "age": 27
+      },
+      {
+        "nameEn": "M. Pašalić",
+        "num": 15,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/2763.png",
+        "age": 30
+      },
+      {
+        "nameEn": "L. Sučić",
+        "num": 21,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/7332.png",
+        "age": 23
+      },
+      {
+        "nameEn": "P. Sučić",
+        "num": 17,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/348205.png",
+        "age": 22
+      },
+      {
+        "nameEn": "N. Vlašić",
+        "num": 13,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/842.png",
+        "age": 28
+      },
+      {
+        "nameEn": "A. Budimir",
+        "num": 11,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/46746.png",
+        "age": 34
+      },
+      {
+        "nameEn": "F. Ivanović",
+        "num": 20,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/202951.png",
+        "age": 22
+      },
+      {
+        "nameEn": "A. Kramarić",
+        "num": 9,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/726.png",
+        "age": 34
+      },
+      {
+        "nameEn": "I. Matanović",
+        "num": 20,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/202696.png",
+        "age": 22
+      },
+      {
+        "nameEn": "P. Musa",
+        "num": 26,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/66055.png",
+        "age": 27
+      },
+      {
+        "nameEn": "M. Oršić",
+        "num": 16,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/1330.png",
+        "age": 33
+      },
+      {
+        "nameEn": "M. Pašalić",
+        "num": 24,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/260865.png",
+        "age": 25
+      },
+      {
+        "nameEn": "I. Perišić",
+        "num": 14,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/207.png",
+        "age": 36
+      }
+    ],
+    "logo": "https://media.api-sports.io/football/teams/3.png"
+  },
+  "GHA": {
+    "players": [
+      {
+        "nameEn": "M. Barcola",
+        "num": 16,
+        "pos": "GK",
+        "photo": "https://media.api-sports.io/football/players/153708.png",
+        "age": 26
+      },
+      {
+        "nameEn": "F. Kagbatawouli",
+        "num": 30,
+        "pos": "GK",
+        "photo": "https://media.api-sports.io/football/players/609102.png",
+        "age": 23
+      },
+      {
+        "nameEn": "S. Mensah",
+        "num": 16,
+        "pos": "GK",
+        "photo": "https://media.api-sports.io/football/players/277990.png",
+        "age": 22
+      },
+      {
+        "nameEn": "C. Tondoro",
+        "num": 23,
+        "pos": "GK",
+        "photo": "https://media.api-sports.io/football/players/575066.png",
+        "age": null
+      },
+      {
+        "nameEn": "A. Yaya",
+        "num": 23,
+        "pos": "GK",
+        "photo": "https://media.api-sports.io/football/players/609238.png",
+        "age": 21
+      },
+      {
+        "nameEn": "M. Amevor",
+        "num": 3,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/68330.png",
+        "age": 34
+      },
+      {
+        "nameEn": "K. Boateng",
+        "num": 5,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/7061.png",
+        "age": 29
+      },
+      {
+        "nameEn": "A. Bode",
+        "num": 8,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/575064.png",
+        "age": 30
+      },
+      {
+        "nameEn": "K. Boma",
+        "num": 2,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/174774.png",
+        "age": 23
+      },
+      {
+        "nameEn": "D. Dakonam",
+        "num": 21,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/47250.png",
+        "age": 34
+      },
+      {
+        "nameEn": "S. Fofana",
+        "num": 20,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/280431.png",
+        "age": 22
+      },
+      {
+        "nameEn": "E. Hackman",
+        "num": 4,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/41353.png",
+        "age": 30
+      },
+      {
+        "nameEn": "K. Holete",
+        "num": 21,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/577135.png",
+        "age": 22
+      },
+      {
+        "nameEn": "J. Homawoo",
+        "num": 9,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/21084.png",
+        "age": 28
+      },
+      {
+        "nameEn": "A. Ouro-Ayeva",
+        "num": 17,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/573730.png",
+        "age": 28
+      },
+      {
+        "nameEn": "R. Aholou",
+        "num": 14,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/180719.png",
+        "age": 32
+      },
+      {
+        "nameEn": "D. Karim",
+        "num": 17,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/322865.png",
+        "age": 22
+      },
+      {
+        "nameEn": "S. Nador",
+        "num": 2,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/342045.png",
+        "age": 23
+      },
+      {
+        "nameEn": "S. Ouro",
+        "num": 6,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/159379.png",
+        "age": 25
+      },
+      {
+        "nameEn": "A. Romao",
+        "num": 15,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/22012.png",
+        "age": 41
+      },
+      {
+        "nameEn": "Y. Agbagno",
+        "num": 7,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/533726.png",
+        "age": 25
+      },
+      {
+        "nameEn": "Y. Annor",
+        "num": 22,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/546541.png",
+        "age": 27
+      },
+      {
+        "nameEn": "K. Denkey",
+        "num": 10,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/21036.png",
+        "age": 25
+      },
+      {
+        "nameEn": "D. Henen",
+        "num": 19,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/8566.png",
+        "age": 29
+      },
+      {
+        "nameEn": "T. Klidje",
+        "num": 18,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/123675.png",
+        "age": 24
+      },
+      {
+        "nameEn": "K. Komlavi",
+        "num": 9,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/577113.png",
+        "age": 24
+      },
+      {
+        "nameEn": "K. Laba",
+        "num": 9,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/36679.png",
+        "age": 33
+      },
+      {
+        "nameEn": "I. Ouro-Agoro",
+        "num": 11,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/201964.png",
+        "age": 29
+      },
+      {
+        "nameEn": "M. Ouro-Tagba",
+        "num": 13,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/380547.png",
+        "age": 21
+      },
+      {
+        "nameEn": "G. Yenoussi",
+        "num": 12,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/575035.png",
+        "age": 28
+      }
+    ],
+    "logo": "https://media.api-sports.io/football/teams/1534.png"
+  },
+  "PAN": {
+    "players": [
+      {
+        "nameEn": "JD Gunn",
+        "num": 12,
+        "pos": "GK",
+        "photo": "https://media.api-sports.io/football/players/458846.png",
+        "age": 25
+      },
+      {
+        "nameEn": "L. Mejía",
+        "num": 1,
+        "pos": "GK",
+        "photo": "https://media.api-sports.io/football/players/2967.png",
+        "age": 34
+      },
+      {
+        "nameEn": "O. Mosquera",
+        "num": 22,
+        "pos": "GK",
+        "photo": "https://media.api-sports.io/football/players/2968.png",
+        "age": 31
+      },
+      {
+        "nameEn": "E. Roberts",
+        "num": 1,
+        "pos": "GK",
+        "photo": "https://media.api-sports.io/football/players/57725.png",
+        "age": 31
+      },
+      {
+        "nameEn": "C. Samudio",
+        "num": 12,
+        "pos": "GK",
+        "photo": "https://media.api-sports.io/football/players/57861.png",
+        "age": 31
+      },
+      {
+        "nameEn": "I. Anderson",
+        "num": 3,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/57805.png",
+        "age": 28
+      },
+      {
+        "nameEn": "A. Andrade",
+        "num": 16,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/7197.png",
+        "age": 27
+      },
+      {
+        "nameEn": "C. Blackman",
+        "num": 2,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/2975.png",
+        "age": 27
+      },
+      {
+        "nameEn": "J. Córdoba",
+        "num": 3,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/57739.png",
+        "age": 24
+      },
+      {
+        "nameEn": "O. Córdoba",
+        "num": 4,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/57728.png",
+        "age": 31
+      },
+      {
+        "nameEn": "É. Davis",
+        "num": 15,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/2970.png",
+        "age": 34
+      },
+      {
+        "nameEn": "O. Davis",
+        "num": 20,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/304057.png",
+        "age": 23
+      },
+      {
+        "nameEn": "F. Escobar",
+        "num": 4,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/2971.png",
+        "age": 30
+      },
+      {
+        "nameEn": "E. Fariña",
+        "num": 5,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/328148.png",
+        "age": 24
+      },
+      {
+        "nameEn": "K. Galván",
+        "num": 6,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/57775.png",
+        "age": 29
+      },
+      {
+        "nameEn": "J. Gutiérrez",
+        "num": 19,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/57803.png",
+        "age": 27
+      },
+      {
+        "nameEn": "J. Hall",
+        "num": 14,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/535861.png",
+        "age": 19
+      },
+      {
+        "nameEn": "C. Harvey",
+        "num": 14,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/71230.png",
+        "age": 25
+      },
+      {
+        "nameEn": "M. Krug",
+        "num": 4,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/407597.png",
+        "age": 19
+      },
+      {
+        "nameEn": "R. Miller",
+        "num": 5,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/81659.png",
+        "age": 33
+      },
+      {
+        "nameEn": "A. Murillo",
+        "num": 23,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/2973.png",
+        "age": 29
+      },
+      {
+        "nameEn": "R. Peralta",
+        "num": 5,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/57890.png",
+        "age": 32
+      },
+      {
+        "nameEn": "J. Ramos",
+        "num": 13,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/57667.png",
+        "age": 28
+      },
+      {
+        "nameEn": "J. Rivera",
+        "num": 0,
+        "pos": "DEF",
+        "photo": "https://media.api-sports.io/football/players/577841.png",
+        "age": 27
+      },
+      {
+        "nameEn": "D. Aparicio",
+        "num": 0,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/153384.png",
+        "age": 25
+      },
+      {
+        "nameEn": "Á. Caicedo",
+        "num": 0,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/325468.png",
+        "age": 26
+      },
+      {
+        "nameEn": "A. Carrasquilla",
+        "num": 8,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/57807.png",
+        "age": 27
+      },
+      {
+        "nameEn": "E. Cedeño",
+        "num": 13,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/337359.png",
+        "age": 22
+      },
+      {
+        "nameEn": "A. Godoy",
+        "num": 20,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/2977.png",
+        "age": 35
+      },
+      {
+        "nameEn": "A. Knight",
+        "num": 6,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/535870.png",
+        "age": 23
+      },
+      {
+        "nameEn": "C. Martinez",
+        "num": 6,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/554208.png",
+        "age": 28
+      },
+      {
+        "nameEn": "R. Phillips",
+        "num": 7,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/199464.png",
+        "age": 24
+      },
+      {
+        "nameEn": "J. Rodríguez",
+        "num": 7,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/2979.png",
+        "age": 27
+      },
+      {
+        "nameEn": "M. Sanchez",
+        "num": 8,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/635194.png",
+        "age": 36
+      },
+      {
+        "nameEn": "J. Welch",
+        "num": 14,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/57904.png",
+        "age": 26
+      },
+      {
+        "nameEn": "A. Arroyo",
+        "num": 18,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/2981.png",
+        "age": 32
+      },
+      {
+        "nameEn": "Y. Bárcenas",
+        "num": 11,
+        "pos": "MID",
+        "photo": "https://media.api-sports.io/football/players/46855.png",
+        "age": 32
+      },
+      {
+        "nameEn": "K. Barria",
+        "num": 9,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/544681.png",
+        "age": 18
+      },
+      {
+        "nameEn": "O. Browne",
+        "num": 21,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/2982.png",
+        "age": 31
+      },
+      {
+        "nameEn": "I. Díaz",
+        "num": 10,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/96615.png",
+        "age": 28
+      },
+      {
+        "nameEn": "J. Fajardo",
+        "num": 17,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/2983.png",
+        "age": 32
+      },
+      {
+        "nameEn": "G. Herbert",
+        "num": 10,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/535837.png",
+        "age": 20
+      },
+      {
+        "nameEn": "G. Herrera",
+        "num": 9,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/445633.png",
+        "age": 20
+      },
+      {
+        "nameEn": "H. Hurtado",
+        "num": 0,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/305698.png",
+        "age": 27
+      },
+      {
+        "nameEn": "K. Lenis",
+        "num": 13,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/336526.png",
+        "age": 24
+      },
+      {
+        "nameEn": "A. Londoño",
+        "num": 11,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/292396.png",
+        "age": 24
+      },
+      {
+        "nameEn": "J. Murillo",
+        "num": 13,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/39612.png",
+        "age": 30
+      },
+      {
+        "nameEn": "A. Quintero",
+        "num": 19,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/2978.png",
+        "age": 38
+      },
+      {
+        "nameEn": "T. Rodríguez",
+        "num": 9,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/57910.png",
+        "age": 26
+      },
+      {
+        "nameEn": "C. Waterman",
+        "num": 18,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/51648.png",
+        "age": 34
+      },
+      {
+        "nameEn": "C. Yanis",
+        "num": 21,
+        "pos": "FW",
+        "photo": "https://media.api-sports.io/football/players/57875.png",
+        "age": 29
+      }
+    ],
+    "logo": "https://media.api-sports.io/football/teams/11.png"
   }
 }

@@ -57,12 +57,14 @@ function Sparkline({ data, highlight }: { data: number[]; highlight?: boolean })
   );
 }
 
-// Hover tooltip for detailed breakdown — positioned at center of viewport
+// Hover tooltip — mobile: bottom sheet, desktop: centered popup
 function PlayerTooltip({ player, visible }: { player: typeof MOCK_PLAYERS[0]; visible: boolean }) {
   if (!visible) return null;
   const b = player.breakdown;
   return (
-    <div className="fixed z-[60] top-1/2 start-1/2 -translate-x-1/2 -translate-y-1/2 w-72 bg-white rounded-xl shadow-2xl border border-gray-200 p-4 text-sm" dir="rtl">
+    <>
+      <div className="fixed inset-0 z-[55] bg-black/20 sm:bg-transparent" />
+      <div className="fixed z-[60] inset-x-3 bottom-20 sm:bottom-auto sm:inset-x-auto sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-72 bg-white rounded-xl shadow-2xl border border-gray-200 p-4 text-sm max-h-[70vh] overflow-y-auto" dir="rtl">
       <p className="font-bold text-base mb-3 border-b border-gray-100 pb-2 text-gray-900">{player.name} — פירוט {player.total} נקודות</p>
       <div className="space-y-2.5">
         <div>
@@ -96,6 +98,7 @@ function PlayerTooltip({ player, visible }: { player: typeof MOCK_PLAYERS[0]; vi
         </div>
       </div>
     </div>
+    </>
   );
 }
 

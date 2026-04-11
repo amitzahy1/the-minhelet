@@ -984,42 +984,48 @@ function SimulationTab() {
           <span className="text-[10px] text-gray-400">{Object.keys(specialResults).length}/{SPECIAL_CATS.length} מולאו</span>
         </summary>
         <div className="border-t border-gray-100 divide-y divide-gray-50 p-3 space-y-2">
-          {SPECIAL_CATS.map(cat => (
-            <div key={cat.key} className="flex items-center gap-2">
-              <span className="text-xs font-bold text-gray-700 w-28 shrink-0">{cat.label}</span>
-              <span className="text-[10px] text-gray-400 w-12 shrink-0">{cat.pts} נק׳</span>
-              {cat.key === "matchup" ? (
-                <select value={specialResults[cat.key] || ""} onChange={e => setSpecialResults(prev => ({ ...prev, [cat.key]: e.target.value }))}
-                  className="flex-1 h-8 rounded-lg border border-gray-200 text-xs px-2">
-                  <option value="">בחרו</option>
-                  <option value="1">1</option>
-                  <option value="X">X</option>
-                  <option value="2">2</option>
-                </select>
-              ) : cat.key === "penalties" ? (
-                <select value={specialResults[cat.key] || ""} onChange={e => setSpecialResults(prev => ({ ...prev, [cat.key]: e.target.value }))}
-                  className="flex-1 h-8 rounded-lg border border-gray-200 text-xs px-2">
-                  <option value="">בחרו</option>
-                  <option value="OVER">אובר</option>
-                  <option value="UNDER">אנדר</option>
-                </select>
-              ) : cat.key === "prolificGroup" || cat.key === "driestGroup" ? (
-                <select value={specialResults[cat.key] || ""} onChange={e => setSpecialResults(prev => ({ ...prev, [cat.key]: e.target.value }))}
-                  className="flex-1 h-8 rounded-lg border border-gray-200 text-xs px-2">
-                  <option value="">בחרו בית</option>
-                  {"ABCDEFGHIJKL".split("").map(g => <option key={g} value={g}>בית {g}</option>)}
-                </select>
-              ) : cat.key === "bestAttack" || cat.key === "dirtiestTeam" ? (
-                <input type="text" placeholder="קוד נבחרת (ARG, BRA...)" value={specialResults[cat.key] || ""}
-                  onChange={e => setSpecialResults(prev => ({ ...prev, [cat.key]: e.target.value.toUpperCase() }))}
-                  className="flex-1 h-8 rounded-lg border border-gray-200 text-xs px-2" dir="ltr" />
-              ) : (
-                <input type="text" placeholder="שם שחקן" value={specialResults[cat.key] || ""}
-                  onChange={e => setSpecialResults(prev => ({ ...prev, [cat.key]: e.target.value }))}
-                  className="flex-1 h-8 rounded-lg border border-gray-200 text-xs px-2" />
-              )}
-            </div>
-          ))}
+          {SPECIAL_CATS.map(cat => {
+            const selectCls = "flex-1 h-8 rounded-lg border border-gray-200 text-xs px-2";
+            const onChange = (v: string) => setSpecialResults(prev => ({ ...prev, [cat.key]: v }));
+            return (
+              <div key={cat.key} className="flex items-center gap-2">
+                <span className="text-xs font-bold text-gray-700 w-24 shrink-0">{cat.label}</span>
+                <span className="text-[10px] text-gray-400 w-10 shrink-0">{cat.pts} נק׳</span>
+                {(cat.key === "bestAttack" || cat.key === "dirtiestTeam") ? (
+                  <select value={specialResults[cat.key] || ""} onChange={e => onChange(e.target.value)} className={selectCls}>
+                    <option value="">בחרו נבחרת</option>
+                    {Object.keys(GROUPS).flatMap(g => GROUPS[g].map(t => (
+                      <option key={t.code} value={t.code}>{getFlag(t.code)} {t.name_he}</option>
+                    )))}
+                  </select>
+                ) : (cat.key === "topScorer" || cat.key === "topAssists") ? (
+                  <select value={specialResults[cat.key] || ""} onChange={e => onChange(e.target.value)} className={selectCls}>
+                    <option value="">בחרו שחקן</option>
+                    {["Haaland", "Mbappé", "Kane", "Vinícius Jr.", "Lautaro", "Isak", "Morata", "Ronaldo",
+                      "Álvarez", "Rodrygo", "Havertz", "Núñez", "Bellingham", "Saka", "Palmer", "Gyökeres",
+                      "Osimhen", "Salah", "Messi", "Son Heung-min", "Pulisic", "David", "Mané",
+                      "Griezmann", "Pedri", "De Bruyne", "Wirtz", "Musiala", "B. Fernandes", "Ødegaard",
+                    ].map(p => <option key={p} value={p}>{p}</option>)}
+                  </select>
+                ) : cat.key === "prolificGroup" || cat.key === "driestGroup" ? (
+                  <select value={specialResults[cat.key] || ""} onChange={e => onChange(e.target.value)} className={selectCls}>
+                    <option value="">בחרו בית</option>
+                    {"ABCDEFGHIJKL".split("").map(g => <option key={g} value={g}>בית {g}</option>)}
+                  </select>
+                ) : cat.key === "matchup" ? (
+                  <select value={specialResults[cat.key] || ""} onChange={e => onChange(e.target.value)} className={selectCls}>
+                    <option value="">בחרו</option>
+                    <option value="1">1</option><option value="X">X</option><option value="2">2</option>
+                  </select>
+                ) : (
+                  <select value={specialResults[cat.key] || ""} onChange={e => onChange(e.target.value)} className={selectCls}>
+                    <option value="">בחרו</option>
+                    <option value="OVER">אובר</option><option value="UNDER">אנדר</option>
+                  </select>
+                )}
+              </div>
+            );
+          })}
         </div>
       </details>
     </div>

@@ -147,6 +147,7 @@ export default function StandingsPage() {
 
     return profiles.map((profile, idx) => {
       // Aggregate scoring entries for this user
+      if (!profile.id) return null;
       const userEntries = scoringLog.filter((e) => e.userId === profile.id);
 
       const breakdown = {
@@ -194,7 +195,7 @@ export default function StandingsPage() {
         isYou: false as boolean,
         breakdown,
       };
-    });
+    }).filter(Boolean) as typeof MOCK_PLAYERS;
   }, [profiles, scoringLog]);
 
   const PLAYERS = realPlayers.length > 0 ? realPlayers : MOCK_PLAYERS;

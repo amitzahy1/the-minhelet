@@ -424,44 +424,39 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </button>
 
       {/* ════════════════════════════════════════════ */}
-      {/* MOBILE BOTTOM NAV — 5 tabs                  */}
+      {/* MOBILE BOTTOM NAV — 6 tabs                  */}
       {/* ════════════════════════════════════════════ */}
       <nav className="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-gray-200 z-50 sm:hidden shadow-[0_-2px_8px_rgba(0,0,0,0.06)]" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
         <div className="flex justify-around items-center h-16">
-          {/* Tab 1: Betting */}
           <Link href="/groups"
             className={`flex flex-col items-center gap-0.5 py-1 ${isBettingPage ? "text-blue-600" : "text-gray-400"}`}>
             {Icons.bets(isBettingPage)}
-            <span className="text-[9px] font-bold">הימורים</span>
-            {isBettingPage && <div className="w-1.5 h-1.5 rounded-full bg-blue-600"></div>}
+            <span className="text-[8px] font-bold">הימורים</span>
           </Link>
-          {/* Tab 2: Standings */}
           <Link href="/standings"
             className={`flex flex-col items-center gap-0.5 py-1 ${pathname === "/standings" ? "text-gray-900" : "text-gray-400"}`}>
             {Icons.leaderboard(pathname === "/standings")}
-            <span className="text-[9px] font-bold">דירוג</span>
-            {pathname === "/standings" && <div className="w-1.5 h-1.5 rounded-full bg-gray-900"></div>}
+            <span className="text-[8px] font-bold">דירוג</span>
           </Link>
-          {/* Tab 3: Compare */}
           <Link href="/compare"
             className={`flex flex-col items-center gap-0.5 py-1 ${pathname === "/compare" ? "text-gray-900" : "text-gray-400"}`}>
             {Icons.compare(pathname === "/compare")}
-            <span className="text-[9px] font-bold">השוואה</span>
-            {pathname === "/compare" && <div className="w-1.5 h-1.5 rounded-full bg-gray-900"></div>}
+            <span className="text-[8px] font-bold">השוואה</span>
           </Link>
-          {/* Tab 4: Live */}
           <Link href="/live"
             className={`flex flex-col items-center gap-0.5 py-1 ${pathname === "/live" ? "text-gray-900" : "text-gray-400"}`}>
             {Icons.live(pathname === "/live")}
-            <span className="text-[9px] font-bold">לייב</span>
-            {pathname === "/live" && <div className="w-1.5 h-1.5 rounded-full bg-gray-900"></div>}
+            <span className="text-[8px] font-bold">לייב</span>
           </Link>
-          {/* Tab 5: Schedule */}
+          <Link href="/squads"
+            className={`flex flex-col items-center gap-0.5 py-1 ${pathname === "/squads" ? "text-gray-900" : "text-gray-400"}`}>
+            {Icons.squads(pathname === "/squads")}
+            <span className="text-[8px] font-bold">נבחרות</span>
+          </Link>
           <Link href="/schedule"
             className={`flex flex-col items-center gap-0.5 py-1 ${pathname === "/schedule" ? "text-gray-900" : "text-gray-400"}`}>
             {Icons.schedule(pathname === "/schedule")}
-            <span className="text-[9px] font-bold">לו״ז</span>
-            {pathname === "/schedule" && <div className="w-1.5 h-1.5 rounded-full bg-gray-900"></div>}
+            <span className="text-[8px] font-bold">לו״ז</span>
           </Link>
         </div>
       </nav>

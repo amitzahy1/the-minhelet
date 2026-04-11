@@ -112,8 +112,16 @@ export default function SquadsPage() {
               <div className="flex items-center gap-4 mt-2 text-sm text-gray-500 flex-wrap">
                 <span>בית {team.group_id}</span>
                 <span>FIFA #{team.fifa_ranking}</span>
-                {squad && <span>מאמן: {squad.coach}</span>}
+                {squad && squad.coach && <span>מאמן: {squad.coach}</span>}
                 {squad && <span>מערך: {source?.formation || squad.formation}</span>}
+                {squad && (() => {
+                  const totalValue = startersForPitch.reduce((sum, p) => sum + (p.marketValue || 0), 0);
+                  return totalValue > 0 ? (
+                    <span className="font-bold text-emerald-600" style={{ fontFamily: "var(--font-inter)" }}>
+                      שווי הרכב: {formatMarketValue(totalValue)}
+                    </span>
+                  ) : null;
+                })()}
               </div>
             </div>
           </div>

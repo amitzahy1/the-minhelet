@@ -391,7 +391,9 @@ export const MARKET_VALUES: Record<string, number> = {
   "Aymen Hussein": 3,
 
   // ===================== JORDAN =====================
-  "Al-Tamari": 5,
+  "Al-Tamari": 5, "Bani Atieh": 2, "Y. Al-Rawashdeh": 1, "M. Abu Zraiq": 1,
+  "N. Al-Bataineh": 1, "M. Shalabia": 1, "Yazid Abu Layla": 1, "Al Naimat": 2,
+  "Al Dardour": 1, "Shafi": 1, "Hammad": 1,
 
   // ===================== CZECHIA =====================
   "Schick": 20,

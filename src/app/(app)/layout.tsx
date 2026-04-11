@@ -15,20 +15,22 @@ const Icons = {
   rules: (a: boolean) => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={a ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>,
   live: (a: boolean) => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={a ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49M7.76 16.24a6 6 0 0 1 0-8.49M19.07 4.93a10 10 0 0 1 0 14.14M4.93 19.07a10 10 0 0 1 0-14.14"/></svg>,
   squads: (a: boolean) => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={a ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+  schedule: (a: boolean) => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={a ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
 };
 
-// Sub-pages under "הימורי משתמש"
+// Betting steps
 const BETTING_PAGES = [
   { href: "/groups", label: "שלב הבתים", step: 1 },
   { href: "/knockout", label: "עץ טורניר", step: 2 },
   { href: "/special-bets", label: "הימורים מיוחדים", step: 3 },
 ];
 
-const NAV_ITEMS = [
+// Tracking/social pages
+const TRACKING_ITEMS = [
   { href: "/standings", label: "דירוג", iconKey: "leaderboard" as const },
   { href: "/compare", label: "השוואה", iconKey: "compare" as const },
-  { href: "/schedule", label: "לו״ז", iconKey: "live" as const },
   { href: "/live", label: "לייב", iconKey: "live" as const },
+  { href: "/schedule", label: "לו״ז", iconKey: "schedule" as const },
   { href: "/squads", label: "נבחרות", iconKey: "squads" as const },
   { href: "/rules", label: "חוקים", iconKey: "rules" as const },
 ];
@@ -43,108 +45,61 @@ function OnboardingWizard({ onDismiss, onStart }: { onDismiss: () => void; onSta
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
       <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden max-h-[85vh] flex flex-col">
-
-        {/* Header — clean, white */}
         <div className="px-6 pt-5 pb-3 shrink-0">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <img src="/logo.png" alt="" className="w-12 h-12 rounded-full shadow-md" />
-              <span className="font-black text-lg text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>The Minhelet</span>
+              <img src="/logo.png" alt="" className="w-10 h-10 rounded-full object-cover" />
+              <div>
+                <h2 className="text-lg font-bold text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>The Minhelet</h2>
+                <p className="text-xs text-gray-400">מונדיאל 2026 — הימורי חברים</p>
+              </div>
             </div>
-            <span className="text-sm text-gray-400 font-bold" style={{ fontFamily: "var(--font-inter)" }}>{page + 1}/3</span>
+            <button onClick={onDismiss} className="text-xs text-gray-400 hover:text-gray-600">דלג</button>
           </div>
-          {/* Progress bar */}
-          <div className="flex gap-1.5">
-            {[0,1,2].map(i => (
-              <div key={i} className={`h-1.5 rounded-full flex-1 transition-all ${i <= page ? "bg-blue-600" : "bg-gray-200"}`}></div>
-            ))}
-          </div>
+          <div className="flex gap-1 mb-4">{[0,1,2].map(i => <div key={i} className={`h-1 flex-1 rounded-full ${i <= page ? "bg-blue-500" : "bg-gray-200"}`}></div>)}</div>
         </div>
-
-        {/* Content — scrollable */}
-        <div className="px-6 py-4 overflow-y-auto flex-1">
+        <div className="px-6 pb-6 overflow-y-auto flex-1">
           {page === 0 && (
-            <div className="space-y-5">
-              <div className="text-center py-2">
-                <h2 className="text-2xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>ברוכים הבאים!</h2>
-                <p className="text-base text-gray-500 mt-1">מונדיאל 2026 — 48 נבחרות, 104 משחקים</p>
-              </div>
-              <p className="text-base text-gray-700 leading-relaxed">
-                לפניכם 3 משימות שצריך להשלים <strong>לפני שהטורניר מתחיל</strong>. כל ההימורים ננעלים ב-10 ביוני.
-              </p>
+            <div className="space-y-4">
+              <h3 className="text-2xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>3 שלבים להשלמה</h3>
+              <p className="text-base text-gray-600">לפני שהמונדיאל מתחיל, יש להשלים 3 שלבי הימורים:</p>
               <div className="space-y-3">
-                {[
-                  { step: "1", title: "שלב הבתים", desc: "הזינו תוצאות ל-72 משחקים בבתים", color: "bg-blue-50 border-blue-200 text-blue-700" },
-                  { step: "2", title: "עץ הנוק-אאוט", desc: "תוצאות מהשמינית ועד הגמר", color: "bg-amber-50 border-amber-200 text-amber-700" },
-                  { step: "3", title: "הימורים מיוחדים", desc: "מי זוכה, עולות, מלך שערים ועוד", color: "bg-purple-50 border-purple-200 text-purple-700" },
-                ].map(s => (
-                  <div key={s.step} className={`flex items-center gap-3 rounded-xl border p-3 ${s.color}`}>
-                    <span className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-sm font-black shadow-sm">{s.step}</span>
-                    <div>
-                      <p className="font-bold text-sm">{s.title}</p>
-                      <p className="text-xs opacity-80">{s.desc}</p>
-                    </div>
-                  </div>
-                ))}
+                <div className="bg-blue-50 rounded-xl p-4 border border-blue-200"><span className="inline-block w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold text-center leading-6 me-2">1</span><strong>שלב הבתים</strong> — ניחוש תוצאות ל-72 משחקי בתים</div>
+                <div className="bg-amber-50 rounded-xl p-4 border border-amber-200"><span className="inline-block w-6 h-6 rounded-full bg-amber-600 text-white text-xs font-bold text-center leading-6 me-2">2</span><strong>עץ הנוק-אאוט</strong> — מי מנצחת מהשמינית עד הגמר</div>
+                <div className="bg-purple-50 rounded-xl p-4 border border-purple-200"><span className="inline-block w-6 h-6 rounded-full bg-purple-600 text-white text-xs font-bold text-center leading-6 me-2">3</span><strong>הימורים מיוחדים</strong> — מלך שערים, זוכה, בית פורה, ועוד</div>
               </div>
             </div>
           )}
-
           {page === 1 && (
-            <div className="space-y-5">
-              <h2 className="text-xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>שלב הבתים</h2>
-              <p className="text-base text-gray-600 leading-relaxed">
-                בכל אחד מ-12 הבתים יש 4 נבחרות שמשחקות אחת נגד השנייה (6 משחקים בכל בית).
-              </p>
-              <div className="bg-gray-50 rounded-xl p-4 space-y-3 border border-gray-200">
-                <p className="font-bold text-gray-800">מה עושים:</p>
-                <div className="space-y-2 text-sm text-gray-700">
-                  <p className="flex gap-2"><span className="font-black text-blue-600">①</span> הזינו <strong>תוצאה מדויקת</strong> לכל 6 המשחקים בכל בית</p>
-                  <p className="flex gap-2"><span className="font-black text-blue-600">②</span> הטבלה מתעדכנת <strong>אוטומטית</strong> לפי התוצאות שהזנתם</p>
-                  <p className="flex gap-2"><span className="font-black text-blue-600">③</span> המערכת מחשבת נקודות, הפרש שערים ושוברי שוויון לפי FIFA</p>
-                </div>
+            <div className="space-y-4">
+              <h3 className="text-2xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>איך מנצחים?</h3>
+              <p className="text-base text-gray-600">ניקוד על כל ניחוש נכון:</p>
+              <div className="space-y-2 text-sm">
+                <div className="bg-green-50 rounded-lg p-3 border border-green-200"><strong>תוצאה מדויקת</strong> = 3 נקודות (בתים)</div>
+                <div className="bg-blue-50 rounded-lg p-3 border border-blue-200"><strong>כיוון נכון (1X2)</strong> = 2 נקודות (בתים)</div>
+                <div className="bg-amber-50 rounded-lg p-3 border border-amber-200"><strong>עולה מדויקת מהבית</strong> = 5 נקודות</div>
+                <div className="bg-purple-50 rounded-lg p-3 border border-purple-200"><strong>ניחוש הזוכה</strong> = 12 נקודות</div>
               </div>
-              <p className="text-sm text-gray-500">
-                2 המובילות מכל בית + 8 מקומות שלישיים עולות לשלב הנוק-אאוט.
-              </p>
             </div>
           )}
-
           {page === 2 && (
-            <div className="space-y-5">
-              <h2 className="text-xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>הימורים מיוחדים + בראקט</h2>
-              <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                <p className="font-bold text-gray-800 mb-2">הימורים מיוחדים:</p>
-                <p className="text-sm text-gray-600 leading-relaxed">
-                  בחרו מי <strong>זוכה</strong> בטורניר, מי עולה ל<strong>גמר</strong>, <strong>חצי</strong> ו<strong>רבע</strong>.
-                  בנוסף: מלך שערים, מלך בישולים, כסחנית, מאצ׳אפים ועוד.
-                </p>
+            <div className="space-y-4">
+              <h3 className="text-2xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>מתי ננעל?</h3>
+              <div className="bg-red-50 rounded-xl p-4 border border-red-200 text-center">
+                <p className="text-lg font-black text-red-700">10 ביוני 2026, 17:00</p>
+                <p className="text-sm text-red-600 mt-1">אחרי — אי אפשר לשנות!</p>
               </div>
-              <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                <p className="font-bold text-gray-800 mb-2">עץ הנוק-אאוט:</p>
-                <p className="text-sm text-gray-600 leading-relaxed">
-                  הנבחרות שהעליתם מהבתים מופיעות <strong>אוטומטית</strong> בשמינית.
-                  הזינו תוצאה ובחרו מי עולה בכל משחק — עד הגמר.
-                  אם תיקו, בחרו מי מנצחת בפנדלים.
-                </p>
-              </div>
-              <div className="bg-amber-50 rounded-xl p-3 border border-amber-200 text-center">
-                <p className="text-sm text-amber-800 font-bold">ניקוד מלא ושוברי שוויון — בדף ״חוקים״ בתפריט</p>
-              </div>
+              <p className="text-base text-gray-600">אחרי הנעילה תוכלו לראות את ההימורים של כולם, לעקוב בזמן אמת, ולהתחרות!</p>
             </div>
           )}
         </div>
-
-        {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between shrink-0">
+        <div className="px-6 pb-5 flex justify-between items-center shrink-0 border-t border-gray-100 pt-3">
           {page > 0 ? (
-            <button onClick={() => setPage(page - 1)} className="px-4 py-2 text-sm font-bold text-gray-500 hover:text-gray-700">→ הקודם</button>
-          ) : (
-            <button onClick={onDismiss} className="px-4 py-2 text-sm font-bold text-gray-400 hover:text-gray-600">דלג</button>
-          )}
+            <button onClick={() => setPage(page - 1)} className="text-sm text-gray-500 font-medium">→ חזרה</button>
+          ) : <div />}
           {isLast ? (
-            <button onClick={onStart} className="px-8 py-3 rounded-xl bg-gray-900 text-white font-bold shadow-md hover:bg-gray-800 transition-colors">
-              בואו נתחיל!
+            <button onClick={onStart} className="px-6 py-2.5 rounded-xl bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 transition-colors">
+              יאללה, מתחילים!
             </button>
           ) : (
             <button onClick={() => setPage(page + 1)} className="px-6 py-2.5 rounded-xl bg-gray-900 text-white font-bold text-sm hover:bg-gray-800 transition-colors">
@@ -157,25 +112,80 @@ function OnboardingWizard({ onDismiss, onStart }: { onDismiss: () => void; onSta
   );
 }
 
+// ============================================================================
+// Progress Banner — shows on ALL pages
+// ============================================================================
+function ProgressBanner() {
+  const groupsFilled = useBettingStore((s) => s.getCompletedGroupsCount());
+  const knockoutFilled = useBettingStore((s) => Object.keys(s.knockout).filter(k => s.knockout[k]?.winner).length);
+  const specialsFilled = useBettingStore((s) => {
+    const sb = s.specialBets;
+    let count = 0;
+    if (sb.winner) count++;
+    if (sb.finalist1) count++;
+    if (sb.finalist2) count++;
+    if (sb.topScorerPlayer) count++;
+    if (sb.topAssistsPlayer) count++;
+    if (sb.bestAttack) count++;
+    if (sb.dirtiestTeam) count++;
+    if (sb.prolificGroup) count++;
+    if (sb.driestGroup) count++;
+    return count;
+  });
+
+  const groupsDone = groupsFilled >= 12;
+  const knockoutDone = knockoutFilled >= 16;
+  const specialsDone = specialsFilled >= 7;
+  const allDone = groupsDone && knockoutDone && specialsDone;
+
+  if (allDone) return null;
+
+  return (
+    <div className="bg-gradient-to-l from-blue-50 to-indigo-50/70 border-b border-blue-200/60">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2 flex items-center gap-3 text-xs sm:text-sm">
+        <span className="text-blue-600 font-bold shrink-0">השלימו:</span>
+        <div className="flex items-center gap-2 sm:gap-3 flex-1 overflow-x-auto">
+          <Link href="/groups" className={`flex items-center gap-1 shrink-0 font-bold ${groupsDone ? "text-green-600" : "text-blue-700 underline"}`}>
+            <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black ${groupsDone ? "bg-green-500 text-white" : "bg-blue-600 text-white"}`}>
+              {groupsDone ? "✓" : "1"}
+            </span>
+            בתים {groupsFilled}/12
+          </Link>
+          <Link href="/knockout" className={`flex items-center gap-1 shrink-0 font-bold ${knockoutDone ? "text-green-600" : "text-gray-500"}`}>
+            <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black ${knockoutDone ? "bg-green-500 text-white" : "bg-gray-300 text-white"}`}>
+              {knockoutDone ? "✓" : "2"}
+            </span>
+            נוק-אאוט
+          </Link>
+          <Link href="/special-bets" className={`flex items-center gap-1 shrink-0 font-bold ${specialsDone ? "text-green-600" : "text-gray-500"}`}>
+            <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black ${specialsDone ? "bg-green-500 text-white" : "bg-gray-300 text-white"}`}>
+              {specialsDone ? "✓" : "3"}
+            </span>
+            מיוחדים
+          </Link>
+        </div>
+        <DeadlineCountdown />
+      </div>
+    </div>
+  );
+}
+
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [showBetsMenu, setShowBetsMenu] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
     useBettingStore.persist.rehydrate();
-    // Ensure light mode
     document.documentElement.classList.remove("dark");
     const supabase = createClient();
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) {
         setUserName(user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split("@")[0] || "");
         setUserEmail(user.email || "");
-        // Show onboarding on first visit
         const seen = localStorage.getItem("wc2026-onboarding-seen");
         if (!seen) setShowOnboarding(true);
       }
@@ -193,100 +203,121 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     router.push("/");
   };
 
-  const totalFilled = useBettingStore((s) => s.getTotalFilledMatches());
-  const totalPossible = 72 + 31;
   const initial = userName ? userName[0].toUpperCase() : userEmail ? userEmail[0].toUpperCase() : "?";
   const isBettingPage = BETTING_PAGES.some(p => pathname === p.href);
+  const isTrackingPage = TRACKING_ITEMS.some(p => pathname === p.href);
 
   return (
     <div className="min-h-screen pb-20 sm:pb-0 bg-[#F8F9FB]" style={{ fontFamily: "var(--font-assistant), sans-serif" }} dir="rtl">
 
-      {/* === ONBOARDING WIZARD (multi-step) === */}
       {showOnboarding && <OnboardingWizard onDismiss={dismissOnboarding} onStart={() => { dismissOnboarding(); router.push("/groups"); }} />}
 
-      {/* === DESKTOP NAV === */}
-      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm hidden sm:block">
-        <div className="max-w-7xl mx-auto flex items-center justify-between h-16 lg:h-20 px-4 lg:px-6">
-          <Link href="/" className="flex items-center gap-3">
-            <img src="/logo.png" alt="The Minhelet" className="w-14 h-14 lg:w-20 lg:h-20 rounded-full object-cover shadow-lg" />
-            <div className="flex flex-col">
-              <span className="font-bold text-base lg:text-xl text-gray-900 leading-tight tracking-tight" style={{ fontFamily: "var(--font-secular)" }}>THE MINHELET</span>
-              <span className="text-xs lg:text-sm text-gray-400 tracking-wide font-medium" style={{ fontFamily: "var(--font-inter)" }}>WORLD CUP 2026</span>
-            </div>
-          </Link>
+      {/* ════════════════════════════════════════════ */}
+      {/* DESKTOP HEADER                              */}
+      {/* ════════════════════════════════════════════ */}
+      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm hidden sm:block">
+        <div className="max-w-7xl mx-auto px-4 lg:px-6">
+          {/* Top row: Logo + User */}
+          <div className="flex items-center justify-between h-14 lg:h-16">
+            <Link href="/standings" className="flex items-center gap-3">
+              <img src="/logo.png" alt="The Minhelet" className="w-12 h-12 lg:w-14 lg:h-14 rounded-full object-cover shadow-lg" />
+              <div className="flex flex-col">
+                <span className="font-bold text-sm lg:text-lg text-gray-900 leading-tight" style={{ fontFamily: "var(--font-secular)" }}>THE MINHELET</span>
+                <span className="text-[10px] lg:text-xs text-gray-400 font-medium" style={{ fontFamily: "var(--font-inter)" }}>WORLD CUP 2026</span>
+              </div>
+            </Link>
 
-          <nav className="flex items-center gap-1">
-            {/* הימורי משתמש — dropdown */}
+            {/* Two-section nav */}
+            <nav className="flex items-center gap-0.5 lg:gap-1">
+              {/* Section 1: BETTING — blue accent */}
+              <div className="flex items-center bg-blue-50/80 rounded-xl px-1 py-1 gap-0.5 border border-blue-100/60">
+                {BETTING_PAGES.map((p) => {
+                  const isActive = pathname === p.href;
+                  return (
+                    <Link key={p.href} href={p.href}
+                      className={`flex items-center gap-1.5 px-2.5 lg:px-4 py-1.5 lg:py-2 rounded-lg text-xs lg:text-sm font-bold transition-all ${
+                        isActive ? "bg-blue-600 text-white shadow-md" : "text-blue-700 hover:bg-blue-100"
+                      }`}>
+                      <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${
+                        isActive ? "bg-white text-blue-600" : "bg-blue-200 text-blue-700"
+                      }`}>{p.step}</span>
+                      <span className="hidden lg:inline">{p.label}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+
+              <div className="w-px h-8 bg-gray-200 mx-1 lg:mx-2"></div>
+
+              {/* Section 2: TRACKING — neutral */}
+              {TRACKING_ITEMS.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <Link key={item.href} href={item.href}
+                    className={`flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 lg:py-2 rounded-lg text-xs lg:text-sm font-bold transition-all ${
+                      isActive ? "bg-gray-900 text-white shadow-md" : "text-gray-500 hover:bg-gray-100"
+                    }`}>
+                    {Icons[item.iconKey](isActive)}
+                    <span className="hidden lg:inline">{item.label}</span>
+                  </Link>
+                );
+              })}
+            </nav>
+
+            {/* User menu */}
             <div className="relative">
-              <button onClick={() => setShowBetsMenu(!showBetsMenu)}
-                className={`flex items-center gap-2 px-3 lg:px-5 py-2 lg:py-3 rounded-xl text-sm lg:text-base font-bold transition-all ${
-                  isBettingPage ? "bg-gradient-to-l from-blue-600 to-indigo-600 text-white shadow-md" : "text-gray-500 hover:bg-gray-100"
-                }`}>
-                {Icons.bets(isBettingPage)}
-                <span className="hidden lg:inline">הימורי משתמש</span>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="ms-0.5"><path d="M6 9l6 6 6-6"/></svg>
+              <button onClick={() => setShowUserMenu(!showUserMenu)} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                <div className="hidden lg:block text-end">
+                  <p className="text-sm font-bold text-gray-900 leading-tight">{userName || "משתמש"}</p>
+                  <p className="text-xs text-gray-400">{userEmail}</p>
+                </div>
+                <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-sm font-bold text-white shadow-md">
+                  {initial}
+                </div>
               </button>
-              {showBetsMenu && (
+              {showUserMenu && (
                 <>
-                  <div className="fixed inset-0 z-40" onClick={() => setShowBetsMenu(false)}></div>
-                  <div className="absolute top-full mt-2 start-0 z-50 bg-white rounded-xl shadow-xl border border-gray-200 py-2 w-56">
+                  <div className="fixed inset-0 z-40" onClick={() => setShowUserMenu(false)}></div>
+                  <div className="absolute top-full mt-2 end-0 z-50 bg-white rounded-xl shadow-xl border border-gray-200 py-2 w-56">
                     <div className="px-4 py-2 border-b border-gray-100">
-                      <p className="text-xs text-gray-400 font-bold">3 שלבים להשלמת ההימורים</p>
+                      <p className="text-sm font-bold text-gray-900">{userName}</p>
+                      <p className="text-xs text-gray-400">{userEmail}</p>
                     </div>
-                    {BETTING_PAGES.map(p => (
-                      <Link key={p.href} href={p.href}
-                        onClick={() => setShowBetsMenu(false)}
-                        className={`flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors ${
-                          pathname === p.href ? "bg-blue-50 text-blue-700" : "text-gray-700 hover:bg-gray-50"
-                        }`}>
-                        <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black ${
-                          pathname === p.href ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-500"
-                        }`}>{p.step}</span>
-                        {p.label}
-                      </Link>
-                    ))}
+                    <Link href="/admin" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 font-medium" onClick={() => setShowUserMenu(false)}>ניהול מערכת</Link>
+                    <Link href="/admin-guide" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 font-medium" onClick={() => setShowUserMenu(false)}>מדריך למנהלים</Link>
+                    <button onClick={handleLogout} className="block w-full text-start px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 font-medium border-t border-gray-100">התנתקות</button>
                   </div>
                 </>
               )}
             </div>
+          </div>
+        </div>
+      </header>
 
-            {/* Regular nav items */}
-            {NAV_ITEMS.map((item) => {
-              const isActive = pathname === item.href;
-              return (
-                <Link key={item.href} href={item.href}
-                  className={`flex items-center gap-2 px-3 lg:px-5 py-2 lg:py-3 rounded-xl text-sm lg:text-base font-bold transition-all ${
-                    isActive ? "bg-gray-900 text-white shadow-md" : "text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-                  }`}>
-                  {Icons[item.iconKey](isActive)}
-                  <span className="hidden lg:inline">{item.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
-
-          {/* User menu */}
+      {/* ════════════════════════════════════════════ */}
+      {/* MOBILE TOP BAR                              */}
+      {/* ════════════════════════════════════════════ */}
+      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm sm:hidden">
+        <div className="flex items-center justify-between h-14 px-4">
+          <Link href="/standings" className="flex items-center gap-2">
+            <img src="/logo.png" alt="" className="w-10 h-10 rounded-full object-cover shadow-sm" />
+            <span className="font-bold text-sm text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>THE MINHELET</span>
+          </Link>
           <div className="relative">
-            <button onClick={() => setShowUserMenu(!showUserMenu)} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-              <div className="hidden lg:block text-end">
-                <p className="text-sm font-bold text-gray-900 leading-tight">{userName || "משתמש"}</p>
-                <p className="text-xs text-gray-400">{userEmail}</p>
-              </div>
-              <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-sm lg:text-base font-bold text-white shadow-md">
-                {initial}
-              </div>
+            <button onClick={() => setShowUserMenu(!showUserMenu)}
+              className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-xs font-bold text-white">
+              {initial}
             </button>
             {showUserMenu && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setShowUserMenu(false)}></div>
-                <div className="absolute top-full mt-2 end-0 z-50 bg-white rounded-xl shadow-xl border border-gray-200 py-2 w-56">
+                <div className="absolute top-full mt-2 end-0 z-50 bg-white rounded-xl shadow-xl border border-gray-200 py-2 w-52">
                   <div className="px-4 py-2 border-b border-gray-100">
                     <p className="text-sm font-bold text-gray-900">{userName}</p>
                     <p className="text-xs text-gray-400">{userEmail}</p>
                   </div>
-                  <Link href="/admin" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 font-medium" onClick={() => setShowUserMenu(false)}>ניהול מערכת</Link>
-                  <Link href="/admin-guide" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 font-medium" onClick={() => setShowUserMenu(false)}>מדריך למנהלים</Link>
-                  <button onClick={handleLogout} className="block w-full text-start px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 font-medium border-t border-gray-100">התנתקות</button>
+                  <Link href="/admin" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 font-medium" onClick={() => setShowUserMenu(false)}>ניהול</Link>
+                  <button onClick={handleLogout} className="block w-full text-start px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 font-medium">התנתקות</button>
                 </div>
               </>
             )}
@@ -294,42 +325,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      {/* === MOBILE TOP BAR === */}
-      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm sm:hidden">
-        <div className="flex items-center justify-between h-14 px-4">
-          <Link href="/" className="flex items-center gap-2">
-            <img src="/logo.png" alt="The Minhelet" className="w-10 h-10 rounded-full object-cover shadow-sm" />
-            <span className="font-bold text-sm text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>THE MINHELET</span>
-          </Link>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-400 font-bold" style={{ fontFamily: "var(--font-inter)" }}></span>
-            <div className="relative">
-              <button onClick={() => setShowUserMenu(!showUserMenu)}
-                className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-xs font-bold text-white">
-                {initial}
-              </button>
-              {showUserMenu && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setShowUserMenu(false)}></div>
-                  <div className="absolute top-full mt-2 end-0 z-50 bg-white rounded-xl shadow-xl border border-gray-200 py-2 w-52">
-                    <div className="px-4 py-2 border-b border-gray-100">
-                      <p className="text-sm font-bold text-gray-900">{userName}</p>
-                      <p className="text-xs text-gray-400">{userEmail}</p>
-                    </div>
-                    <Link href="/admin" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 font-medium" onClick={() => setShowUserMenu(false)}>ניהול</Link>
-                    <button onClick={handleLogout} className="block w-full text-start px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 font-medium">התנתקות</button>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* ════════════════════════════════════════════ */}
+      {/* PERSISTENT PROGRESS BANNER (all pages)      */}
+      {/* ════════════════════════════════════════════ */}
+      <ProgressBanner />
 
-      {/* === BETTING PAGES SUB-NAV (shown on groups/knockout/special-bets) === */}
+      {/* ════════════════════════════════════════════ */}
+      {/* BETTING SUB-NAV (only on betting pages)     */}
+      {/* ════════════════════════════════════════════ */}
       {isBettingPage && (
-        <div className="bg-gradient-to-l from-blue-50 to-indigo-50 border-b border-blue-200">
-          <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2.5 flex items-center gap-3">
+        <div className="bg-white border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2 flex items-center gap-3">
             <div className="flex items-center gap-0 sm:gap-1 flex-1">
               {BETTING_PAGES.map((p, i) => {
                 const isActive = pathname === p.href;
@@ -340,10 +346,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     <Link href={p.href}
                       className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-bold w-full justify-center transition-all ${
                         isActive
-                          ? "bg-white text-blue-700 shadow-md border border-blue-200"
+                          ? "bg-blue-50 text-blue-700 border border-blue-200"
                           : isPast
-                          ? "text-green-600 hover:bg-white/50"
-                          : "text-gray-500 hover:bg-white/50"
+                          ? "text-green-600 hover:bg-green-50"
+                          : "text-gray-400 hover:bg-gray-50"
                       }`}>
                       <span className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-black shrink-0 ${
                         isActive ? "bg-blue-600 text-white" :
@@ -359,18 +365,28 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 );
               })}
             </div>
-            <DeadlineCountdown />
+          </div>
+        </div>
+      )}
+
+      {/* ════════════════════════════════════════════ */}
+      {/* BREADCRUMB on tracking pages                */}
+      {/* ════════════════════════════════════════════ */}
+      {isTrackingPage && !isBettingPage && (
+        <div className="bg-white border-b border-gray-100 sm:hidden">
+          <div className="px-4 py-2">
+            <Link href="/groups" className="text-xs text-blue-600 font-bold hover:underline">← חזור להימורים</Link>
           </div>
         </div>
       )}
 
       <main><ErrorBoundary>{children}</ErrorBoundary></main>
 
-      {/* === FLOATING HELP BUTTON === */}
+      {/* Floating help */}
       <button
         onClick={() => { localStorage.removeItem("wc2026-onboarding-seen"); setShowOnboarding(true); }}
         className="fixed bottom-20 sm:bottom-6 start-4 sm:start-6 z-40 w-11 h-11 rounded-full bg-white border-2 border-gray-200 text-gray-500 shadow-lg hover:shadow-xl hover:scale-110 hover:text-blue-600 hover:border-blue-300 transition-all flex items-center justify-center"
-        title="עזרה — איך להמר?"
+        title="עזרה"
       >
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="10"/>
@@ -379,32 +395,40 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </svg>
       </button>
 
-      {/* === MOBILE BOTTOM NAV === */}
-      <nav className="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-gray-200 flex justify-around items-center h-16 z-50 sm:hidden shadow-[0_-2px_8px_rgba(0,0,0,0.06)]" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
-        {/* Betting pages grouped */}
-        <Link href="/groups"
-          className={`flex flex-col items-center gap-0.5 py-1 ${isBettingPage ? "text-blue-600" : "text-gray-400"}`}>
-          {Icons.bets(isBettingPage)}
-          <span className="text-[9px] font-bold">הימורים</span>
-          {isBettingPage && <div className="w-1 h-1 rounded-full bg-blue-600"></div>}
-        </Link>
-        {[
-          { href: "/standings", label: "דירוג", iconKey: "leaderboard" as const },
-          { href: "/compare", label: "השוואה", iconKey: "compare" as const },
-          { href: "/live", label: "לייב", iconKey: "live" as const },
-          { href: "/schedule", label: "לו״ז", iconKey: "live" as const },
-          { href: "/squads", label: "נבחרות", iconKey: "squads" as const },
-        ].map((item) => {
-          const isActive = pathname === item.href;
-          return (
-            <Link key={item.href} href={item.href}
-              className={`flex flex-col items-center gap-0.5 py-1 ${isActive ? "text-gray-900" : "text-gray-400"}`}>
-              {Icons[item.iconKey](isActive)}
-              <span className="text-[9px] font-bold">{item.label}</span>
-              {isActive && <div className="w-1 h-1 rounded-full bg-gray-900"></div>}
-            </Link>
-          );
-        })}
+      {/* ════════════════════════════════════════════ */}
+      {/* MOBILE BOTTOM NAV — 4 tabs                  */}
+      {/* ════════════════════════════════════════════ */}
+      <nav className="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-gray-200 z-50 sm:hidden shadow-[0_-2px_8px_rgba(0,0,0,0.06)]" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
+        <div className="flex justify-around items-center h-16">
+          {/* Tab 1: Betting */}
+          <Link href="/groups"
+            className={`flex flex-col items-center gap-0.5 py-1 min-w-[60px] ${isBettingPage ? "text-blue-600" : "text-gray-400"}`}>
+            {Icons.bets(isBettingPage)}
+            <span className="text-[10px] font-bold">הימורים</span>
+            {isBettingPage && <div className="w-1.5 h-1.5 rounded-full bg-blue-600"></div>}
+          </Link>
+          {/* Tab 2: Standings */}
+          <Link href="/standings"
+            className={`flex flex-col items-center gap-0.5 py-1 min-w-[60px] ${pathname === "/standings" || pathname === "/compare" ? "text-gray-900" : "text-gray-400"}`}>
+            {Icons.leaderboard(pathname === "/standings" || pathname === "/compare")}
+            <span className="text-[10px] font-bold">דירוג</span>
+            {(pathname === "/standings" || pathname === "/compare") && <div className="w-1.5 h-1.5 rounded-full bg-gray-900"></div>}
+          </Link>
+          {/* Tab 3: Live */}
+          <Link href="/live"
+            className={`flex flex-col items-center gap-0.5 py-1 min-w-[60px] ${pathname === "/live" ? "text-gray-900" : "text-gray-400"}`}>
+            {Icons.live(pathname === "/live")}
+            <span className="text-[10px] font-bold">לייב</span>
+            {pathname === "/live" && <div className="w-1.5 h-1.5 rounded-full bg-gray-900"></div>}
+          </Link>
+          {/* Tab 4: Schedule */}
+          <Link href="/schedule"
+            className={`flex flex-col items-center gap-0.5 py-1 min-w-[60px] ${pathname === "/schedule" || pathname === "/squads" ? "text-gray-900" : "text-gray-400"}`}>
+            {Icons.schedule(pathname === "/schedule" || pathname === "/squads")}
+            <span className="text-[10px] font-bold">לו״ז</span>
+            {(pathname === "/schedule" || pathname === "/squads") && <div className="w-1.5 h-1.5 rounded-full bg-gray-900"></div>}
+          </Link>
+        </div>
       </nav>
     </div>
   );

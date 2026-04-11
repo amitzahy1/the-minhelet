@@ -194,6 +194,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showBetsMenu, setShowBetsMenu] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
@@ -234,72 +235,56 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       {/* DESKTOP HEADER                              */}
       {/* ════════════════════════════════════════════ */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm hidden sm:block">
-        <div className="max-w-7xl mx-auto px-4 lg:px-6">
-          {/* Row 1: Logo + User */}
-          <div className="flex items-center justify-between h-12">
-            <Link href="/standings" className="flex items-center gap-2">
-              <img src="/logo.png" alt="The Minhelet" className="w-10 h-10 rounded-full object-cover shadow-md" />
-              <div className="flex flex-col">
-                <span className="font-bold text-sm text-gray-900 leading-tight" style={{ fontFamily: "var(--font-secular)" }}>THE MINHELET</span>
-                <span className="text-[9px] text-gray-400 font-medium" style={{ fontFamily: "var(--font-inter)" }}>WORLD CUP 2026</span>
-              </div>
-            </Link>
-            {/* User menu */}
+        <div className="max-w-7xl mx-auto flex items-center justify-between h-14 lg:h-16 px-4 lg:px-6">
+          <Link href="/standings" className="flex items-center gap-2 shrink-0">
+            <img src="/logo.png" alt="The Minhelet" className="w-12 h-12 lg:w-14 lg:h-14 rounded-full object-cover shadow-lg" />
+            <div className="flex flex-col">
+              <span className="font-bold text-sm lg:text-lg text-gray-900 leading-tight" style={{ fontFamily: "var(--font-secular)" }}>THE MINHELET</span>
+              <span className="text-[9px] lg:text-xs text-gray-400 font-medium" style={{ fontFamily: "var(--font-inter)" }}>WORLD CUP 2026</span>
+            </div>
+          </Link>
+
+          <nav className="flex items-center gap-0.5 lg:gap-1">
+            {/* BETTING — dropdown with blue accent */}
             <div className="relative">
-              <button onClick={() => setShowUserMenu(!showUserMenu)} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-                <div className="hidden lg:block text-end">
-                  <p className="text-sm font-bold text-gray-900 leading-tight">{userName || "משתמש"}</p>
-                  <p className="text-xs text-gray-400">{userEmail}</p>
-                </div>
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-sm font-bold text-white shadow-md">
-                  {initial}
-                </div>
+              <button onClick={() => { setShowBetsMenu(!showBetsMenu); setShowUserMenu(false); }}
+                className={`flex items-center gap-1.5 px-3 lg:px-4 py-2 lg:py-2.5 rounded-xl text-xs lg:text-sm font-bold transition-all ${
+                  isBettingPage ? "bg-gradient-to-l from-blue-600 to-indigo-600 text-white shadow-md" : "bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100"
+                }`}>
+                {Icons.bets(isBettingPage)}
+                <span>הימורים</span>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 9l6 6 6-6"/></svg>
               </button>
-              {showUserMenu && (
+              {showBetsMenu && (
                 <>
-                  <div className="fixed inset-0 z-40" onClick={() => setShowUserMenu(false)}></div>
-                  <div className="absolute top-full mt-2 end-0 z-50 bg-white rounded-xl shadow-xl border border-gray-200 py-2 w-56">
+                  <div className="fixed inset-0 z-40" onClick={() => setShowBetsMenu(false)}></div>
+                  <div className="absolute top-full mt-2 start-0 z-50 bg-white rounded-xl shadow-xl border border-gray-200 py-2 w-60">
                     <div className="px-4 py-2 border-b border-gray-100">
-                      <p className="text-sm font-bold text-gray-900">{userName}</p>
-                      <p className="text-xs text-gray-400">{userEmail}</p>
+                      <p className="text-xs text-gray-400 font-bold">3 שלבים להשלמת ההימורים</p>
                     </div>
-                    <Link href="/admin" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 font-medium" onClick={() => setShowUserMenu(false)}>ניהול מערכת</Link>
-                    <Link href="/admin-guide" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 font-medium" onClick={() => setShowUserMenu(false)}>מדריך למנהלים</Link>
-                    <button onClick={handleLogout} className="block w-full text-start px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 font-medium border-t border-gray-100">התנתקות</button>
+                    {BETTING_PAGES.map(p => (
+                      <Link key={p.href} href={p.href} onClick={() => setShowBetsMenu(false)}
+                        className={`flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors ${
+                          pathname === p.href ? "bg-blue-50 text-blue-700" : "text-gray-700 hover:bg-gray-50"
+                        }`}>
+                        <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black ${
+                          pathname === p.href ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-500"
+                        }`}>{p.step}</span>
+                        {p.label}
+                      </Link>
+                    ))}
                   </div>
                 </>
               )}
             </div>
-          </div>
-          {/* Row 2: Navigation — betting + tracking */}
-          <nav className="flex items-center gap-1 pb-2 overflow-x-auto">
-            {/* BETTING section */}
-            <div className="flex items-center bg-blue-50/80 rounded-lg px-1 py-0.5 gap-0.5 border border-blue-100/60 shrink-0">
-              <span className="text-[10px] font-black text-blue-500 px-1 hidden lg:block">הימורים</span>
-              {BETTING_PAGES.map((p) => {
-                const isActive = pathname === p.href;
-                return (
-                  <Link key={p.href} href={p.href}
-                    className={`flex items-center gap-1 px-2 lg:px-3 py-1.5 rounded-md text-xs font-bold transition-all shrink-0 ${
-                      isActive ? "bg-blue-600 text-white shadow-sm" : "text-blue-700 hover:bg-blue-100"
-                    }`}>
-                    <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black ${
-                      isActive ? "bg-white text-blue-600" : "bg-blue-200 text-blue-700"
-                    }`}>{p.step}</span>
-                    <span className="hidden lg:inline">{p.label}</span>
-                  </Link>
-                );
-              })}
-            </div>
-            <div className="w-px h-6 bg-gray-200 mx-1 shrink-0"></div>
-            {/* TRACKING section */}
-            <span className="text-[10px] font-black text-gray-400 px-0.5 hidden lg:block shrink-0">מעקב</span>
+
+            {/* TRACKING — regular nav items */}
             {TRACKING_ITEMS.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Link key={item.href} href={item.href}
-                  className={`flex items-center gap-1 px-2 lg:px-3 py-1.5 rounded-md text-xs font-bold transition-all shrink-0 ${
-                    isActive ? "bg-gray-900 text-white shadow-sm" : "text-gray-500 hover:bg-gray-100"
+                  className={`flex items-center gap-1.5 px-2.5 lg:px-4 py-2 lg:py-2.5 rounded-xl text-xs lg:text-sm font-bold transition-all ${
+                    isActive ? "bg-gray-900 text-white shadow-md" : "text-gray-500 hover:bg-gray-100"
                   }`}>
                   {Icons[item.iconKey](isActive)}
                   <span className="hidden lg:inline">{item.label}</span>
@@ -307,6 +292,33 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               );
             })}
           </nav>
+
+          {/* User */}
+          <div className="relative shrink-0">
+            <button onClick={() => { setShowUserMenu(!showUserMenu); setShowBetsMenu(false); }} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+              <div className="hidden lg:block text-end">
+                <p className="text-sm font-bold text-gray-900 leading-tight">{userName || "משתמש"}</p>
+                <p className="text-xs text-gray-400">{userEmail}</p>
+              </div>
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-sm font-bold text-white shadow-md">
+                {initial}
+              </div>
+            </button>
+            {showUserMenu && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowUserMenu(false)}></div>
+                <div className="absolute top-full mt-2 end-0 z-50 bg-white rounded-xl shadow-xl border border-gray-200 py-2 w-56">
+                  <div className="px-4 py-2 border-b border-gray-100">
+                    <p className="text-sm font-bold text-gray-900">{userName}</p>
+                    <p className="text-xs text-gray-400">{userEmail}</p>
+                  </div>
+                  <Link href="/admin" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 font-medium" onClick={() => setShowUserMenu(false)}>ניהול מערכת</Link>
+                  <Link href="/admin-guide" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 font-medium" onClick={() => setShowUserMenu(false)}>מדריך למנהלים</Link>
+                  <button onClick={handleLogout} className="block w-full text-start px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 font-medium border-t border-gray-100">התנתקות</button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </header>
 

@@ -722,7 +722,6 @@ function SimulationTab() {
   // Compute leaderboard from all filled results
   const leaderboard = useMemo(() => {
     const filledKeys = Object.keys(results);
-    if (filledKeys.length === 0) return [];
     return SIM_BETTORS.map(name => {
       let totoCount = 0, exactCount = 0, pts = 0;
       for (const key of filledKeys) {
@@ -741,37 +740,88 @@ function SimulationTab() {
   }, [results]);
 
   const filledCount = Object.keys(results).length;
+  const progressPct = Math.round((filledCount / 72) * 100);
 
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 text-center">
-        <h2 className="text-lg font-black text-gray-900 mb-1">סימולטור ניקוד — שלב הבתים</h2>
-        <p className="text-xs text-gray-500">הזינו תוצאות ל-72 משחקי הבתים וצפו בניקוד משתנה בזמן אמת</p>
-        <p className="text-[10px] text-gray-400 mt-1">טוטו נכון = {TOTO_PTS} נק׳ · מדויקת = +{EXACT_PTS} נק׳ · {filledCount}/72 משחקים מולאו</p>
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-5 text-center">
+        <h2 className="text-lg font-black text-gray-900 mb-1">סימולטור ניקוד — הזינו תוצאות ותראו איך הטבלה משתנה</h2>
+        <p className="text-xs text-gray-500 mb-3">טוטו נכון = {TOTO_PTS} נק׳ · מדויקת = +{EXACT_PTS} נק׳</p>
+        {/* Progress indicator */}
+        <div className="flex items-center justify-center gap-3">
+          <span className="text-sm font-bold text-gray-700">מילאתם {filledCount}/72 משחקים</span>
+          <div className="w-40 h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div className="h-full bg-gradient-to-l from-blue-500 to-indigo-500 rounded-full transition-all duration-300" style={{ width: `${progressPct}%` }} />
+          </div>
+          <span className="text-xs text-gray-400 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{progressPct}%</span>
+        </div>
       </div>
 
-      {/* Mini leaderboard */}
-      {leaderboard.length > 0 && (
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-          <div className="px-3 py-2 bg-amber-50 border-b border-amber-100">
-            <span className="text-sm font-bold text-amber-800">טבלת ניקוד</span>
-          </div>
-          <div className="divide-y divide-gray-100">
-            {leaderboard.map((b, i) => (
-              <div key={b.name} className={`flex items-center px-3 py-1.5 text-xs ${b.name === "אמית" ? "bg-blue-50/40" : ""}`}>
-                <span className="w-5 font-black text-gray-400 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{i + 1}</span>
-                <span className="flex-1 font-bold text-gray-800">{b.name}</span>
-                <span className="text-gray-400 ml-2">{b.totoCount} טוטו</span>
-                <span className="text-amber-500 ml-2">{b.exactCount} מדויקות</span>
-                <span className="font-black text-green-600 min-w-[36px] text-left ml-2 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{b.pts}</span>
-              </div>
-            ))}
+      {/* Leaderboard — identical design to standings page */}
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden hover:shadow-lg transition-all">
+        <div className="px-5 py-3 bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/40 border-b border-blue-100/50 flex items-center justify-between">
+          <div>
+            <h2 className="text-base font-bold text-gray-800">טבלת דירוג</h2>
+            <p className="text-xs text-gray-400 mt-0.5">הניקוד מתעדכן בזמן אמת</p>
           </div>
         </div>
-      )}
 
-      {/* Groups */}
+        {/* Table header — mobile */}
+        <div className="flex sm:hidden items-center px-4 py-2 text-xs text-gray-500 bg-gray-50 border-b border-gray-200 font-semibold" style={{ fontFamily: "var(--font-inter)" }}>
+          <span className="w-8 text-center">#</span>
+          <span className="w-9 me-2"></span>
+          <span className="me-3 flex-1 text-start">שחקן</span>
+          <span className="w-12 text-center">מדויקות</span>
+          <span className="w-12 text-center">טוטו</span>
+          <span className="w-16 text-center">סה״כ</span>
+        </div>
+        {/* Table header — desktop */}
+        <div className="hidden sm:flex items-center px-4 py-2 text-xs text-gray-500 bg-gray-50 border-b border-gray-200 font-semibold" style={{ fontFamily: "var(--font-inter)" }}>
+          <span className="w-8 text-center">#</span>
+          <span className="w-10 me-2"></span>
+          <span className="me-3 flex-1 text-start">שחקן</span>
+          <span className="w-14 text-center">מדויקות</span>
+          <span className="w-14 text-center">טוטו</span>
+          <span className="w-16 text-center">סה״כ</span>
+        </div>
+
+        {leaderboard.map((b, i) => (
+          <div key={b.name}
+            className={`relative flex items-center px-4 py-3 border-b border-gray-100 last:border-0 transition-colors ${
+              b.name === "אמית" ? "bg-blue-50/50" : "hover:bg-gray-50/50"
+            }`}
+          >
+            {/* Rank */}
+            <span className="w-8 text-center font-bold text-base text-gray-400">
+              {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : i + 1}
+            </span>
+            {/* Avatar */}
+            <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold me-2 ${
+              i === 0 ? "bg-amber-100 text-amber-700 ring-2 ring-amber-300" :
+              i === 1 ? "bg-gray-200 text-gray-600" :
+              i === 2 ? "bg-orange-100 text-orange-700" : "bg-gray-100 text-gray-500"
+            }`}>{b.name?.[0] || "?"}</div>
+            {/* Name */}
+            <div className="me-3 flex-1 min-w-0">
+              <span className="font-bold text-base text-gray-900">{b.name}</span>
+              {b.name === "אמית" && <span className="text-xs text-blue-500 ms-1.5 bg-blue-100 rounded px-1.5 py-0.5 font-bold">אתה</span>}
+            </div>
+            {/* Exact count — mobile */}
+            <span className="w-12 text-center text-sm font-medium text-gray-600 sm:hidden" style={{ fontFamily: "var(--font-inter)" }}>{b.exactCount}</span>
+            {/* Toto count — mobile */}
+            <span className="w-12 text-center text-sm font-medium text-gray-600 sm:hidden" style={{ fontFamily: "var(--font-inter)" }}>{b.totoCount}</span>
+            {/* Exact count — desktop */}
+            <span className="w-14 text-center text-sm font-medium text-gray-600 hidden sm:block" style={{ fontFamily: "var(--font-inter)" }}>{b.exactCount}</span>
+            {/* Toto count — desktop */}
+            <span className="w-14 text-center text-sm font-medium text-gray-600 hidden sm:block" style={{ fontFamily: "var(--font-inter)" }}>{b.totoCount}</span>
+            {/* Total */}
+            <span className="w-16 text-center font-black text-lg text-gray-900 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{b.pts}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Groups — score inputs */}
       {Object.keys(GROUPS).map(groupId => {
         const matches = groupMatches(groupId);
         return (

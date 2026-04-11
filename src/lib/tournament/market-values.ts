@@ -1,7 +1,7 @@
 // ============================================================================
 // Estimated market values (€M) — April 2026
 // Source: Transfermarkt estimates (projected +1 year from 2025 values)
-// Only top ~200 most valuable players included
+// ~400 players across 48+ national teams
 // ============================================================================
 
 export const MARKET_VALUES: Record<string, number> = {
@@ -139,6 +139,10 @@ export const MARKET_VALUES: Record<string, number> = {
   "Lukaku": 25,
   "Tielemans": 30,
   "Casteels": 10,
+  "Mertens": 3,
+  "Lukebakio": 15,
+  "Vermeeren": 20,
+  "Theate": 15,
 
   // ===================== CROATIA =====================
   "Gvardiol": 80,
@@ -161,6 +165,9 @@ export const MARKET_VALUES: Record<string, number> = {
   "J. Arias": 20,
   "Lerma": 12,
   "Córdoba": 15,
+  "D. Arias": 10,
+  "Sinisterra": 18,
+  "Borja": 5,
 
   // ===================== JAPAN =====================
   "Kubo": 40,
@@ -171,12 +178,15 @@ export const MARKET_VALUES: Record<string, number> = {
   "Doan": 15,
   "Machida": 15,
   "Itakura": 15,
+  "Tanaka": 10,
 
   // ===================== SOUTH KOREA =====================
   "Son H.": 35,
   "Kim M.": 50,
   "Lee K.": 40,
   "Hwang H.": 12,
+  "Hwang I.": 8,
+  "Jeong W.": 10,
 
   // ===================== MOROCCO =====================
   "Hakimi": 60,
@@ -186,6 +196,7 @@ export const MARKET_VALUES: Record<string, number> = {
   "Bounou": 8,
   "Mazraoui": 35,
   "Diaz": 18,
+  "Ounahi": 15,
 
   // ===================== USA =====================
   "Pulisic": 40,
@@ -196,20 +207,40 @@ export const MARKET_VALUES: Record<string, number> = {
   "Musah": 25,
   "Balogun": 25,
   "Richards": 15,
+  "Reyna": 25,
+  "Turner": 5,
 
   // ===================== CANADA =====================
   "A. Davies": 60,
   "Jonathan David": 45,
+  "Buchanan": 12,
+  "Eustaquio": 15,
+  "Larin": 8,
+  "Miller": 5,
+  "Osorio": 6,
+  "Johnston": 5,
+  "Crépeau": 3,
 
   // ===================== MEXICO =====================
   "K. Álvarez": 15,
   "S. Giménez": 18,
   "E. Álvarez": 12,
   "Lozano": 10,
+  "R. Jiménez": 8,
+  "Romo": 5,
+  "Arteaga": 10,
+  "J. Sánchez": 8,
+  "Antuna": 6,
 
   // ===================== SENEGAL =====================
   "Mané": 12,
   "Koulibaly": 5,
+  "I. Sarr": 30,
+  "Ndiaye": 25,
+  "N. Jackson": 55,
+  "A. Diallo": 15,
+  "I. Gueye": 5,
+  "E. Mendy": 8,
 
   // ===================== SWITZERLAND =====================
   "Akanji": 35,
@@ -233,38 +264,266 @@ export const MARKET_VALUES: Record<string, number> = {
   "Hincapié": 30,
   "Estupiñán": 25,
   "Páez": 25,
+  "Sarmiento": 12,
+  "E. Valencia": 10,
 
   // ===================== SWEDEN =====================
   "Gyökeres": 70,
   "Isak": 85,
   "Kulusevski": 55,
   "Lindelöf": 10,
+  "K. Olsson": 5,
 
   // ===================== NORWAY =====================
   "Haaland": 170,
   "Ødegaard": 100,
+  "Sørloth": 30,
+  "Nusa": 25,
+  "Schjelderup": 20,
+  "S. Berge": 15,
+  "Ajer": 12,
+  "Ryerson": 10,
+  "Bobb": 15,
+  "Strand Larsen": 20,
 
   // ===================== IVORY COAST =====================
   "Kessié": 8,
   "Haller": 15,
+  "N. Pépé": 10,
+  "Zaha": 10,
+  "Boly": 5,
+  "Aurier": 3,
+  "Konan": 8,
+  "Gradel": 2,
 
   // ===================== GHANA =====================
   "Partey": 20,
   "Kudus": 55,
   "Semenyo": 20,
+  "Iñaki Williams": 15,
 
   // ===================== IRAN =====================
   "Taremi": 15,
   "Azmoun": 12,
+  "Jahanbakhsh": 5,
+  "Beiranvand": 3,
 
   // ===================== AUSTRALIA =====================
   "Souttar": 8,
+  "M. Ryan": 3,
+  "Hrustic": 5,
+  "McGree": 5,
+  "Kuol": 8,
+  "Maclaren": 3,
+  "Duke": 3,
+  "Irvine": 4,
+
+  // ===================== DENMARK =====================
+  "Hjulmand": 25,
+  "Højlund": 80,
+  "Eriksen": 15,
+  "Mæhle": 15,
+  "A. Christensen": 25,
+  "Dolberg": 12,
+  "Wind": 18,
+  "Nørgaard": 15,
+  "Vestergaard": 8,
+  "Schmeichel": 3,
+  "Skov Olsen": 15,
+
+  // ===================== SAUDI ARABIA =====================
+  "Al-Dawsari": 5,
+  "Kanno": 3,
+  "Al-Owais": 3,
+  "Al-Shehri": 3,
+  "Al-Buraikan": 5,
+
+  // ===================== QATAR =====================
+  "Afif": 8,
+  "Almoez Ali": 5,
+  "Pedro Miguel": 3,
+
+  // ===================== SOUTH AFRICA =====================
+  "Tau": 5,
+  "Zwane": 3,
+  "Mokoena": 3,
+
+  // ===================== PANAMA =====================
+  "J. Torres": 3,
+  "Blackburn": 2,
+
+  // ===================== NEW ZEALAND =====================
+  "C. Wood": 15,
+  "Singh": 2,
+  "Cacace": 5,
+
+  // ===================== BOSNIA =====================
+  "Džeko": 3,
+  "Demirović": 25,
+  "Kolašinac": 3,
+  "Begović": 1,
+
+  // ===================== SCOTLAND =====================
+  "Robertson": 30,
+  "McTominay": 35,
+  "McGinn": 25,
+  "Gilmour": 25,
+  "C. Adams": 15,
+  "Tierney": 15,
+  "Gunn": 5,
+  "Christie": 8,
+  "Dykes": 5,
+
+  // ===================== PARAGUAY =====================
+  "Almirón": 10,
+  "Enciso": 20,
+  "Ant. Silva": 5,     // Antonio Silva (Paraguay) — disambiguated from Portugal's A. Silva
+  "Sanabria": 8,
+  "Alderete": 5,
+  "J. Gómez": 15,
+
+  // ===================== TUNISIA =====================
+  "Dahmen": 3,
+  "Laidouni": 5,
+  "Sliti": 2,
+
+  // ===================== IRAQ =====================
+  "Aymen Hussein": 3,
+
+  // ===================== JORDAN =====================
+  "Al-Tamari": 5,
+
+  // ===================== CZECHIA =====================
+  "Schick": 20,
+  "Souček": 20,
+  "Coufal": 10,
+  "Hložek": 25,
+  "Provod": 8,
+  "Černý": 10,
+  "Barák": 8,
+
+  // ===================== EGYPT =====================
+  "Salah": 50,
+  "Mostafa Mohamed": 8,
+  "Trézéguet": 5,
+  "El-Shenawy": 3,
+  "Marwan": 5,
+
+  // ===================== ALGERIA =====================
+  "Mahrez": 10,
+  "Bennacer": 25,
+  "Atal": 8,
+
+  // ===================== CAPE VERDE =====================
+  "Stopira": 2,
+  "Ryan Mendes": 2,
+
+  // ===================== CURAÇAO =====================
+  "Room": 3,
+  "Bacuna": 2,
+
+  // ===================== HAITI =====================
+  "Bazile": 3,
+
+  // ===================== UZBEKISTAN =====================
+  "Shomurodov": 8,
+
+  // ===================== CONGO DR =====================
+  "Bakambu": 5,
+  "Mbemba": 3,
+
+  // ===================== SERBIA =====================
+  "Vlahović": 65,
+  "Milinković-Savić": 30,
+  "Kostić": 8,
+  "Tadić": 5,
+  "Pavlović": 25,
+  "Jović": 10,
+  "Živković": 5,
+  "Gudelj": 5,
+
+  // ===================== CAMEROON =====================
+  "Mbeumo": 35,
+  "Onana": 40,
+  "Anguissa": 30,
+  "Toko Ekambi": 8,
+  "Ondoua": 3,
+  "Nkoulou": 2,
+  "Choupo-Moting": 3,
+
+  // ===================== NIGERIA =====================
+  "Osimhen": 80,
+  "Lookman": 45,
+  "Iwobi": 12,
+  "Ndidi": 15,
+  "Ola Aina": 10,
+  "Troost-Ekong": 3,
+  "Bassey": 20,
+  "S. Chukwueze": 20,
+  "Moses Simon": 10,
+  "Onyeka": 12,
+
+  // ===================== POLAND =====================
+  "Lewandowski": 15,
+  "Zieliński": 25,
+  "Szczęsny": 3,
+  "Zalewski": 15,
+  "Urbański": 15,
+  "S. Szymański": 15,
+  "Frankowski": 5,
+  "Bułka": 8,
+  "Kiwior": 20,
+  "Piątek": 8,
+
+  // ===================== HUNGARY =====================
+  "Szoboszlai": 55,
+  "Kerkez": 25,
+  "Orbán": 5,
+  "Gulácsi": 5,
+  "Szalai": 3,
+  "Sallai": 10,
+  "Schäfer": 8,
+
+  // ===================== GEORGIA =====================
+  "Kvaratskhelia": 75,
+  "Mamardashvili": 35,
+  "Mikautadze": 20,
+  "Kochorashvili": 10,
+  "Kakabadze": 3,
+
+  // ===================== WALES =====================
+  "D. James": 20,
+  "B. Johnson": 8,
+  "Neco Williams": 5,
+  "H. Wilson": 10,
+  "Ward": 2,
+
+  // ===================== COSTA RICA =====================
+  "K. Fuller": 3,
+  "Tejeda": 2,
+  "Waston": 2,
+  "K. Navas": 2,
+
+  // ===================== JAMAICA =====================
+  "Bailey": 20,
+  "Antonio": 5,
+  "Nicholson": 3,
+  "Pinnock": 5,
+
+  // ===================== UKRAINE =====================
+  "Mudryk": 35,
+  "Dovbyk": 40,
+  "Zinchenko": 25,
+  "Lunin": 20,
+  "Malinovsky": 10,
+  "Tsygankov": 12,
+  "Zabarnyi": 25,
+  "Mykolenko": 15,
+  "Shaparenko": 8,
+  "Sudakov": 30,
 
   // ===================== OTHER NOTABLE PLAYERS =====================
-  "Szoboszlai": 55,       // Hungary
-  "Kvaratskhelia": 75,    // Georgia
   "Calvert-Lewin": 25,    // England
-  "Osimhen": 80,           // Nigeria
 };
 
 /**

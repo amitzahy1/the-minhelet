@@ -138,6 +138,24 @@ function ProgressBanner() {
   const specialsDone = specialsFilled >= 7;
   const allDone = groupsDone && knockoutDone && specialsDone;
 
+  // Check if tournament has started (June 11, 2026)
+  const tournamentStarted = new Date() >= new Date("2026-06-11T00:00:00Z");
+  // Check if pre-tournament lock passed (June 10, 2026 17:00 IST)
+  const preLockPassed = new Date() >= new Date("2026-06-10T14:00:00Z");
+
+  // During tournament: show different banner
+  if (preLockPassed && tournamentStarted) {
+    return (
+      <div className="bg-gradient-to-l from-green-50 to-emerald-50/70 border-b border-green-200/60">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2 flex items-center gap-3 text-xs sm:text-sm">
+          <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse shrink-0"></span>
+          <span className="text-green-700 font-bold">הטורניר בעיצומו!</span>
+          <Link href="/live" className="text-green-600 font-bold hover:underline ms-auto">צפו בלייב ←</Link>
+        </div>
+      </div>
+    );
+  }
+
   if (allDone) return null;
 
   return (
@@ -231,6 +249,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <nav className="flex items-center gap-0.5 lg:gap-1">
               {/* Section 1: BETTING — blue accent */}
               <div className="flex items-center bg-blue-50/80 rounded-xl px-1 py-1 gap-0.5 border border-blue-100/60">
+                <span className="text-[10px] lg:text-xs font-black text-blue-500 px-1.5 hidden lg:block">הימורים</span>
                 {BETTING_PAGES.map((p) => {
                   const isActive = pathname === p.href;
                   return (
@@ -250,6 +269,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <div className="w-px h-8 bg-gray-200 mx-1 lg:mx-2"></div>
 
               {/* Section 2: TRACKING — neutral */}
+              <span className="text-[10px] lg:text-xs font-black text-gray-400 px-1 hidden lg:block">מעקב</span>
               {TRACKING_ITEMS.map((item) => {
                 const isActive = pathname === item.href;
                 return (

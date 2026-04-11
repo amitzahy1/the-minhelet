@@ -337,7 +337,8 @@ for (const [code, squad] of Object.entries(squads)) {
   const seen = new Set<string>();
   for (const p of squad.players) {
     let key = p.nameEn;
-    if (seen.has(key)) key = `${key} #${p.num}`;
+    let n = 2;
+    while (seen.has(key)) { key = `${p.nameEn} (${n})`; n++; }
     seen.add(key);
     tsContent += `    "${key}": "${p.photo}",\n`;
   }

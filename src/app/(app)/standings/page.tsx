@@ -342,8 +342,6 @@ export default function StandingsPage() {
         );
       })()}
 
-      <CompletionTracker players={COMPLETION_DATA} />
-
       {/* Comparison table */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden hover:shadow-lg transition-all mb-6">
         <div className="px-5 py-4 bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/40 border-b border-blue-100/50">

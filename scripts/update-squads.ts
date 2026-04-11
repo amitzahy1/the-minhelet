@@ -12,32 +12,32 @@ import * as path from "path";
 const API_KEY = process.env.API_FOOTBALL_KEY || "bf9c9c08ac73c3896876105278ea7a2c";
 const API_HOST = "v3.football.api-sports.io";
 
-// Verified API-Football national team IDs (from direct API search)
+// Verified API-Football national team IDs (fixed April 11 2026)
 const TEAM_IDS: Record<string, number> = {
   // Group A
   MEX: 16, KOR: 17, CZE: 770, RSA: 1531,
   // Group B
-  CAN: 5529, QAT: 1569, SUI: 15, BIH: 776,
+  CAN: 5529, QAT: 1569, SUI: 15, BIH: 1113,
   // Group C
-  BRA: 6, MAR: 31, SCO: 1108, HAI: 1536,
+  BRA: 6, MAR: 31, SCO: 1108, HAI: 2386,
   // Group D
   USA: 2384, PAR: 2380, TUR: 777, AUS: 20,
   // Group E
-  GER: 25, ECU: 2382, CIV: 1532, CUR: 5531,
+  GER: 25, ECU: 2382, CIV: 1501, CUR: 5530,
   // Group F
-  NED: 1118, JPN: 12, SWE: 1104, TUN: 1533,
+  NED: 1118, JPN: 12, SWE: 5, TUN: 28,
   // Group G
   BEL: 1, IRN: 22, EGY: 32, NZL: 4673,
   // Group H
-  ESP: 9, URU: 7, KSA: 23, CPV: 1534,
+  ESP: 9, URU: 7, KSA: 23, CPV: 1533,
   // Group I
-  FRA: 2, SEN: 13, NOR: 1106, IRQ: 1570,
+  FRA: 2, SEN: 13, NOR: 1090, IRQ: 1567,
   // Group J
-  ARG: 26, AUT: 775, ALG: 1530, JOR: 1564,
+  ARG: 26, AUT: 775, ALG: 1532, JOR: 1548,
   // Group K
-  POR: 27, COL: 8, UZB: 1572, COD: 1535,
+  POR: 27, COL: 8, UZB: 1568, COD: 1508,
   // Group L
-  ENG: 10, CRO: 3, GHA: 1534, PAN: 11,
+  ENG: 10, CRO: 3, GHA: 1504, PAN: 11,
 };
 
 // Hebrew names for position mapping

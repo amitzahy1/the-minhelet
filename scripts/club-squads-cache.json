@@ -13253,5 +13253,8913 @@
       }
     ],
     "fetchedAt": "2026-04-08T07:22:51.342Z"
+  },
+  "PSV": {
+    "teamId": 197,
+    "players": [
+      {
+        "id": 138804,
+        "name": "M. Kovář",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 37818,
+        "name": "N. Olij",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 328193,
+        "name": "N. Schiks",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 371523,
+        "name": "T. Smolenaars",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 38735,
+        "name": "S. Dest",
+        "position": "Defender"
+      },
+      {
+        "id": 342054,
+        "name": "R. Flamingo",
+        "position": "Defender"
+      },
+      {
+        "id": 361385,
+        "name": "Yarek Gasiorowski",
+        "position": "Defender"
+      },
+      {
+        "id": 233,
+        "name": "Mauro Júnior",
+        "position": "Defender"
+      },
+      {
+        "id": 474551,
+        "name": "F. Merién",
+        "position": "Defender"
+      },
+      {
+        "id": 228,
+        "name": "A. Obispo",
+        "position": "Defender"
+      },
+      {
+        "id": 162451,
+        "name": "A. Salah-Eddine",
+        "position": "Defender"
+      },
+      {
+        "id": 191233,
+        "name": "K. Sildillia",
+        "position": "Defender"
+      },
+      {
+        "id": 439829,
+        "name": "Jordy Bawuah",
+        "position": "Midfielder"
+      },
+      {
+        "id": 474550,
+        "name": "N. Fernandez",
+        "position": "Midfielder"
+      },
+      {
+        "id": 161897,
+        "name": "I. Saibari",
+        "position": "Midfielder"
+      },
+      {
+        "id": 37890,
+        "name": "J. Schouten",
+        "position": "Defender"
+      },
+      {
+        "id": 36905,
+        "name": "G. Til",
+        "position": "Attacker"
+      },
+      {
+        "id": 37749,
+        "name": "J. Veerman",
+        "position": "Midfielder"
+      },
+      {
+        "id": 441047,
+        "name": "N. Verkooijen",
+        "position": "Midfielder"
+      },
+      {
+        "id": 327895,
+        "name": "P. Wanner",
+        "position": "Midfielder"
+      },
+      {
+        "id": 434623,
+        "name": "J. van den Berg",
+        "position": "Midfielder"
+      },
+      {
+        "id": 329409,
+        "name": "E. Bajraktarevic",
+        "position": "Attacker"
+      },
+      {
+        "id": 36907,
+        "name": "M. Boadu",
+        "position": "Attacker"
+      },
+      {
+        "id": 272543,
+        "name": "C. Driouech",
+        "position": "Attacker"
+      },
+      {
+        "id": 43036,
+        "name": "D. Man",
+        "position": "Attacker"
+      },
+      {
+        "id": 73868,
+        "name": "R. Pepi",
+        "position": "Attacker"
+      },
+      {
+        "id": 207,
+        "name": "I. Perišić",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:24:10.707Z"
+  },
+  "Feyenoord": {
+    "teamId": 215,
+    "players": [
+      {
+        "id": 41486,
+        "name": "Caio Secco",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 41320,
+        "name": "André Ferreira",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 41229,
+        "name": "Mika",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 330410,
+        "name": "Gilberto Batista",
+        "position": "Defender"
+      },
+      {
+        "id": 187920,
+        "name": "Fabiano",
+        "position": "Defender"
+      },
+      {
+        "id": 544698,
+        "name": "Kevyn Monteiro",
+        "position": "Defender"
+      },
+      {
+        "id": 379124,
+        "name": "Kiko",
+        "position": "Defender"
+      },
+      {
+        "id": 9380,
+        "name": "Maracás",
+        "position": "Defender"
+      },
+      {
+        "id": 311759,
+        "name": "Álvaro Martínez",
+        "position": "Defender"
+      },
+      {
+        "id": 312311,
+        "name": "Michel",
+        "position": "Defender"
+      },
+      {
+        "id": 141890,
+        "name": "Dinis Pinto",
+        "position": "Defender"
+      },
+      {
+        "id": 474842,
+        "name": "Leandro Henrique Sousa Santos",
+        "position": "Defender"
+      },
+      {
+        "id": 336575,
+        "name": "Diogo Travassos",
+        "position": "Defender"
+      },
+      {
+        "id": 195110,
+        "name": "Alan",
+        "position": "Midfielder"
+      },
+      {
+        "id": 505604,
+        "name": "Afonso Assis",
+        "position": "Midfielder"
+      },
+      {
+        "id": 313229,
+        "name": "J. Gower",
+        "position": "Midfielder"
+      },
+      {
+        "id": 162150,
+        "name": "N. John",
+        "position": "Midfielder"
+      },
+      {
+        "id": 333680,
+        "name": "Rodri Alonso",
+        "position": "Midfielder"
+      },
+      {
+        "id": 325830,
+        "name": "Vasco Sousa",
+        "position": "Midfielder"
+      },
+      {
+        "id": 400720,
+        "name": "M. Stjepanović",
+        "position": "Midfielder"
+      },
+      {
+        "id": 119633,
+        "name": "Kiko Bondoso",
+        "position": "Midfielder"
+      },
+      {
+        "id": 408618,
+        "name": "Landerson",
+        "position": "Defender"
+      },
+      {
+        "id": 335054,
+        "name": "Luís Semedo",
+        "position": "Attacker"
+      },
+      {
+        "id": 161968,
+        "name": "Cedric Teguia",
+        "position": "Attacker"
+      },
+      {
+        "id": 300901,
+        "name": "Maranhão",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:24:17.822Z"
+  },
+  "AZ": {
+    "teamId": 202,
+    "players": [
+      {
+        "id": 359370,
+        "name": "D. Baron",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 37217,
+        "name": "H. Jurjus",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 162245,
+        "name": "L. Štubljar",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 36854,
+        "name": "E. Vaessen",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 314264,
+        "name": "T. Blokzijl",
+        "position": "Defender"
+      },
+      {
+        "id": 454545,
+        "name": "Sven Bouland",
+        "position": "Defender"
+      },
+      {
+        "id": 412872,
+        "name": "D. Janse",
+        "position": "Defender"
+      },
+      {
+        "id": 526553,
+        "name": "Petrit Preniqi",
+        "position": "Defender"
+      },
+      {
+        "id": 446871,
+        "name": "Tyrique Mercera",
+        "position": "Defender"
+      },
+      {
+        "id": 93060,
+        "name": "M. Peersman",
+        "position": "Defender"
+      },
+      {
+        "id": 439830,
+        "name": "Wouter Prins",
+        "position": "Defender"
+      },
+      {
+        "id": 90957,
+        "name": "M. Rente",
+        "position": "Defender"
+      },
+      {
+        "id": 497022,
+        "name": "E. van der Laan",
+        "position": "Defender"
+      },
+      {
+        "id": 526554,
+        "name": "Besnik Mashuku",
+        "position": "Midfielder"
+      },
+      {
+        "id": 384585,
+        "name": "T. Hernes",
+        "position": "Midfielder"
+      },
+      {
+        "id": 321039,
+        "name": "R. Higgins",
+        "position": "Midfielder"
+      },
+      {
+        "id": 402272,
+        "name": "T. Land",
+        "position": "Midfielder"
+      },
+      {
+        "id": 291505,
+        "name": "S. Resink",
+        "position": "Midfielder"
+      },
+      {
+        "id": 394608,
+        "name": "J. Schreuders",
+        "position": "Midfielder"
+      },
+      {
+        "id": 328670,
+        "name": "Y. Taha",
+        "position": "Midfielder"
+      },
+      {
+        "id": 314267,
+        "name": "T. de Jonge",
+        "position": "Midfielder"
+      },
+      {
+        "id": 473416,
+        "name": "D. van der Werff",
+        "position": "Midfielder"
+      },
+      {
+        "id": 178168,
+        "name": "Rui Mendes",
+        "position": "Attacker"
+      },
+      {
+        "id": 631615,
+        "name": "R. Metu",
+        "position": "Attacker"
+      },
+      {
+        "id": 36903,
+        "name": "M. Seuntjens",
+        "position": "Midfielder"
+      },
+      {
+        "id": 28733,
+        "name": "B. Willumsson",
+        "position": "Attacker"
+      },
+      {
+        "id": 40298,
+        "name": "O. Zawada",
+        "position": "Attacker"
+      },
+      {
+        "id": 392044,
+        "name": "T. van Bergen",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:24:24.946Z"
+  },
+  "Galatasaray": {
+    "teamId": 645,
+    "players": [
+      {
+        "id": 49866,
+        "name": "U. Çakır",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 61950,
+        "name": "G. Güvenç",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 430,
+        "name": "B. Şen",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 568439,
+        "name": "A. Yilmaz",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 25448,
+        "name": "K. Ayhan",
+        "position": "Defender"
+      },
+      {
+        "id": 162000,
+        "name": "M. Baltacı",
+        "position": "Defender"
+      },
+      {
+        "id": 61837,
+        "name": "A. Bardakcı",
+        "position": "Defender"
+      },
+      {
+        "id": 2195,
+        "name": "S. Boey",
+        "position": "Defender"
+      },
+      {
+        "id": 50057,
+        "name": "E. Elmalı",
+        "position": "Defender"
+      },
+      {
+        "id": 158121,
+        "name": "I. Jakobs",
+        "position": "Defender"
+      },
+      {
+        "id": 568393,
+        "name": "Y. Kahraman",
+        "position": "Defender"
+      },
+      {
+        "id": 26252,
+        "name": "R. Sallai",
+        "position": "Midfielder"
+      },
+      {
+        "id": 168,
+        "name": "D. Sánchez",
+        "position": "Defender"
+      },
+      {
+        "id": 30504,
+        "name": "W. Singo",
+        "position": "Defender"
+      },
+      {
+        "id": 404443,
+        "name": "A. Ünyay",
+        "position": "Defender"
+      },
+      {
+        "id": 567984,
+        "name": "C. Akgun",
+        "position": "Midfielder"
+      },
+      {
+        "id": 568050,
+        "name": "E. Arac",
+        "position": "Midfielder"
+      },
+      {
+        "id": 281795,
+        "name": "Y. Asprilla",
+        "position": "Midfielder"
+      },
+      {
+        "id": 80552,
+        "name": "Gabriel Sara",
+        "position": "Midfielder"
+      },
+      {
+        "id": 633,
+        "name": "İ. Gündoğan",
+        "position": "Midfielder"
+      },
+      {
+        "id": 394222,
+        "name": "Gökdeniz Gürpüz",
+        "position": "Midfielder"
+      },
+      {
+        "id": 18947,
+        "name": "M. Lemina",
+        "position": "Midfielder"
+      },
+      {
+        "id": 518567,
+        "name": "Renato Nhaga",
+        "position": "Midfielder"
+      },
+      {
+        "id": 567979,
+        "name": "N. Ogulcan Yancel",
+        "position": "Midfielder"
+      },
+      {
+        "id": 1462,
+        "name": "L. Torreira",
+        "position": "Midfielder"
+      },
+      {
+        "id": 454,
+        "name": "Y. Akgün",
+        "position": "Midfielder"
+      },
+      {
+        "id": 585709,
+        "name": "C. Guner",
+        "position": "Attacker"
+      },
+      {
+        "id": 216,
+        "name": "M. Icardi",
+        "position": "Attacker"
+      },
+      {
+        "id": 498673,
+        "name": "F. Koçak",
+        "position": "Attacker"
+      },
+      {
+        "id": 422,
+        "name": "A. Kutucu",
+        "position": "Attacker"
+      },
+      {
+        "id": 544,
+        "name": "N. Lang",
+        "position": "Midfielder"
+      },
+      {
+        "id": 2780,
+        "name": "V. Osimhen",
+        "position": "Attacker"
+      },
+      {
+        "id": 644,
+        "name": "L. Sané",
+        "position": "Midfielder"
+      },
+      {
+        "id": 63274,
+        "name": "B. Yılmaz",
+        "position": "Midfielder"
+      },
+      {
+        "id": 602698,
+        "name": "A. Yuzgec",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:24:32.054Z"
+  },
+  "Fenerbahçe": {
+    "teamId": 611,
+    "players": [
+      {
+        "id": 500088,
+        "name": "E. Biterge",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 62401,
+        "name": "T. Çetin",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 643580,
+        "name": "Hulusi Efe Ceylan",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 617,
+        "name": "Ederson",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 49837,
+        "name": "M. Günok",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 161661,
+        "name": "A. Brown",
+        "position": "Defender"
+      },
+      {
+        "id": 364594,
+        "name": "Y. Demir",
+        "position": "Defender"
+      },
+      {
+        "id": 127609,
+        "name": "L. Mercan",
+        "position": "Defender"
+      },
+      {
+        "id": 1719,
+        "name": "M. Müldür",
+        "position": "Defender"
+      },
+      {
+        "id": 272721,
+        "name": "J. Oosterwolde",
+        "position": "Defender"
+      },
+      {
+        "id": 130,
+        "name": "Nélson Semedo",
+        "position": "Defender"
+      },
+      {
+        "id": 198,
+        "name": "M. Škriniar",
+        "position": "Defender"
+      },
+      {
+        "id": 18776,
+        "name": "Ç. Söyüncü",
+        "position": "Defender"
+      },
+      {
+        "id": 625426,
+        "name": "Kamil Efe Üregen",
+        "position": "Defender"
+      },
+      {
+        "id": 2869,
+        "name": "E. Álvarez",
+        "position": "Midfielder"
+      },
+      {
+        "id": 134590,
+        "name": "O. Aydın",
+        "position": "Attacker"
+      },
+      {
+        "id": 630584,
+        "name": "Alaettin Ekici",
+        "position": "Midfielder"
+      },
+      {
+        "id": 905,
+        "name": "Fred",
+        "position": "Midfielder"
+      },
+      {
+        "id": 1454,
+        "name": "M. Guendouzi",
+        "position": "Midfielder"
+      },
+      {
+        "id": 2290,
+        "name": "N. Kanté",
+        "position": "Midfielder"
+      },
+      {
+        "id": 302869,
+        "name": "N. Dorgeles",
+        "position": "Midfielder"
+      },
+      {
+        "id": 12724,
+        "name": "Talisca",
+        "position": "Attacker"
+      },
+      {
+        "id": 50097,
+        "name": "M. Yandaş",
+        "position": "Midfielder"
+      },
+      {
+        "id": 214463,
+        "name": "İ. Yüksek",
+        "position": "Midfielder"
+      },
+      {
+        "id": 142959,
+        "name": "K. Aktürkoğlu",
+        "position": "Attacker"
+      },
+      {
+        "id": 746,
+        "name": "Marco Asensio",
+        "position": "Midfielder"
+      },
+      {
+        "id": 421875,
+        "name": "S. Cherif",
+        "position": "Attacker"
+      },
+      {
+        "id": 37380,
+        "name": "A. Musaba",
+        "position": "Midfielder"
+      },
+      {
+        "id": 634143,
+        "name": "E. Sancakli",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:24:39.166Z"
+  },
+  "Beşiktaş": {
+    "teamId": 549,
+    "players": [
+      {
+        "id": 275090,
+        "name": "E. Bilgin",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 1971,
+        "name": "E. Destanoğlu",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 81012,
+        "name": "D. Vásquez",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 544926,
+        "name": "E. Yasar",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 135068,
+        "name": "E. Agbadou",
+        "position": "Defender"
+      },
+      {
+        "id": 394663,
+        "name": "Taylan  Bulut",
+        "position": "Defender"
+      },
+      {
+        "id": 1479,
+        "name": "Tiago Djaló",
+        "position": "Defender"
+      },
+      {
+        "id": 2973,
+        "name": "A. Murillo",
+        "position": "Defender"
+      },
+      {
+        "id": 544790,
+        "name": "Y. Ozcan",
+        "position": "Defender"
+      },
+      {
+        "id": 50046,
+        "name": "E. Topçu",
+        "position": "Defender"
+      },
+      {
+        "id": 25406,
+        "name": "F. Uduokhai",
+        "position": "Defender"
+      },
+      {
+        "id": 1987,
+        "name": "R. Yılmaz",
+        "position": "Defender"
+      },
+      {
+        "id": 275776,
+        "name": "K. Asllani",
+        "position": "Midfielder"
+      },
+      {
+        "id": 549,
+        "name": "V. Černý",
+        "position": "Midfielder"
+      },
+      {
+        "id": 1998,
+        "name": "K. Yılmaz",
+        "position": "Midfielder"
+      },
+      {
+        "id": 37155,
+        "name": "O. Kökçü",
+        "position": "Midfielder"
+      },
+      {
+        "id": 18786,
+        "name": "W. Ndidi",
+        "position": "Midfielder"
+      },
+      {
+        "id": 316904,
+        "name": "J. Olaitan",
+        "position": "Midfielder"
+      },
+      {
+        "id": 25324,
+        "name": "M. Rashica",
+        "position": "Midfielder"
+      },
+      {
+        "id": 529859,
+        "name": "Devrim Sahin",
+        "position": "Midfielder"
+      },
+      {
+        "id": 550885,
+        "name": "G. Sazdagi",
+        "position": "Midfielder"
+      },
+      {
+        "id": 31058,
+        "name": "S. Uçan",
+        "position": "Midfielder"
+      },
+      {
+        "id": 1997,
+        "name": "N. Uysal",
+        "position": "Midfielder"
+      },
+      {
+        "id": 630520,
+        "name": "Sami Bircan Ahmet",
+        "position": "Attacker"
+      },
+      {
+        "id": 436179,
+        "name": "M. Hekimoğlu",
+        "position": "Attacker"
+      },
+      {
+        "id": 141901,
+        "name": "Jota Silva",
+        "position": "Attacker"
+      },
+      {
+        "id": 34710,
+        "name": "Oh Hyeon-Gyu",
+        "position": "Attacker"
+      },
+      {
+        "id": 633057,
+        "name": "A. Pagda",
+        "position": "Attacker"
+      },
+      {
+        "id": 194750,
+        "name": "E. Touré",
+        "position": "Attacker"
+      },
+      {
+        "id": 785,
+        "name": "C. Ünder",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:24:46.286Z"
+  },
+  "Trabzonspor": {
+    "teamId": 607,
+    "players": [
+      {
+        "id": 478077,
+        "name": "E. Aydın",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 402493,
+        "name": "D. Ertaş",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 194689,
+        "name": "B. Güngördü",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 119182,
+        "name": "R. Baniya",
+        "position": "Defender"
+      },
+      {
+        "id": 37175,
+        "name": "R. Bazoer",
+        "position": "Defender"
+      },
+      {
+        "id": 338815,
+        "name": "A. Boşluk",
+        "position": "Defender"
+      },
+      {
+        "id": 14691,
+        "name": "J. Ćalušić",
+        "position": "Defender"
+      },
+      {
+        "id": 61986,
+        "name": "A. Demirbağ",
+        "position": "Defender"
+      },
+      {
+        "id": 40472,
+        "name": "Guilherme",
+        "position": "Defender"
+      },
+      {
+        "id": 307426,
+        "name": "A. Nagalo",
+        "position": "Defender"
+      },
+      {
+        "id": 645527,
+        "name": "A. Tirpanci",
+        "position": "Defender"
+      },
+      {
+        "id": 619706,
+        "name": "A. Yanik",
+        "position": "Defender"
+      },
+      {
+        "id": 47461,
+        "name": "E. Bardhi",
+        "position": "Midfielder"
+      },
+      {
+        "id": 94576,
+        "name": "M. Bjørlo",
+        "position": "Midfielder"
+      },
+      {
+        "id": 523095,
+        "name": "Ismail Esat Buga",
+        "position": "Midfielder"
+      },
+      {
+        "id": 645318,
+        "name": "Omer Cobanoglu",
+        "position": "Midfielder"
+      },
+      {
+        "id": 645519,
+        "name": "A. K. Dagdevir",
+        "position": "Midfielder"
+      },
+      {
+        "id": 645517,
+        "name": "E. Dogan",
+        "position": "Midfielder"
+      },
+      {
+        "id": 19300,
+        "name": "Diogo Gonçalves",
+        "position": "Midfielder"
+      },
+      {
+        "id": 152845,
+        "name": "M. İbrahimoğlu",
+        "position": "Midfielder"
+      },
+      {
+        "id": 50008,
+        "name": "M. Jevtović",
+        "position": "Midfielder"
+      },
+      {
+        "id": 364597,
+        "name": "Jo Jin-Ho",
+        "position": "Midfielder"
+      },
+      {
+        "id": 264627,
+        "name": "B. Kutlu",
+        "position": "Defender"
+      },
+      {
+        "id": 62023,
+        "name": "Y. Subaşı",
+        "position": "Defender"
+      },
+      {
+        "id": 50126,
+        "name": "D. Türüç",
+        "position": "Midfielder"
+      },
+      {
+        "id": 50063,
+        "name": "U. Yazğılı",
+        "position": "Defender"
+      },
+      {
+        "id": 47512,
+        "name": "Y. Andzouana",
+        "position": "Defender"
+      },
+      {
+        "id": 645518,
+        "name": "T. Elgun",
+        "position": "Attacker"
+      },
+      {
+        "id": 119780,
+        "name": "B. Kramer",
+        "position": "Attacker"
+      },
+      {
+        "id": 144656,
+        "name": "J. Muleka",
+        "position": "Attacker"
+      },
+      {
+        "id": 194880,
+        "name": "A. Ndao",
+        "position": "Attacker"
+      },
+      {
+        "id": 167659,
+        "name": "K. Olaigbe",
+        "position": "Midfielder"
+      },
+      {
+        "id": 550861,
+        "name": "Pedrinho",
+        "position": "Attacker"
+      },
+      {
+        "id": 645526,
+        "name": "E. I. Seven",
+        "position": "Attacker"
+      },
+      {
+        "id": 119278,
+        "name": "M. Ștefănescu",
+        "position": "Attacker"
+      },
+      {
+        "id": 39101,
+        "name": "S. Svendsen",
+        "position": "Midfielder"
+      },
+      {
+        "id": 161880,
+        "name": "T. Taşçı",
+        "position": "Attacker"
+      },
+      {
+        "id": 645525,
+        "name": "M. Var",
+        "position": "Attacker"
+      },
+      {
+        "id": 640065,
+        "name": "Cemali Yagmur Eren",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:24:53.405Z"
+  },
+  "Club Brugge": {
+    "teamId": 569,
+    "players": [
+      {
+        "id": 395891,
+        "name": "A. De Corte",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 1923,
+        "name": "N. Jackers",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 282,
+        "name": "S. Mignolet",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 551320,
+        "name": "S. Ostoici",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 426668,
+        "name": "Argus Vanden Driessche",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 282903,
+        "name": "D. van den Heuvel",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 439579,
+        "name": "S. Gomez van Hoogen",
+        "position": "Defender"
+      },
+      {
+        "id": 69,
+        "name": "B. Mechele",
+        "position": "Defender"
+      },
+      {
+        "id": 314265,
+        "name": "B. Meijer",
+        "position": "Defender"
+      },
+      {
+        "id": 354027,
+        "name": "J. Ordoñez",
+        "position": "Defender"
+      },
+      {
+        "id": 474741,
+        "name": "V. Osuji",
+        "position": "Defender"
+      },
+      {
+        "id": 301322,
+        "name": "K. Sabbe",
+        "position": "Defender"
+      },
+      {
+        "id": 375974,
+        "name": "J. Seys",
+        "position": "Defender"
+      },
+      {
+        "id": 290213,
+        "name": "H. Siquet",
+        "position": "Defender"
+      },
+      {
+        "id": 304984,
+        "name": "J. Spileers",
+        "position": "Defender"
+      },
+      {
+        "id": 271609,
+        "name": "L. Audoor",
+        "position": "Midfielder"
+      },
+      {
+        "id": 362047,
+        "name": "Alejandro Granados",
+        "position": "Midfielder"
+      },
+      {
+        "id": 325594,
+        "name": "F. Lemaréchal",
+        "position": "Midfielder"
+      },
+      {
+        "id": 162219,
+        "name": "R. Onyedika",
+        "position": "Midfielder"
+      },
+      {
+        "id": 38124,
+        "name": "L. Reis",
+        "position": "Midfielder"
+      },
+      {
+        "id": 162211,
+        "name": "C. Sandra",
+        "position": "Midfielder"
+      },
+      {
+        "id": 342230,
+        "name": "A. Stanković",
+        "position": "Midfielder"
+      },
+      {
+        "id": 78,
+        "name": "H. Vanaken",
+        "position": "Midfielder"
+      },
+      {
+        "id": 39291,
+        "name": "H. Vetlesen",
+        "position": "Midfielder"
+      },
+      {
+        "id": 430077,
+        "name": "S. Campbell",
+        "position": "Attacker"
+      },
+      {
+        "id": 386481,
+        "name": "M. Diakhon",
+        "position": "Attacker"
+      },
+      {
+        "id": 282126,
+        "name": "Carlos Forbs",
+        "position": "Midfielder"
+      },
+      {
+        "id": 15683,
+        "name": "G. Nilsson",
+        "position": "Attacker"
+      },
+      {
+        "id": 287923,
+        "name": "N. Tresoldi",
+        "position": "Attacker"
+      },
+      {
+        "id": 161800,
+        "name": "C. Tzolis",
+        "position": "Midfielder"
+      },
+      {
+        "id": 271276,
+        "name": "R. Vermant",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:25:00.540Z"
+  },
+  "Anderlecht": {
+    "teamId": 554,
+    "players": [
+      {
+        "id": 8469,
+        "name": "C. Coosemans",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 106792,
+        "name": "J. Heekeren",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 8549,
+        "name": "J. Imbrechts",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 449714,
+        "name": "M. Angely",
+        "position": "Defender"
+      },
+      {
+        "id": 2852,
+        "name": "L. Augustinsson",
+        "position": "Defender"
+      },
+      {
+        "id": 70476,
+        "name": "M. Diarra",
+        "position": "Defender"
+      },
+      {
+        "id": 315615,
+        "name": "L. Hey",
+        "position": "Defender"
+      },
+      {
+        "id": 346923,
+        "name": "M. Ilić",
+        "position": "Defender"
+      },
+      {
+        "id": 127418,
+        "name": "K. Sardella",
+        "position": "Defender"
+      },
+      {
+        "id": 481515,
+        "name": "B. Vroninks",
+        "position": "Defender"
+      },
+      {
+        "id": 371839,
+        "name": "I. Camara",
+        "position": "Midfielder"
+      },
+      {
+        "id": 453903,
+        "name": "Nathan De Cat",
+        "position": "Midfielder"
+      },
+      {
+        "id": 2929,
+        "name": "T. Hazard",
+        "position": "Midfielder"
+      },
+      {
+        "id": 127417,
+        "name": "M. Kana",
+        "position": "Defender"
+      },
+      {
+        "id": 38745,
+        "name": "E. Llansana",
+        "position": "Midfielder"
+      },
+      {
+        "id": 401367,
+        "name": "A. Maamar",
+        "position": "Defender"
+      },
+      {
+        "id": 77,
+        "name": "M. Rits",
+        "position": "Midfielder"
+      },
+      {
+        "id": 294824,
+        "name": "N. Saliba",
+        "position": "Midfielder"
+      },
+      {
+        "id": 296455,
+        "name": "M. Stroeykens",
+        "position": "Midfielder"
+      },
+      {
+        "id": 409011,
+        "name": "A. Tajaouart",
+        "position": "Midfielder"
+      },
+      {
+        "id": 1429,
+        "name": "Y. Verschaeren",
+        "position": "Midfielder"
+      },
+      {
+        "id": 129126,
+        "name": "A. Bertaccini",
+        "position": "Attacker"
+      },
+      {
+        "id": 544636,
+        "name": "M. Cvetkovic",
+        "position": "Attacker"
+      },
+      {
+        "id": 471432,
+        "name": "E. Dao",
+        "position": "Attacker"
+      },
+      {
+        "id": 400844,
+        "name": "T. Degreef",
+        "position": "Midfielder"
+      },
+      {
+        "id": 36111,
+        "name": "C. Huerta",
+        "position": "Attacker"
+      },
+      {
+        "id": 418189,
+        "name": "I. Kanate",
+        "position": "Attacker"
+      },
+      {
+        "id": 107303,
+        "name": "D. Sikan",
+        "position": "Attacker"
+      },
+      {
+        "id": 309364,
+        "name": "Coba",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:25:07.648Z"
+  },
+  "Genk": {
+    "teamId": 631,
+    "players": [
+      {
+        "id": 313077,
+        "name": "K. Peersman",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 8716,
+        "name": "D. Roef",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 131953,
+        "name": "T. Vandenberghe",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 161935,
+        "name": "Tiago Araújo",
+        "position": "Midfielder"
+      },
+      {
+        "id": 436990,
+        "name": "A. Ayindé",
+        "position": "Defender"
+      },
+      {
+        "id": 396200,
+        "name": "G. De Meyer",
+        "position": "Defender"
+      },
+      {
+        "id": 20655,
+        "name": "J. Duverne",
+        "position": "Defender"
+      },
+      {
+        "id": 269453,
+        "name": "H. Essaoubi",
+        "position": "Defender"
+      },
+      {
+        "id": 33095,
+        "name": "D. Hashioka",
+        "position": "Defender"
+      },
+      {
+        "id": 60353,
+        "name": "M. Paskotši",
+        "position": "Defender"
+      },
+      {
+        "id": 643031,
+        "name": "Eric Simpore",
+        "position": "Defender"
+      },
+      {
+        "id": 37639,
+        "name": "S. Van der Heyden",
+        "position": "Defender"
+      },
+      {
+        "id": 551299,
+        "name": "M. Volckaert",
+        "position": "Defender"
+      },
+      {
+        "id": 551260,
+        "name": "W. Asselman",
+        "position": "Midfielder"
+      },
+      {
+        "id": 20144,
+        "name": "Leonardo Lopes",
+        "position": "Midfielder"
+      },
+      {
+        "id": 381830,
+        "name": "T. De Vlieger",
+        "position": "Midfielder"
+      },
+      {
+        "id": 299972,
+        "name": "M. Delorge-Knieper",
+        "position": "Midfielder"
+      },
+      {
+        "id": 446302,
+        "name": "M. El Âdfaoui",
+        "position": "Midfielder"
+      },
+      {
+        "id": 26519,
+        "name": "Hong Hyun-Seok",
+        "position": "Attacker"
+      },
+      {
+        "id": 266927,
+        "name": "A. Ito",
+        "position": "Midfielder"
+      },
+      {
+        "id": 129867,
+        "name": "A. Kadri",
+        "position": "Midfielder"
+      },
+      {
+        "id": 402955,
+        "name": "A. Omgba",
+        "position": "Midfielder"
+      },
+      {
+        "id": 281376,
+        "name": "M. Samoise",
+        "position": "Midfielder"
+      },
+      {
+        "id": 278233,
+        "name": "M. Dean",
+        "position": "Attacker"
+      },
+      {
+        "id": 414787,
+        "name": "M. Diop",
+        "position": "Attacker"
+      },
+      {
+        "id": 477549,
+        "name": "B. Goore",
+        "position": "Attacker"
+      },
+      {
+        "id": 21155,
+        "name": "W. Kanga",
+        "position": "Attacker"
+      },
+      {
+        "id": 40809,
+        "name": "M. Skóraś",
+        "position": "Midfielder"
+      },
+      {
+        "id": 328978,
+        "name": "M. Sonko",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:25:14.761Z"
+  },
+  "Celtic": {
+    "teamId": 247,
+    "players": [
+      {
+        "id": 45150,
+        "name": "R. Doohan",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 2728,
+        "name": "K. Schmeichel",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 169291,
+        "name": "V. Sinisalo",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 51051,
+        "name": "J. Araujo",
+        "position": "Defender"
+      },
+      {
+        "id": 430827,
+        "name": "Benjamin Arthur",
+        "position": "Defender"
+      },
+      {
+        "id": 19314,
+        "name": "C. Carter-Vickers",
+        "position": "Defender"
+      },
+      {
+        "id": 451314,
+        "name": "Colby Donovan",
+        "position": "Defender"
+      },
+      {
+        "id": 619563,
+        "name": "J. Haney",
+        "position": "Defender"
+      },
+      {
+        "id": 78547,
+        "name": "A. Johnston",
+        "position": "Defender"
+      },
+      {
+        "id": 311820,
+        "name": "D. Murray",
+        "position": "Defender"
+      },
+      {
+        "id": 1115,
+        "name": "A. Ralston",
+        "position": "Defender"
+      },
+      {
+        "id": 1160,
+        "name": "M. Saracchi",
+        "position": "Defender"
+      },
+      {
+        "id": 69450,
+        "name": "L. Scales",
+        "position": "Defender"
+      },
+      {
+        "id": 1117,
+        "name": "K. Tierney",
+        "position": "Defender"
+      },
+      {
+        "id": 50737,
+        "name": "A. Trusty",
+        "position": "Defender"
+      },
+      {
+        "id": 161938,
+        "name": "Paulo Bernardo",
+        "position": "Midfielder"
+      },
+      {
+        "id": 162210,
+        "name": "A. Engels",
+        "position": "Midfielder"
+      },
+      {
+        "id": 620019,
+        "name": "F. Hale",
+        "position": "Midfielder"
+      },
+      {
+        "id": 180758,
+        "name": "R. Hatate",
+        "position": "Midfielder"
+      },
+      {
+        "id": 452381,
+        "name": "Thomas Hatton",
+        "position": "Midfielder"
+      },
+      {
+        "id": 1129,
+        "name": "C. McGregor",
+        "position": "Midfielder"
+      },
+      {
+        "id": 443670,
+        "name": "S. McArdle",
+        "position": "Midfielder"
+      },
+      {
+        "id": 158551,
+        "name": "J. Mvuka",
+        "position": "Midfielder"
+      },
+      {
+        "id": 339172,
+        "name": "C. Osmand",
+        "position": "Midfielder"
+      },
+      {
+        "id": 297,
+        "name": "A. Oxlade-Chamberlain",
+        "position": "Midfielder"
+      },
+      {
+        "id": 304958,
+        "name": "Yang Hyun-Jun",
+        "position": "Midfielder"
+      },
+      {
+        "id": 125173,
+        "name": "J. Adamu",
+        "position": "Attacker"
+      },
+      {
+        "id": 267728,
+        "name": "M. Balikwisha",
+        "position": "Attacker"
+      },
+      {
+        "id": 80434,
+        "name": "T. Čvančara",
+        "position": "Attacker"
+      },
+      {
+        "id": 1127,
+        "name": "J. Forrest",
+        "position": "Midfielder"
+      },
+      {
+        "id": 2778,
+        "name": "K. Ịheanachọ",
+        "position": "Attacker"
+      },
+      {
+        "id": 459715,
+        "name": "Samuel Isiguzo",
+        "position": "Attacker"
+      },
+      {
+        "id": 33224,
+        "name": "D. Maeda",
+        "position": "Midfielder"
+      },
+      {
+        "id": 45169,
+        "name": "L. McCowan",
+        "position": "Midfielder"
+      },
+      {
+        "id": 48002,
+        "name": "B. Nygren",
+        "position": "Midfielder"
+      },
+      {
+        "id": 57518,
+        "name": "S. Tounekti",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:25:21.874Z"
+  },
+  "Rangers": {
+    "teamId": 257,
+    "players": [
+      {
+        "id": 2930,
+        "name": "J. Butland",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 44937,
+        "name": "L. Kelly",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 138415,
+        "name": "K. Wright",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 19070,
+        "name": "M. Aarons",
+        "position": "Defender"
+      },
+      {
+        "id": 51295,
+        "name": "D. Cornelius",
+        "position": "Defender"
+      },
+      {
+        "id": 303322,
+        "name": "N. Djiga",
+        "position": "Defender"
+      },
+      {
+        "id": 322882,
+        "name": "E. Fernandez",
+        "position": "Defender"
+      },
+      {
+        "id": 620763,
+        "name": "A. Kerr",
+        "position": "Defender"
+      },
+      {
+        "id": 350625,
+        "name": "J. Meghoma",
+        "position": "Defender"
+      },
+      {
+        "id": 343577,
+        "name": "B. Rice",
+        "position": "Defender"
+      },
+      {
+        "id": 162159,
+        "name": "T. Rommens",
+        "position": "Defender"
+      },
+      {
+        "id": 44865,
+        "name": "J. Souttar",
+        "position": "Defender"
+      },
+      {
+        "id": 19990,
+        "name": "D. Sterling",
+        "position": "Defender"
+      },
+      {
+        "id": 1744,
+        "name": "J. Tavernier",
+        "position": "Defender"
+      },
+      {
+        "id": 277930,
+        "name": "T. Aasgaard",
+        "position": "Midfielder"
+      },
+      {
+        "id": 48577,
+        "name": "N. Bajrami",
+        "position": "Midfielder"
+      },
+      {
+        "id": 138460,
+        "name": "C. Barron",
+        "position": "Midfielder"
+      },
+      {
+        "id": 137384,
+        "name": "T. Chukwuani",
+        "position": "Midfielder"
+      },
+      {
+        "id": 199638,
+        "name": "M. Diomandé",
+        "position": "Midfielder"
+      },
+      {
+        "id": 497658,
+        "name": "A. McCallion",
+        "position": "Midfielder"
+      },
+      {
+        "id": 2120,
+        "name": "N. Raskin",
+        "position": "Midfielder"
+      },
+      {
+        "id": 637438,
+        "name": "Alexander Smith",
+        "position": "Midfielder"
+      },
+      {
+        "id": 562806,
+        "name": "L. Stewart",
+        "position": "Midfielder"
+      },
+      {
+        "id": 15906,
+        "name": "O. Antman",
+        "position": "Attacker"
+      },
+      {
+        "id": 330412,
+        "name": "Youssef Chermiti",
+        "position": "Attacker"
+      },
+      {
+        "id": 336563,
+        "name": "D. Gassama",
+        "position": "Attacker"
+      },
+      {
+        "id": 634664,
+        "name": "Z. Lawson",
+        "position": "Attacker"
+      },
+      {
+        "id": 109564,
+        "name": "B. Miovski",
+        "position": "Attacker"
+      },
+      {
+        "id": 380690,
+        "name": "M. Moore",
+        "position": "Midfielder"
+      },
+      {
+        "id": 280305,
+        "name": "R. Naderi",
+        "position": "Attacker"
+      },
+      {
+        "id": 15916,
+        "name": "A. Skov Olsen",
+        "position": "Midfielder"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:25:28.980Z"
+  },
+  "Al-Hilal": {
+    "teamId": 2932,
+    "players": [
+      {
+        "id": 405904,
+        "name": "Ahmad Abu Rasen",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 576269,
+        "name": "R. Al Dossary",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 543009,
+        "name": "M. Al Rubaie",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 2701,
+        "name": "Y. Bounou",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 198389,
+        "name": "M. Patouillet",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 412703,
+        "name": "Yusuf Akçiçek",
+        "position": "Defender"
+      },
+      {
+        "id": 576285,
+        "name": "M. Al Dawood",
+        "position": "Defender"
+      },
+      {
+        "id": 202381,
+        "name": "Moteb Al Harbi",
+        "position": "Defender"
+      },
+      {
+        "id": 586636,
+        "name": "Saad Al Mutairi",
+        "position": "Defender"
+      },
+      {
+        "id": 286354,
+        "name": "Hamad Turki Al Tuhayfan",
+        "position": "Defender"
+      },
+      {
+        "id": 531421,
+        "name": "S. Haroun",
+        "position": "Defender"
+      },
+      {
+        "id": 47300,
+        "name": "T. Hernández",
+        "position": "Defender"
+      },
+      {
+        "id": 318,
+        "name": "K. Koulibaly",
+        "position": "Defender"
+      },
+      {
+        "id": 44507,
+        "name": "Ali Lajami",
+        "position": "Defender"
+      },
+      {
+        "id": 46792,
+        "name": "Pablo Marí",
+        "position": "Defender"
+      },
+      {
+        "id": 44362,
+        "name": "Hassan Tambakti",
+        "position": "Defender"
+      },
+      {
+        "id": 623862,
+        "name": "R. Al-Ghamdi",
+        "position": "Midfielder"
+      },
+      {
+        "id": 576181,
+        "name": "M. Al-Zaid",
+        "position": "Midfielder"
+      },
+      {
+        "id": 44339,
+        "name": "Nasser Al Dawsari",
+        "position": "Midfielder"
+      },
+      {
+        "id": 44340,
+        "name": "Salem Al Dawsari",
+        "position": "Midfielder"
+      },
+      {
+        "id": 442343,
+        "name": "Murad Al Hawsawi",
+        "position": "Midfielder"
+      },
+      {
+        "id": 584515,
+        "name": "A. Al Zaid",
+        "position": "Midfielder"
+      },
+      {
+        "id": 334582,
+        "name": "Suhayb Al Zaid",
+        "position": "Midfielder"
+      },
+      {
+        "id": 442321,
+        "name": "Abdulkarim Darisi",
+        "position": "Midfielder"
+      },
+      {
+        "id": 44349,
+        "name": "Mohamed Kanno",
+        "position": "Midfielder"
+      },
+      {
+        "id": 1856,
+        "name": "S. Milinković-Savić",
+        "position": "Midfielder"
+      },
+      {
+        "id": 2676,
+        "name": "Rúben Neves",
+        "position": "Midfielder"
+      },
+      {
+        "id": 586639,
+        "name": "Abdulaziz Al Hadhood",
+        "position": "Attacker"
+      },
+      {
+        "id": 759,
+        "name": "K. Benzema",
+        "position": "Attacker"
+      },
+      {
+        "id": 412711,
+        "name": "Saïmon Bouabré",
+        "position": "Attacker"
+      },
+      {
+        "id": 156,
+        "name": "Malcom",
+        "position": "Midfielder"
+      },
+      {
+        "id": 2639,
+        "name": "Sultan Mandash",
+        "position": "Attacker"
+      },
+      {
+        "id": 267771,
+        "name": "Marcos Leonardo",
+        "position": "Attacker"
+      },
+      {
+        "id": 449662,
+        "name": "M. Meïté",
+        "position": "Attacker"
+      },
+      {
+        "id": 51617,
+        "name": "D. Núñez",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:25:36.099Z"
+  },
+  "Al-Nassr": {
+    "teamId": 2939,
+    "players": [
+      {
+        "id": 193288,
+        "name": "Nawaf Al Aqidi",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 568641,
+        "name": "M. Al Buainain",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 44360,
+        "name": "Raghed Najjar",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 10111,
+        "name": "Bento",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 134995,
+        "name": "Nawaf Boushal",
+        "position": "Defender"
+      },
+      {
+        "id": 44475,
+        "name": "Abdulelah Al Amri",
+        "position": "Defender"
+      },
+      {
+        "id": 44309,
+        "name": "Sultan Al Ghannam",
+        "position": "Defender"
+      },
+      {
+        "id": 350381,
+        "name": "Salem Al Najdi",
+        "position": "Defender"
+      },
+      {
+        "id": 44260,
+        "name": "Nader Al Sharari",
+        "position": "Defender"
+      },
+      {
+        "id": 456019,
+        "name": "Awad Aman",
+        "position": "Defender"
+      },
+      {
+        "id": 2670,
+        "name": "Íñigo Martínez",
+        "position": "Defender"
+      },
+      {
+        "id": 22250,
+        "name": "M. Simakan",
+        "position": "Defender"
+      },
+      {
+        "id": 420243,
+        "name": "Hayder Abdulkareem",
+        "position": "Midfielder"
+      },
+      {
+        "id": 565734,
+        "name": "R. Al Ghamdi",
+        "position": "Midfielder"
+      },
+      {
+        "id": 44509,
+        "name": "Ali Al Hassan",
+        "position": "Midfielder"
+      },
+      {
+        "id": 635839,
+        "name": "Abdulmalik Al-Jaber",
+        "position": "Midfielder"
+      },
+      {
+        "id": 44315,
+        "name": "Abdullah Al Khaibari",
+        "position": "Midfielder"
+      },
+      {
+        "id": 296940,
+        "name": "Saad Al Nasser",
+        "position": "Defender"
+      },
+      {
+        "id": 201,
+        "name": "M. Brozović",
+        "position": "Midfielder"
+      },
+      {
+        "id": 44382,
+        "name": "Abdullah Al Hamdan",
+        "position": "Attacker"
+      },
+      {
+        "id": 288055,
+        "name": "Ângelo",
+        "position": "Midfielder"
+      },
+      {
+        "id": 508,
+        "name": "K. Coman",
+        "position": "Attacker"
+      },
+      {
+        "id": 44447,
+        "name": "Abdulrahman Ghareeb",
+        "position": "Midfielder"
+      },
+      {
+        "id": 457124,
+        "name": "Saad Haqawi",
+        "position": "Attacker"
+      },
+      {
+        "id": 583,
+        "name": "João Félix",
+        "position": "Attacker"
+      },
+      {
+        "id": 304,
+        "name": "S. Mané",
+        "position": "Midfielder"
+      },
+      {
+        "id": 193289,
+        "name": "Mohammed Maran",
+        "position": "Attacker"
+      },
+      {
+        "id": 874,
+        "name": "Cristiano Ronaldo",
+        "position": "Attacker"
+      },
+      {
+        "id": 147812,
+        "name": "Ayman Yahya",
+        "position": "Attacker"
+      },
+      {
+        "id": 423691,
+        "name": "Faris Salem",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:25:43.209Z"
+  },
+  "Al-Ittihad": {
+    "teamId": 2934,
+    "players": [
+      {
+        "id": 579648,
+        "name": "A. Hawsawi",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 388481,
+        "name": "Abdulbasit Hawsawi",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 19657,
+        "name": "M. Rodák",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 636313,
+        "name": "T. Al Madani",
+        "position": "Defender"
+      },
+      {
+        "id": 470335,
+        "name": "Hassan Al Musallam",
+        "position": "Defender"
+      },
+      {
+        "id": 2636,
+        "name": "Madallah Al Olayan",
+        "position": "Defender"
+      },
+      {
+        "id": 44476,
+        "name": "Radhi Al Otaibi",
+        "position": "Defender"
+      },
+      {
+        "id": 135341,
+        "name": "Meshal Sibyani",
+        "position": "Defender"
+      },
+      {
+        "id": 2830,
+        "name": "F. Calvo",
+        "position": "Defender"
+      },
+      {
+        "id": 525696,
+        "name": "Awad Dahal",
+        "position": "Defender"
+      },
+      {
+        "id": 1111,
+        "name": "J. Hendry",
+        "position": "Defender"
+      },
+      {
+        "id": 44422,
+        "name": "Abdulbasit Al-Hindi",
+        "position": "Defender"
+      },
+      {
+        "id": 43943,
+        "name": "Abdullah Khateeb",
+        "position": "Defender"
+      },
+      {
+        "id": 44303,
+        "name": "Abdullah Madu",
+        "position": "Defender"
+      },
+      {
+        "id": 637350,
+        "name": "N. Abdulrahman",
+        "position": "Midfielder"
+      },
+      {
+        "id": 576147,
+        "name": "F. Al Ghamdi",
+        "position": "Midfielder"
+      },
+      {
+        "id": 613458,
+        "name": "Yasir Shammari",
+        "position": "Midfielder"
+      },
+      {
+        "id": 37121,
+        "name": "Mukhtar Ali",
+        "position": "Midfielder"
+      },
+      {
+        "id": 25349,
+        "name": "O. Duda",
+        "position": "Midfielder"
+      },
+      {
+        "id": 47546,
+        "name": "Álvaro Medrán",
+        "position": "Midfielder"
+      },
+      {
+        "id": 643746,
+        "name": "A. Sahhari",
+        "position": "Midfielder"
+      },
+      {
+        "id": 300,
+        "name": "G. Wijnaldum",
+        "position": "Midfielder"
+      },
+      {
+        "id": 531429,
+        "name": "Z. Al Ghamdi",
+        "position": "Attacker"
+      },
+      {
+        "id": 44701,
+        "name": "Khalid Al Ghannam",
+        "position": "Midfielder"
+      },
+      {
+        "id": 368096,
+        "name": "João Gabriel e Costa Cesco",
+        "position": "Attacker"
+      },
+      {
+        "id": 666,
+        "name": "M. Dembélé",
+        "position": "Attacker"
+      },
+      {
+        "id": 284099,
+        "name": "M. Gluščević",
+        "position": "Attacker"
+      },
+      {
+        "id": 491453,
+        "name": "Jalal Al Salem",
+        "position": "Attacker"
+      },
+      {
+        "id": 1617,
+        "name": "Koka",
+        "position": "Attacker"
+      },
+      {
+        "id": 483109,
+        "name": "M. Nkota",
+        "position": "Midfielder"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:25:50.318Z"
+  },
+  "Al-Ahli": {
+    "teamId": 2933,
+    "players": [
+      {
+        "id": 44449,
+        "name": "Ahmed Al Kassar",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 623731,
+        "name": "Abgullah Almuhaysin",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 2918,
+        "name": "K. Casteels",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 44528,
+        "name": "Meshari Sunyur",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 653529,
+        "name": "Abdulah Abdulaziz Al Jwayzan",
+        "position": "Defender"
+      },
+      {
+        "id": 44337,
+        "name": "Waleed Al Ahmad",
+        "position": "Defender"
+      },
+      {
+        "id": 44331,
+        "name": "Yasir Al Shahrani",
+        "position": "Defender"
+      },
+      {
+        "id": 51449,
+        "name": "G. Álvarez",
+        "position": "Defender"
+      },
+      {
+        "id": 735,
+        "name": "Nacho",
+        "position": "Defender"
+      },
+      {
+        "id": 44656,
+        "name": "Mohammed Qassem",
+        "position": "Defender"
+      },
+      {
+        "id": 543059,
+        "name": "J. Thakri",
+        "position": "Defender"
+      },
+      {
+        "id": 403087,
+        "name": "Mohammed Abu Al Shamat",
+        "position": "Midfielder"
+      },
+      {
+        "id": 44374,
+        "name": "Turki Al Ammar",
+        "position": "Midfielder"
+      },
+      {
+        "id": 306380,
+        "name": "Musab Al Juwayr",
+        "position": "Midfielder"
+      },
+      {
+        "id": 531414,
+        "name": "A. Al Yuhaybi",
+        "position": "Midfielder"
+      },
+      {
+        "id": 415049,
+        "name": "Gabriel Carvalho",
+        "position": "Midfielder"
+      },
+      {
+        "id": 2632,
+        "name": "Ali Abdullah Hazzazi",
+        "position": "Midfielder"
+      },
+      {
+        "id": 531443,
+        "name": "E. Houssa",
+        "position": "Midfielder"
+      },
+      {
+        "id": 44581,
+        "name": "Ibrahim Mahnashi",
+        "position": "Defender"
+      },
+      {
+        "id": 2614,
+        "name": "N. Nández",
+        "position": "Midfielder"
+      },
+      {
+        "id": 380,
+        "name": "Otávio",
+        "position": "Midfielder"
+      },
+      {
+        "id": 19,
+        "name": "J. Weigl",
+        "position": "Midfielder"
+      },
+      {
+        "id": 44322,
+        "name": "Abdullah Al Salem",
+        "position": "Attacker"
+      },
+      {
+        "id": 268087,
+        "name": "Haitham Asiri",
+        "position": "Attacker"
+      },
+      {
+        "id": 411800,
+        "name": "C. Bonsu Baah",
+        "position": "Midfielder"
+      },
+      {
+        "id": 35532,
+        "name": "J. Quiñones",
+        "position": "Attacker"
+      },
+      {
+        "id": 6420,
+        "name": "M. Retegui",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:25:57.426Z"
+  },
+  "Bröndby": {
+    "teamId": 400,
+    "players": [
+      {
+        "id": 568382,
+        "name": "T. Breum-Harild",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 441252,
+        "name": "Oscar Gadeberg-Buur",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 524,
+        "name": "D. Kotarski",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 2784,
+        "name": "R. Rúnarsson",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 568099,
+        "name": "G. Ankamafio",
+        "position": "Defender"
+      },
+      {
+        "id": 8451,
+        "name": "Aurélio Buta",
+        "position": "Defender"
+      },
+      {
+        "id": 159511,
+        "name": "Gabriel Pereira",
+        "position": "Defender"
+      },
+      {
+        "id": 36885,
+        "name": "P. Hatzidiakos",
+        "position": "Defender"
+      },
+      {
+        "id": 2431,
+        "name": "M. López",
+        "position": "Defender"
+      },
+      {
+        "id": 1173,
+        "name": "B. Meling",
+        "position": "Defender"
+      },
+      {
+        "id": 504208,
+        "name": "K. Myrie",
+        "position": "Defender"
+      },
+      {
+        "id": 351014,
+        "name": "J. Suzuki",
+        "position": "Defender"
+      },
+      {
+        "id": 2731,
+        "name": "M. Jørgensen",
+        "position": "Defender"
+      },
+      {
+        "id": 349212,
+        "name": "W. Clem",
+        "position": "Midfielder"
+      },
+      {
+        "id": 15,
+        "name": "T. Delaney",
+        "position": "Midfielder"
+      },
+      {
+        "id": 395602,
+        "name": "Oliver Højer",
+        "position": "Midfielder"
+      },
+      {
+        "id": 15934,
+        "name": "M. Emil Madsen",
+        "position": "Midfielder"
+      },
+      {
+        "id": 444418,
+        "name": "Jonathan Moalem",
+        "position": "Midfielder"
+      },
+      {
+        "id": 314231,
+        "name": "A. Richardson",
+        "position": "Midfielder"
+      },
+      {
+        "id": 42012,
+        "name": "E. Achouri",
+        "position": "Midfielder"
+      },
+      {
+        "id": 2080,
+        "name": "V. Claesson",
+        "position": "Midfielder"
+      },
+      {
+        "id": 1274,
+        "name": "A. Cornelius",
+        "position": "Attacker"
+      },
+      {
+        "id": 426288,
+        "name": "V. Dadason",
+        "position": "Attacker"
+      },
+      {
+        "id": 18946,
+        "name": "M. Elyounoussi",
+        "position": "Midfielder"
+      },
+      {
+        "id": 48203,
+        "name": "J. Larsson",
+        "position": "Midfielder"
+      },
+      {
+        "id": 161919,
+        "name": "Y. Moukoko",
+        "position": "Attacker"
+      },
+      {
+        "id": 422779,
+        "name": "Robert",
+        "position": "Midfielder"
+      },
+      {
+        "id": 633096,
+        "name": "G. Vianney",
+        "position": "Attacker"
+      },
+      {
+        "id": 416088,
+        "name": "L. West",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:26:04.555Z"
+  },
+  "Copenhagen": {
+    "teamId": 397,
+    "players": [
+      {
+        "id": 284543,
+        "name": "O. Ejeheri",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 2727,
+        "name": "J. Lössl",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 89754,
+        "name": "E. Ólafsson",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 374525,
+        "name": "M. Ugboh",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 162218,
+        "name": "V. Bak Jensen",
+        "position": "Midfielder"
+      },
+      {
+        "id": 19345,
+        "name": "M. Bech",
+        "position": "Defender"
+      },
+      {
+        "id": 404026,
+        "name": "O. Diao",
+        "position": "Defender"
+      },
+      {
+        "id": 30827,
+        "name": "M. Erlić",
+        "position": "Defender"
+      },
+      {
+        "id": 287565,
+        "name": "A. Gabriel",
+        "position": "Defender"
+      },
+      {
+        "id": 421937,
+        "name": "B. Konteh Krubally",
+        "position": "Defender"
+      },
+      {
+        "id": 237218,
+        "name": "Lee Han-Beom",
+        "position": "Defender"
+      },
+      {
+        "id": 946,
+        "name": "K. Mbabu",
+        "position": "Defender"
+      },
+      {
+        "id": 641327,
+        "name": "A. Ndiaye",
+        "position": "Defender"
+      },
+      {
+        "id": 10016,
+        "name": "Paulinho",
+        "position": "Defender"
+      },
+      {
+        "id": 2734,
+        "name": "P. Billing",
+        "position": "Midfielder"
+      },
+      {
+        "id": 311432,
+        "name": "P. Bravo",
+        "position": "Midfielder"
+      },
+      {
+        "id": 338045,
+        "name": "D. Castillo",
+        "position": "Midfielder"
+      },
+      {
+        "id": 544622,
+        "name": "A. Djabi",
+        "position": "Midfielder"
+      },
+      {
+        "id": 371909,
+        "name": "V. Byskov",
+        "position": "Midfielder"
+      },
+      {
+        "id": 48056,
+        "name": "E. Chilufya",
+        "position": "Attacker"
+      },
+      {
+        "id": 34211,
+        "name": "Cho Gue-Sung",
+        "position": "Attacker"
+      },
+      {
+        "id": 585845,
+        "name": "Julius Emefile",
+        "position": "Attacker"
+      },
+      {
+        "id": 340625,
+        "name": "Franculino Djú",
+        "position": "Attacker"
+      },
+      {
+        "id": 435061,
+        "name": "Mikel Johan Gogorza Krüger-Johnsen",
+        "position": "Attacker"
+      },
+      {
+        "id": 15810,
+        "name": "Júnior Brumado",
+        "position": "Attacker"
+      },
+      {
+        "id": 394184,
+        "name": "Junior Arlet Zé",
+        "position": "Midfielder"
+      },
+      {
+        "id": 307117,
+        "name": "D. Osorio",
+        "position": "Midfielder"
+      },
+      {
+        "id": 585850,
+        "name": "M. Pimpong",
+        "position": "Attacker"
+      },
+      {
+        "id": 161790,
+        "name": "A. Şimşir",
+        "position": "Attacker"
+      },
+      {
+        "id": 15894,
+        "name": "M. Uhre",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:26:11.664Z"
+  },
+  "Salzburg": {
+    "teamId": 571,
+    "players": [
+      {
+        "id": 354305,
+        "name": "S. Hamzić",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 428304,
+        "name": "Nikola Šarčević",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 7525,
+        "name": "A. Schlager",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 445566,
+        "name": "Christian Zawieschitzky",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 361981,
+        "name": "A. Chase",
+        "position": "Defender"
+      },
+      {
+        "id": 327635,
+        "name": "Douglas Mendes",
+        "position": "Defender"
+      },
+      {
+        "id": 327861,
+        "name": "T. Drexler",
+        "position": "Defender"
+      },
+      {
+        "id": 409215,
+        "name": "Kouakou Joane Gadou",
+        "position": "Defender"
+      },
+      {
+        "id": 280335,
+        "name": "F. Krätzig",
+        "position": "Midfielder"
+      },
+      {
+        "id": 1082,
+        "name": "S. Lainer",
+        "position": "Defender"
+      },
+      {
+        "id": 349,
+        "name": "A. Terzić",
+        "position": "Defender"
+      },
+      {
+        "id": 162189,
+        "name": "M. Bidstrup",
+        "position": "Midfielder"
+      },
+      {
+        "id": 441958,
+        "name": "Clement Bischoff",
+        "position": "Midfielder"
+      },
+      {
+        "id": 403326,
+        "name": "S. Diabaté",
+        "position": "Midfielder"
+      },
+      {
+        "id": 302915,
+        "name": "M. Diambou",
+        "position": "Midfielder"
+      },
+      {
+        "id": 288073,
+        "name": "S. Kitano",
+        "position": "Midfielder"
+      },
+      {
+        "id": 115587,
+        "name": "M. Kjærgaard",
+        "position": "Midfielder"
+      },
+      {
+        "id": 394682,
+        "name": "O. Lukic",
+        "position": "Midfielder"
+      },
+      {
+        "id": 441271,
+        "name": "Jannik Schuster",
+        "position": "Midfielder"
+      },
+      {
+        "id": 364320,
+        "name": "V. Sulzbacher",
+        "position": "Midfielder"
+      },
+      {
+        "id": 386296,
+        "name": "T. Trummer",
+        "position": "Midfielder"
+      },
+      {
+        "id": 381810,
+        "name": "M. Yeo",
+        "position": "Midfielder"
+      },
+      {
+        "id": 444468,
+        "name": "E. Aguilar",
+        "position": "Attacker"
+      },
+      {
+        "id": 395559,
+        "name": "Kerim-Sam Alajbegović",
+        "position": "Midfielder"
+      },
+      {
+        "id": 464055,
+        "name": "E. Baidoo",
+        "position": "Attacker"
+      },
+      {
+        "id": 331865,
+        "name": "K. Konaté",
+        "position": "Attacker"
+      },
+      {
+        "id": 25928,
+        "name": "K. Onisiwo",
+        "position": "Attacker"
+      },
+      {
+        "id": 286784,
+        "name": "D. Redzic",
+        "position": "Attacker"
+      },
+      {
+        "id": 129072,
+        "name": "Y. Vertessen",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:26:18.777Z"
+  },
+  "Rapid Vienna": {
+    "teamId": 573,
+    "players": [
+      {
+        "id": 46156,
+        "name": "M. Krunić",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 534439,
+        "name": "M. Milosevic",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 330853,
+        "name": "V. Đurđević",
+        "position": "Defender"
+      },
+      {
+        "id": 105803,
+        "name": "M. Jurčevič",
+        "position": "Defender"
+      },
+      {
+        "id": 66778,
+        "name": "S. Milić",
+        "position": "Defender"
+      },
+      {
+        "id": 336673,
+        "name": "M. Milovanović",
+        "position": "Defender"
+      },
+      {
+        "id": 2819,
+        "name": "S. Mitrović",
+        "position": "Defender"
+      },
+      {
+        "id": 580676,
+        "name": "A. Mohammed",
+        "position": "Defender"
+      },
+      {
+        "id": 498288,
+        "name": "S. Petrović",
+        "position": "Defender"
+      },
+      {
+        "id": 339936,
+        "name": "M. Roganović",
+        "position": "Defender"
+      },
+      {
+        "id": 398206,
+        "name": "N. SimiÄ",
+        "position": "Defender"
+      },
+      {
+        "id": 45937,
+        "name": "A. Stojković",
+        "position": "Defender"
+      },
+      {
+        "id": 443802,
+        "name": "V. Dragojević",
+        "position": "Midfielder"
+      },
+      {
+        "id": 398188,
+        "name": "D. Janković",
+        "position": "Midfielder"
+      },
+      {
+        "id": 445439,
+        "name": "B. Kostić",
+        "position": "Midfielder"
+      },
+      {
+        "id": 602727,
+        "name": "D. Makevic",
+        "position": "Midfielder"
+      },
+      {
+        "id": 1611,
+        "name": "B. Natcho",
+        "position": "Midfielder"
+      },
+      {
+        "id": 443803,
+        "name": "O. Ugresić",
+        "position": "Midfielder"
+      },
+      {
+        "id": 133444,
+        "name": "M. Vukotić",
+        "position": "Midfielder"
+      },
+      {
+        "id": 15297,
+        "name": "G. Zahid",
+        "position": "Midfielder"
+      },
+      {
+        "id": 45831,
+        "name": "S. Zdjelar",
+        "position": "Midfielder"
+      },
+      {
+        "id": 638229,
+        "name": "D. Jovanovic",
+        "position": "Attacker"
+      },
+      {
+        "id": 449642,
+        "name": "A. Kostić",
+        "position": "Attacker"
+      },
+      {
+        "id": 639751,
+        "name": "I. Martinovic",
+        "position": "Attacker"
+      },
+      {
+        "id": 633088,
+        "name": "M. Ninic",
+        "position": "Attacker"
+      },
+      {
+        "id": 24861,
+        "name": "S. Polter",
+        "position": "Attacker"
+      },
+      {
+        "id": 282706,
+        "name": "D. Seck",
+        "position": "Midfielder"
+      },
+      {
+        "id": 414212,
+        "name": "N. Trifunović",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:26:25.891Z"
+  },
+  "Dynamo Kyiv": {
+    "teamId": 334,
+    "players": [
+      {
+        "id": 15978,
+        "name": "J. Pryts",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 310476,
+        "name": "S. Strand-Kolbjørnsen",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 310079,
+        "name": "J. Torkildsen",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 339824,
+        "name": "O. Jebali",
+        "position": "Defender"
+      },
+      {
+        "id": 564532,
+        "name": "S. Jorgensen",
+        "position": "Defender"
+      },
+      {
+        "id": 412898,
+        "name": "J. Meyer",
+        "position": "Defender"
+      },
+      {
+        "id": 57482,
+        "name": "J. Norheim",
+        "position": "Defender"
+      },
+      {
+        "id": 57316,
+        "name": "F. Pålerud",
+        "position": "Defender"
+      },
+      {
+        "id": 39062,
+        "name": "E. Reitan",
+        "position": "Defender"
+      },
+      {
+        "id": 126756,
+        "name": "M. Soomets",
+        "position": "Midfielder"
+      },
+      {
+        "id": 57390,
+        "name": "K. Tønnessen",
+        "position": "Defender"
+      },
+      {
+        "id": 266316,
+        "name": "O. Toure",
+        "position": "Defender"
+      },
+      {
+        "id": 98869,
+        "name": "A. Ujkani",
+        "position": "Defender"
+      },
+      {
+        "id": 564603,
+        "name": "N. Apland",
+        "position": "Midfielder"
+      },
+      {
+        "id": 475783,
+        "name": "L. Gausdal",
+        "position": "Midfielder"
+      },
+      {
+        "id": 24905,
+        "name": "S. Griesbeck",
+        "position": "Midfielder"
+      },
+      {
+        "id": 649128,
+        "name": "Filip Strømland Lien",
+        "position": "Midfielder"
+      },
+      {
+        "id": 94594,
+        "name": "H. Lorentzen",
+        "position": "Attacker"
+      },
+      {
+        "id": 71568,
+        "name": "S. Mvoué",
+        "position": "Midfielder"
+      },
+      {
+        "id": 614382,
+        "name": "B. Ruenes",
+        "position": "Midfielder"
+      },
+      {
+        "id": 57444,
+        "name": "E. Schulze",
+        "position": "Midfielder"
+      },
+      {
+        "id": 57253,
+        "name": "E. Segberg",
+        "position": "Midfielder"
+      },
+      {
+        "id": 156561,
+        "name": "T. Strannegård",
+        "position": "Defender"
+      },
+      {
+        "id": 57259,
+        "name": "M. Ugland",
+        "position": "Defender"
+      },
+      {
+        "id": 304531,
+        "name": "J. Ampofo",
+        "position": "Attacker"
+      },
+      {
+        "id": 456332,
+        "name": "J. Cornelius",
+        "position": "Attacker"
+      },
+      {
+        "id": 584513,
+        "name": "A. F. Gurendal",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:26:33.002Z"
+  },
+  "Shakhtar": {
+    "teamId": 338,
+    "players": [
+      {
+        "id": 40163,
+        "name": "K. Broda",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 2300,
+        "name": "A. Chichkan",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 429981,
+        "name": "P. Letkiewicz",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 41035,
+        "name": "W. Biedrzycki",
+        "position": "Defender"
+      },
+      {
+        "id": 147782,
+        "name": "J. Colley",
+        "position": "Defender"
+      },
+      {
+        "id": 48655,
+        "name": "R. Giger",
+        "position": "Defender"
+      },
+      {
+        "id": 7112,
+        "name": "D. Grujčić",
+        "position": "Defender"
+      },
+      {
+        "id": 392621,
+        "name": "J. Krzyżanowski",
+        "position": "Defender"
+      },
+      {
+        "id": 37609,
+        "name": "J. Lelieveld",
+        "position": "Defender"
+      },
+      {
+        "id": 107533,
+        "name": "R. Mikulec",
+        "position": "Defender"
+      },
+      {
+        "id": 40280,
+        "name": "A. Uryga",
+        "position": "Defender"
+      },
+      {
+        "id": 583718,
+        "name": "A. Ziarko",
+        "position": "Defender"
+      },
+      {
+        "id": 531368,
+        "name": "F. Baniowski",
+        "position": "Midfielder"
+      },
+      {
+        "id": 122376,
+        "name": "M. Božić",
+        "position": "Midfielder"
+      },
+      {
+        "id": 105097,
+        "name": "Marc Carbó",
+        "position": "Midfielder"
+      },
+      {
+        "id": 26777,
+        "name": "Frederico Duarte",
+        "position": "Midfielder"
+      },
+      {
+        "id": 263180,
+        "name": "K. Duda",
+        "position": "Midfielder"
+      },
+      {
+        "id": 7654,
+        "name": "J. Ertlthaler",
+        "position": "Midfielder"
+      },
+      {
+        "id": 47059,
+        "name": "J. Igbekeme",
+        "position": "Midfielder"
+      },
+      {
+        "id": 429982,
+        "name": "M. Kutwa",
+        "position": "Midfielder"
+      },
+      {
+        "id": 497499,
+        "name": "M. Kuziemka",
+        "position": "Midfielder"
+      },
+      {
+        "id": 313202,
+        "name": "E. Omić",
+        "position": "Midfielder"
+      },
+      {
+        "id": 379989,
+        "name": "W. Staszak",
+        "position": "Midfielder"
+      },
+      {
+        "id": 324068,
+        "name": "W. Szywacz",
+        "position": "Midfielder"
+      },
+      {
+        "id": 549515,
+        "name": "S. Kawala",
+        "position": "Attacker"
+      },
+      {
+        "id": 321770,
+        "name": "A. Nikaj",
+        "position": "Attacker"
+      },
+      {
+        "id": 181533,
+        "name": "Ángel Rodado",
+        "position": "Attacker"
+      },
+      {
+        "id": 104888,
+        "name": "Jordi Sánchez",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:26:40.114Z"
+  },
+  "Olympiacos": {
+    "teamId": 314,
+    "players": [
+      {
+        "id": 356707,
+        "name": "H. Nishimura",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 457176,
+        "name": "S. Sato",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 33844,
+        "name": "Y. Sato",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 639394,
+        "name": "S. Ito",
+        "position": "Defender"
+      },
+      {
+        "id": 307959,
+        "name": "W. Iwashita",
+        "position": "Defender"
+      },
+      {
+        "id": 91644,
+        "name": "K. Kuroki",
+        "position": "Defender"
+      },
+      {
+        "id": 33770,
+        "name": "Y. Omoto",
+        "position": "Defender"
+      },
+      {
+        "id": 555827,
+        "name": "T. Ri",
+        "position": "Defender"
+      },
+      {
+        "id": 641069,
+        "name": "Shumpei Toda",
+        "position": "Defender"
+      },
+      {
+        "id": 472371,
+        "name": "S. Aoki",
+        "position": "Midfielder"
+      },
+      {
+        "id": 457177,
+        "name": "K. Fujii",
+        "position": "Midfielder"
+      },
+      {
+        "id": 509257,
+        "name": "A. Iihoshi",
+        "position": "Midfielder"
+      },
+      {
+        "id": 91675,
+        "name": "S. Kamimura",
+        "position": "Midfielder"
+      },
+      {
+        "id": 509258,
+        "name": "K. Kobayashi",
+        "position": "Midfielder"
+      },
+      {
+        "id": 33970,
+        "name": "S. Mishima",
+        "position": "Midfielder"
+      },
+      {
+        "id": 354262,
+        "name": "S. Nagai",
+        "position": "Midfielder"
+      },
+      {
+        "id": 639412,
+        "name": "K. Nasu",
+        "position": "Midfielder"
+      },
+      {
+        "id": 509259,
+        "name": "K. Negishi",
+        "position": "Midfielder"
+      },
+      {
+        "id": 196896,
+        "name": "R. Onishi",
+        "position": "Midfielder"
+      },
+      {
+        "id": 641068,
+        "name": "Rei Yakushida",
+        "position": "Midfielder"
+      },
+      {
+        "id": 641067,
+        "name": "Yuki Yoshioka",
+        "position": "Midfielder"
+      },
+      {
+        "id": 457179,
+        "name": "Bae Jeong-Min",
+        "position": "Attacker"
+      },
+      {
+        "id": 472735,
+        "name": "M. Handai",
+        "position": "Attacker"
+      },
+      {
+        "id": 641542,
+        "name": "Ora Ishihara",
+        "position": "Attacker"
+      },
+      {
+        "id": 639413,
+        "name": "Y. Katori",
+        "position": "Attacker"
+      },
+      {
+        "id": 206972,
+        "name": "E. Matsuda",
+        "position": "Attacker"
+      },
+      {
+        "id": 509260,
+        "name": "R. Watanabe",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:26:47.231Z"
+  },
+  "PAOK": {
+    "teamId": 311,
+    "players": [
+      {
+        "id": 48393,
+        "name": "N. Baumann",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 307956,
+        "name": "R. Tashiro",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 410012,
+        "name": "S. Uchiyama",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 33987,
+        "name": "D. Yoshimitsu",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 32949,
+        "name": "M. Fitzgerald",
+        "position": "Defender"
+      },
+      {
+        "id": 109334,
+        "name": "S. Fujiwara",
+        "position": "Defender"
+      },
+      {
+        "id": 304794,
+        "name": "Y. Fujiwara",
+        "position": "Defender"
+      },
+      {
+        "id": 33159,
+        "name": "K. Funaki",
+        "position": "Defender"
+      },
+      {
+        "id": 33847,
+        "name": "J. Geria",
+        "position": "Defender"
+      },
+      {
+        "id": 33626,
+        "name": "F. Hayakawa",
+        "position": "Defender"
+      },
+      {
+        "id": 555838,
+        "name": "T. Kato",
+        "position": "Defender"
+      },
+      {
+        "id": 640934,
+        "name": "Toshiya Matsuoka",
+        "position": "Defender"
+      },
+      {
+        "id": 354518,
+        "name": "K. Mori",
+        "position": "Defender"
+      },
+      {
+        "id": 434216,
+        "name": "R. Mori",
+        "position": "Defender"
+      },
+      {
+        "id": 550717,
+        "name": "M. Sato",
+        "position": "Defender"
+      },
+      {
+        "id": 206924,
+        "name": "T. Arai",
+        "position": "Midfielder"
+      },
+      {
+        "id": 410013,
+        "name": "A. Ishiyama",
+        "position": "Midfielder"
+      },
+      {
+        "id": 370122,
+        "name": "Keisuke Kasai",
+        "position": "Midfielder"
+      },
+      {
+        "id": 356560,
+        "name": "R. Ochiai",
+        "position": "Midfielder"
+      },
+      {
+        "id": 455188,
+        "name": "J. Okumura",
+        "position": "Midfielder"
+      },
+      {
+        "id": 555739,
+        "name": "Y. Onishi",
+        "position": "Midfielder"
+      },
+      {
+        "id": 458245,
+        "name": "Y. Otake",
+        "position": "Midfielder"
+      },
+      {
+        "id": 288915,
+        "name": "K. Shimabuku",
+        "position": "Midfielder"
+      },
+      {
+        "id": 91697,
+        "name": "T. Shimamura",
+        "position": "Midfielder"
+      },
+      {
+        "id": 33436,
+        "name": "E. Shirai",
+        "position": "Midfielder"
+      },
+      {
+        "id": 352795,
+        "name": "J. Yoshida",
+        "position": "Midfielder"
+      },
+      {
+        "id": 47627,
+        "name": "A. Boudah",
+        "position": "Attacker"
+      },
+      {
+        "id": 457178,
+        "name": "C. Konagaya",
+        "position": "Attacker"
+      },
+      {
+        "id": 278499,
+        "name": "Moraes",
+        "position": "Attacker"
+      },
+      {
+        "id": 33412,
+        "name": "Y. Ono",
+        "position": "Attacker"
+      },
+      {
+        "id": 33151,
+        "name": "Y. Wakatsuki",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:26:54.340Z"
+  },
+  "Red Star": {
+    "teamId": 591,
+    "players": [
+      {
+        "id": 192016,
+        "name": "Mauro Rabelo",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 123049,
+        "name": "Á. Ruíz",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 609934,
+        "name": "M. Alvarez",
+        "position": "Defender"
+      },
+      {
+        "id": 581136,
+        "name": "A. Awana",
+        "position": "Defender"
+      },
+      {
+        "id": 544776,
+        "name": "D. Crespo",
+        "position": "Defender"
+      },
+      {
+        "id": 47431,
+        "name": "David Juncà",
+        "position": "Defender"
+      },
+      {
+        "id": 292563,
+        "name": "David Rodríguez",
+        "position": "Defender"
+      },
+      {
+        "id": 544862,
+        "name": "S. Rodriguez",
+        "position": "Defender"
+      },
+      {
+        "id": 183014,
+        "name": "Martín Ross",
+        "position": "Defender"
+      },
+      {
+        "id": 544777,
+        "name": "J. Rubio",
+        "position": "Defender"
+      },
+      {
+        "id": 544780,
+        "name": "M. San Nicolas",
+        "position": "Defender"
+      },
+      {
+        "id": 47243,
+        "name": "Adri Arjona",
+        "position": "Midfielder"
+      },
+      {
+        "id": 116832,
+        "name": "Iñigo Barrenetxea",
+        "position": "Midfielder"
+      },
+      {
+        "id": 43,
+        "name": "Mikel Carro",
+        "position": "Midfielder"
+      },
+      {
+        "id": 610258,
+        "name": "Cheki",
+        "position": "Midfielder"
+      },
+      {
+        "id": 181662,
+        "name": "Sascha",
+        "position": "Attacker"
+      },
+      {
+        "id": 113579,
+        "name": "J. Becerra",
+        "position": "Attacker"
+      },
+      {
+        "id": 624722,
+        "name": "Y. Betancor",
+        "position": "Attacker"
+      },
+      {
+        "id": 610317,
+        "name": "H. Esteban",
+        "position": "Attacker"
+      },
+      {
+        "id": 348198,
+        "name": "Hugo Silva",
+        "position": "Attacker"
+      },
+      {
+        "id": 179438,
+        "name": "G. López",
+        "position": "Attacker"
+      },
+      {
+        "id": 581135,
+        "name": "A. Villar",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:27:01.491Z"
+  },
+  "Slavia Prague": {
+    "teamId": 553,
+    "players": [
+      {
+        "id": 573738,
+        "name": "N. Botis",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 343194,
+        "name": "N. Botis",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 451997,
+        "name": "G. Kouraklis",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 2355,
+        "name": "A. Paschalakis",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 1591,
+        "name": "K. Tzolakis",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 84081,
+        "name": "G. Biancone",
+        "position": "Defender"
+      },
+      {
+        "id": 204037,
+        "name": "Costinha",
+        "position": "Defender"
+      },
+      {
+        "id": 313222,
+        "name": "A. Kalogeropoulos",
+        "position": "Defender"
+      },
+      {
+        "id": 278196,
+        "name": "S. Onyemaechi",
+        "position": "Defender"
+      },
+      {
+        "id": 6064,
+        "name": "F. Ortega",
+        "position": "Defender"
+      },
+      {
+        "id": 134431,
+        "name": "L. Pirola",
+        "position": "Defender"
+      },
+      {
+        "id": 971,
+        "name": "P. Retsos",
+        "position": "Defender"
+      },
+      {
+        "id": 10157,
+        "name": "Rodinei",
+        "position": "Defender"
+      },
+      {
+        "id": 47457,
+        "name": "Rúben Vezo",
+        "position": "Defender"
+      },
+      {
+        "id": 41130,
+        "name": "Chiquinho",
+        "position": "Midfielder"
+      },
+      {
+        "id": 47281,
+        "name": "Dani García",
+        "position": "Midfielder"
+      },
+      {
+        "id": 195929,
+        "name": "S. Hezze",
+        "position": "Midfielder"
+      },
+      {
+        "id": 586500,
+        "name": "Asteris Konstantinidis",
+        "position": "Midfielder"
+      },
+      {
+        "id": 443716,
+        "name": "A. Liatsikouras",
+        "position": "Midfielder"
+      },
+      {
+        "id": 392514,
+        "name": "C. Mouzakitis",
+        "position": "Midfielder"
+      },
+      {
+        "id": 162481,
+        "name": "Diogo Nascimento",
+        "position": "Midfielder"
+      },
+      {
+        "id": 364513,
+        "name": "L. Scipioni",
+        "position": "Midfielder"
+      },
+      {
+        "id": 49888,
+        "name": "Y. Yazıcı",
+        "position": "Attacker"
+      },
+      {
+        "id": 325717,
+        "name": "André Luiz",
+        "position": "Attacker"
+      },
+      {
+        "id": 195580,
+        "name": "Clayton",
+        "position": "Attacker"
+      },
+      {
+        "id": 2722,
+        "name": "A. El Kaabi",
+        "position": "Attacker"
+      },
+      {
+        "id": 118,
+        "name": "Gelson Martins",
+        "position": "Midfielder"
+      },
+      {
+        "id": 1605,
+        "name": "Daniel Podence",
+        "position": "Midfielder"
+      },
+      {
+        "id": 42315,
+        "name": "M. Taremi",
+        "position": "Midfielder"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:27:08.604Z"
+  },
+  "Sparta Prague": {
+    "teamId": 555,
+    "players": [
+      {
+        "id": 821,
+        "name": "I. Akinfeev",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 467629,
+        "name": "Nikolay Barovskiy",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 521020,
+        "name": "Egor Besaev",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 134435,
+        "name": "V. Torop",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 531883,
+        "name": "M. Badmaev",
+        "position": "Defender"
+      },
+      {
+        "id": 275550,
+        "name": "M. Zea",
+        "position": "Defender"
+      },
+      {
+        "id": 302921,
+        "name": "R. Di Luciano",
+        "position": "Defender"
+      },
+      {
+        "id": 10225,
+        "name": "João Victor",
+        "position": "Defender"
+      },
+      {
+        "id": 53703,
+        "name": "D. Krugovoy",
+        "position": "Defender"
+      },
+      {
+        "id": 362567,
+        "name": "M. Lukin",
+        "position": "Defender"
+      },
+      {
+        "id": 41179,
+        "name": "Matheus Reis",
+        "position": "Defender"
+      },
+      {
+        "id": 10013,
+        "name": "Moisés",
+        "position": "Defender"
+      },
+      {
+        "id": 428082,
+        "name": "A. Bandikyan",
+        "position": "Midfielder"
+      },
+      {
+        "id": 476,
+        "name": "D. Barinov",
+        "position": "Midfielder"
+      },
+      {
+        "id": 341,
+        "name": "M. Gajić",
+        "position": "Defender"
+      },
+      {
+        "id": 342198,
+        "name": "K. Glebov",
+        "position": "Midfielder"
+      },
+      {
+        "id": 408728,
+        "name": "M. Kislyak",
+        "position": "Midfielder"
+      },
+      {
+        "id": 342208,
+        "name": "D. Kozlov",
+        "position": "Midfielder"
+      },
+      {
+        "id": 465200,
+        "name": "Matheus Alves",
+        "position": "Midfielder"
+      },
+      {
+        "id": 839,
+        "name": "I. Oblyakov",
+        "position": "Midfielder"
+      },
+      {
+        "id": 543554,
+        "name": "M. Popovic",
+        "position": "Midfielder"
+      },
+      {
+        "id": 59635,
+        "name": "D. Ruiz",
+        "position": "Attacker"
+      },
+      {
+        "id": 531831,
+        "name": "I. Firov",
+        "position": "Attacker"
+      },
+      {
+        "id": 265909,
+        "name": "L. Gondou",
+        "position": "Attacker"
+      },
+      {
+        "id": 543555,
+        "name": "Henrique Carmo",
+        "position": "Midfielder"
+      },
+      {
+        "id": 202167,
+        "name": "T. Musaev",
+        "position": "Attacker"
+      },
+      {
+        "id": 474887,
+        "name": "Maksym Voronov",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:27:15.713Z"
+  },
+  "Zürich": {
+    "teamId": 781,
+    "players": [
+      {
+        "id": 1710,
+        "name": "P. Gartler",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 313625,
+        "name": "B. Göschl",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 169346,
+        "name": "N. Hedl",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 302866,
+        "name": "L. Orgler",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 293948,
+        "name": "K. Ahoussou",
+        "position": "Defender"
+      },
+      {
+        "id": 66728,
+        "name": "J. Auer",
+        "position": "Defender"
+      },
+      {
+        "id": 27778,
+        "name": "B. Bolla",
+        "position": "Midfielder"
+      },
+      {
+        "id": 550809,
+        "name": "J. Brunnhofer",
+        "position": "Defender"
+      },
+      {
+        "id": 46160,
+        "name": "N. Cvetković",
+        "position": "Defender"
+      },
+      {
+        "id": 375316,
+        "name": "F. Demir",
+        "position": "Defender"
+      },
+      {
+        "id": 7072,
+        "name": "L. Grgić",
+        "position": "Midfielder"
+      },
+      {
+        "id": 461621,
+        "name": "Amìn-Elias Gröller",
+        "position": "Defender"
+      },
+      {
+        "id": 24791,
+        "name": "J. Horn",
+        "position": "Defender"
+      },
+      {
+        "id": 128999,
+        "name": "S. Raux-Yao",
+        "position": "Defender"
+      },
+      {
+        "id": 550776,
+        "name": "E. Roka",
+        "position": "Defender"
+      },
+      {
+        "id": 339985,
+        "name": "J. Schöller",
+        "position": "Defender"
+      },
+      {
+        "id": 350854,
+        "name": "R. Amané",
+        "position": "Midfielder"
+      },
+      {
+        "id": 39288,
+        "name": "T. Børkeeiet",
+        "position": "Midfielder"
+      },
+      {
+        "id": 146053,
+        "name": "T. Gulliksen",
+        "position": "Midfielder"
+      },
+      {
+        "id": 352528,
+        "name": "M. Atemengue",
+        "position": "Midfielder"
+      },
+      {
+        "id": 24809,
+        "name": "L. Schaub",
+        "position": "Midfielder"
+      },
+      {
+        "id": 176022,
+        "name": "M. Seidl",
+        "position": "Midfielder"
+      },
+      {
+        "id": 394967,
+        "name": "Lorenz Szladits",
+        "position": "Midfielder"
+      },
+      {
+        "id": 19283,
+        "name": "A. Weimann",
+        "position": "Attacker"
+      },
+      {
+        "id": 193870,
+        "name": "J. Antiste",
+        "position": "Attacker"
+      },
+      {
+        "id": 352728,
+        "name": "P. Dahl",
+        "position": "Attacker"
+      },
+      {
+        "id": 131294,
+        "name": "Y. Demir",
+        "position": "Attacker"
+      },
+      {
+        "id": 528308,
+        "name": "Moulaye Haïdara",
+        "position": "Attacker"
+      },
+      {
+        "id": 119139,
+        "name": "E. Kara",
+        "position": "Attacker"
+      },
+      {
+        "id": 87317,
+        "name": "C. M&apos;Buyi",
+        "position": "Attacker"
+      },
+      {
+        "id": 550802,
+        "name": "D. Nunoo",
+        "position": "Attacker"
+      },
+      {
+        "id": 68041,
+        "name": "M. Tilio",
+        "position": "Attacker"
+      },
+      {
+        "id": 322979,
+        "name": "D. Weixelbraun",
+        "position": "Attacker"
+      },
+      {
+        "id": 428779,
+        "name": "Nikolaus Wurmbrand",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:27:22.827Z"
+  },
+  "Basel": {
+    "teamId": 789,
+    "players": [
+      {
+        "id": 649456,
+        "name": "A. Auil",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 58218,
+        "name": "J. Carrera",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 573962,
+        "name": "F. Perrone",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 6396,
+        "name": "N. Bazzana",
+        "position": "Defender"
+      },
+      {
+        "id": 354936,
+        "name": "N. Canela",
+        "position": "Defender"
+      },
+      {
+        "id": 411463,
+        "name": "L. Cuello",
+        "position": "Defender"
+      },
+      {
+        "id": 217888,
+        "name": "L. López",
+        "position": "Defender"
+      },
+      {
+        "id": 58446,
+        "name": "M. Mauri",
+        "position": "Defender"
+      },
+      {
+        "id": 58603,
+        "name": "A. Pezzi",
+        "position": "Defender"
+      },
+      {
+        "id": 75170,
+        "name": "C. Arriola",
+        "position": "Midfielder"
+      },
+      {
+        "id": 566193,
+        "name": "M. Caballo",
+        "position": "Midfielder"
+      },
+      {
+        "id": 567606,
+        "name": "J. Castellano",
+        "position": "Midfielder"
+      },
+      {
+        "id": 304380,
+        "name": "M. Giménez",
+        "position": "Midfielder"
+      },
+      {
+        "id": 567603,
+        "name": "B. Magnago",
+        "position": "Midfielder"
+      },
+      {
+        "id": 58844,
+        "name": "B. Meza",
+        "position": "Midfielder"
+      },
+      {
+        "id": 567464,
+        "name": "L. Ojeda",
+        "position": "Midfielder"
+      },
+      {
+        "id": 5888,
+        "name": "G. Pereira",
+        "position": "Midfielder"
+      },
+      {
+        "id": 567615,
+        "name": "M. Ponce de Leon",
+        "position": "Midfielder"
+      },
+      {
+        "id": 566258,
+        "name": "R. Seratto",
+        "position": "Midfielder"
+      },
+      {
+        "id": 651249,
+        "name": "Simon Fiorito",
+        "position": "Attacker"
+      },
+      {
+        "id": 567613,
+        "name": "M. Gomez",
+        "position": "Attacker"
+      },
+      {
+        "id": 416666,
+        "name": "F. González",
+        "position": "Attacker"
+      },
+      {
+        "id": 575849,
+        "name": "L. Munoz",
+        "position": "Attacker"
+      },
+      {
+        "id": 16510,
+        "name": "M. Orlando",
+        "position": "Attacker"
+      },
+      {
+        "id": 536820,
+        "name": "J. Palacio",
+        "position": "Attacker"
+      },
+      {
+        "id": 649850,
+        "name": "F. Reta",
+        "position": "Attacker"
+      },
+      {
+        "id": 649457,
+        "name": "L. Rosciano",
+        "position": "Attacker"
+      },
+      {
+        "id": 567467,
+        "name": "E. Tus",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:27:29.934Z"
+  },
+  "Young Boys": {
+    "teamId": 788,
+    "players": [
+      {
+        "id": 591330,
+        "name": "Ivan Bresiski",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 591331,
+        "name": "Javier Colli",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 591332,
+        "name": "Mirko Romero",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 591334,
+        "name": "Jose Arias",
+        "position": "Defender"
+      },
+      {
+        "id": 591335,
+        "name": "Leonel Canzoniero",
+        "position": "Defender"
+      },
+      {
+        "id": 591337,
+        "name": "Pablo Narvaez",
+        "position": "Defender"
+      },
+      {
+        "id": 591339,
+        "name": "Juan Aguilar",
+        "position": "Midfielder"
+      },
+      {
+        "id": 591340,
+        "name": "Andres Araujo Aldo",
+        "position": "Midfielder"
+      },
+      {
+        "id": 591341,
+        "name": "Santiago De Olivera",
+        "position": "Midfielder"
+      },
+      {
+        "id": 591342,
+        "name": "Carlos Duarte",
+        "position": "Midfielder"
+      },
+      {
+        "id": 591343,
+        "name": "Augusto Gonzalez",
+        "position": "Midfielder"
+      },
+      {
+        "id": 591344,
+        "name": "Mateo Marcucci",
+        "position": "Midfielder"
+      },
+      {
+        "id": 108440,
+        "name": "S. Mayorga",
+        "position": "Midfielder"
+      },
+      {
+        "id": 591346,
+        "name": "Javier Roa Meza Justo",
+        "position": "Midfielder"
+      },
+      {
+        "id": 545498,
+        "name": "J. Sequeyra",
+        "position": "Midfielder"
+      },
+      {
+        "id": 591348,
+        "name": "Axel Silva",
+        "position": "Midfielder"
+      },
+      {
+        "id": 591350,
+        "name": "Pablo de Olivera",
+        "position": "Midfielder"
+      },
+      {
+        "id": 591351,
+        "name": "Rau Alvarez Fleitas Ernesto",
+        "position": "Attacker"
+      },
+      {
+        "id": 591352,
+        "name": "Miqueas Amaya",
+        "position": "Attacker"
+      },
+      {
+        "id": 591355,
+        "name": "Javier Penazola",
+        "position": "Attacker"
+      },
+      {
+        "id": 591357,
+        "name": "Luis Silva",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:27:37.042Z"
+  },
+  "Malmö": {
+    "teamId": 368,
+    "players": [
+      {
+        "id": 473883,
+        "name": "A. Kaaki",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 275066,
+        "name": "S. Mustafa",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 473882,
+        "name": "L. Wootz",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 473881,
+        "name": "A. Abrar",
+        "position": "Defender"
+      },
+      {
+        "id": 306953,
+        "name": "O. Åsell",
+        "position": "Defender"
+      },
+      {
+        "id": 47831,
+        "name": "Peshraw Azizi",
+        "position": "Defender"
+      },
+      {
+        "id": 453377,
+        "name": "A. Fejzic",
+        "position": "Defender"
+      },
+      {
+        "id": 198939,
+        "name": "I. Izountouemoi",
+        "position": "Defender"
+      },
+      {
+        "id": 473880,
+        "name": "A. Malmer",
+        "position": "Defender"
+      },
+      {
+        "id": 473878,
+        "name": "S. Törnlund",
+        "position": "Defender"
+      },
+      {
+        "id": 504237,
+        "name": "L. Ãsell",
+        "position": "Midfielder"
+      },
+      {
+        "id": 268523,
+        "name": "Rafid Chowdury",
+        "position": "Midfielder"
+      },
+      {
+        "id": 473356,
+        "name": "M. Dawlat Muhammad",
+        "position": "Midfielder"
+      },
+      {
+        "id": 473366,
+        "name": "L. Gullberg",
+        "position": "Midfielder"
+      },
+      {
+        "id": 473877,
+        "name": "W. Habib",
+        "position": "Midfielder"
+      },
+      {
+        "id": 473876,
+        "name": "A. Johansson",
+        "position": "Midfielder"
+      },
+      {
+        "id": 473365,
+        "name": "Dante Cardoso Da Silva",
+        "position": "Midfielder"
+      },
+      {
+        "id": 473875,
+        "name": "M. Mohamud",
+        "position": "Midfielder"
+      },
+      {
+        "id": 358050,
+        "name": "D. Tsikandi",
+        "position": "Midfielder"
+      },
+      {
+        "id": 473351,
+        "name": "B. Sofi",
+        "position": "Midfielder"
+      },
+      {
+        "id": 371409,
+        "name": "J. Törnell",
+        "position": "Midfielder"
+      },
+      {
+        "id": 473352,
+        "name": "D. Åsell",
+        "position": "Attacker"
+      },
+      {
+        "id": 370571,
+        "name": "K. Krebs",
+        "position": "Attacker"
+      },
+      {
+        "id": 370647,
+        "name": "K. Okafor",
+        "position": "Attacker"
+      },
+      {
+        "id": 139689,
+        "name": "B. Pantaleev",
+        "position": "Attacker"
+      },
+      {
+        "id": 473355,
+        "name": "A. Vahedi",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:27:44.169Z"
+  },
+  "Hammarby": {
+    "teamId": 367,
+    "players": [
+      {
+        "id": 414187,
+        "name": "D. Andersson",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 30416,
+        "name": "E. Berisha",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 39034,
+        "name": "A. Linde",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 497029,
+        "name": "K. Marinkovic",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 191980,
+        "name": "B. Engdahl",
+        "position": "Defender"
+      },
+      {
+        "id": 48012,
+        "name": "J. Hammar",
+        "position": "Defender"
+      },
+      {
+        "id": 2854,
+        "name": "F. Helander",
+        "position": "Defender"
+      },
+      {
+        "id": 442520,
+        "name": "H. Hilvenius",
+        "position": "Defender"
+      },
+      {
+        "id": 51083,
+        "name": "A. Lundkvist",
+        "position": "Defender"
+      },
+      {
+        "id": 496418,
+        "name": "Filip Ohman",
+        "position": "Defender"
+      },
+      {
+        "id": 357771,
+        "name": "O. Samuelsson",
+        "position": "Defender"
+      },
+      {
+        "id": 57173,
+        "name": "B. Wembangomo",
+        "position": "Defender"
+      },
+      {
+        "id": 341822,
+        "name": "S. Andersen",
+        "position": "Midfielder"
+      },
+      {
+        "id": 404169,
+        "name": "P. Dahbo",
+        "position": "Midfielder"
+      },
+      {
+        "id": 561197,
+        "name": "M. Ljungkull",
+        "position": "Midfielder"
+      },
+      {
+        "id": 561182,
+        "name": "N. Mitrovic",
+        "position": "Midfielder"
+      },
+      {
+        "id": 323901,
+        "name": "S. Ngabo",
+        "position": "Midfielder"
+      },
+      {
+        "id": 15919,
+        "name": "M. Rygaard",
+        "position": "Midfielder"
+      },
+      {
+        "id": 139691,
+        "name": "D. Seger",
+        "position": "Midfielder"
+      },
+      {
+        "id": 420934,
+        "name": "A. Svanbäck",
+        "position": "Attacker"
+      },
+      {
+        "id": 386852,
+        "name": "J. Agbonifo",
+        "position": "Attacker"
+      },
+      {
+        "id": 239259,
+        "name": "D. Al-Saed",
+        "position": "Attacker"
+      },
+      {
+        "id": 484034,
+        "name": "D. Gashi",
+        "position": "Attacker"
+      },
+      {
+        "id": 39078,
+        "name": "A. Layouni",
+        "position": "Midfielder"
+      },
+      {
+        "id": 160934,
+        "name": "Julius Lindberg",
+        "position": "Midfielder"
+      },
+      {
+        "id": 317380,
+        "name": "G. Lindgren",
+        "position": "Attacker"
+      },
+      {
+        "id": 429927,
+        "name": "S. Nioule",
+        "position": "Attacker"
+      },
+      {
+        "id": 472249,
+        "name": "C. Wawa",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:27:51.275Z"
+  },
+  "Bodø/Glimt": {
+    "teamId": 342,
+    "players": [
+      {
+        "id": 476173,
+        "name": "M. Kabala",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 148711,
+        "name": "M. Kos",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 359693,
+        "name": "K. Siuta",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 40225,
+        "name": "A. Gryszkiewicz",
+        "position": "Defender"
+      },
+      {
+        "id": 125437,
+        "name": "G. Janiszewski",
+        "position": "Defender"
+      },
+      {
+        "id": 547805,
+        "name": "S. Kopec",
+        "position": "Defender"
+      },
+      {
+        "id": 40237,
+        "name": "M. Matras",
+        "position": "Defender"
+      },
+      {
+        "id": 637802,
+        "name": "K. Mironowicz",
+        "position": "Defender"
+      },
+      {
+        "id": 161837,
+        "name": "R. Seweryś",
+        "position": "Defender"
+      },
+      {
+        "id": 40174,
+        "name": "D. Szot",
+        "position": "Defender"
+      },
+      {
+        "id": 593506,
+        "name": "Kacper Tobiczyk",
+        "position": "Defender"
+      },
+      {
+        "id": 618350,
+        "name": "M. Barc",
+        "position": "Midfielder"
+      },
+      {
+        "id": 64303,
+        "name": "B. Boruń",
+        "position": "Midfielder"
+      },
+      {
+        "id": 547814,
+        "name": "M. Broniewski",
+        "position": "Midfielder"
+      },
+      {
+        "id": 547699,
+        "name": "B. Checinski",
+        "position": "Midfielder"
+      },
+      {
+        "id": 358402,
+        "name": "I. Dziedzic",
+        "position": "Midfielder"
+      },
+      {
+        "id": 269891,
+        "name": "P. Gogół",
+        "position": "Midfielder"
+      },
+      {
+        "id": 128591,
+        "name": "F. Laskowski",
+        "position": "Midfielder"
+      },
+      {
+        "id": 40530,
+        "name": "P. Mucha",
+        "position": "Midfielder"
+      },
+      {
+        "id": 592195,
+        "name": "Pascal Okebe Uriel Fomukung",
+        "position": "Midfielder"
+      },
+      {
+        "id": 547697,
+        "name": "J. Pawlowski",
+        "position": "Midfielder"
+      },
+      {
+        "id": 304815,
+        "name": "M. Pawlusiński",
+        "position": "Midfielder"
+      },
+      {
+        "id": 357761,
+        "name": "M. Predenkiewicz",
+        "position": "Midfielder"
+      },
+      {
+        "id": 216584,
+        "name": "B. Wasiluk",
+        "position": "Midfielder"
+      },
+      {
+        "id": 476174,
+        "name": "B. Zawojski",
+        "position": "Midfielder"
+      },
+      {
+        "id": 304431,
+        "name": "L. Rönnberg",
+        "position": "Attacker"
+      },
+      {
+        "id": 26813,
+        "name": "E. Shikavka",
+        "position": "Attacker"
+      },
+      {
+        "id": 302131,
+        "name": "K. Skóra",
+        "position": "Attacker"
+      },
+      {
+        "id": 547640,
+        "name": "B. Snopczynski",
+        "position": "Attacker"
+      },
+      {
+        "id": 40942,
+        "name": "S. Sobczak",
+        "position": "Attacker"
+      },
+      {
+        "id": 641572,
+        "name": "Kacper Wolowiec",
+        "position": "Attacker"
+      },
+      {
+        "id": 547632,
+        "name": "J. Zajac",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:27:58.382Z"
+  },
+  "Al-Duhail": {
+    "teamId": 2948,
+    "players": [
+      {
+        "id": 442412,
+        "name": "Ali Al Abdulsalam",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 43913,
+        "name": "Mohammed Al Maqhawi",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 44194,
+        "name": "Jamal Al Dhaferi",
+        "position": "Defender"
+      },
+      {
+        "id": 44096,
+        "name": "Mubarak Wajdi Al Dossary",
+        "position": "Defender"
+      },
+      {
+        "id": 112027,
+        "name": "Bakary Coulibaly",
+        "position": "Defender"
+      },
+      {
+        "id": 44680,
+        "name": "Nasser Al Khalifa",
+        "position": "Defender"
+      },
+      {
+        "id": 44664,
+        "name": "Omar Al-Mazial",
+        "position": "Defender"
+      },
+      {
+        "id": 443366,
+        "name": "Muhammad Dagriri",
+        "position": "Defender"
+      },
+      {
+        "id": 443367,
+        "name": "Ammar Ahmed",
+        "position": "Midfielder"
+      },
+      {
+        "id": 443368,
+        "name": "Hamad Al Quwaiyzani",
+        "position": "Midfielder"
+      },
+      {
+        "id": 443369,
+        "name": "Hussein Al Sheikh",
+        "position": "Midfielder"
+      },
+      {
+        "id": 443370,
+        "name": "Muhammad Al Tufayl",
+        "position": "Midfielder"
+      },
+      {
+        "id": 44668,
+        "name": "Hassen Jaaferi",
+        "position": "Midfielder"
+      },
+      {
+        "id": 41187,
+        "name": "N. Jambor",
+        "position": "Midfielder"
+      },
+      {
+        "id": 402548,
+        "name": "Abdulkarim Ali Maghrabi",
+        "position": "Midfielder"
+      },
+      {
+        "id": 44762,
+        "name": "Talal Majrashi",
+        "position": "Midfielder"
+      },
+      {
+        "id": 26695,
+        "name": "S. Spiridonović",
+        "position": "Midfielder"
+      },
+      {
+        "id": 443371,
+        "name": "Abdulla Al Mubarak",
+        "position": "Attacker"
+      },
+      {
+        "id": 54487,
+        "name": "Antonio Adriano Antunes de Paula",
+        "position": "Attacker"
+      },
+      {
+        "id": 60952,
+        "name": "R. Ngah",
+        "position": "Attacker"
+      },
+      {
+        "id": 193311,
+        "name": "Abdullah Khattab Bilal",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:28:05.518Z"
+  },
+  "Al-Shabab": {
+    "teamId": 2935,
+    "players": [
+      {
+        "id": 630669,
+        "name": "M. Al Khaibari",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 576238,
+        "name": "S. Al Ohaymid",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 639899,
+        "name": "M. Al Otaibi",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 576241,
+        "name": "F. Abdulrazaq",
+        "position": "Defender"
+      },
+      {
+        "id": 578977,
+        "name": "M. Al Dawsari",
+        "position": "Defender"
+      },
+      {
+        "id": 44330,
+        "name": "Mohammed Al Dossary",
+        "position": "Defender"
+      },
+      {
+        "id": 576242,
+        "name": "T. Al Shuqayran",
+        "position": "Defender"
+      },
+      {
+        "id": 44506,
+        "name": "Abdullah Al Yousif",
+        "position": "Defender"
+      },
+      {
+        "id": 630425,
+        "name": "P. Brito",
+        "position": "Defender"
+      },
+      {
+        "id": 21761,
+        "name": "O. Gonzalez",
+        "position": "Defender"
+      },
+      {
+        "id": 441994,
+        "name": "Abdullah Hazazi",
+        "position": "Defender"
+      },
+      {
+        "id": 208286,
+        "name": "Yahya Sunbul",
+        "position": "Defender"
+      },
+      {
+        "id": 433092,
+        "name": "Bander Whaeshi",
+        "position": "Defender"
+      },
+      {
+        "id": 630012,
+        "name": "A. Al-Balawi",
+        "position": "Midfielder"
+      },
+      {
+        "id": 624735,
+        "name": "S. Al-Marwani",
+        "position": "Midfielder"
+      },
+      {
+        "id": 44578,
+        "name": "Saad Al Salouli",
+        "position": "Midfielder"
+      },
+      {
+        "id": 576148,
+        "name": "M. Al Shaikh",
+        "position": "Midfielder"
+      },
+      {
+        "id": 576243,
+        "name": "A. Al Shaikhi",
+        "position": "Midfielder"
+      },
+      {
+        "id": 403478,
+        "name": "Anas Al Zahrani",
+        "position": "Midfielder"
+      },
+      {
+        "id": 576239,
+        "name": "K. Yoda",
+        "position": "Midfielder"
+      },
+      {
+        "id": 463524,
+        "name": "Omar Shami",
+        "position": "Midfielder"
+      },
+      {
+        "id": 573996,
+        "name": "S. Tweh",
+        "position": "Midfielder"
+      },
+      {
+        "id": 636077,
+        "name": "Ziyad Al Refaei",
+        "position": "Midfielder"
+      },
+      {
+        "id": 607517,
+        "name": "W. Al Shanqiti",
+        "position": "Attacker"
+      },
+      {
+        "id": 4400,
+        "name": "Y. Bouzok",
+        "position": "Attacker"
+      },
+      {
+        "id": 1940,
+        "name": "Zinho Gano",
+        "position": "Attacker"
+      },
+      {
+        "id": 46922,
+        "name": "J. Narváez",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:28:19.806Z"
+  },
+  "Pachuca": {
+    "teamId": 2283,
+    "players": [
+      {
+        "id": 268385,
+        "name": "C. Ramos",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 127229,
+        "name": "A. Sánchez",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 2482,
+        "name": "C. Vargas",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 36496,
+        "name": "G. Aguirre",
+        "position": "Defender"
+      },
+      {
+        "id": 6260,
+        "name": "M. Capasso",
+        "position": "Defender"
+      },
+      {
+        "id": 35710,
+        "name": "A. Mora",
+        "position": "Defender"
+      },
+      {
+        "id": 35780,
+        "name": "C. Orrantía",
+        "position": "Defender"
+      },
+      {
+        "id": 47460,
+        "name": "Róber Pier",
+        "position": "Defender"
+      },
+      {
+        "id": 476997,
+        "name": "Paulo Ramírez",
+        "position": "Midfielder"
+      },
+      {
+        "id": 297145,
+        "name": "J. Rodríguez",
+        "position": "Midfielder"
+      },
+      {
+        "id": 457533,
+        "name": "J. San Martín",
+        "position": "Defender"
+      },
+      {
+        "id": 5909,
+        "name": "R. Schlegel",
+        "position": "Defender"
+      },
+      {
+        "id": 524441,
+        "name": "L. Blanco",
+        "position": "Midfielder"
+      },
+      {
+        "id": 68193,
+        "name": "M. García",
+        "position": "Midfielder"
+      },
+      {
+        "id": 35546,
+        "name": "A. González",
+        "position": "Attacker"
+      },
+      {
+        "id": 647146,
+        "name": "J. Guillen",
+        "position": "Midfielder"
+      },
+      {
+        "id": 10066,
+        "name": "Gustavo Ferrareis",
+        "position": "Attacker"
+      },
+      {
+        "id": 502044,
+        "name": "S. Hernández",
+        "position": "Midfielder"
+      },
+      {
+        "id": 428468,
+        "name": "V. RÃ­os",
+        "position": "Midfielder"
+      },
+      {
+        "id": 35949,
+        "name": "A. Rocha",
+        "position": "Midfielder"
+      },
+      {
+        "id": 465286,
+        "name": "Jesús Serrato",
+        "position": "Midfielder"
+      },
+      {
+        "id": 35856,
+        "name": "É. Zaldívar",
+        "position": "Midfielder"
+      },
+      {
+        "id": 35789,
+        "name": "E. Aguirre",
+        "position": "Attacker"
+      },
+      {
+        "id": 552386,
+        "name": "L. Gamboa",
+        "position": "Attacker"
+      },
+      {
+        "id": 307103,
+        "name": "D. González",
+        "position": "Midfielder"
+      },
+      {
+        "id": 127228,
+        "name": "J. Lozano",
+        "position": "Attacker"
+      },
+      {
+        "id": 524440,
+        "name": "J. Martín",
+        "position": "Attacker"
+      },
+      {
+        "id": 546159,
+        "name": "A. Rodriguez",
+        "position": "Attacker"
+      },
+      {
+        "id": 51841,
+        "name": "G. del Prete",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:28:26.917Z"
+  },
+  "América": {
+    "teamId": 2277,
+    "players": [
+      {
+        "id": 549747,
+        "name": "D. El Hazawi",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 112486,
+        "name": "M. Grech",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 544841,
+        "name": "M. Martinez",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 615175,
+        "name": "Bradley Micallef",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 641196,
+        "name": "K. Sammut",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 354051,
+        "name": "Luis Mario Cordova Mina",
+        "position": "Defender"
+      },
+      {
+        "id": 147023,
+        "name": "A. Garzia",
+        "position": "Defender"
+      },
+      {
+        "id": 5749,
+        "name": "L. Lacunza",
+        "position": "Defender"
+      },
+      {
+        "id": 524422,
+        "name": "Francisco López",
+        "position": "Defender"
+      },
+      {
+        "id": 630019,
+        "name": "S. Magri",
+        "position": "Defender"
+      },
+      {
+        "id": 549745,
+        "name": "M. Morello",
+        "position": "Defender"
+      },
+      {
+        "id": 631785,
+        "name": "Roni Santos",
+        "position": "Defender"
+      },
+      {
+        "id": 585366,
+        "name": "B. Zani",
+        "position": "Defender"
+      },
+      {
+        "id": 544729,
+        "name": "G. Acheampong",
+        "position": "Midfielder"
+      },
+      {
+        "id": 112398,
+        "name": "J. Busuttil",
+        "position": "Midfielder"
+      },
+      {
+        "id": 128454,
+        "name": "A. Coppola",
+        "position": "Midfielder"
+      },
+      {
+        "id": 394714,
+        "name": "L. Delicata",
+        "position": "Midfielder"
+      },
+      {
+        "id": 105914,
+        "name": "S. Dimech",
+        "position": "Midfielder"
+      },
+      {
+        "id": 631787,
+        "name": "J. Fenech",
+        "position": "Midfielder"
+      },
+      {
+        "id": 339895,
+        "name": "K. Fenech",
+        "position": "Midfielder"
+      },
+      {
+        "id": 70699,
+        "name": "P. Gaitán",
+        "position": "Midfielder"
+      },
+      {
+        "id": 17637,
+        "name": "Donovan Stephane Makoma",
+        "position": "Midfielder"
+      },
+      {
+        "id": 544843,
+        "name": "M. Maydana",
+        "position": "Midfielder"
+      },
+      {
+        "id": 106936,
+        "name": "N. Micallef",
+        "position": "Midfielder"
+      },
+      {
+        "id": 512884,
+        "name": "D. Pullicino",
+        "position": "Midfielder"
+      },
+      {
+        "id": 112436,
+        "name": "K. Reid",
+        "position": "Midfielder"
+      },
+      {
+        "id": 531458,
+        "name": "S. Viveros",
+        "position": "Midfielder"
+      },
+      {
+        "id": 634719,
+        "name": "J. Bayo",
+        "position": "Attacker"
+      },
+      {
+        "id": 337949,
+        "name": "N. Cross",
+        "position": "Attacker"
+      },
+      {
+        "id": 544728,
+        "name": "Macula",
+        "position": "Attacker"
+      },
+      {
+        "id": 637016,
+        "name": "Dean Tonna",
+        "position": "Attacker"
+      },
+      {
+        "id": 553107,
+        "name": "J. Vrcic",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:28:34.021Z"
+  },
+  "Monterrey": {
+    "teamId": 2282,
+    "players": [
+      {
+        "id": 35536,
+        "name": "L. Cárdenas",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 639139,
+        "name": "K. Cuneo",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 61895,
+        "name": "S. Mele",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 586238,
+        "name": "Santiago Perez",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 290648,
+        "name": "A. Aceves",
+        "position": "Defender"
+      },
+      {
+        "id": 35648,
+        "name": "É. Aguirre",
+        "position": "Defender"
+      },
+      {
+        "id": 35774,
+        "name": "G. Arteaga",
+        "position": "Defender"
+      },
+      {
+        "id": 333425,
+        "name": "C. Bustos",
+        "position": "Defender"
+      },
+      {
+        "id": 36471,
+        "name": "R. Chávez",
+        "position": "Defender"
+      },
+      {
+        "id": 552352,
+        "name": "C. Frayde",
+        "position": "Defender"
+      },
+      {
+        "id": 647145,
+        "name": "D. Garcia",
+        "position": "Defender"
+      },
+      {
+        "id": 129943,
+        "name": "V. Guzmán",
+        "position": "Defender"
+      },
+      {
+        "id": 35539,
+        "name": "S. Medina",
+        "position": "Defender"
+      },
+      {
+        "id": 35597,
+        "name": "L. Reyes",
+        "position": "Defender"
+      },
+      {
+        "id": 2877,
+        "name": "C. Salcedo",
+        "position": "Defender"
+      },
+      {
+        "id": 35542,
+        "name": "G. Sánchez",
+        "position": "Defender"
+      },
+      {
+        "id": 167014,
+        "name": "F. Ambríz",
+        "position": "Midfielder"
+      },
+      {
+        "id": 1570,
+        "name": "Sergio Canales",
+        "position": "Midfielder"
+      },
+      {
+        "id": 436534,
+        "name": "J. Domínguez",
+        "position": "Midfielder"
+      },
+      {
+        "id": 426512,
+        "name": "Iker Jareth Fimbres Ochoa",
+        "position": "Midfielder"
+      },
+      {
+        "id": 630772,
+        "name": "O. Galvez",
+        "position": "Midfielder"
+      },
+      {
+        "id": 454032,
+        "name": "C. Reyes",
+        "position": "Midfielder"
+      },
+      {
+        "id": 6369,
+        "name": "J. Rodríguez",
+        "position": "Midfielder"
+      },
+      {
+        "id": 416400,
+        "name": "S. Rodriguez",
+        "position": "Midfielder"
+      },
+      {
+        "id": 632815,
+        "name": "A. Rojas",
+        "position": "Midfielder"
+      },
+      {
+        "id": 385,
+        "name": "Óliver Torres",
+        "position": "Midfielder"
+      },
+      {
+        "id": 407383,
+        "name": "José Alejandro Urías Félix",
+        "position": "Midfielder"
+      },
+      {
+        "id": 389,
+        "name": "J. Corona",
+        "position": "Midfielder"
+      },
+      {
+        "id": 46901,
+        "name": "U. Đurđević",
+        "position": "Attacker"
+      },
+      {
+        "id": 908,
+        "name": "A. Martial",
+        "position": "Attacker"
+      },
+      {
+        "id": 407366,
+        "name": "Joaquin Alejandro Moxica Chapa",
+        "position": "Attacker"
+      },
+      {
+        "id": 1911,
+        "name": "L. Ocampos",
+        "position": "Midfielder"
+      },
+      {
+        "id": 6063,
+        "name": "L. Orellano",
+        "position": "Attacker"
+      },
+      {
+        "id": 35669,
+        "name": "R. de la Rosa",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:28:41.134Z"
+  },
+  "Toluca": {
+    "teamId": 2286,
+    "players": [
+      {
+        "id": 455874,
+        "name": "P. Lara",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 731,
+        "name": "K. Navas",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 414617,
+        "name": "M. Paul",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 13729,
+        "name": "Á. Angulo",
+        "position": "Midfielder"
+      },
+      {
+        "id": 511033,
+        "name": "Á. Azuaje",
+        "position": "Defender"
+      },
+      {
+        "id": 35904,
+        "name": "P. Bennevendo",
+        "position": "Defender"
+      },
+      {
+        "id": 47355,
+        "name": "Rubén Duarte",
+        "position": "Defender"
+      },
+      {
+        "id": 524450,
+        "name": "A. Juárez",
+        "position": "Defender"
+      },
+      {
+        "id": 265676,
+        "name": "T. Leone",
+        "position": "Defender"
+      },
+      {
+        "id": 407675,
+        "name": "P. Monroy",
+        "position": "Defender"
+      },
+      {
+        "id": 9697,
+        "name": "Nathan Silva",
+        "position": "Defender"
+      },
+      {
+        "id": 524449,
+        "name": "Dennis Ramirez",
+        "position": "Defender"
+      },
+      {
+        "id": 154852,
+        "name": "J. Rivas",
+        "position": "Defender"
+      },
+      {
+        "id": 511849,
+        "name": "E. Villaseñor",
+        "position": "Defender"
+      },
+      {
+        "id": 51069,
+        "name": "U. Antuna",
+        "position": "Midfielder"
+      },
+      {
+        "id": 57807,
+        "name": "A. Carrasquilla",
+        "position": "Midfielder"
+      },
+      {
+        "id": 552387,
+        "name": "S. Garcia",
+        "position": "Midfielder"
+      },
+      {
+        "id": 445419,
+        "name": "Cesar Garza Cantu",
+        "position": "Midfielder"
+      },
+      {
+        "id": 373294,
+        "name": "R. López",
+        "position": "Defender"
+      },
+      {
+        "id": 474590,
+        "name": "Á. Rico",
+        "position": "Midfielder"
+      },
+      {
+        "id": 35788,
+        "name": "U. Rivas",
+        "position": "Midfielder"
+      },
+      {
+        "id": 623710,
+        "name": "Gerardo Serralde",
+        "position": "Midfielder"
+      },
+      {
+        "id": 325817,
+        "name": "S. Trigos",
+        "position": "Midfielder"
+      },
+      {
+        "id": 237078,
+        "name": "P. Vite",
+        "position": "Midfielder"
+      },
+      {
+        "id": 195704,
+        "name": "J. Carrillo",
+        "position": "Midfielder"
+      },
+      {
+        "id": 9623,
+        "name": "Juninho",
+        "position": "Attacker"
+      },
+      {
+        "id": 428074,
+        "name": "Santiago López López",
+        "position": "Attacker"
+      },
+      {
+        "id": 35503,
+        "name": "J. Macías",
+        "position": "Attacker"
+      },
+      {
+        "id": 36088,
+        "name": "G. Martínez",
+        "position": "Attacker"
+      },
+      {
+        "id": 35721,
+        "name": "A. Medina",
+        "position": "Midfielder"
+      },
+      {
+        "id": 95446,
+        "name": "R. Morales",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:28:48.235Z"
+  },
+  "Cruz Azul": {
+    "teamId": 2281,
+    "players": [
+      {
+        "id": 35702,
+        "name": "L. García",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 2867,
+        "name": "H. González",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 503204,
+        "name": "D. Shrem",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 586239,
+        "name": "Sebastian Aceves",
+        "position": "Defender"
+      },
+      {
+        "id": 36160,
+        "name": "D. Barbosa",
+        "position": "Defender"
+      },
+      {
+        "id": 41489,
+        "name": "A. Briseño",
+        "position": "Defender"
+      },
+      {
+        "id": 10233,
+        "name": "B. Méndez",
+        "position": "Defender"
+      },
+      {
+        "id": 2881,
+        "name": "J. Gallardo",
+        "position": "Defender"
+      },
+      {
+        "id": 196460,
+        "name": "M. Isaís",
+        "position": "Defender"
+      },
+      {
+        "id": 9913,
+        "name": "Luan",
+        "position": "Defender"
+      },
+      {
+        "id": 67884,
+        "name": "F. Pereira",
+        "position": "Defender"
+      },
+      {
+        "id": 362815,
+        "name": "E. López",
+        "position": "Defender"
+      },
+      {
+        "id": 35687,
+        "name": "J. Angulo",
+        "position": "Attacker"
+      },
+      {
+        "id": 36169,
+        "name": "F. Arce",
+        "position": "Midfielder"
+      },
+      {
+        "id": 552327,
+        "name": "J. Arroyo",
+        "position": "Midfielder"
+      },
+      {
+        "id": 409886,
+        "name": "V. Arteaga",
+        "position": "Midfielder"
+      },
+      {
+        "id": 153372,
+        "name": "N. Castro",
+        "position": "Midfielder"
+      },
+      {
+        "id": 35590,
+        "name": "S. Córdova",
+        "position": "Midfielder"
+      },
+      {
+        "id": 35490,
+        "name": "J. Díaz",
+        "position": "Attacker"
+      },
+      {
+        "id": 325270,
+        "name": "J. Domínguez",
+        "position": "Midfielder"
+      },
+      {
+        "id": 470144,
+        "name": "F. Pumpido",
+        "position": "Midfielder"
+      },
+      {
+        "id": 289482,
+        "name": "F. Romero",
+        "position": "Midfielder"
+      },
+      {
+        "id": 35981,
+        "name": "M. Ruiz",
+        "position": "Midfielder"
+      },
+      {
+        "id": 271852,
+        "name": "A. Álvarez",
+        "position": "Attacker"
+      },
+      {
+        "id": 607860,
+        "name": "G. Bravo",
+        "position": "Attacker"
+      },
+      {
+        "id": 586241,
+        "name": "Jose Estrada",
+        "position": "Attacker"
+      },
+      {
+        "id": 9965,
+        "name": "Helinho",
+        "position": "Midfielder"
+      },
+      {
+        "id": 41111,
+        "name": "Paulinho",
+        "position": "Attacker"
+      },
+      {
+        "id": 189568,
+        "name": "P. Pérez",
+        "position": "Midfielder"
+      },
+      {
+        "id": 310781,
+        "name": "F. Rossi",
+        "position": "Attacker"
+      },
+      {
+        "id": 237143,
+        "name": "S. Simón",
+        "position": "Defender"
+      },
+      {
+        "id": 2889,
+        "name": "A. Vega",
+        "position": "Midfielder"
+      },
+      {
+        "id": 505296,
+        "name": "O. Virgen",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:28:55.350Z"
+  },
+  "Santos": {
+    "teamId": 756,
+    "players": [
+      {
+        "id": 537966,
+        "name": "Kim Je-hee",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 537780,
+        "name": "I. Kondo",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 538075,
+        "name": "K. Shiga",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 641093,
+        "name": "Kazuki Yamada",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 608261,
+        "name": "R. Akimoto",
+        "position": "Defender"
+      },
+      {
+        "id": 404343,
+        "name": "K. Kikuchi",
+        "position": "Defender"
+      },
+      {
+        "id": 641094,
+        "name": "Gun-il Kim",
+        "position": "Defender"
+      },
+      {
+        "id": 33506,
+        "name": "T. Koyanagi",
+        "position": "Defender"
+      },
+      {
+        "id": 457182,
+        "name": "R. Nakano",
+        "position": "Defender"
+      },
+      {
+        "id": 510882,
+        "name": "S. Nose",
+        "position": "Defender"
+      },
+      {
+        "id": 579430,
+        "name": "M. Nuki",
+        "position": "Defender"
+      },
+      {
+        "id": 307991,
+        "name": "R. Ohata",
+        "position": "Defender"
+      },
+      {
+        "id": 537594,
+        "name": "T. Shimokawa",
+        "position": "Defender"
+      },
+      {
+        "id": 537779,
+        "name": "R. Tagashira",
+        "position": "Defender"
+      },
+      {
+        "id": 377926,
+        "name": "S. Adachi",
+        "position": "Midfielder"
+      },
+      {
+        "id": 403460,
+        "name": "F. Mohamado",
+        "position": "Midfielder"
+      },
+      {
+        "id": 32997,
+        "name": "R. Fujimura",
+        "position": "Midfielder"
+      },
+      {
+        "id": 641091,
+        "name": "Takatora Harada",
+        "position": "Midfielder"
+      },
+      {
+        "id": 307937,
+        "name": "T. Kagami",
+        "position": "Midfielder"
+      },
+      {
+        "id": 537657,
+        "name": "R. Kamigaki",
+        "position": "Midfielder"
+      },
+      {
+        "id": 33670,
+        "name": "K. Kazama",
+        "position": "Midfielder"
+      },
+      {
+        "id": 641092,
+        "name": "Shun Koga",
+        "position": "Midfielder"
+      },
+      {
+        "id": 537595,
+        "name": "H. Konishi",
+        "position": "Midfielder"
+      },
+      {
+        "id": 33344,
+        "name": "Y. Nishimura",
+        "position": "Midfielder"
+      },
+      {
+        "id": 537973,
+        "name": "A. Sakurai",
+        "position": "Midfielder"
+      },
+      {
+        "id": 641090,
+        "name": "Rinya Sato",
+        "position": "Midfielder"
+      },
+      {
+        "id": 404354,
+        "name": "G. Sehata",
+        "position": "Midfielder"
+      },
+      {
+        "id": 641089,
+        "name": "Min-seob Song",
+        "position": "Midfielder"
+      },
+      {
+        "id": 457183,
+        "name": "T. Tamashiro",
+        "position": "Midfielder"
+      },
+      {
+        "id": 33084,
+        "name": "K. Yamaguchi",
+        "position": "Midfielder"
+      },
+      {
+        "id": 33221,
+        "name": "S. Yonehara",
+        "position": "Midfielder"
+      },
+      {
+        "id": 107843,
+        "name": "S. Aoki",
+        "position": "Attacker"
+      },
+      {
+        "id": 537662,
+        "name": "M. Hyakuda",
+        "position": "Attacker"
+      },
+      {
+        "id": 410452,
+        "name": "S. Izuma",
+        "position": "Attacker"
+      },
+      {
+        "id": 640769,
+        "name": "Kosei Matsumoto",
+        "position": "Attacker"
+      },
+      {
+        "id": 304781,
+        "name": "T. Nakashima",
+        "position": "Attacker"
+      },
+      {
+        "id": 537597,
+        "name": "S. Tanaka",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:29:02.466Z"
+  },
+  "Fluminense": {
+    "teamId": 753,
+    "players": [
+      {
+        "id": 10408,
+        "name": "Felipe Alves",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 311394,
+        "name": "Gabriel Souza",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 238050,
+        "name": "Rokenedy",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 9242,
+        "name": "Alex Ruan",
+        "position": "Defender"
+      },
+      {
+        "id": 633180,
+        "name": "Harley Dalyson Araujo Barbosa",
+        "position": "Defender"
+      },
+      {
+        "id": 237794,
+        "name": "Edson",
+        "position": "Defender"
+      },
+      {
+        "id": 636841,
+        "name": "L. Fabiel",
+        "position": "Defender"
+      },
+      {
+        "id": 54918,
+        "name": "Ianson",
+        "position": "Defender"
+      },
+      {
+        "id": 115521,
+        "name": "Israel",
+        "position": "Defender"
+      },
+      {
+        "id": 181890,
+        "name": "Jefinho Bahia",
+        "position": "Defender"
+      },
+      {
+        "id": 635860,
+        "name": "Matheus Castilho",
+        "position": "Defender"
+      },
+      {
+        "id": 266234,
+        "name": "Matheus",
+        "position": "Defender"
+      },
+      {
+        "id": 147788,
+        "name": "Rodrigues",
+        "position": "Defender"
+      },
+      {
+        "id": 80252,
+        "name": "William Alves",
+        "position": "Defender"
+      },
+      {
+        "id": 10571,
+        "name": "Andrey",
+        "position": "Midfielder"
+      },
+      {
+        "id": 619387,
+        "name": "Eurico",
+        "position": "Midfielder"
+      },
+      {
+        "id": 633179,
+        "name": "Galhardo Gabriel",
+        "position": "Midfielder"
+      },
+      {
+        "id": 234273,
+        "name": "Patrick Allan",
+        "position": "Midfielder"
+      },
+      {
+        "id": 353361,
+        "name": "Pedro Favela",
+        "position": "Midfielder"
+      },
+      {
+        "id": 633182,
+        "name": "Ryan",
+        "position": "Midfielder"
+      },
+      {
+        "id": 199377,
+        "name": "Wagner Balotelli",
+        "position": "Midfielder"
+      },
+      {
+        "id": 619391,
+        "name": "Willian Junior",
+        "position": "Midfielder"
+      },
+      {
+        "id": 633178,
+        "name": "David Cabeca",
+        "position": "Attacker"
+      },
+      {
+        "id": 434217,
+        "name": "Marcos André de Menezes Diniz",
+        "position": "Attacker"
+      },
+      {
+        "id": 237670,
+        "name": "Matheus Régis",
+        "position": "Attacker"
+      },
+      {
+        "id": 35700,
+        "name": "A. Nahuelpán",
+        "position": "Attacker"
+      },
+      {
+        "id": 54403,
+        "name": "Diego Quirino",
+        "position": "Attacker"
+      },
+      {
+        "id": 10189,
+        "name": "Renato",
+        "position": "Attacker"
+      },
+      {
+        "id": 10289,
+        "name": "Robinho",
+        "position": "Attacker"
+      },
+      {
+        "id": 633181,
+        "name": "Hora Vini",
+        "position": "Attacker"
+      },
+      {
+        "id": 407264,
+        "name": "Vitinho",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:29:09.590Z"
+  },
+  "Palmeiras": {
+    "teamId": 754,
+    "players": [
+      {
+        "id": 10333,
+        "name": "Matheus Alves",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 55105,
+        "name": "Rodolfo Castro",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 197034,
+        "name": "Cayo Tenório",
+        "position": "Defender"
+      },
+      {
+        "id": 54748,
+        "name": "Dudu Mandai",
+        "position": "Defender"
+      },
+      {
+        "id": 576692,
+        "name": "Fabao",
+        "position": "Defender"
+      },
+      {
+        "id": 278349,
+        "name": "Jefferson Vinicius",
+        "position": "Defender"
+      },
+      {
+        "id": 160485,
+        "name": "Lucas Marques",
+        "position": "Defender"
+      },
+      {
+        "id": 198141,
+        "name": "Lucas Souza",
+        "position": "Defender"
+      },
+      {
+        "id": 651262,
+        "name": "Mauricio Schneider",
+        "position": "Defender"
+      },
+      {
+        "id": 9766,
+        "name": "Wellington Carvalho",
+        "position": "Defender"
+      },
+      {
+        "id": 195116,
+        "name": "Bruno Leite",
+        "position": "Midfielder"
+      },
+      {
+        "id": 9696,
+        "name": "Édson",
+        "position": "Midfielder"
+      },
+      {
+        "id": 197065,
+        "name": "Geilson",
+        "position": "Midfielder"
+      },
+      {
+        "id": 359600,
+        "name": "Jhosefer Raphael Januario",
+        "position": "Midfielder"
+      },
+      {
+        "id": 9612,
+        "name": "João Pedro",
+        "position": "Midfielder"
+      },
+      {
+        "id": 80289,
+        "name": "Lima",
+        "position": "Midfielder"
+      },
+      {
+        "id": 651683,
+        "name": "Mateus Bernardo",
+        "position": "Midfielder"
+      },
+      {
+        "id": 443959,
+        "name": "Randerson",
+        "position": "Midfielder"
+      },
+      {
+        "id": 200277,
+        "name": "Brunão",
+        "position": "Attacker"
+      },
+      {
+        "id": 504962,
+        "name": "Emanuel",
+        "position": "Attacker"
+      },
+      {
+        "id": 237668,
+        "name": "Igor Bahia",
+        "position": "Attacker"
+      },
+      {
+        "id": 119265,
+        "name": "João Diogo",
+        "position": "Attacker"
+      },
+      {
+        "id": 10145,
+        "name": "Luiz Fernando",
+        "position": "Attacker"
+      },
+      {
+        "id": 119273,
+        "name": "Thiaguinho",
+        "position": "Attacker"
+      },
+      {
+        "id": 80440,
+        "name": "Wallyson",
+        "position": "Attacker"
+      },
+      {
+        "id": 455878,
+        "name": "Thalissinho",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:29:16.703Z"
+  },
+  "Flamengo": {
+    "teamId": 755,
+    "players": [
+      {
+        "id": 6133,
+        "name": "G. Guruceaga",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 41227,
+        "name": "Muriel",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 9701,
+        "name": "Arnaldo",
+        "position": "Defender"
+      },
+      {
+        "id": 195388,
+        "name": "Alberto",
+        "position": "Defender"
+      },
+      {
+        "id": 638551,
+        "name": "Emanuel",
+        "position": "Defender"
+      },
+      {
+        "id": 638210,
+        "name": "G. Fagundes",
+        "position": "Defender"
+      },
+      {
+        "id": 632891,
+        "name": "Gustavo Henrique",
+        "position": "Defender"
+      },
+      {
+        "id": 10519,
+        "name": "Igor Fernandes",
+        "position": "Defender"
+      },
+      {
+        "id": 356833,
+        "name": "Gabriel Severino de Sousa",
+        "position": "Defender"
+      },
+      {
+        "id": 544690,
+        "name": "Leo Jance",
+        "position": "Defender"
+      },
+      {
+        "id": 9313,
+        "name": "Reginaldo Lopes",
+        "position": "Defender"
+      },
+      {
+        "id": 634321,
+        "name": "P. R. Martins",
+        "position": "Defender"
+      },
+      {
+        "id": 152621,
+        "name": "Mateus Silva",
+        "position": "Defender"
+      },
+      {
+        "id": 9981,
+        "name": "Matheus Ribeiro",
+        "position": "Defender"
+      },
+      {
+        "id": 576724,
+        "name": "Wanderson",
+        "position": "Defender"
+      },
+      {
+        "id": 10061,
+        "name": "Yuri",
+        "position": "Defender"
+      },
+      {
+        "id": 78045,
+        "name": "Auremir",
+        "position": "Midfielder"
+      },
+      {
+        "id": 306885,
+        "name": "Dodozinho",
+        "position": "Midfielder"
+      },
+      {
+        "id": 452869,
+        "name": "Felipe Cardoso",
+        "position": "Midfielder"
+      },
+      {
+        "id": 505686,
+        "name": "Felipe Redaelli",
+        "position": "Midfielder"
+      },
+      {
+        "id": 638209,
+        "name": "Rikelme",
+        "position": "Midfielder"
+      },
+      {
+        "id": 196842,
+        "name": "Leonai",
+        "position": "Midfielder"
+      },
+      {
+        "id": 638211,
+        "name": "Liedson",
+        "position": "Midfielder"
+      },
+      {
+        "id": 166711,
+        "name": "Luiz Felipe",
+        "position": "Midfielder"
+      },
+      {
+        "id": 9610,
+        "name": "Ramon",
+        "position": "Midfielder"
+      },
+      {
+        "id": 457556,
+        "name": "Samuel",
+        "position": "Midfielder"
+      },
+      {
+        "id": 456213,
+        "name": "Vitinho",
+        "position": "Midfielder"
+      },
+      {
+        "id": 10063,
+        "name": "Wenderson",
+        "position": "Midfielder"
+      },
+      {
+        "id": 157361,
+        "name": "Derek",
+        "position": "Attacker"
+      },
+      {
+        "id": 9224,
+        "name": "Felipe Saraiva",
+        "position": "Attacker"
+      },
+      {
+        "id": 520233,
+        "name": "Isaque Ferreira",
+        "position": "Attacker"
+      },
+      {
+        "id": 9969,
+        "name": "Jonas Toró",
+        "position": "Attacker"
+      },
+      {
+        "id": 77717,
+        "name": "Juninho",
+        "position": "Midfielder"
+      },
+      {
+        "id": 9262,
+        "name": "Júnior Todinho",
+        "position": "Attacker"
+      },
+      {
+        "id": 631755,
+        "name": "Kevyn Santos",
+        "position": "Attacker"
+      },
+      {
+        "id": 633283,
+        "name": "Kaua Leandro",
+        "position": "Attacker"
+      },
+      {
+        "id": 53963,
+        "name": "Paulo Sérgio",
+        "position": "Attacker"
+      },
+      {
+        "id": 649138,
+        "name": "M. Rosa",
+        "position": "Attacker"
+      },
+      {
+        "id": 632544,
+        "name": "G. Rosa",
+        "position": "Attacker"
+      },
+      {
+        "id": 10215,
+        "name": "Victor Andrade",
+        "position": "Attacker"
+      },
+      {
+        "id": 9660,
+        "name": "Vinícius",
+        "position": "Midfielder"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:29:23.809Z"
+  },
+  "Internacional": {
+    "teamId": 759,
+    "players": [
+      {
+        "id": 204996,
+        "name": "Ľ. Belko",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 1170,
+        "name": "A. Østbø",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 531303,
+        "name": "V. Auklend",
+        "position": "Defender"
+      },
+      {
+        "id": 15712,
+        "name": "A. Bærtelsen",
+        "position": "Defender"
+      },
+      {
+        "id": 39130,
+        "name": "S. Bjørshol",
+        "position": "Defender"
+      },
+      {
+        "id": 180937,
+        "name": "H. Falchener",
+        "position": "Defender"
+      },
+      {
+        "id": 191732,
+        "name": "H. Haugen",
+        "position": "Defender"
+      },
+      {
+        "id": 264710,
+        "name": "H. Heggheim",
+        "position": "Defender"
+      },
+      {
+        "id": 57436,
+        "name": "M. Roseth",
+        "position": "Defender"
+      },
+      {
+        "id": 6937,
+        "name": "G. Stensness",
+        "position": "Defender"
+      },
+      {
+        "id": 39132,
+        "name": "V. Vevatne",
+        "position": "Defender"
+      },
+      {
+        "id": 39285,
+        "name": "K. Askildsen",
+        "position": "Midfielder"
+      },
+      {
+        "id": 94541,
+        "name": "J. Bell",
+        "position": "Midfielder"
+      },
+      {
+        "id": 457199,
+        "name": "J. Hansen",
+        "position": "Midfielder"
+      },
+      {
+        "id": 39040,
+        "name": "K. Haugen",
+        "position": "Defender"
+      },
+      {
+        "id": 464563,
+        "name": "T. Moi",
+        "position": "Midfielder"
+      },
+      {
+        "id": 464564,
+        "name": "O. Visted",
+        "position": "Midfielder"
+      },
+      {
+        "id": 368793,
+        "name": "E. Austbö",
+        "position": "Attacker"
+      },
+      {
+        "id": 39220,
+        "name": "V. Berisha",
+        "position": "Attacker"
+      },
+      {
+        "id": 15622,
+        "name": "P. Christiansen",
+        "position": "Attacker"
+      },
+      {
+        "id": 637833,
+        "name": "K. A. Frimpong",
+        "position": "Attacker"
+      },
+      {
+        "id": 465702,
+        "name": "N. Fuglestad",
+        "position": "Midfielder"
+      },
+      {
+        "id": 318591,
+        "name": "S. Kvia-Egeskog",
+        "position": "Midfielder"
+      },
+      {
+        "id": 273271,
+        "name": "H. Mikaelsson",
+        "position": "Attacker"
+      },
+      {
+        "id": 39145,
+        "name": "Z. Tripić",
+        "position": "Midfielder"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:29:30.925Z"
+  },
+  "River Plate": {
+    "teamId": 435,
+    "players": [
+      {
+        "id": 2463,
+        "name": "F. Armani",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 414525,
+        "name": "S. Beltrán",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 5985,
+        "name": "E. Centurión",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 576649,
+        "name": "F. Jaroszewicz",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 1493,
+        "name": "M. Acuña",
+        "position": "Defender"
+      },
+      {
+        "id": 6080,
+        "name": "F. Bustos",
+        "position": "Defender"
+      },
+      {
+        "id": 2550,
+        "name": "P. Díaz",
+        "position": "Defender"
+      },
+      {
+        "id": 414391,
+        "name": "U. Giménez",
+        "position": "Defender"
+      },
+      {
+        "id": 538363,
+        "name": "F. Gonzalez",
+        "position": "Defender"
+      },
+      {
+        "id": 6000,
+        "name": "L. Martínez",
+        "position": "Defender"
+      },
+      {
+        "id": 2468,
+        "name": "G. Montiel",
+        "position": "Defender"
+      },
+      {
+        "id": 2469,
+        "name": "G. Pezzella",
+        "position": "Defender"
+      },
+      {
+        "id": 58392,
+        "name": "J. Portillo",
+        "position": "Defender"
+      },
+      {
+        "id": 414386,
+        "name": "T. Palacio",
+        "position": "Defender"
+      },
+      {
+        "id": 463851,
+        "name": "L. Rivero",
+        "position": "Defender"
+      },
+      {
+        "id": 51572,
+        "name": "M. Viña",
+        "position": "Defender"
+      },
+      {
+        "id": 538352,
+        "name": "T. Acosta",
+        "position": "Midfielder"
+      },
+      {
+        "id": 516788,
+        "name": "A. De la Cuesta Airoldi",
+        "position": "Midfielder"
+      },
+      {
+        "id": 289592,
+        "name": "K. Castaño",
+        "position": "Midfielder"
+      },
+      {
+        "id": 6725,
+        "name": "F. Vera",
+        "position": "Midfielder"
+      },
+      {
+        "id": 265912,
+        "name": "T. Galván",
+        "position": "Midfielder"
+      },
+      {
+        "id": 506482,
+        "name": "E. Giménez",
+        "position": "Midfielder"
+      },
+      {
+        "id": 6379,
+        "name": "G. Galoppo",
+        "position": "Midfielder"
+      },
+      {
+        "id": 478954,
+        "name": "S. Lencinas",
+        "position": "Midfielder"
+      },
+      {
+        "id": 472567,
+        "name": "J. Meza",
+        "position": "Midfielder"
+      },
+      {
+        "id": 35550,
+        "name": "M. Meza",
+        "position": "Midfielder"
+      },
+      {
+        "id": 6347,
+        "name": "A. Moreno",
+        "position": "Midfielder"
+      },
+      {
+        "id": 506487,
+        "name": "Lucas Agustin Obregon",
+        "position": "Midfielder"
+      },
+      {
+        "id": 406303,
+        "name": "K. Páez",
+        "position": "Midfielder"
+      },
+      {
+        "id": 6005,
+        "name": "J. Quintero",
+        "position": "Midfielder"
+      },
+      {
+        "id": 414329,
+        "name": "A. Ruberto",
+        "position": "Midfielder"
+      },
+      {
+        "id": 214,
+        "name": "F. Colidio",
+        "position": "Midfielder"
+      },
+      {
+        "id": 1222,
+        "name": "S. Driussi",
+        "position": "Attacker"
+      },
+      {
+        "id": 560314,
+        "name": "J. Freitas",
+        "position": "Attacker"
+      },
+      {
+        "id": 560476,
+        "name": "C. Jaime",
+        "position": "Attacker"
+      },
+      {
+        "id": 11493,
+        "name": "M. Salas",
+        "position": "Attacker"
+      },
+      {
+        "id": 414380,
+        "name": "Ian Martin Subiabre",
+        "position": "Midfielder"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:29:38.033Z"
+  },
+  "Boca Juniors": {
+    "teamId": 451,
+    "players": [
+      {
+        "id": 177230,
+        "name": "L. Brey",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 5903,
+        "name": "J. García",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 2464,
+        "name": "A. Marchesín",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 126743,
+        "name": "J. Barinaga",
+        "position": "Defender"
+      },
+      {
+        "id": 289444,
+        "name": "L. Blanco",
+        "position": "Defender"
+      },
+      {
+        "id": 288750,
+        "name": "A. Costa",
+        "position": "Defender"
+      },
+      {
+        "id": 369412,
+        "name": "L. Di Lollo",
+        "position": "Defender"
+      },
+      {
+        "id": 6082,
+        "name": "N. Figal",
+        "position": "Defender"
+      },
+      {
+        "id": 414484,
+        "name": "D. Gorosito",
+        "position": "Defender"
+      },
+      {
+        "id": 212842,
+        "name": "Marco Pellegrino",
+        "position": "Defender"
+      },
+      {
+        "id": 5969,
+        "name": "M. Weigandt",
+        "position": "Defender"
+      },
+      {
+        "id": 11424,
+        "name": "W. Alarcón",
+        "position": "Midfielder"
+      },
+      {
+        "id": 510587,
+        "name": "T. Aranda",
+        "position": "Midfielder"
+      },
+      {
+        "id": 26305,
+        "name": "S. Ascacíbar",
+        "position": "Midfielder"
+      },
+      {
+        "id": 1484,
+        "name": "R. Battaglia",
+        "position": "Midfielder"
+      },
+      {
+        "id": 6209,
+        "name": "T. Belmonte",
+        "position": "Midfielder"
+      },
+      {
+        "id": 5791,
+        "name": "M. Braida",
+        "position": "Midfielder"
+      },
+      {
+        "id": 11463,
+        "name": "C. Palacios",
+        "position": "Midfielder"
+      },
+      {
+        "id": 459876,
+        "name": "M. Delgado",
+        "position": "Midfielder"
+      },
+      {
+        "id": 898,
+        "name": "Ander Herrera",
+        "position": "Midfielder"
+      },
+      {
+        "id": 68013,
+        "name": "A. Martegani",
+        "position": "Midfielder"
+      },
+      {
+        "id": 271,
+        "name": "L. Paredes",
+        "position": "Midfielder"
+      },
+      {
+        "id": 414378,
+        "name": "C. Rey",
+        "position": "Midfielder"
+      },
+      {
+        "id": 288707,
+        "name": "K. Zenón",
+        "position": "Midfielder"
+      },
+      {
+        "id": 2521,
+        "name": "Á. Romero",
+        "position": "Attacker"
+      },
+      {
+        "id": 35551,
+        "name": "A. Bareiro",
+        "position": "Attacker"
+      },
+      {
+        "id": 274,
+        "name": "E. Cavani",
+        "position": "Attacker"
+      },
+      {
+        "id": 510586,
+        "name": "L. Flores",
+        "position": "Attacker"
+      },
+      {
+        "id": 560386,
+        "name": "G. Gelini",
+        "position": "Attacker"
+      },
+      {
+        "id": 59229,
+        "name": "M. Giménez",
+        "position": "Attacker"
+      },
+      {
+        "id": 6161,
+        "name": "L. Janson",
+        "position": "Attacker"
+      },
+      {
+        "id": 6327,
+        "name": "M. Merentiel",
+        "position": "Attacker"
+      },
+      {
+        "id": 6092,
+        "name": "A. Velasco",
+        "position": "Midfielder"
+      },
+      {
+        "id": 237090,
+        "name": "E. Zeballos",
+        "position": "Attacker"
+      },
+      {
+        "id": 459858,
+        "name": "I. Zufiaurre",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:29:45.144Z"
+  },
+  "Nacional": {
+    "teamId": 2364,
+    "players": [
+      {
+        "id": 67904,
+        "name": "F. Coirolo",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 591028,
+        "name": "Nunes Cesar",
+        "position": "Defender"
+      },
+      {
+        "id": 591029,
+        "name": "Eduardo Prado Marinho Geovani",
+        "position": "Defender"
+      },
+      {
+        "id": 591030,
+        "name": "Gaston Rosello",
+        "position": "Defender"
+      },
+      {
+        "id": 591031,
+        "name": "Bruno Serron",
+        "position": "Defender"
+      },
+      {
+        "id": 199076,
+        "name": "F. Souza",
+        "position": "Defender"
+      },
+      {
+        "id": 243351,
+        "name": "R. Viera",
+        "position": "Defender"
+      },
+      {
+        "id": 51663,
+        "name": "G. Andrada",
+        "position": "Midfielder"
+      },
+      {
+        "id": 575456,
+        "name": "F. Brinon",
+        "position": "Midfielder"
+      },
+      {
+        "id": 591032,
+        "name": "Fernando Chavez",
+        "position": "Midfielder"
+      },
+      {
+        "id": 591033,
+        "name": "Agustin Da Rocha",
+        "position": "Midfielder"
+      },
+      {
+        "id": 51751,
+        "name": "J. Plada",
+        "position": "Midfielder"
+      },
+      {
+        "id": 565578,
+        "name": "M. Aguilera",
+        "position": "Attacker"
+      },
+      {
+        "id": 410410,
+        "name": "M. Núñez",
+        "position": "Attacker"
+      },
+      {
+        "id": 52055,
+        "name": "R. Quintana",
+        "position": "Attacker"
+      },
+      {
+        "id": 6164,
+        "name": "D. Vera",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:29:52.247Z"
+  },
+  "Peñarol": {
+    "teamId": 2363,
+    "players": [
+      {
+        "id": 425600,
+        "name": "L. Fernández",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 6291,
+        "name": "A. Mehring",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 51476,
+        "name": "A. Requena",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 51765,
+        "name": "F. Andueza",
+        "position": "Defender"
+      },
+      {
+        "id": 51686,
+        "name": "S. Cardozo",
+        "position": "Defender"
+      },
+      {
+        "id": 474576,
+        "name": "H. Carroso",
+        "position": "Defender"
+      },
+      {
+        "id": 70734,
+        "name": "A. Cougo",
+        "position": "Defender"
+      },
+      {
+        "id": 426498,
+        "name": "F. GarcÃ­a",
+        "position": "Defender"
+      },
+      {
+        "id": 51626,
+        "name": "F. Kidd",
+        "position": "Defender"
+      },
+      {
+        "id": 649231,
+        "name": "F. Lopez",
+        "position": "Defender"
+      },
+      {
+        "id": 364431,
+        "name": "M. Paolini",
+        "position": "Defender"
+      },
+      {
+        "id": 633466,
+        "name": "Agustin Codagnone",
+        "position": "Midfielder"
+      },
+      {
+        "id": 6712,
+        "name": "A. Colombino",
+        "position": "Midfielder"
+      },
+      {
+        "id": 51604,
+        "name": "M. de los Santos",
+        "position": "Midfielder"
+      },
+      {
+        "id": 297690,
+        "name": "N. Fernández",
+        "position": "Midfielder"
+      },
+      {
+        "id": 101832,
+        "name": "F. Fernández",
+        "position": "Midfielder"
+      },
+      {
+        "id": 12123,
+        "name": "I. Lemmo",
+        "position": "Midfielder"
+      },
+      {
+        "id": 566261,
+        "name": "A. Paz",
+        "position": "Midfielder"
+      },
+      {
+        "id": 410413,
+        "name": "A. Pinheiro",
+        "position": "Midfielder"
+      },
+      {
+        "id": 281069,
+        "name": "G. Silva",
+        "position": "Midfielder"
+      },
+      {
+        "id": 51512,
+        "name": "G. Trasante",
+        "position": "Defender"
+      },
+      {
+        "id": 51377,
+        "name": "S. Viera",
+        "position": "Midfielder"
+      },
+      {
+        "id": 425719,
+        "name": "M. Copelotti",
+        "position": "Attacker"
+      },
+      {
+        "id": 399519,
+        "name": "F. de León",
+        "position": "Midfielder"
+      },
+      {
+        "id": 51407,
+        "name": "J. dos Santos",
+        "position": "Attacker"
+      },
+      {
+        "id": 458942,
+        "name": "R. Hernández",
+        "position": "Attacker"
+      },
+      {
+        "id": 458676,
+        "name": "N. López",
+        "position": "Attacker"
+      },
+      {
+        "id": 269516,
+        "name": "M. Martin",
+        "position": "Defender"
+      },
+      {
+        "id": 269905,
+        "name": "J. Rivero",
+        "position": "Attacker"
+      },
+      {
+        "id": 565560,
+        "name": "F. Ruiz",
+        "position": "Attacker"
+      },
+      {
+        "id": 545845,
+        "name": "D. Sanchez",
+        "position": "Attacker"
+      },
+      {
+        "id": 420220,
+        "name": "G. Silva",
+        "position": "Attacker"
+      },
+      {
+        "id": 633467,
+        "name": "Joaquin Silva",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:29:59.353Z"
+  },
+  "Atlanta United": {
+    "teamId": 1598,
+    "players": [
+      {
+        "id": 51274,
+        "name": "M. Crépeau",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 542291,
+        "name": "T. Himes",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 216510,
+        "name": "Javier Otero",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 109887,
+        "name": "D. Brekalo",
+        "position": "Defender"
+      },
+      {
+        "id": 50824,
+        "name": "G. Dorsey",
+        "position": "Defender"
+      },
+      {
+        "id": 647152,
+        "name": "A. Gomez",
+        "position": "Defender"
+      },
+      {
+        "id": 366780,
+        "name": "Iago",
+        "position": "Defender"
+      },
+      {
+        "id": 50924,
+        "name": "R. Jansson",
+        "position": "Defender"
+      },
+      {
+        "id": 47358,
+        "name": "Adrián Marín",
+        "position": "Defender"
+      },
+      {
+        "id": 641988,
+        "name": "N. Miller",
+        "position": "Defender"
+      },
+      {
+        "id": 362428,
+        "name": "T. Reid-Brown",
+        "position": "Defender"
+      },
+      {
+        "id": 382291,
+        "name": "Z. Taifi",
+        "position": "Midfielder"
+      },
+      {
+        "id": 542334,
+        "name": "S. Titus Jr",
+        "position": "Defender"
+      },
+      {
+        "id": 51033,
+        "name": "E. Atuesta",
+        "position": "Midfielder"
+      },
+      {
+        "id": 2427,
+        "name": "W. Cartagena",
+        "position": "Midfielder"
+      },
+      {
+        "id": 461515,
+        "name": "Colin Guske",
+        "position": "Midfielder"
+      },
+      {
+        "id": 509022,
+        "name": "D. Judelson",
+        "position": "Midfielder"
+      },
+      {
+        "id": 463959,
+        "name": "Luis Otávio",
+        "position": "Midfielder"
+      },
+      {
+        "id": 70767,
+        "name": "B. Ojeda",
+        "position": "Defender"
+      },
+      {
+        "id": 5919,
+        "name": "M. Ojeda",
+        "position": "Midfielder"
+      },
+      {
+        "id": 583997,
+        "name": "Pedro Leao",
+        "position": "Midfielder"
+      },
+      {
+        "id": 80998,
+        "name": "I. Angulo",
+        "position": "Midfielder"
+      },
+      {
+        "id": 464780,
+        "name": "Gustavo Caraballo Delgado",
+        "position": "Attacker"
+      },
+      {
+        "id": 461514,
+        "name": "Justin Ellis",
+        "position": "Attacker"
+      },
+      {
+        "id": 407016,
+        "name": "D. McGuire",
+        "position": "Attacker"
+      },
+      {
+        "id": 260865,
+        "name": "M. Pašalić",
+        "position": "Midfielder"
+      },
+      {
+        "id": 642596,
+        "name": "Harvey Sarajian",
+        "position": "Attacker"
+      },
+      {
+        "id": 459717,
+        "name": "T. Spicer",
+        "position": "Attacker"
+      },
+      {
+        "id": 407262,
+        "name": "Tiago",
+        "position": "Attacker"
+      },
+      {
+        "id": 457892,
+        "name": "Y. Tsukada",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:30:06.470Z"
+  },
+  "Inter Miami": {
+    "teamId": 9568,
+    "players": [
+      {
+        "id": 50847,
+        "name": "L. Barraza",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 196737,
+        "name": "R. Ríos Novo",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 51148,
+        "name": "D. St. Clair",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 513293,
+        "name": "Ezequiel Abadia-Reda",
+        "position": "Defender"
+      },
+      {
+        "id": 282407,
+        "name": "N. Allen",
+        "position": "Defender"
+      },
+      {
+        "id": 67896,
+        "name": "M. Falcón",
+        "position": "Defender"
+      },
+      {
+        "id": 216493,
+        "name": "I. Fray",
+        "position": "Defender"
+      },
+      {
+        "id": 362060,
+        "name": "T. Hall",
+        "position": "Defender"
+      },
+      {
+        "id": 306705,
+        "name": "G. Luján",
+        "position": "Defender"
+      },
+      {
+        "id": 305799,
+        "name": "Micael",
+        "position": "Defender"
+      },
+      {
+        "id": 6401,
+        "name": "F. Mura",
+        "position": "Defender"
+      },
+      {
+        "id": 739,
+        "name": "Reguilón",
+        "position": "Defender"
+      },
+      {
+        "id": 636363,
+        "name": "A. Talabi",
+        "position": "Defender"
+      },
+      {
+        "id": 129886,
+        "name": "D. Ayala",
+        "position": "Midfielder"
+      },
+      {
+        "id": 455386,
+        "name": "Y. Bright",
+        "position": "Midfielder"
+      },
+      {
+        "id": 422792,
+        "name": "S. Morales",
+        "position": "Midfielder"
+      },
+      {
+        "id": 325063,
+        "name": "D. Ruíz",
+        "position": "Midfielder"
+      },
+      {
+        "id": 144303,
+        "name": "T. Segovia",
+        "position": "Midfielder"
+      },
+      {
+        "id": 542272,
+        "name": "A. Shaw",
+        "position": "Midfielder"
+      },
+      {
+        "id": 2472,
+        "name": "R. De Paul",
+        "position": "Midfielder"
+      },
+      {
+        "id": 304383,
+        "name": "T. Allende",
+        "position": "Midfielder"
+      },
+      {
+        "id": 6485,
+        "name": "G. Berterame",
+        "position": "Attacker"
+      },
+      {
+        "id": 154,
+        "name": "L. Messi",
+        "position": "Midfielder"
+      },
+      {
+        "id": 541862,
+        "name": "D. Pinter",
+        "position": "Attacker"
+      },
+      {
+        "id": 475582,
+        "name": "Mateo Silvetti",
+        "position": "Attacker"
+      },
+      {
+        "id": 157,
+        "name": "L. Suárez",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:30:13.683Z"
+  },
+  "LA Galaxy": {
+    "teamId": 1599,
+    "players": [
+      {
+        "id": 50725,
+        "name": "A. Blake",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 351567,
+        "name": "G. Marks",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 364116,
+        "name": "A. Rick",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 102524,
+        "name": "N. Harriel",
+        "position": "Defender"
+      },
+      {
+        "id": 392387,
+        "name": "O. Makhanya",
+        "position": "Defender"
+      },
+      {
+        "id": 474752,
+        "name": "G. Martínez",
+        "position": "Defender"
+      },
+      {
+        "id": 50734,
+        "name": "O. Mbaïzo",
+        "position": "Defender"
+      },
+      {
+        "id": 406867,
+        "name": "P. Ndinga Ossibadjouo",
+        "position": "Defender"
+      },
+      {
+        "id": 409142,
+        "name": "G. Sequera",
+        "position": "Defender"
+      },
+      {
+        "id": 64339,
+        "name": "J. Sery Larsen",
+        "position": "Defender"
+      },
+      {
+        "id": 540925,
+        "name": "F. Sundstrom",
+        "position": "Defender"
+      },
+      {
+        "id": 362085,
+        "name": "F. Westfield",
+        "position": "Defender"
+      },
+      {
+        "id": 50740,
+        "name": "A. Bedoya",
+        "position": "Midfielder"
+      },
+      {
+        "id": 351568,
+        "name": "B. Bender",
+        "position": "Midfielder"
+      },
+      {
+        "id": 52709,
+        "name": "J. Bueno",
+        "position": "Midfielder"
+      },
+      {
+        "id": 338367,
+        "name": "D. Jean-Jacques",
+        "position": "Midfielder"
+      },
+      {
+        "id": 263510,
+        "name": "J. Lukić",
+        "position": "Midfielder"
+      },
+      {
+        "id": 71743,
+        "name": "J. Rafanello",
+        "position": "Midfielder"
+      },
+      {
+        "id": 462853,
+        "name": "Cavan  Sullivan",
+        "position": "Midfielder"
+      },
+      {
+        "id": 265882,
+        "name": "Q. Sullivan",
+        "position": "Midfielder"
+      },
+      {
+        "id": 508068,
+        "name": "E. Alladoh",
+        "position": "Attacker"
+      },
+      {
+        "id": 301465,
+        "name": "A. Anello",
+        "position": "Attacker"
+      },
+      {
+        "id": 321839,
+        "name": "B. Damiani",
+        "position": "Attacker"
+      },
+      {
+        "id": 362299,
+        "name": "Edward Davis",
+        "position": "Attacker"
+      },
+      {
+        "id": 199406,
+        "name": "M. Iloski",
+        "position": "Midfielder"
+      },
+      {
+        "id": 542233,
+        "name": "M. Jakupovic",
+        "position": "Attacker"
+      },
+      {
+        "id": 512951,
+        "name": "Stas Kornzeniowski",
+        "position": "Attacker"
+      },
+      {
+        "id": 434048,
+        "name": "Sal Olivas",
+        "position": "Attacker"
+      },
+      {
+        "id": 153506,
+        "name": "I. Vassilev",
+        "position": "Midfielder"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:30:20.790Z"
+  },
+  "LAFC": {
+    "teamId": 1605,
+    "players": [
+      {
+        "id": 51166,
+        "name": "J. Marcinkowski",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 45794,
+        "name": "N. Mićović",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 24787,
+        "name": "B. Scott",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 196739,
+        "name": "J. Aude",
+        "position": "Defender"
+      },
+      {
+        "id": 71219,
+        "name": "M. Cuevas",
+        "position": "Defender"
+      },
+      {
+        "id": 325807,
+        "name": "C. Garcés",
+        "position": "Defender"
+      },
+      {
+        "id": 39327,
+        "name": "J. Glesnes",
+        "position": "Defender"
+      },
+      {
+        "id": 50857,
+        "name": "J. Haak",
+        "position": "Midfielder"
+      },
+      {
+        "id": 460356,
+        "name": "Harbor Miller",
+        "position": "Midfielder"
+      },
+      {
+        "id": 51126,
+        "name": "J. Nelson",
+        "position": "Defender"
+      },
+      {
+        "id": 541877,
+        "name": "Pepe",
+        "position": "Defender"
+      },
+      {
+        "id": 407239,
+        "name": "C. Rindov",
+        "position": "Defender"
+      },
+      {
+        "id": 33144,
+        "name": "M. Yamane",
+        "position": "Defender"
+      },
+      {
+        "id": 18944,
+        "name": "M. Yoshida",
+        "position": "Defender"
+      },
+      {
+        "id": 51132,
+        "name": "E. Cerrillo",
+        "position": "Midfielder"
+      },
+      {
+        "id": 641994,
+        "name": "T. Elgersma",
+        "position": "Midfielder"
+      },
+      {
+        "id": 102702,
+        "name": "Tucker Lepley",
+        "position": "Midfielder"
+      },
+      {
+        "id": 308690,
+        "name": "I. Parente",
+        "position": "Midfielder"
+      },
+      {
+        "id": 413207,
+        "name": "R. Ramos",
+        "position": "Attacker"
+      },
+      {
+        "id": 25,
+        "name": "M. Reus",
+        "position": "Midfielder"
+      },
+      {
+        "id": 456688,
+        "name": "L. Sanabria",
+        "position": "Midfielder"
+      },
+      {
+        "id": 26311,
+        "name": "E. Thommy",
+        "position": "Midfielder"
+      },
+      {
+        "id": 102689,
+        "name": "E. Wynder",
+        "position": "Midfielder"
+      },
+      {
+        "id": 143367,
+        "name": "Gabriel Pec",
+        "position": "Midfielder"
+      },
+      {
+        "id": 7539,
+        "name": "João Klauss",
+        "position": "Attacker"
+      },
+      {
+        "id": 269441,
+        "name": "Matheus Nascimento",
+        "position": "Attacker"
+      },
+      {
+        "id": 1944,
+        "name": "J. Paintsil",
+        "position": "Attacker"
+      },
+      {
+        "id": 413208,
+        "name": "J. Placias",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:30:27.903Z"
+  },
+  "Chicago Fire": {
+    "teamId": 1606,
+    "players": [
+      {
+        "id": 510678,
+        "name": "M. Kerkvliet",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 30443,
+        "name": "Rafael Cabral",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 102674,
+        "name": "M. Stajduhar",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 357339,
+        "name": "J. Arias",
+        "position": "Defender"
+      },
+      {
+        "id": 16015,
+        "name": "L. Engel",
+        "position": "Defender"
+      },
+      {
+        "id": 51195,
+        "name": "J. Glad",
+        "position": "Defender"
+      },
+      {
+        "id": 265865,
+        "name": "K. Henry",
+        "position": "Defender"
+      },
+      {
+        "id": 51090,
+        "name": "S. Junqua",
+        "position": "Defender"
+      },
+      {
+        "id": 26649,
+        "name": "A. Katránis",
+        "position": "Midfielder"
+      },
+      {
+        "id": 636059,
+        "name": "D. Kropp",
+        "position": "Defender"
+      },
+      {
+        "id": 542027,
+        "name": "R. Mesalles",
+        "position": "Defender"
+      },
+      {
+        "id": 351575,
+        "name": "P. Quinton",
+        "position": "Defender"
+      },
+      {
+        "id": 542295,
+        "name": "G. Villa",
+        "position": "Defender"
+      },
+      {
+        "id": 18897,
+        "name": "D. Yedlin",
+        "position": "Defender"
+      },
+      {
+        "id": 284397,
+        "name": "Chadwick Zachary Booth",
+        "position": "Midfielder"
+      },
+      {
+        "id": 260946,
+        "name": "N. Caliskan",
+        "position": "Midfielder"
+      },
+      {
+        "id": 313661,
+        "name": "G. Dillon",
+        "position": "Midfielder"
+      },
+      {
+        "id": 413169,
+        "name": "E. Eneli",
+        "position": "Midfielder"
+      },
+      {
+        "id": 467946,
+        "name": "A. Hezarkhani",
+        "position": "Midfielder"
+      },
+      {
+        "id": 312896,
+        "name": "D. Luna",
+        "position": "Attacker"
+      },
+      {
+        "id": 461424,
+        "name": "Omar Marquez",
+        "position": "Midfielder"
+      },
+      {
+        "id": 412228,
+        "name": "L. Moisa",
+        "position": "Midfielder"
+      },
+      {
+        "id": 542028,
+        "name": "A. Riquelme",
+        "position": "Midfielder"
+      },
+      {
+        "id": 51211,
+        "name": "P. Ruiz",
+        "position": "Midfielder"
+      },
+      {
+        "id": 162891,
+        "name": "J. Sanabria",
+        "position": "Midfielder"
+      },
+      {
+        "id": 36868,
+        "name": "S. Spierings",
+        "position": "Midfielder"
+      },
+      {
+        "id": 513023,
+        "name": "Jesús Rafael Barea Barroso",
+        "position": "Attacker"
+      },
+      {
+        "id": 542004,
+        "name": "C. Cowell",
+        "position": "Attacker"
+      },
+      {
+        "id": 412227,
+        "name": "Z. Gozo",
+        "position": "Midfielder"
+      },
+      {
+        "id": 23643,
+        "name": "M. Guilavogui",
+        "position": "Attacker"
+      },
+      {
+        "id": 271983,
+        "name": "D. Marczuk",
+        "position": "Attacker"
+      },
+      {
+        "id": 61454,
+        "name": "V. Olatunji",
+        "position": "Attacker"
+      },
+      {
+        "id": 406713,
+        "name": "A. Piol",
+        "position": "Attacker"
+      },
+      {
+        "id": 610405,
+        "name": "S. Solans",
+        "position": "Attacker"
+      },
+      {
+        "id": 207771,
+        "name": "T. Wolff",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:30:35.052Z"
+  },
+  "Al-Ain": {
+    "teamId": 2926,
+    "players": [
+      {
+        "id": 639146,
+        "name": "A. Al Anzi",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 640311,
+        "name": "Mohammed Al Shammari Falah",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 576234,
+        "name": "F. Al Shamri",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 576232,
+        "name": "M. Freih",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 576233,
+        "name": "T. Al Jalfan",
+        "position": "Defender"
+      },
+      {
+        "id": 44196,
+        "name": "Khalid Al Khathlan",
+        "position": "Defender"
+      },
+      {
+        "id": 635893,
+        "name": "A. Al Shammari",
+        "position": "Defender"
+      },
+      {
+        "id": 607574,
+        "name": "M. Al Shammari",
+        "position": "Defender"
+      },
+      {
+        "id": 576141,
+        "name": "S. Baryan",
+        "position": "Defender"
+      },
+      {
+        "id": 1804,
+        "name": "S. Falette",
+        "position": "Defender"
+      },
+      {
+        "id": 286509,
+        "name": "Bader Nasser",
+        "position": "Defender"
+      },
+      {
+        "id": 587064,
+        "name": "Uriel Rodriguez Isaias",
+        "position": "Defender"
+      },
+      {
+        "id": 626167,
+        "name": "M. Tayeh",
+        "position": "Defender"
+      },
+      {
+        "id": 607575,
+        "name": "A. Al Dhafiri",
+        "position": "Midfielder"
+      },
+      {
+        "id": 576142,
+        "name": "F. Al Dhefiri",
+        "position": "Midfielder"
+      },
+      {
+        "id": 350549,
+        "name": "Tariq Al Mutairi",
+        "position": "Midfielder"
+      },
+      {
+        "id": 44662,
+        "name": "Abdulkarim Al Qahtani",
+        "position": "Midfielder"
+      },
+      {
+        "id": 135005,
+        "name": "Mishari Al Qahtani",
+        "position": "Midfielder"
+      },
+      {
+        "id": 576145,
+        "name": "N. Al Sehimai",
+        "position": "Midfielder"
+      },
+      {
+        "id": 642321,
+        "name": "N. Al Shammari",
+        "position": "Midfielder"
+      },
+      {
+        "id": 275355,
+        "name": "O. El Manssouri",
+        "position": "Midfielder"
+      },
+      {
+        "id": 20754,
+        "name": "Y. M&apos;Changama",
+        "position": "Midfielder"
+      },
+      {
+        "id": 2117,
+        "name": "P. M&apos;Poku",
+        "position": "Midfielder"
+      },
+      {
+        "id": 641215,
+        "name": "M. Musallat Al Shammari",
+        "position": "Midfielder"
+      },
+      {
+        "id": 327621,
+        "name": "Abdulrahman Saad",
+        "position": "Attacker"
+      },
+      {
+        "id": 576143,
+        "name": "K. Q. Al",
+        "position": "Attacker"
+      },
+      {
+        "id": 576146,
+        "name": "M. Al Sahli",
+        "position": "Attacker"
+      },
+      {
+        "id": 576144,
+        "name": "S. Al Saleem",
+        "position": "Attacker"
+      },
+      {
+        "id": 1495,
+        "name": "A. Diaby",
+        "position": "Attacker"
+      },
+      {
+        "id": 366539,
+        "name": "Yousef Fawaz",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:30:42.162Z"
+  },
+  "Shanghai Port": {
+    "teamId": 1700,
+    "players": [
+      {
+        "id": 56429,
+        "name": "A. Gozzi",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 56430,
+        "name": "G. Piretro",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 56431,
+        "name": "Luca Bertoldi",
+        "position": "Defender"
+      },
+      {
+        "id": 56436,
+        "name": "S. Pecorini",
+        "position": "Defender"
+      },
+      {
+        "id": 56437,
+        "name": "F. Santacroce",
+        "position": "Defender"
+      },
+      {
+        "id": 56432,
+        "name": "Alessandro Castellana",
+        "position": "Defender"
+      },
+      {
+        "id": 56435,
+        "name": "V. Marin",
+        "position": "Defender"
+      },
+      {
+        "id": 56442,
+        "name": "Francesco Ferrieri",
+        "position": "Midfielder"
+      },
+      {
+        "id": 56444,
+        "name": "Gonzalo Agustín Piermarteri",
+        "position": "Midfielder"
+      },
+      {
+        "id": 56445,
+        "name": "Theo Reymond",
+        "position": "Midfielder"
+      },
+      {
+        "id": 68539,
+        "name": "N. Scarano",
+        "position": "Midfielder"
+      },
+      {
+        "id": 56448,
+        "name": "D. Arras",
+        "position": "Attacker"
+      },
+      {
+        "id": 56447,
+        "name": "N. Alvaro",
+        "position": "Attacker"
+      },
+      {
+        "id": 56456,
+        "name": "Emanuele Offidani",
+        "position": "Attacker"
+      },
+      {
+        "id": 56450,
+        "name": "F. De Stefano",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:30:56.387Z"
+  },
+  "Gamba Osaka": {
+    "teamId": 282,
+    "players": [
+      {
+        "id": 491469,
+        "name": "C. Hill",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 491468,
+        "name": "H. Ogawa",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 33034,
+        "name": "K. Osako",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 33812,
+        "name": "I. Ouchi",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 109305,
+        "name": "Y. Tanaka",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 33624,
+        "name": "N. Arai",
+        "position": "Midfielder"
+      },
+      {
+        "id": 33035,
+        "name": "H. Araki",
+        "position": "Defender"
+      },
+      {
+        "id": 34496,
+        "name": "Kim Ju-Sung",
+        "position": "Defender"
+      },
+      {
+        "id": 355998,
+        "name": "S. Nakano",
+        "position": "Midfielder"
+      },
+      {
+        "id": 2595,
+        "name": "S. Sasaki",
+        "position": "Defender"
+      },
+      {
+        "id": 33425,
+        "name": "T. Shichi",
+        "position": "Defender"
+      },
+      {
+        "id": 44054,
+        "name": "T. Shiotani",
+        "position": "Defender"
+      },
+      {
+        "id": 225092,
+        "name": "T. Yamasaki",
+        "position": "Defender"
+      },
+      {
+        "id": 1353,
+        "name": "T. Arslan",
+        "position": "Midfielder"
+      },
+      {
+        "id": 33853,
+        "name": "Y. Chajima",
+        "position": "Midfielder"
+      },
+      {
+        "id": 33042,
+        "name": "S. Higashi",
+        "position": "Midfielder"
+      },
+      {
+        "id": 33045,
+        "name": "H. Kawabe",
+        "position": "Midfielder"
+      },
+      {
+        "id": 491467,
+        "name": "S. Kobayashi",
+        "position": "Midfielder"
+      },
+      {
+        "id": 392714,
+        "name": "S. Koshimichi",
+        "position": "Midfielder"
+      },
+      {
+        "id": 33047,
+        "name": "T. Matsumoto",
+        "position": "Midfielder"
+      },
+      {
+        "id": 423798,
+        "name": "Y. Nakajima",
+        "position": "Midfielder"
+      },
+      {
+        "id": 606831,
+        "name": "R. Noguchi",
+        "position": "Midfielder"
+      },
+      {
+        "id": 340991,
+        "name": "M. Ohara",
+        "position": "Midfielder"
+      },
+      {
+        "id": 491466,
+        "name": "M. Sota",
+        "position": "Midfielder"
+      },
+      {
+        "id": 33000,
+        "name": "D. Suga",
+        "position": "Midfielder"
+      },
+      {
+        "id": 153269,
+        "name": "S. Ayukawa",
+        "position": "Attacker"
+      },
+      {
+        "id": 33378,
+        "name": "R. Germain",
+        "position": "Attacker"
+      },
+      {
+        "id": 199792,
+        "name": "M. Kato",
+        "position": "Attacker"
+      },
+      {
+        "id": 8517,
+        "name": "K. Kinoshita",
+        "position": "Attacker"
+      },
+      {
+        "id": 32897,
+        "name": "N. Maeda",
+        "position": "Attacker"
+      },
+      {
+        "id": 508070,
+        "name": "S. Nakamura",
+        "position": "Attacker"
+      },
+      {
+        "id": 351015,
+        "name": "A. Suzuki",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:31:03.512Z"
+  },
+  "Kawasaki": {
+    "teamId": 284,
+    "players": [
+      {
+        "id": 641032,
+        "name": "Hikaru Iwase",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 33785,
+        "name": "N. Kamifukumoto",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 33122,
+        "name": "K. Sanada",
+        "position": "Goalkeeper"
+      },
+      {
+        "id": 33126,
+        "name": "H. Fukushima",
+        "position": "Defender"
+      },
+      {
+        "id": 33816,
+        "name": "Y. Hakamata",
+        "position": "Defender"
+      },
+      {
+        "id": 581819,
+        "name": "Kanaru Matsumoto",
+        "position": "Defender"
+      },
+      {
+        "id": 351536,
+        "name": "S. Matsumura",
+        "position": "Defender"
+      },
+      {
+        "id": 307209,
+        "name": "K. Minoda",
+        "position": "Defender"
+      },
+      {
+        "id": 316834,
+        "name": "S. Okaniwa",
+        "position": "Defender"
+      },
+      {
+        "id": 33127,
+        "name": "K. Ohno",
+        "position": "Defender"
+      },
+      {
+        "id": 403469,
+        "name": "T. Shibata",
+        "position": "Defender"
+      },
+      {
+        "id": 33731,
+        "name": "W. Shimoguchi",
+        "position": "Defender"
+      },
+      {
+        "id": 32965,
+        "name": "Y. Suzuki",
+        "position": "Defender"
+      },
+      {
+        "id": 130229,
+        "name": "K. Tachi",
+        "position": "Defender"
+      },
+      {
+        "id": 109395,
+        "name": "N. Takahashi",
+        "position": "Defender"
+      },
+      {
+        "id": 32866,
+        "name": "Arthur Silva",
+        "position": "Midfielder"
+      },
+      {
+        "id": 199628,
+        "name": "T. Fujii",
+        "position": "Midfielder"
+      },
+      {
+        "id": 109221,
+        "name": "M. Ikeda",
+        "position": "Midfielder"
+      },
+      {
+        "id": 495499,
+        "name": "S. Ishibashi",
+        "position": "Midfielder"
+      },
+      {
+        "id": 555755,
+        "name": "N. Kase",
+        "position": "Midfielder"
+      },
+      {
+        "id": 33046,
+        "name": "H. Matsumoto",
+        "position": "Midfielder"
+      },
+      {
+        "id": 643596,
+        "name": "R. Nakamura",
+        "position": "Midfielder"
+      },
+      {
+        "id": 33248,
+        "name": "Y. Oda",
+        "position": "Midfielder"
+      },
+      {
+        "id": 33178,
+        "name": "H. Okuno",
+        "position": "Midfielder"
+      },
+      {
+        "id": 33314,
+        "name": "K. Onose",
+        "position": "Midfielder"
+      },
+      {
+        "id": 33738,
+        "name": "S. Takeda",
+        "position": "Midfielder"
+      },
+      {
+        "id": 237058,
+        "name": "S. Tamura",
+        "position": "Midfielder"
+      },
+      {
+        "id": 13658,
+        "name": "F. González",
+        "position": "Attacker"
+      },
+      {
+        "id": 410011,
+        "name": "H. Ishii",
+        "position": "Attacker"
+      },
+      {
+        "id": 33529,
+        "name": "S. Ota",
+        "position": "Attacker"
+      },
+      {
+        "id": 468740,
+        "name": "K. Watanabe",
+        "position": "Attacker"
+      },
+      {
+        "id": 33191,
+        "name": "H. Yamada",
+        "position": "Attacker"
+      }
+    ],
+    "fetchedAt": "2026-04-11T04:31:10.620Z"
   }
 }

@@ -3,11 +3,9 @@
 import { useEffect, useState, useMemo } from "react";
 import { useConfetti } from "@/hooks/useConfetti";
 import { RegretMeter } from "@/components/shared/RegretMeter";
-import { getFlag, getTeamNameHe } from "@/lib/flags";
-import { PullToRefresh } from "@/components/shared/PullToRefresh";
+import { getFlag } from "@/lib/flags";
 import { MatchReactions, MOCK_REACTIONS } from "@/components/shared/MatchReactions";
 import WhosAlive from "@/components/shared/WhosAlive";
-import PredictionReveals from "@/components/shared/PredictionReveals";
 import { useSharedData } from "@/hooks/useSharedData";
 import type { MatchPrediction, BettorBracket, BettorAdvancement } from "@/lib/supabase/shared-data";
 
@@ -407,110 +405,75 @@ function WhatIfTab({ brackets }: { brackets: BettorBracket[] }) {
 
   return (
     <>
-      <p className="text-base text-gray-600 mb-6">בחרו משחק וסמלצו תוצאה — ראו מי מרוויח ומי מפסיד</p>
-
-      {/* Match selector */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden mb-6">
-        <div className="px-5 py-4 bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/40 border-b border-blue-100/50">
-          <h2 className="text-lg font-bold text-gray-900">בחרו משחק</h2>
+      {/* Winner selector — compact, at top */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-3">
+        <div className="px-3 py-2 bg-blue-50/50 border-b border-blue-100/50 flex items-center justify-between">
+          <span className="text-sm font-bold text-gray-800">{getFlag(selectedMatch.home)} {selectedMatch.homeName} vs {selectedMatch.awayName} {getFlag(selectedMatch.away)}</span>
         </div>
-        <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {MOCK_WHATIF_MATCHES.map(m => (
-            <button key={m.id} onClick={() => { setSelectedMatch(m); setSimulatedWinner(null); }}
-              className={`flex items-center justify-between px-4 py-3 rounded-xl border transition-all ${
-                selectedMatch.id === m.id ? "border-blue-300 bg-blue-50 shadow-sm" : "border-gray-200 hover:bg-gray-50"
-              }`}>
-              <span className="flex items-center gap-2">
-                <span className="text-lg">{getFlag(m.home)}</span>
-                <span className="font-bold text-sm">{m.homeName}</span>
-              </span>
-              <span className="text-xs text-gray-400">vs</span>
-              <span className="flex items-center gap-2">
-                <span className="font-bold text-sm">{m.awayName}</span>
-                <span className="text-lg">{getFlag(m.away)}</span>
-              </span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Simulate winner */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden mb-6">
-        <div className="px-5 py-4 border-b border-gray-100">
-          <h2 className="text-lg font-bold text-gray-900">מי מנצחת?</h2>
-        </div>
-        <div className="p-5 flex gap-3">
+        <div className="p-2 flex gap-2">
           <button onClick={() => setSimulatedWinner(selectedMatch.home)}
-            className={`flex-1 py-4 rounded-xl border-2 text-center font-bold transition-all ${
-              simulatedWinner === selectedMatch.home
-                ? "border-green-400 bg-green-50 text-green-700 shadow-md"
-                : "border-gray-200 hover:border-gray-300 text-gray-700"
+            className={`flex-1 py-2.5 rounded-lg border-2 text-center font-bold text-sm transition-all ${
+              simulatedWinner === selectedMatch.home ? "border-green-400 bg-green-50 text-green-700" : "border-gray-200 text-gray-600"
             }`}>
-            <span className="text-3xl block mb-1">{getFlag(selectedMatch.home)}</span>
-            <span className="text-lg">{selectedMatch.homeName}</span>
+            {getFlag(selectedMatch.home)} {selectedMatch.homeName}
           </button>
           <button onClick={() => setSimulatedWinner(selectedMatch.away)}
-            className={`flex-1 py-4 rounded-xl border-2 text-center font-bold transition-all ${
-              simulatedWinner === selectedMatch.away
-                ? "border-green-400 bg-green-50 text-green-700 shadow-md"
-                : "border-gray-200 hover:border-gray-300 text-gray-700"
+            className={`flex-1 py-2.5 rounded-lg border-2 text-center font-bold text-sm transition-all ${
+              simulatedWinner === selectedMatch.away ? "border-green-400 bg-green-50 text-green-700" : "border-gray-200 text-gray-600"
             }`}>
-            <span className="text-3xl block mb-1">{getFlag(selectedMatch.away)}</span>
-            <span className="text-lg">{selectedMatch.awayName}</span>
+            {getFlag(selectedMatch.away)} {selectedMatch.awayName}
           </button>
         </div>
       </div>
 
-      {/* Impact analysis */}
+      {/* Impact */}
       {impact && simulatedWinner && (
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
-              <p className="text-3xl font-black text-green-600" style={{ fontFamily: "var(--font-inter)" }}>{winnersCount}</p>
-              <p className="text-sm font-bold text-green-700">ניחשו נכון</p>
-              <p className="text-xs text-green-600">+3 נקודות לכל אחד</p>
+        <div className="space-y-2 mb-4">
+          <div className="grid grid-cols-2 gap-2">
+            <div className="bg-green-50 border border-green-200 rounded-lg p-2 text-center">
+              <p className="text-xl font-black text-green-600">{winnersCount}</p>
+              <p className="text-[10px] font-bold text-green-700">ניחשו נכון</p>
             </div>
-            <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
-              <p className="text-3xl font-black text-red-600" style={{ fontFamily: "var(--font-inter)" }}>{losersCount}</p>
-              <p className="text-sm font-bold text-red-700">ניחשו לא נכון</p>
-              <p className="text-xs text-red-600">הנבחרת שניחשו נפסלת מהמשך העץ</p>
+            <div className="bg-red-50 border border-red-200 rounded-lg p-2 text-center">
+              <p className="text-xl font-black text-red-600">{losersCount}</p>
+              <p className="text-[10px] font-bold text-red-700">טעו</p>
             </div>
           </div>
-
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
-            <div className="px-5 py-3 border-b border-gray-100">
-              <h3 className="text-base font-bold text-gray-900">
-                אם {getFlag(simulatedWinner)} {simulatedWinner === selectedMatch.home ? selectedMatch.homeName : selectedMatch.awayName} מנצחת:
-              </h3>
-            </div>
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
             <div className="divide-y divide-gray-100">
               {impact.map(i => (
-                <div key={i.name} className={`flex items-center gap-3 px-5 py-3 ${i.isYou ? "bg-blue-50/40" : ""}`}>
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                <div key={i.name} className={`flex items-center gap-2 px-3 py-2 ${i.isYou ? "bg-blue-50/40" : ""}`}>
+                  <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
                     i.correct ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-                  }`}>
-                    {i.correct ? "✓" : "✗"}
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-bold text-sm text-gray-900">{i.name} {i.isYou && <span className="text-xs text-blue-500 bg-blue-100 rounded px-1 ms-1">אתה</span>}</p>
-                    <p className="text-xs text-gray-500">
-                      ניחש: {getFlag(i.pick)} {i.pick}
-                      {i.upset && " — הפתעה! ניחש הפוך"}
-                    </p>
-                  </div>
-                  <div className="text-end">
-                    {i.correct ? (
-                      <span className="text-sm font-bold text-green-600">+{i.pointsGained} נק׳</span>
-                    ) : (
-                      <span className="text-sm font-bold text-red-500">הנבחרת שניחש נפסלת מהעץ</span>
-                    )}
-                  </div>
+                  }`}>{i.correct ? "✓" : "✗"}</span>
+                  <span className="font-bold text-xs text-gray-900 flex-1">{i.name}</span>
+                  <span className="text-[10px] text-gray-400">{getFlag(i.pick)} {i.pick}</span>
+                  <span className={`text-xs font-bold ${i.correct ? "text-green-600" : "text-red-500"}`}>
+                    {i.correct ? `+${i.pointsGained}` : "נפסל"}
+                  </span>
                 </div>
               ))}
             </div>
           </div>
         </div>
       )}
+
+      {/* Match selector */}
+      <details className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <summary className="px-3 py-2 cursor-pointer text-sm font-bold text-gray-600 hover:bg-gray-50">החלף משחק</summary>
+        <div className="p-2 grid grid-cols-1 sm:grid-cols-2 gap-1 border-t border-gray-100">
+          {MOCK_WHATIF_MATCHES.map(m => (
+            <button key={m.id} onClick={() => { setSelectedMatch(m); setSimulatedWinner(null); }}
+              className={`flex items-center justify-between px-3 py-2 rounded-lg border text-xs transition-all ${
+                selectedMatch.id === m.id ? "border-blue-300 bg-blue-50" : "border-gray-100 hover:bg-gray-50"
+              }`}>
+              <span>{getFlag(m.home)} {m.homeName}</span>
+              <span className="text-gray-300">vs</span>
+              <span>{m.awayName} {getFlag(m.away)}</span>
+            </button>
+          ))}
+        </div>
+      </details>
     </>
   );
 }
@@ -612,34 +575,3 @@ function WhosAliveTab({ advancements }: { advancements: BettorAdvancement[] }) {
   return <WhosAlive bettors={bettors} />;
 }
 
-const MOCK_PREDICTION_REVEALS_DATA = [
-  { name: "דני", champion: "ARG", championName: "ארגנטינה" },
-  { name: "יוני", champion: "FRA", championName: "צרפת" },
-  { name: "דור דסא", champion: "BRA", championName: "ברזיל" },
-  { name: "אמית", champion: "ARG", championName: "ארגנטינה" },
-  { name: "רון ב", champion: "ENG", championName: "אנגליה" },
-  { name: "רון ג", champion: "ESP", championName: "ספרד" },
-  { name: "רועי", champion: "GER", championName: "גרמניה" },
-  { name: "עידן", champion: "FRA", championName: "צרפת" },
-  { name: "אוהד", champion: "ARG", championName: "ארגנטינה" },
-  { name: "אורי", champion: "BRA", championName: "ברזיל" },
-];
-
-function PredictionRevealsTab({ advancements }: { advancements: BettorAdvancement[] }) {
-  // Build prediction reveals from real advancements, or fall back to mock
-  const predictionData = useMemo(() => {
-    if (advancements.length === 0) return MOCK_PREDICTION_REVEALS_DATA;
-
-    const realData = advancements
-      .filter(a => a.winner)
-      .map(a => ({
-        name: a.displayName,
-        champion: a.winner,
-        championName: getTeamNameHe(a.winner),
-      }));
-
-    return realData.length > 0 ? realData : MOCK_PREDICTION_REVEALS_DATA;
-  }, [advancements]);
-
-  return <PredictionReveals predictions={predictionData} isLocked={true} />;
-}

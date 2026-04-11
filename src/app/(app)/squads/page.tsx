@@ -17,7 +17,7 @@ const F: Record<string,string> = {
 
 const SOURCES = ["SofaScore", "FotMob", "Transfermarkt", "WhoScored"];
 
-function PitchFormation({ players, formation, teamColor }: { players: { nameEn: string; num: number; pos: string; photo?: string }[]; formation: string; teamColor: string }) {
+function PitchFormation({ players, formation, teamColor }: { players: { nameEn: string; num: number; pos: string; photo?: string; club?: string }[]; formation: string; teamColor: string }) {
   const gk = players.filter(p => p.pos === "GK");
   const def = players.filter(p => p.pos === "DEF");
   const mid = players.filter(p => p.pos === "MID");
@@ -48,8 +48,9 @@ function PitchFormation({ players, formation, teamColor }: { players: { nameEn: 
                   {p.num}
                 </div>
               )}
-              <div className="bg-black/50 backdrop-blur-sm rounded-md px-1.5 py-0.5">
-                <span className="text-[9px] sm:text-xs font-bold text-white text-center block">{p.nameEn}</span>
+              <div className="bg-black/60 backdrop-blur-sm rounded-md px-1.5 py-0.5 max-w-[80px] sm:max-w-[100px]">
+                <span className="text-[9px] sm:text-xs font-bold text-white text-center block truncate">{p.nameEn}</span>
+                {p.club && <span className="text-[7px] sm:text-[9px] text-gray-300 text-center block truncate">{p.club}</span>}
               </div>
             </div>
           ))}

@@ -235,55 +235,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       {/* ════════════════════════════════════════════ */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm hidden sm:block">
         <div className="max-w-7xl mx-auto px-4 lg:px-6">
-          {/* Top row: Logo + User */}
-          <div className="flex items-center justify-between h-14 lg:h-16">
-            <Link href="/standings" className="flex items-center gap-3">
-              <img src="/logo.png" alt="The Minhelet" className="w-12 h-12 lg:w-14 lg:h-14 rounded-full object-cover shadow-lg" />
+          {/* Row 1: Logo + User */}
+          <div className="flex items-center justify-between h-12">
+            <Link href="/standings" className="flex items-center gap-2">
+              <img src="/logo.png" alt="The Minhelet" className="w-10 h-10 rounded-full object-cover shadow-md" />
               <div className="flex flex-col">
-                <span className="font-bold text-sm lg:text-lg text-gray-900 leading-tight" style={{ fontFamily: "var(--font-secular)" }}>THE MINHELET</span>
-                <span className="text-[10px] lg:text-xs text-gray-400 font-medium" style={{ fontFamily: "var(--font-inter)" }}>WORLD CUP 2026</span>
+                <span className="font-bold text-sm text-gray-900 leading-tight" style={{ fontFamily: "var(--font-secular)" }}>THE MINHELET</span>
+                <span className="text-[9px] text-gray-400 font-medium" style={{ fontFamily: "var(--font-inter)" }}>WORLD CUP 2026</span>
               </div>
             </Link>
-
-            {/* Two-section nav */}
-            <nav className="flex items-center gap-0.5 lg:gap-1">
-              {/* Section 1: BETTING — blue accent */}
-              <div className="flex items-center bg-blue-50/80 rounded-xl px-1 py-1 gap-0.5 border border-blue-100/60">
-                <span className="text-[10px] lg:text-xs font-black text-blue-500 px-1.5 hidden lg:block">הימורים</span>
-                {BETTING_PAGES.map((p) => {
-                  const isActive = pathname === p.href;
-                  return (
-                    <Link key={p.href} href={p.href}
-                      className={`flex items-center gap-1.5 px-2.5 lg:px-4 py-1.5 lg:py-2 rounded-lg text-xs lg:text-sm font-bold transition-all ${
-                        isActive ? "bg-blue-600 text-white shadow-md" : "text-blue-700 hover:bg-blue-100"
-                      }`}>
-                      <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${
-                        isActive ? "bg-white text-blue-600" : "bg-blue-200 text-blue-700"
-                      }`}>{p.step}</span>
-                      <span className="hidden lg:inline">{p.label}</span>
-                    </Link>
-                  );
-                })}
-              </div>
-
-              <div className="w-px h-8 bg-gray-200 mx-1 lg:mx-2"></div>
-
-              {/* Section 2: TRACKING — neutral */}
-              <span className="text-[10px] lg:text-xs font-black text-gray-400 px-1 hidden lg:block">מעקב</span>
-              {TRACKING_ITEMS.map((item) => {
-                const isActive = pathname === item.href;
-                return (
-                  <Link key={item.href} href={item.href}
-                    className={`flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 lg:py-2 rounded-lg text-xs lg:text-sm font-bold transition-all ${
-                      isActive ? "bg-gray-900 text-white shadow-md" : "text-gray-500 hover:bg-gray-100"
-                    }`}>
-                    {Icons[item.iconKey](isActive)}
-                    <span className="hidden lg:inline">{item.label}</span>
-                  </Link>
-                );
-              })}
-            </nav>
-
             {/* User menu */}
             <div className="relative">
               <button onClick={() => setShowUserMenu(!showUserMenu)} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
@@ -291,7 +251,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <p className="text-sm font-bold text-gray-900 leading-tight">{userName || "משתמש"}</p>
                   <p className="text-xs text-gray-400">{userEmail}</p>
                 </div>
-                <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-sm font-bold text-white shadow-md">
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-sm font-bold text-white shadow-md">
                   {initial}
                 </div>
               </button>
@@ -311,6 +271,42 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               )}
             </div>
           </div>
+          {/* Row 2: Navigation — betting + tracking */}
+          <nav className="flex items-center gap-1 pb-2 overflow-x-auto">
+            {/* BETTING section */}
+            <div className="flex items-center bg-blue-50/80 rounded-lg px-1 py-0.5 gap-0.5 border border-blue-100/60 shrink-0">
+              <span className="text-[10px] font-black text-blue-500 px-1 hidden lg:block">הימורים</span>
+              {BETTING_PAGES.map((p) => {
+                const isActive = pathname === p.href;
+                return (
+                  <Link key={p.href} href={p.href}
+                    className={`flex items-center gap-1 px-2 lg:px-3 py-1.5 rounded-md text-xs font-bold transition-all shrink-0 ${
+                      isActive ? "bg-blue-600 text-white shadow-sm" : "text-blue-700 hover:bg-blue-100"
+                    }`}>
+                    <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black ${
+                      isActive ? "bg-white text-blue-600" : "bg-blue-200 text-blue-700"
+                    }`}>{p.step}</span>
+                    <span className="hidden lg:inline">{p.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+            <div className="w-px h-6 bg-gray-200 mx-1 shrink-0"></div>
+            {/* TRACKING section */}
+            <span className="text-[10px] font-black text-gray-400 px-0.5 hidden lg:block shrink-0">מעקב</span>
+            {TRACKING_ITEMS.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link key={item.href} href={item.href}
+                  className={`flex items-center gap-1 px-2 lg:px-3 py-1.5 rounded-md text-xs font-bold transition-all shrink-0 ${
+                    isActive ? "bg-gray-900 text-white shadow-sm" : "text-gray-500 hover:bg-gray-100"
+                  }`}>
+                  {Icons[item.iconKey](isActive)}
+                  <span className="hidden lg:inline">{item.label}</span>
+                </Link>
+              );
+            })}
+          </nav>
         </div>
       </header>
 

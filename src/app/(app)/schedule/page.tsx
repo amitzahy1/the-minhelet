@@ -1,30 +1,11 @@
 "use client";
 import { LoadingPage } from "@/components/shared/LoadingAnimation";
 import { useSharedData } from "@/hooks/useSharedData";
+import { getFlag, getTeamNameHe } from "@/lib/flags";
 import type { BettorProfile, BettorSpecialBets, BettorAdvancement, MatchPrediction } from "@/lib/supabase/shared-data";
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-
-// Flags for all 48 teams
-const F: Record<string,string> = {
-  MEX:"🇲🇽",KOR:"🇰🇷",CZE:"🇨🇿",RSA:"🇿🇦",CAN:"🇨🇦",QAT:"🇶🇦",SUI:"🇨🇭",BIH:"🇧🇦",
-  BRA:"🇧🇷",MAR:"🇲🇦",SCO:"🏴󠁧󠁢󠁳󠁣󠁴󠁿",HAI:"🇭🇹",USA:"🇺🇸",PAR:"🇵🇾",TUR:"🇹🇷",AUS:"🇦🇺",
-  GER:"🇩🇪",ECU:"🇪🇨",CIV:"🇨🇮",CUR:"🇨🇼",NED:"🇳🇱",JPN:"🇯🇵",SWE:"🇸🇪",TUN:"🇹🇳",
-  BEL:"🇧🇪",IRN:"🇮🇷",EGY:"🇪🇬",NZL:"🇳🇿",ESP:"🇪🇸",URU:"🇺🇾",KSA:"🇸🇦",CPV:"🇨🇻",
-  FRA:"🇫🇷",SEN:"🇸🇳",NOR:"🇳🇴",IRQ:"🇮🇶",ARG:"🇦🇷",AUT:"🇦🇹",ALG:"🇩🇿",JOR:"🇯🇴",
-  POR:"🇵🇹",COL:"🇨🇴",UZB:"🇺🇿",COD:"🇨🇩",ENG:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",CRO:"🇭🇷",GHA:"🇬🇭",PAN:"🇵🇦",
-};
-
-// Hebrew team names
-const HE: Record<string,string> = {
-  MEX:"מקסיקו",KOR:"דרום קוריאה",CZE:"צ׳כיה",RSA:"דרום אפריקה",CAN:"קנדה",QAT:"קטאר",SUI:"שווייץ",BIH:"בוסניה",
-  BRA:"ברזיל",MAR:"מרוקו",SCO:"סקוטלנד",HAI:"האיטי",USA:"ארה״ב",PAR:"פרגוואי",TUR:"טורקיה",AUS:"אוסטרליה",
-  GER:"גרמניה",ECU:"אקוודור",CIV:"חוף השנהב",CUR:"קוראסאו",NED:"הולנד",JPN:"יפן",SWE:"שוודיה",TUN:"תוניסיה",
-  BEL:"בלגיה",IRN:"איראן",EGY:"מצרים",NZL:"ניו זילנד",ESP:"ספרד",URU:"אורוגוואי",KSA:"סעודיה",CPV:"כף ורדה",
-  FRA:"צרפת",SEN:"סנגל",NOR:"נורבגיה",IRQ:"עיראק",ARG:"ארגנטינה",AUT:"אוסטריה",ALG:"אלג׳יריה",JOR:"ירדן",
-  POR:"פורטוגל",COL:"קולומביה",UZB:"אוזבקיסטן",COD:"קונגו",ENG:"אנגליה",CRO:"קרואטיה",GHA:"גאנה",PAN:"פנמה",
-};
 
 // Mock bettor predictions — in production from Supabase
 const MOCK_PREDICTIONS: Record<string, Record<string, string>> = {
@@ -121,7 +102,7 @@ function MatchBetsPanel({ match, profiles, specialBets, advancements, prediction
       if (hasAdvancements) {
         const adv = advancements.find(a => a.displayName === bettorName);
         if (adv?.winner && (adv.winner === home || adv.winner === away)) {
-          relatedBets.push({ bettor: bettorName, type: "אלוף", detail: `${F[adv.winner] || ""} ${HE[adv.winner] || adv.winner}` });
+          relatedBets.push({ bettor: bettorName, type: "אלוף", detail: `${getFlag(adv.winner)} ${getTeamNameHe(adv.winner)}` });
         }
       }
 
@@ -148,12 +129,12 @@ function MatchBetsPanel({ match, profiles, specialBets, advancements, prediction
 
       // Best attack team
       if (sb.bestAttackTeam && (sb.bestAttackTeam === home || sb.bestAttackTeam === away)) {
-        relatedBets.push({ bettor: bettorName, type: "התקפה הכי טובה", detail: `${F[sb.bestAttackTeam] || ""} ${HE[sb.bestAttackTeam] || sb.bestAttackTeam}` });
+        relatedBets.push({ bettor: bettorName, type: "התקפה הכי טובה", detail: `${getFlag(sb.bestAttackTeam)} ${getTeamNameHe(sb.bestAttackTeam)}` });
       }
 
       // Dirtiest team
       if (sb.dirtiestTeam && (sb.dirtiestTeam === home || sb.dirtiestTeam === away)) {
-        relatedBets.push({ bettor: bettorName, type: "הכי כסחנית", detail: `${F[sb.dirtiestTeam] || ""} ${HE[sb.dirtiestTeam] || sb.dirtiestTeam}` });
+        relatedBets.push({ bettor: bettorName, type: "הכי כסחנית", detail: `${getFlag(sb.dirtiestTeam)} ${getTeamNameHe(sb.dirtiestTeam)}` });
       }
     }
   } else {
@@ -164,19 +145,19 @@ function MatchBetsPanel({ match, profiles, specialBets, advancements, prediction
       if (!sb) continue;
 
       if (sb.winner === home || sb.winner === away) {
-        relatedBets.push({ bettor, type: "אלוף", detail: `${F[sb.winner]} ${HE[sb.winner]}` });
+        relatedBets.push({ bettor, type: "אלוף", detail: `${getFlag(sb.winner)} ${getTeamNameHe(sb.winner)}` });
       }
       if (sb.topScorer.team === home || sb.topScorer.team === away) {
-        relatedBets.push({ bettor, type: "מלך שערים", detail: `${sb.topScorer.player} (${F[sb.topScorer.team]} ${HE[sb.topScorer.team]})` });
+        relatedBets.push({ bettor, type: "מלך שערים", detail: `${sb.topScorer.player} (${getFlag(sb.topScorer.team)} ${getTeamNameHe(sb.topScorer.team)})` });
       }
       if (sb.topAssists.team === home || sb.topAssists.team === away) {
-        relatedBets.push({ bettor, type: "מלך בישולים", detail: `${sb.topAssists.player} (${F[sb.topAssists.team]} ${HE[sb.topAssists.team]})` });
+        relatedBets.push({ bettor, type: "מלך בישולים", detail: `${sb.topAssists.player} (${getFlag(sb.topAssists.team)} ${getTeamNameHe(sb.topAssists.team)})` });
       }
       if (sb.bestAttack === home || sb.bestAttack === away) {
-        relatedBets.push({ bettor, type: "התקפה הכי טובה", detail: `${F[sb.bestAttack]} ${HE[sb.bestAttack]}` });
+        relatedBets.push({ bettor, type: "התקפה הכי טובה", detail: `${getFlag(sb.bestAttack)} ${getTeamNameHe(sb.bestAttack)}` });
       }
       if (sb.dirtiestTeam === home || sb.dirtiestTeam === away) {
-        relatedBets.push({ bettor, type: "הכי כסחנית", detail: `${F[sb.dirtiestTeam]} ${HE[sb.dirtiestTeam]}` });
+        relatedBets.push({ bettor, type: "הכי כסחנית", detail: `${getFlag(sb.dirtiestTeam)} ${getTeamNameHe(sb.dirtiestTeam)}` });
       }
     }
   }
@@ -262,8 +243,8 @@ function MatchBetsPanel({ match, profiles, specialBets, advancements, prediction
                             <span className="text-[10px] w-3 shrink-0" style={{ fontFamily: "var(--font-inter)" }}>{j + 1}.</span>
                             {t !== "---" ? (
                               <>
-                                <span>{F[t] || "🏳️"}</span>
-                                <span className="truncate">{HE[t] || t}</span>
+                                <span>{getFlag(t)}</span>
+                                <span className="truncate">{getTeamNameHe(t)}</span>
                               </>
                             ) : (
                               <span className="text-gray-300">...</span>
@@ -380,16 +361,16 @@ export default function SchedulePage() {
                         className="px-4 py-3 grid grid-cols-[1fr_80px_1fr] items-center cursor-pointer"
                       >
                         <div className="flex items-center gap-2 justify-end">
-                          <span className="font-bold text-sm text-end">{HE[m.homeTla] || m.homeTeam}</span>
-                          <span className="text-lg shrink-0">{F[m.homeTla] || "🏳️"}</span>
+                          <span className="font-bold text-sm text-end">{getTeamNameHe(m.homeTla) || m.homeTeam}</span>
+                          <span className="text-lg shrink-0">{getFlag(m.homeTla)}</span>
                         </div>
                         <div className="text-center">
                           <p className="text-base font-black text-gray-900 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{toIsraelTimeShort(m.date)}</p>
                           <p className="text-[10px] text-gray-400">{m.group?.replace("GROUP_", "בית ") || m.stage}</p>
                         </div>
                         <div className="flex items-center gap-2 justify-start">
-                          <span className="text-lg shrink-0">{F[m.awayTla] || "🏳️"}</span>
-                          <span className="font-bold text-sm">{HE[m.awayTla] || m.awayTeam}</span>
+                          <span className="text-lg shrink-0">{getFlag(m.awayTla)}</span>
+                          <span className="font-bold text-sm">{getTeamNameHe(m.awayTla) || m.awayTeam}</span>
                         </div>
                       </div>
                       <AnimatePresence>

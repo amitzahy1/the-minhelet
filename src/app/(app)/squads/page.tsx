@@ -5,16 +5,8 @@ import { ALL_TEAMS } from "@/lib/tournament/groups";
 import { SQUADS_DATA, getSquad, getAvailableSquads } from "@/lib/tournament/squads-data";
 import { getTeamColor } from "@/lib/team-colors";
 import { formatMarketValue } from "@/lib/tournament/market-values";
+import { getFlag } from "@/lib/flags";
 import { PageTransition } from "@/components/shared/PageTransition";
-
-const F: Record<string,string> = {
-  MEX:"🇲🇽",KOR:"🇰🇷",CZE:"🇨🇿",RSA:"🇿🇦",CAN:"🇨🇦",QAT:"🇶🇦",SUI:"🇨🇭",BIH:"🇧🇦",
-  BRA:"🇧🇷",MAR:"🇲🇦",SCO:"🏴󠁧󠁢󠁳󠁣󠁴󠁿",HAI:"🇭🇹",USA:"🇺🇸",PAR:"🇵🇾",TUR:"🇹🇷",AUS:"🇦🇺",
-  GER:"🇩🇪",ECU:"🇪🇨",CIV:"🇨🇮",CUR:"🇨🇼",NED:"🇳🇱",JPN:"🇯🇵",SWE:"🇸🇪",TUN:"🇹🇳",
-  BEL:"🇧🇪",IRN:"🇮🇷",EGY:"🇪🇬",NZL:"🇳🇿",ESP:"🇪🇸",URU:"🇺🇾",KSA:"🇸🇦",CPV:"🇨🇻",
-  FRA:"🇫🇷",SEN:"🇸🇳",NOR:"🇳🇴",IRQ:"🇮🇶",ARG:"🇦🇷",AUT:"🇦🇹",ALG:"🇩🇿",JOR:"🇯🇴",
-  POR:"🇵🇹",COL:"🇨🇴",UZB:"🇺🇿",COD:"🇨🇩",ENG:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",CRO:"🇭🇷",GHA:"🇬🇭",PAN:"🇵🇦",
-};
 
 const SOURCES = ["SofaScore", "FotMob", "Transfermarkt", "WhoScored"];
 
@@ -94,7 +86,7 @@ export default function SquadsPage() {
           className="w-full sm:w-auto px-4 py-3 rounded-xl border border-gray-200 bg-white text-base font-bold shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
           {ALL_TEAMS.map(t => (
             <option key={t.code} value={t.code}>
-              {F[t.code] || "🏳️"} {t.name_he} ({t.code})
+              {getFlag(t.code)} {t.name_he} ({t.code})
             </option>
           ))}
         </select>
@@ -105,7 +97,7 @@ export default function SquadsPage() {
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-6">
           <div className="h-2" style={{ background: teamColors.primary }}></div>
           <div className="p-5 flex items-center gap-4">
-            <span className="text-6xl">{F[selected]}</span>
+            <span className="text-6xl">{getFlag(selected)}</span>
             <div>
               <h2 className="text-2xl font-black text-gray-900 dark:text-white">{team.name_he}</h2>
               <p className="text-base text-gray-500">{team.name}</p>
@@ -240,7 +232,7 @@ export default function SquadsPage() {
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8 text-center">
           <p className="text-gray-500 text-lg mb-2">סגל הנבחרת הזו יתעדכן בקרוב</p>
           <p className="text-sm text-gray-400">סגלים רשמיים יפורסמו ~2 שבועות לפני הטורניר</p>
-          <p className="text-sm text-gray-400 mt-1">כרגע זמינים: {availableSquads.map(c => `${F[c]} ${c}`).join(", ")}</p>
+          <p className="text-sm text-gray-400 mt-1">כרגע זמינים: {availableSquads.map(c => `${getFlag(c)} ${c}`).join(", ")}</p>
         </div>
       )}
     </div>

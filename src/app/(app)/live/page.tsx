@@ -13,39 +13,34 @@ import type { MatchPrediction, BettorBracket, BettorAdvancement } from "@/lib/su
 // Live page — shows matches from last 24h and next 12h
 // In production: real-time updates from API-Football via Supabase Realtime
 
-const F: Record<string,string> = {
-  ARG:"🇦🇷",MEX:"🇲🇽",BRA:"🇧🇷",FRA:"🇫🇷",ENG:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",ESP:"🇪🇸",GER:"🇩🇪",POR:"🇵🇹",
-  KSA:"🇸🇦",IDN:"🇮🇩",JPN:"🇯🇵",MAR:"🇲🇦",UZB:"🇺🇿",CAN:"🇨🇦",SEN:"🇸🇳",DEN:"🇩🇰",
-};
-
 const MOCK_LIVE_MATCHES = [
-  { id: 1, status: "live", minute: "72'", stage: "בית C · סיבוב 2",
+  { id: 1, status: "live", minute: "72'", stage: "בית J · סיבוב 2",
     home: { code: "ARG", name: "ארגנטינה", goals: 2 },
     away: { code: "KSA", name: "ערב הסעודית", goals: 0 },
     yourPrediction: "2-0", yourStatus: "exact", potentialPts: "+3",
     friends: [{ name: "דני", pred: "3-0" }, { name: "יוני", pred: "1-0" }, { name: "רון", pred: "2-1" }, { name: "דור", pred: "2-0" }],
   },
-  { id: 2, status: "live", minute: "45'+2", stage: "בית C · סיבוב 2",
+  { id: 2, status: "live", minute: "45'+2", stage: "בית A · סיבוב 2",
     home: { code: "MEX", name: "מקסיקו", goals: 1 },
-    away: { code: "IDN", name: "אינדונזיה", goals: 1 },
+    away: { code: "CZE", name: "צ׳כיה", goals: 1 },
     yourPrediction: "2-0", yourStatus: "wrong", potentialPts: "+0",
     friends: [{ name: "דני", pred: "2-0" }, { name: "יוני", pred: "3-1" }],
   },
 ];
 
 const MOCK_UPCOMING = [
-  { id: 3, status: "upcoming", time: "19:00", stage: "בית D · סיבוב 2",
-    home: { code: "JPN", name: "יפן" }, away: { code: "MAR", name: "מרוקו" }, yourPrediction: null },
-  { id: 4, status: "upcoming", time: "22:00", stage: "בית D · סיבוב 2",
-    home: { code: "CAN", name: "קנדה" }, away: { code: "SEN", name: "סנגל" }, yourPrediction: "1-0" },
+  { id: 3, status: "upcoming", time: "19:00", stage: "בית F · סיבוב 2",
+    home: { code: "JPN", name: "יפן" }, away: { code: "SWE", name: "שוודיה" }, yourPrediction: null },
+  { id: 4, status: "upcoming", time: "22:00", stage: "בית B · סיבוב 2",
+    home: { code: "CAN", name: "קנדה" }, away: { code: "SUI", name: "שווייץ" }, yourPrediction: "1-0" },
 ];
 
 const MOCK_FINISHED = [
-  { id: 5, status: "finished", stage: "בית B · סיבוב 1",
-    home: { code: "FRA", name: "צרפת", goals: 3 }, away: { code: "DEN", name: "דנמרק", goals: 1 },
+  { id: 5, status: "finished", stage: "בית I · סיבוב 1",
+    home: { code: "FRA", name: "צרפת", goals: 3 }, away: { code: "IRQ", name: "עיראק", goals: 1 },
     yourPrediction: "2-1", yourStatus: "toto", pts: "+2" },
-  { id: 6, status: "finished", stage: "בית B · סיבוב 1",
-    home: { code: "BRA", name: "ברזיל", goals: 2 }, away: { code: "UZB", name: "אוזבקיסטן", goals: 0 },
+  { id: 6, status: "finished", stage: "בית C · סיבוב 1",
+    home: { code: "BRA", name: "ברזיל", goals: 2 }, away: { code: "HAI", name: "האיטי", goals: 0 },
     yourPrediction: "2-0", yourStatus: "exact", pts: "+3" },
 ];
 
@@ -169,7 +164,7 @@ function LiveTab({ predictions }: { predictions: MatchPrediction[] }) {
                 </div>
                 <div className="px-6 py-5 flex items-center justify-between">
                   <div className="flex flex-col items-center gap-2 w-28">
-                    <span className="text-5xl">{F[m.home.code]}</span>
+                    <span className="text-5xl">{getFlag(m.home.code)}</span>
                     <span className="font-bold text-base text-gray-800">{m.home.name}</span>
                   </div>
                   <div className="flex items-center gap-4">
@@ -178,7 +173,7 @@ function LiveTab({ predictions }: { predictions: MatchPrediction[] }) {
                     <span className="font-black text-6xl tabular-nums text-gray-900" style={{ fontFamily: "var(--font-inter)" }}>{m.away.goals}</span>
                   </div>
                   <div className="flex flex-col items-center gap-2 w-28">
-                    <span className="text-5xl">{F[m.away.code]}</span>
+                    <span className="text-5xl">{getFlag(m.away.code)}</span>
                     <span className="font-bold text-base text-gray-800">{m.away.name}</span>
                   </div>
                 </div>
@@ -289,7 +284,7 @@ function LiveTab({ predictions }: { predictions: MatchPrediction[] }) {
           {MOCK_UPCOMING.map(m => (
             <div key={m.id} className="bg-white rounded-xl border border-gray-200 shadow-sm px-5 py-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <span className="text-2xl">{F[m.home.code]}</span>
+                <span className="text-2xl">{getFlag(m.home.code)}</span>
                 <span className="font-bold text-base text-gray-800">{m.home.name}</span>
               </div>
               <div className="text-center">
@@ -303,7 +298,7 @@ function LiveTab({ predictions }: { predictions: MatchPrediction[] }) {
               </div>
               <div className="flex items-center gap-3">
                 <span className="font-bold text-base text-gray-800">{m.away.name}</span>
-                <span className="text-2xl">{F[m.away.code]}</span>
+                <span className="text-2xl">{getFlag(m.away.code)}</span>
               </div>
             </div>
           ))}
@@ -318,7 +313,7 @@ function LiveTab({ predictions }: { predictions: MatchPrediction[] }) {
             <div key={m.id} className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
               <div className="px-5 py-3 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <span className="text-2xl">{F[m.home.code]}</span>
+                  <span className="text-2xl">{getFlag(m.home.code)}</span>
                   <span className="font-bold text-base">{m.home.name}</span>
                 </div>
                 <div className="flex items-center gap-3">
@@ -328,7 +323,7 @@ function LiveTab({ predictions }: { predictions: MatchPrediction[] }) {
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="font-bold text-base">{m.away.name}</span>
-                  <span className="text-2xl">{F[m.away.code]}</span>
+                  <span className="text-2xl">{getFlag(m.away.code)}</span>
                 </div>
               </div>
               <div className={`px-5 py-2 border-t flex items-center justify-between ${m.yourStatus === "exact" ? "bg-green-50 border-green-100" : "bg-blue-50 border-blue-100"}`}>

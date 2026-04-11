@@ -2,6 +2,7 @@
 
 import { useBettingStore } from "@/stores/betting-store";
 import { ALL_TEAMS } from "@/lib/tournament/groups";
+import { getFlag } from "@/lib/flags";
 import { PageTransition } from "@/components/shared/PageTransition";
 
 const GROUPS = ["A","B","C","D","E","F","G","H","I","J","K","L"];
@@ -22,15 +23,6 @@ const TEAM_PLAYERS: Record<string, string[]> = {
   JPN: ["T. Kubo", "K. Mitoma", "D. Kamada"], KOR: ["Son Heung-min", "Lee Kang-in", "Kim Min-jae"],
   MAR: ["H. Ziyech", "A. Hakimi", "Y. En-Nesyri"], USA: ["C. Pulisic", "G. Reyna", "W. McKennie", "T. Weah"],
   MEX: ["H. Lozano", "S. Giménez"], COL: ["L. Díaz", "J. Arias", "R. Falcao"],
-};
-
-const FLAGS: Record<string,string> = {
-  MAR:"🇲🇦",PER:"🇵🇪",CAN:"🇨🇦",BFA:"🇧🇫",FRA:"🇫🇷",COL:"🇨🇴",HON:"🇭🇳",NZL:"🇳🇿",
-  ARG:"🇦🇷",MEX:"🇲🇽",UZB:"🇺🇿",IDN:"🇮🇩",JPN:"🇯🇵",AUS:"🇦🇺",BHR:"🇧🇭",TBD:"🏳️",
-  BRA:"🇧🇷",ECU:"🇪🇨",JAM:"🇯🇲",BOL:"🇧🇴",ESP:"🇪🇸",CHI:"🇨🇱",CMR:"🇨🇲",ALB:"🇦🇱",
-  ENG:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",SEN:"🇸🇳",DEN:"🇩🇰",KSA:"🇸🇦",POR:"🇵🇹",IRN:"🇮🇷",PAR:"🇵🇾",CIV:"🇨🇮",
-  GER:"🇩🇪",URU:"🇺🇾",USA:"🇺🇸",WAL:"🏴󠁧󠁢󠁷󠁬󠁳󠁿",NED:"🇳🇱",KOR:"🇰🇷",PAN:"🇵🇦",CRC:"🇨🇷",
-  ITA:"🇮🇹",SRB:"🇷🇸",TUN:"🇹🇳",TRI:"🇹🇹",BEL:"🇧🇪",CRO:"🇭🇷",NGA:"🇳🇬",QAT:"🇶🇦",
 };
 
 function SectionCard({ title, subtitle, points, children }: { title: string; subtitle?: string; points: string; children: React.ReactNode }) {
@@ -56,7 +48,7 @@ function TeamSelect({ value, onChange, label, excludeCodes = [] }: { value: stri
         className="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500">
         <option value="">בחרו נבחרת...</option>
         {ALL_TEAMS.filter(t => !excludeCodes.includes(t.code) || t.code === value).map(t => (
-          <option key={t.code} value={t.code}>{FLAGS[t.code] || "🏳️"} {t.name_he}</option>
+          <option key={t.code} value={t.code}>{getFlag(t.code)} {t.name_he}</option>
         ))}
       </select>
     </div>

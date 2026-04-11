@@ -3,17 +3,8 @@
 import { useState, useCallback, memo } from "react";
 import { useBettingStore } from "@/stores/betting-store";
 import { GROUPS } from "@/lib/tournament/groups";
+import { getFlag } from "@/lib/flags";
 import { PageTransition } from "@/components/shared/PageTransition";
-
-// Flags
-const F: Record<string,string> = {
-  MAR:"🇲🇦",PER:"🇵🇪",CAN:"🇨🇦",BFA:"🇧🇫",FRA:"🇫🇷",COL:"🇨🇴",HON:"🇭🇳",NZL:"🇳🇿",
-  ARG:"🇦🇷",MEX:"🇲🇽",UZB:"🇺🇿",IDN:"🇮🇩",JPN:"🇯🇵",AUS:"🇦🇺",BHR:"🇧🇭",TBD:"🏳️",
-  BRA:"🇧🇷",ECU:"🇪🇨",JAM:"🇯🇲",BOL:"🇧🇴",ESP:"🇪🇸",CHI:"🇨🇱",CMR:"🇨🇲",ALB:"🇦🇱",
-  ENG:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",SEN:"🇸🇳",DEN:"🇩🇰",KSA:"🇸🇦",POR:"🇵🇹",IRN:"🇮🇷",PAR:"🇵🇾",CIV:"🇨🇮",
-  GER:"🇩🇪",URU:"🇺🇾",USA:"🇺🇸",WAL:"🏴󠁧󠁢󠁷󠁬󠁳󠁿",NED:"🇳🇱",KOR:"🇰🇷",PAN:"🇵🇦",CRC:"🇨🇷",
-  ITA:"🇮🇹",SRB:"🇷🇸",TUN:"🇹🇳",TRI:"🇹🇹",BEL:"🇧🇪",CRO:"🇭🇷",NGA:"🇳🇬",QAT:"🇶🇦",
-};
 
 // R32 matchups based on FIFA WC2026 regulations
 // Left half: groups A-H, Right half: groups I-L + cross-group
@@ -100,13 +91,13 @@ const BracketMatch = memo(function BracketMatch({ matchKey, team1Code, team2Code
   return (
     <div className={`bg-white rounded-lg border overflow-hidden transition-all ${match?.winner ? "border-green-300 shadow-sm" : "border-gray-200 shadow-sm hover:shadow-md"}`}>
       <div onClick={() => selectWinner(team1Code)} className={`flex items-center gap-1.5 px-2 ${py} w-full cursor-pointer border-b border-gray-100 transition-colors ${isWinner1 ? "bg-green-50" : "hover:bg-gray-50"}`}>
-        <span className="text-sm">{F[team1Code]}</span>
+        <span className="text-sm">{getFlag(team1Code)}</span>
         <span className={`text-sm font-bold flex-1 ${isWinner1 ? "text-green-700" : "text-gray-800"}`}>{team1Code}</span>
         {stepper(1, match?.score1 ?? null)}
         {isWinner1 && <span className="text-green-500 text-xs font-bold ms-0.5">✓</span>}
       </div>
       <div onClick={() => selectWinner(team2Code)} className={`flex items-center gap-1.5 px-2 ${py} w-full cursor-pointer transition-colors ${isWinner2 ? "bg-green-50" : "hover:bg-gray-50"}`}>
-        <span className="text-sm">{F[team2Code]}</span>
+        <span className="text-sm">{getFlag(team2Code)}</span>
         <span className={`text-sm font-bold flex-1 ${isWinner2 ? "text-green-700" : "text-gray-800"}`}>{team2Code}</span>
         {stepper(2, match?.score2 ?? null)}
         {isWinner2 && <span className="text-green-500 text-xs font-bold ms-0.5">✓</span>}
@@ -203,7 +194,7 @@ function MobileKnockoutView({ r32l, r32r, getR32Team, getWinner, knockout, final
             {knockout.final?.winner && (
               <div className="mt-4 rounded-xl border-2 border-amber-300 bg-amber-50 p-4 text-center">
                 <p className="text-base text-amber-700 font-bold">אלוף העולם 2026</p>
-                <p className="text-2xl font-black text-amber-900 mt-1">{F[knockout.final.winner]} {knockout.final.winner}</p>
+                <p className="text-2xl font-black text-amber-900 mt-1">{getFlag(knockout.final.winner)} {knockout.final.winner}</p>
               </div>
             )}
           </>
@@ -304,7 +295,7 @@ export default function KnockoutPage() {
                 <>
                   <p className="text-sm text-amber-700 font-semibold">אלוף העולם 2026</p>
                   <div className="flex items-center justify-center gap-2 mt-1">
-                    <span className="text-2xl">{F[knockout.final.winner]}</span>
+                    <span className="text-2xl">{getFlag(knockout.final.winner)}</span>
                     <span className="text-xl font-black text-amber-900">{knockout.final.winner}</span>
                   </div>
                 </>

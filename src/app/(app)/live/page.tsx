@@ -436,7 +436,6 @@ function WhatIfTab({ brackets }: { brackets: BettorBracket[] }) {
   }, [homeGoals, awayGoals]);
 
   const impact = useMemo(() => {
-    if (!hasSimulated) return null;
     const { toto: totoPoints, exact: exactPoints } = getScoringConfig(selectedMatch.stage);
     const simDir = homeGoals > awayGoals ? "1" : awayGoals > homeGoals ? "2" : "X";
     const simWinner = homeGoals > awayGoals ? selectedMatch.home : awayGoals > homeGoals ? selectedMatch.away : null;
@@ -517,24 +516,30 @@ function WhatIfTab({ brackets }: { brackets: BettorBracket[] }) {
         </div>
       </div>
 
-      {/* Impact table */}
-      {impact && hasSimulated && (
+      {/* Bettor predictions — always visible, points show when simulated */}
+      {impact && impact.length > 0 && (
         <div className="space-y-2 mb-4">
-          {/* Summary */}
-          <div className="grid grid-cols-3 gap-2">
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-2 text-center">
-              <p className="text-xl font-black text-amber-600">{exactCount}</p>
-              <p className="text-[10px] font-bold text-amber-700">מדויקת</p>
+          {/* Summary — only when simulated */}
+          {hasSimulated && (
+            <div className="grid grid-cols-3 gap-2">
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-2 text-center">
+                <p className="text-xl font-black text-amber-600">{exactCount}</p>
+                <p className="text-[10px] font-bold text-amber-700">מדויקת</p>
+              </div>
+              <div className="bg-green-50 border border-green-200 rounded-lg p-2 text-center">
+                <p className="text-xl font-black text-green-600">{totoCount}</p>
+                <p className="text-[10px] font-bold text-green-700">טוטו בלבד</p>
+              </div>
+              <div className="bg-purple-50 border border-purple-200 rounded-lg p-2 text-center">
+                <p className="text-xl font-black text-purple-600">{totalPoints}</p>
+                <p className="text-[10px] font-bold text-purple-700">סה״כ נק׳</p>
+              </div>
             </div>
-            <div className="bg-green-50 border border-green-200 rounded-lg p-2 text-center">
-              <p className="text-xl font-black text-green-600">{totoCount}</p>
-              <p className="text-[10px] font-bold text-green-700">טוטו בלבד</p>
-            </div>
-            <div className="bg-purple-50 border border-purple-200 rounded-lg p-2 text-center">
-              <p className="text-xl font-black text-purple-600">{totalPoints}</p>
-              <p className="text-[10px] font-bold text-purple-700">סה״כ נק׳</p>
-            </div>
-          </div>
+          )}
+
+          {!hasSimulated && (
+            <p className="text-xs text-gray-400 text-center py-2">הזינו תוצאה למעלה כדי לראות ניקוד</p>
+          )}
 
           {/* Per-bettor results */}
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
@@ -559,9 +564,9 @@ function WhatIfTab({ brackets }: { brackets: BettorBracket[] }) {
                     </span>
                   )}
                   <span className={`text-sm font-black tabular-nums min-w-[28px] text-left ${
-                    i.points > 0 ? "text-green-600" : "text-gray-300"
+                    !hasSimulated ? "text-gray-300" : i.points > 0 ? "text-green-600" : "text-gray-300"
                   }`} style={{ fontFamily: "var(--font-inter)" }}>
-                    +{i.points}
+                    {hasSimulated ? `+${i.points}` : "-"}
                   </span>
                 </div>
               ))}

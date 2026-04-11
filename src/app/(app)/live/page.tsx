@@ -3,7 +3,8 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useConfetti } from "@/hooks/useConfetti";
 import { RegretMeter } from "@/components/shared/RegretMeter";
-import { getFlag } from "@/lib/flags";
+import { getFlag, getTeamNameHe } from "@/lib/flags";
+import { GROUPS } from "@/lib/tournament/groups";
 import { MatchReactions, MOCK_REACTIONS } from "@/components/shared/MatchReactions";
 import WhosAlive from "@/components/shared/WhosAlive";
 import { useSharedData } from "@/hooks/useSharedData";
@@ -668,19 +669,149 @@ const MOCK_WHOS_ALIVE_DATA = [
   },
 ];
 
+// --- Simulation Tab: group-stage scoring simulator ---
+
+// Generate round-robin matches for a group of 4 teams (6 matches)
+function groupMatches(groupId: string): { key: string; home: string; away: string }[] {
+  const teams = GROUPS[groupId];
+  if (!teams) return [];
+  const pairs: { key: string; home: string; away: string }[] = [];
+  for (let i = 0; i < teams.length; i++)
+    for (let j = i + 1; j < teams.length; j++)
+      pairs.push({ key: `${groupId}-${teams[i].code}-${teams[j].code}`, home: teams[i].code, away: teams[j].code });
+  return pairs;
+}
+
+const ALL_GROUP_MATCHES = Object.keys(GROUPS).flatMap(g => groupMatches(g));
+
+// Deterministic seeded random: hash bettor name + match key into 0..max-1
+function seededGoals(name: string, matchKey: string, max: number): number {
+  let h = 0;
+  const s = name + matchKey;
+  for (let i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+  return ((h < 0 ? -h : h) % max);
+}
+
+const SIM_BETTORS = ["דני", "יוני", "אמית", "דור דסא", "רון ב", "רון ג", "רועי", "עידן"];
+
+// Pre-compute mock predictions: each bettor has a home/away prediction for every group match
+const MOCK_SIM_PREDS: Record<string, Record<string, { home: number; away: number }>> = {};
+for (const name of SIM_BETTORS) {
+  MOCK_SIM_PREDS[name] = {};
+  for (const m of ALL_GROUP_MATCHES) {
+    MOCK_SIM_PREDS[name][m.key] = {
+      home: seededGoals(name, m.key + "h", 4),
+      away: seededGoals(name, m.key + "a", 3),
+    };
+  }
+}
+
+const TOTO_PTS = 2;
+const EXACT_PTS = 1;
+
 function SimulationTab() {
+  const [results, setResults] = useState<Record<string, { home: number; away: number }>>({});
+
+  const setGoal = useCallback((key: string, side: "home" | "away", val: number) => {
+    setResults(prev => {
+      const cur = prev[key] || { home: 0, away: 0 };
+      return { ...prev, [key]: { ...cur, [side]: Math.max(0, Math.min(15, val)) } };
+    });
+  }, []);
+
+  // Compute leaderboard from all filled results
+  const leaderboard = useMemo(() => {
+    const filledKeys = Object.keys(results);
+    if (filledKeys.length === 0) return [];
+    return SIM_BETTORS.map(name => {
+      let totoCount = 0, exactCount = 0, pts = 0;
+      for (const key of filledKeys) {
+        const r = results[key];
+        const p = MOCK_SIM_PREDS[name][key];
+        if (!p) continue;
+        const rDir = r.home > r.away ? 1 : r.away > r.home ? -1 : 0;
+        const pDir = p.home > p.away ? 1 : p.away > p.home ? -1 : 0;
+        const toto = rDir === pDir;
+        const exact = r.home === p.home && r.away === p.away;
+        if (toto) { totoCount++; pts += TOTO_PTS; }
+        if (exact) { exactCount++; pts += EXACT_PTS; }
+      }
+      return { name, totoCount, exactCount, pts };
+    }).sort((a, b) => b.pts - a.pts || b.exactCount - a.exactCount);
+  }, [results]);
+
+  const filledCount = Object.keys(results).length;
+
   return (
     <div className="space-y-4">
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 text-center">
-        <span className="text-4xl mb-3 block">🧪</span>
-        <h2 className="text-xl font-bold text-gray-900 mb-2">סימולטור טורניר</h2>
-        <p className="text-sm text-gray-600 mb-4">הזינו תוצאות לכל המשחקים הנותרים ותראו איך הטבלה משתנה</p>
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-amber-800">
-          <p className="font-bold mb-1">בקרוב!</p>
-          <p>הסימולטור המלא יהיה זמין כשהטורניר מתחיל (11.6.2026).</p>
-          <p className="mt-1">בינתיים — השתמשו בטאב "מה אם?" לבדיקת משחקים בודדים.</p>
-        </div>
+      {/* Header */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 text-center">
+        <h2 className="text-lg font-black text-gray-900 mb-1">סימולטור ניקוד — שלב הבתים</h2>
+        <p className="text-xs text-gray-500">הזינו תוצאות ל-72 משחקי הבתים וצפו בניקוד משתנה בזמן אמת</p>
+        <p className="text-[10px] text-gray-400 mt-1">טוטו נכון = {TOTO_PTS} נק׳ · מדויקת = +{EXACT_PTS} נק׳ · {filledCount}/72 משחקים מולאו</p>
       </div>
+
+      {/* Mini leaderboard */}
+      {leaderboard.length > 0 && (
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="px-3 py-2 bg-amber-50 border-b border-amber-100">
+            <span className="text-sm font-bold text-amber-800">טבלת ניקוד</span>
+          </div>
+          <div className="divide-y divide-gray-100">
+            {leaderboard.map((b, i) => (
+              <div key={b.name} className={`flex items-center px-3 py-1.5 text-xs ${b.name === "אמית" ? "bg-blue-50/40" : ""}`}>
+                <span className="w-5 font-black text-gray-400 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{i + 1}</span>
+                <span className="flex-1 font-bold text-gray-800">{b.name}</span>
+                <span className="text-gray-400 ml-2">{b.totoCount} טוטו</span>
+                <span className="text-amber-500 ml-2">{b.exactCount} מדויקות</span>
+                <span className="font-black text-green-600 min-w-[36px] text-left ml-2 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{b.pts}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Groups */}
+      {Object.keys(GROUPS).map(groupId => {
+        const matches = groupMatches(groupId);
+        return (
+          <details key={groupId} className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <summary className="px-4 py-2.5 cursor-pointer hover:bg-gray-50 flex items-center justify-between">
+              <span className="text-sm font-black text-gray-800">בית {groupId}</span>
+              <span className="text-[10px] text-gray-400">
+                {matches.filter(m => results[m.key]).length}/{matches.length} מולאו
+              </span>
+            </summary>
+            <div className="border-t border-gray-100 divide-y divide-gray-50">
+              {matches.map(m => {
+                const r = results[m.key] || { home: 0, away: 0 };
+                const filled = !!results[m.key];
+                return (
+                  <div key={m.key} className="px-3 py-2 flex items-center gap-1.5">
+                    <span className="text-sm">{getFlag(m.home)}</span>
+                    <span className="text-[11px] font-bold text-gray-700 w-16 truncate text-right">{getTeamNameHe(m.home)}</span>
+                    <input type="number" min={0} max={15} value={r.home}
+                      onChange={e => setGoal(m.key, "home", parseInt(e.target.value) || 0)}
+                      className={`w-9 h-8 text-center rounded-lg border text-sm font-black tabular-nums ${filled ? "border-green-300 bg-green-50" : "border-gray-200"}`}
+                      style={{ fontFamily: "var(--font-inter)" }} />
+                    <span className="text-gray-300 text-xs">:</span>
+                    <input type="number" min={0} max={15} value={r.away}
+                      onChange={e => setGoal(m.key, "away", parseInt(e.target.value) || 0)}
+                      className={`w-9 h-8 text-center rounded-lg border text-sm font-black tabular-nums ${filled ? "border-green-300 bg-green-50" : "border-gray-200"}`}
+                      style={{ fontFamily: "var(--font-inter)" }} />
+                    <span className="text-[11px] font-bold text-gray-700 w-16 truncate">{getTeamNameHe(m.away)}</span>
+                    <span className="text-sm">{getFlag(m.away)}</span>
+                    {!filled && (
+                      <button onClick={() => setResults(prev => ({ ...prev, [m.key]: { home: 0, away: 0 } }))}
+                        className="text-[9px] text-blue-500 font-bold mr-auto hover:underline">0:0</button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </details>
+        );
+      })}
     </div>
   );
 }

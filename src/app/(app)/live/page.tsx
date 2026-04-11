@@ -709,8 +709,67 @@ for (const name of SIM_BETTORS) {
 const TOTO_PTS = 2;
 const EXACT_PTS = 1;
 
+// Knockout matches for simulation
+const KO_MATCHES = [
+  { key: "ko_r32_1", home: "MEX", away: "QAT", round: "R32", homeName: "מקסיקו", awayName: "קטאר" },
+  { key: "ko_r32_2", home: "BRA", away: "HAI", round: "R32", homeName: "ברזיל", awayName: "האיטי" },
+  { key: "ko_r32_3", home: "ARG", away: "AUS", round: "R32", homeName: "ארגנטינה", awayName: "אוסטרליה" },
+  { key: "ko_r32_4", home: "FRA", away: "IRQ", round: "R32", homeName: "צרפת", awayName: "עיראק" },
+  { key: "ko_r32_5", home: "GER", away: "CUR", round: "R32", homeName: "גרמניה", awayName: "קוראסאו" },
+  { key: "ko_r32_6", home: "NED", away: "TUN", round: "R32", homeName: "הולנד", awayName: "תוניסיה" },
+  { key: "ko_r32_7", home: "BEL", away: "NZL", round: "R32", homeName: "בלגיה", awayName: "ניו זילנד" },
+  { key: "ko_r32_8", home: "ESP", away: "CPV", round: "R32", homeName: "ספרד", awayName: "כף ורדה" },
+  { key: "ko_r16_1", home: "MEX", away: "BRA", round: "R16", homeName: "מקסיקו", awayName: "ברזיל" },
+  { key: "ko_r16_2", home: "ARG", away: "FRA", round: "R16", homeName: "ארגנטינה", awayName: "צרפת" },
+  { key: "ko_r16_3", home: "GER", away: "NED", round: "R16", homeName: "גרמניה", awayName: "הולנד" },
+  { key: "ko_r16_4", home: "BEL", away: "ESP", round: "R16", homeName: "בלגיה", awayName: "ספרד" },
+  { key: "ko_qf_1", home: "BRA", away: "ARG", round: "QF", homeName: "ברזיל", awayName: "ארגנטינה" },
+  { key: "ko_qf_2", home: "GER", away: "ESP", round: "QF", homeName: "גרמניה", awayName: "ספרד" },
+  { key: "ko_sf_1", home: "ARG", away: "ESP", round: "SF", homeName: "ארגנטינה", awayName: "ספרד" },
+  { key: "ko_final", home: "ARG", away: "FRA", round: "FINAL", homeName: "ארגנטינה", awayName: "צרפת" },
+];
+
+const KO_SCORING: Record<string, { toto: number; exact: number }> = {
+  R32: { toto: 3, exact: 1 }, R16: { toto: 3, exact: 1 },
+  QF: { toto: 3, exact: 1 }, SF: { toto: 3, exact: 2 }, FINAL: { toto: 4, exact: 2 },
+};
+
+// Mock bettor knockout predictions
+const MOCK_SIM_KO_PREDS: Record<string, Record<string, { home: number; away: number }>> = {};
+for (const name of SIM_BETTORS) {
+  MOCK_SIM_KO_PREDS[name] = {};
+  for (const m of KO_MATCHES) {
+    MOCK_SIM_KO_PREDS[name][m.key] = { home: seededGoals(name, m.key + "h", 3), away: seededGoals(name, m.key + "a", 2) };
+  }
+}
+
+// Mock bettor special bets
+const SPECIAL_CATS = [
+  { key: "topScorer", label: "מלך שערים", pts: 9 },
+  { key: "topAssists", label: "מלך בישולים", pts: 7 },
+  { key: "bestAttack", label: "התקפה הכי טובה", pts: 6 },
+  { key: "dirtiestTeam", label: "הכי כסחנית", pts: 5 },
+  { key: "prolificGroup", label: "בית פורה", pts: 5 },
+  { key: "driestGroup", label: "בית יבש", pts: 5 },
+  { key: "matchup", label: "מאצ׳אפ", pts: 5 },
+  { key: "penalties", label: "פנדלים", pts: 5 },
+] as const;
+
+const MOCK_BETTOR_SPECIALS: Record<string, Record<string, string>> = {
+  "דני": { topScorer: "Lautaro", topAssists: "Griezmann", bestAttack: "BRA", dirtiestTeam: "URU", prolificGroup: "C", driestGroup: "H", matchup: "1", penalties: "OVER" },
+  "יוני": { topScorer: "Mbappé", topAssists: "Pedri", bestAttack: "ARG", dirtiestTeam: "MAR", prolificGroup: "A", driestGroup: "G", matchup: "2", penalties: "UNDER" },
+  "דור דסא": { topScorer: "Vinícius Jr.", topAssists: "Musiala", bestAttack: "FRA", dirtiestTeam: "KSA", prolificGroup: "B", driestGroup: "L", matchup: "1", penalties: "OVER" },
+  "אמית": { topScorer: "Haaland", topAssists: "Messi", bestAttack: "GER", dirtiestTeam: "MAR", prolificGroup: "C", driestGroup: "H", matchup: "X", penalties: "UNDER" },
+  "רון ב": { topScorer: "Kane", topAssists: "Rodrygo", bestAttack: "ESP", dirtiestTeam: "IRN", prolificGroup: "D", driestGroup: "K", matchup: "1", penalties: "OVER" },
+  "רון ג": { topScorer: "Ronaldo", topAssists: "Mbappé", bestAttack: "ARG", dirtiestTeam: "AUS", prolificGroup: "A", driestGroup: "J", matchup: "2", penalties: "UNDER" },
+  "רועי": { topScorer: "Isak", topAssists: "Bellingham", bestAttack: "FRA", dirtiestTeam: "URU", prolificGroup: "B", driestGroup: "H", matchup: "1", penalties: "OVER" },
+  "עידן": { topScorer: "Álvarez", topAssists: "B. Fernandes", bestAttack: "ARG", dirtiestTeam: "CRO", prolificGroup: "C", driestGroup: "G", matchup: "X", penalties: "UNDER" },
+};
+
 function SimulationTab() {
   const [results, setResults] = useState<Record<string, { home: number; away: number }>>({});
+  const [koResults, setKoResults] = useState<Record<string, { home: number; away: number }>>({});
+  const [specialResults, setSpecialResults] = useState<Record<string, string>>({});
 
   const setGoal = useCallback((key: string, side: "home" | "away", val: number) => {
     setResults(prev => {
@@ -719,38 +778,67 @@ function SimulationTab() {
     });
   }, []);
 
-  // Compute leaderboard from all filled results
+  const setKoGoal = useCallback((key: string, side: "home" | "away", val: number) => {
+    setKoResults(prev => {
+      const cur = prev[key] || { home: 0, away: 0 };
+      return { ...prev, [key]: { ...cur, [side]: Math.max(0, Math.min(15, val)) } };
+    });
+  }, []);
+
+  // Compute leaderboard from ALL results (groups + knockout + specials)
   const leaderboard = useMemo(() => {
-    const filledKeys = Object.keys(results);
     return SIM_BETTORS.map(name => {
-      let totoCount = 0, exactCount = 0, pts = 0;
-      for (const key of filledKeys) {
-        const r = results[key];
-        const p = MOCK_SIM_PREDS[name][key];
+      let matchPts = 0, advPts = 0, specPts = 0, exactCount = 0, totoCount = 0;
+
+      // Group matches
+      for (const key of Object.keys(results)) {
+        const r = results[key]; const p = MOCK_SIM_PREDS[name]?.[key];
         if (!p) continue;
         const rDir = r.home > r.away ? 1 : r.away > r.home ? -1 : 0;
         const pDir = p.home > p.away ? 1 : p.away > p.home ? -1 : 0;
-        const toto = rDir === pDir;
-        const exact = r.home === p.home && r.away === p.away;
-        if (toto) { totoCount++; pts += TOTO_PTS; }
-        if (exact) { exactCount++; pts += EXACT_PTS; }
+        if (rDir === pDir) { totoCount++; matchPts += TOTO_PTS; }
+        if (r.home === p.home && r.away === p.away) { exactCount++; matchPts += EXACT_PTS; }
       }
-      return { name, totoCount, exactCount, pts };
-    }).sort((a, b) => b.pts - a.pts || b.exactCount - a.exactCount);
-  }, [results]);
 
-  const filledCount = Object.keys(results).length;
-  const progressPct = Math.round((filledCount / 72) * 100);
+      // Knockout matches
+      for (const key of Object.keys(koResults)) {
+        const r = koResults[key]; const p = MOCK_SIM_KO_PREDS[name]?.[key];
+        if (!p) continue;
+        const m = KO_MATCHES.find(km => km.key === key);
+        const sc = KO_SCORING[m?.round || "R32"];
+        const rDir = r.home > r.away ? 1 : r.away > r.home ? -1 : 0;
+        const pDir = p.home > p.away ? 1 : p.away > p.home ? -1 : 0;
+        if (rDir === pDir) { totoCount++; matchPts += sc.toto; }
+        if (r.home === p.home && r.away === p.away) { exactCount++; matchPts += sc.exact; }
+      }
+
+      // Special bets
+      const bs = MOCK_BETTOR_SPECIALS[name] || {};
+      for (const cat of SPECIAL_CATS) {
+        const simVal = specialResults[cat.key];
+        if (simVal && bs[cat.key] && simVal.toLowerCase() === bs[cat.key].toLowerCase()) {
+          specPts += cat.pts;
+        }
+      }
+
+      const total = matchPts + advPts + specPts;
+      return { name, matchPts, advPts, specPts, total, exactCount, totoCount };
+    }).sort((a, b) => b.total - a.total || b.exactCount - a.exactCount);
+  }, [results, koResults, specialResults]);
+
+  const filledCount = Object.keys(results).length + Object.keys(koResults).length;
+  const totalMatches = 72 + KO_MATCHES.length;
+  const progressPct = Math.round((filledCount / totalMatches) * 100);
 
   return (
     <div className="space-y-4">
       {/* Header */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-5 text-center">
         <h2 className="text-lg font-black text-gray-900 mb-1">סימולטור ניקוד — הזינו תוצאות ותראו איך הטבלה משתנה</h2>
-        <p className="text-xs text-gray-500 mb-3">טוטו נכון = {TOTO_PTS} נק׳ · מדויקת = +{EXACT_PTS} נק׳</p>
+        <p className="text-xs text-gray-500 mb-3">בתים: טוטו={TOTO_PTS} מדויקת=+{EXACT_PTS} · נוק-אאוט: 3-4 · מיוחדים: 5-9 נק׳</p>
         {/* Progress indicator */}
         <div className="flex items-center justify-center gap-3">
-          <span className="text-sm font-bold text-gray-700">מילאתם {filledCount}/72 משחקים</span>
+          <span className="text-sm font-bold text-gray-700">מילאתם {filledCount}/{totalMatches} משחקים</span>
           <div className="w-40 h-2 bg-gray-200 rounded-full overflow-hidden">
             <div className="h-full bg-gradient-to-l from-blue-500 to-indigo-500 rounded-full transition-all duration-300" style={{ width: `${progressPct}%` }} />
           </div>
@@ -767,22 +855,13 @@ function SimulationTab() {
           </div>
         </div>
 
-        {/* Table header — mobile */}
-        <div className="flex sm:hidden items-center px-4 py-2 text-xs text-gray-500 bg-gray-50 border-b border-gray-200 font-semibold" style={{ fontFamily: "var(--font-inter)" }}>
+        {/* Table header */}
+        <div className="flex items-center px-4 py-2 text-xs text-gray-500 bg-gray-50 border-b border-gray-200 font-semibold" style={{ fontFamily: "var(--font-inter)" }}>
           <span className="w-8 text-center">#</span>
-          <span className="w-9 me-2"></span>
+          <span className="w-9 sm:w-10 me-2"></span>
           <span className="me-3 flex-1 text-start">שחקן</span>
-          <span className="w-12 text-center">מדויקות</span>
-          <span className="w-12 text-center">טוטו</span>
-          <span className="w-16 text-center">סה״כ</span>
-        </div>
-        {/* Table header — desktop */}
-        <div className="hidden sm:flex items-center px-4 py-2 text-xs text-gray-500 bg-gray-50 border-b border-gray-200 font-semibold" style={{ fontFamily: "var(--font-inter)" }}>
-          <span className="w-8 text-center">#</span>
-          <span className="w-10 me-2"></span>
-          <span className="me-3 flex-1 text-start">שחקן</span>
-          <span className="w-14 text-center">מדויקות</span>
-          <span className="w-14 text-center">טוטו</span>
+          <span className="w-12 sm:w-14 text-center">משחקים</span>
+          <span className="w-12 sm:w-14 text-center hidden sm:block">מיוחדים</span>
           <span className="w-16 text-center">סה״כ</span>
         </div>
 
@@ -807,16 +886,10 @@ function SimulationTab() {
               <span className="font-bold text-base text-gray-900">{b.name}</span>
               {b.name === "אמית" && <span className="text-xs text-blue-500 ms-1.5 bg-blue-100 rounded px-1.5 py-0.5 font-bold">אתה</span>}
             </div>
-            {/* Exact count — mobile */}
-            <span className="w-12 text-center text-sm font-medium text-gray-600 sm:hidden" style={{ fontFamily: "var(--font-inter)" }}>{b.exactCount}</span>
-            {/* Toto count — mobile */}
-            <span className="w-12 text-center text-sm font-medium text-gray-600 sm:hidden" style={{ fontFamily: "var(--font-inter)" }}>{b.totoCount}</span>
-            {/* Exact count — desktop */}
-            <span className="w-14 text-center text-sm font-medium text-gray-600 hidden sm:block" style={{ fontFamily: "var(--font-inter)" }}>{b.exactCount}</span>
-            {/* Toto count — desktop */}
-            <span className="w-14 text-center text-sm font-medium text-gray-600 hidden sm:block" style={{ fontFamily: "var(--font-inter)" }}>{b.totoCount}</span>
+            <span className="w-12 sm:w-14 text-center text-sm font-medium text-gray-600" style={{ fontFamily: "var(--font-inter)" }}>{b.matchPts}</span>
+            <span className="w-14 text-center text-sm font-medium text-gray-600 hidden sm:block" style={{ fontFamily: "var(--font-inter)" }}>{b.specPts}</span>
             {/* Total */}
-            <span className="w-16 text-center font-black text-lg text-gray-900 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{b.pts}</span>
+            <span className="w-16 text-center font-black text-lg text-gray-900 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{b.total}</span>
           </div>
         ))}
       </div>
@@ -862,6 +935,98 @@ function SimulationTab() {
           </details>
         );
       })}
+
+      {/* Knockout matches */}
+      <details className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <summary className="px-4 py-3 cursor-pointer hover:bg-gray-50 flex items-center justify-between">
+          <span className="text-sm font-black text-gray-800">שלב הנוק-אאוט ({KO_MATCHES.length} משחקים)</span>
+          <span className="text-[10px] text-gray-400">{Object.keys(koResults).length}/{KO_MATCHES.length} מולאו</span>
+        </summary>
+        <div className="border-t border-gray-100">
+          {(["R32", "R16", "QF", "SF", "FINAL"] as const).map(round => {
+            const roundMatches = KO_MATCHES.filter(m => m.round === round);
+            const roundLabel = round === "R32" ? "שמינית גמר" : round === "R16" ? "רבע" : round === "QF" ? "רבע גמר" : round === "SF" ? "חצי גמר" : "גמר";
+            const sc = KO_SCORING[round];
+            return (
+              <details key={round} className="border-b border-gray-100 last:border-0">
+                <summary className="px-4 py-2 cursor-pointer hover:bg-gray-50 flex items-center justify-between text-xs">
+                  <span className="font-bold text-gray-700">{roundLabel} ({roundMatches.length})</span>
+                  <span className="text-gray-400">טוטו={sc.toto} מדויקת=+{sc.exact}</span>
+                </summary>
+                <div className="divide-y divide-gray-50">
+                  {roundMatches.map(m => {
+                    const r = koResults[m.key] || { home: 0, away: 0 };
+                    const filled = !!koResults[m.key];
+                    return (
+                      <div key={m.key} className="px-3 py-2 flex items-center gap-1.5">
+                        <span className="text-sm">{getFlag(m.home)}</span>
+                        <span className="text-[11px] font-bold text-gray-700 w-16 truncate text-right">{m.homeName}</span>
+                        <input type="number" min={0} max={15} value={r.home}
+                          onChange={e => setKoGoal(m.key, "home", parseInt(e.target.value) || 0)}
+                          className={`w-9 h-8 text-center rounded-lg border text-sm font-black tabular-nums ${filled ? "border-green-300 bg-green-50" : "border-gray-200"}`}
+                          style={{ fontFamily: "var(--font-inter)" }} />
+                        <span className="text-gray-300 text-xs">:</span>
+                        <input type="number" min={0} max={15} value={r.away}
+                          onChange={e => setKoGoal(m.key, "away", parseInt(e.target.value) || 0)}
+                          className={`w-9 h-8 text-center rounded-lg border text-sm font-black tabular-nums ${filled ? "border-green-300 bg-green-50" : "border-gray-200"}`}
+                          style={{ fontFamily: "var(--font-inter)" }} />
+                        <span className="text-[11px] font-bold text-gray-700 w-16 truncate">{m.awayName}</span>
+                        <span className="text-sm">{getFlag(m.away)}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </details>
+            );
+          })}
+        </div>
+      </details>
+
+      {/* Special bets outcomes */}
+      <details className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <summary className="px-4 py-3 cursor-pointer hover:bg-gray-50 flex items-center justify-between">
+          <span className="text-sm font-black text-gray-800">הימורים מיוחדים — תוצאות</span>
+          <span className="text-[10px] text-gray-400">{Object.keys(specialResults).length}/{SPECIAL_CATS.length} מולאו</span>
+        </summary>
+        <div className="border-t border-gray-100 divide-y divide-gray-50 p-3 space-y-2">
+          {SPECIAL_CATS.map(cat => (
+            <div key={cat.key} className="flex items-center gap-2">
+              <span className="text-xs font-bold text-gray-700 w-28 shrink-0">{cat.label}</span>
+              <span className="text-[10px] text-gray-400 w-12 shrink-0">{cat.pts} נק׳</span>
+              {cat.key === "matchup" ? (
+                <select value={specialResults[cat.key] || ""} onChange={e => setSpecialResults(prev => ({ ...prev, [cat.key]: e.target.value }))}
+                  className="flex-1 h-8 rounded-lg border border-gray-200 text-xs px-2">
+                  <option value="">בחרו</option>
+                  <option value="1">1</option>
+                  <option value="X">X</option>
+                  <option value="2">2</option>
+                </select>
+              ) : cat.key === "penalties" ? (
+                <select value={specialResults[cat.key] || ""} onChange={e => setSpecialResults(prev => ({ ...prev, [cat.key]: e.target.value }))}
+                  className="flex-1 h-8 rounded-lg border border-gray-200 text-xs px-2">
+                  <option value="">בחרו</option>
+                  <option value="OVER">אובר</option>
+                  <option value="UNDER">אנדר</option>
+                </select>
+              ) : cat.key === "prolificGroup" || cat.key === "driestGroup" ? (
+                <select value={specialResults[cat.key] || ""} onChange={e => setSpecialResults(prev => ({ ...prev, [cat.key]: e.target.value }))}
+                  className="flex-1 h-8 rounded-lg border border-gray-200 text-xs px-2">
+                  <option value="">בחרו בית</option>
+                  {"ABCDEFGHIJKL".split("").map(g => <option key={g} value={g}>בית {g}</option>)}
+                </select>
+              ) : cat.key === "bestAttack" || cat.key === "dirtiestTeam" ? (
+                <input type="text" placeholder="קוד נבחרת (ARG, BRA...)" value={specialResults[cat.key] || ""}
+                  onChange={e => setSpecialResults(prev => ({ ...prev, [cat.key]: e.target.value.toUpperCase() }))}
+                  className="flex-1 h-8 rounded-lg border border-gray-200 text-xs px-2" dir="ltr" />
+              ) : (
+                <input type="text" placeholder="שם שחקן" value={specialResults[cat.key] || ""}
+                  onChange={e => setSpecialResults(prev => ({ ...prev, [cat.key]: e.target.value }))}
+                  className="flex-1 h-8 rounded-lg border border-gray-200 text-xs px-2" />
+              )}
+            </div>
+          ))}
+        </div>
+      </details>
     </div>
   );
 }

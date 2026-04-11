@@ -248,27 +248,34 @@ function MatchBetsPanel({ match, profiles, specialBets, advancements, prediction
           <div>
             <p className="text-xs font-bold text-gray-500 mb-2">הימורים על בית {groupLetter}</p>
             <div className="bg-white rounded-lg border border-gray-200 px-3 py-2">
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {bettors.slice(0, 6).map((bettor, i) => {
-                  // Mock group order predictions
                   const mockOrder = i % 2 === 0
                     ? [home, away, "---", "---"]
                     : [away, home, "---", "---"];
                   return (
-                    <div key={bettor} className="text-xs">
-                      <p className="font-bold text-gray-800 mb-0.5">{bettor}</p>
-                      <div className="flex gap-1 text-gray-500">
+                    <div key={bettor} className="text-xs border border-gray-100 rounded-lg p-2">
+                      <p className="font-bold text-gray-800 mb-1">{bettor}</p>
+                      <div className="space-y-0.5">
                         {mockOrder.map((t, j) => (
-                          <span key={j} className={`${j < 2 ? "font-medium text-green-700" : "text-gray-300"}`}>
-                            {j + 1}. {t === "---" ? "..." : (F[t] || t)}
-                          </span>
+                          <div key={j} className={`flex items-center gap-1.5 ${j < 2 ? "text-green-700 font-medium" : "text-gray-400"}`}>
+                            <span className="text-[10px] w-3 shrink-0" style={{ fontFamily: "var(--font-inter)" }}>{j + 1}.</span>
+                            {t !== "---" ? (
+                              <>
+                                <span>{F[t] || "🏳️"}</span>
+                                <span className="truncate">{HE[t] || t}</span>
+                              </>
+                            ) : (
+                              <span className="text-gray-300">...</span>
+                            )}
+                          </div>
                         ))}
                       </div>
                     </div>
                   );
                 })}
               </div>
-              <p className="text-[10px] text-gray-400 mt-1.5">1-2 = עולות מהבית</p>
+              <p className="text-[10px] text-gray-400 mt-1.5 text-center">מקומות 1-2 = עולות מהבית</p>
             </div>
           </div>
         )}

@@ -416,37 +416,44 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </button>
 
       {/* ════════════════════════════════════════════ */}
-      {/* MOBILE BOTTOM NAV — 4 tabs                  */}
+      {/* MOBILE BOTTOM NAV — 5 tabs                  */}
       {/* ════════════════════════════════════════════ */}
       <nav className="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-gray-200 z-50 sm:hidden shadow-[0_-2px_8px_rgba(0,0,0,0.06)]" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
         <div className="flex justify-around items-center h-16">
           {/* Tab 1: Betting */}
           <Link href="/groups"
-            className={`flex flex-col items-center gap-0.5 py-1 min-w-[60px] ${isBettingPage ? "text-blue-600" : "text-gray-400"}`}>
+            className={`flex flex-col items-center gap-0.5 py-1 ${isBettingPage ? "text-blue-600" : "text-gray-400"}`}>
             {Icons.bets(isBettingPage)}
-            <span className="text-[10px] font-bold">הימורים</span>
+            <span className="text-[9px] font-bold">הימורים</span>
             {isBettingPage && <div className="w-1.5 h-1.5 rounded-full bg-blue-600"></div>}
           </Link>
           {/* Tab 2: Standings */}
           <Link href="/standings"
-            className={`flex flex-col items-center gap-0.5 py-1 min-w-[60px] ${pathname === "/standings" || pathname === "/compare" ? "text-gray-900" : "text-gray-400"}`}>
-            {Icons.leaderboard(pathname === "/standings" || pathname === "/compare")}
-            <span className="text-[10px] font-bold">דירוג</span>
-            {(pathname === "/standings" || pathname === "/compare") && <div className="w-1.5 h-1.5 rounded-full bg-gray-900"></div>}
+            className={`flex flex-col items-center gap-0.5 py-1 ${pathname === "/standings" ? "text-gray-900" : "text-gray-400"}`}>
+            {Icons.leaderboard(pathname === "/standings")}
+            <span className="text-[9px] font-bold">דירוג</span>
+            {pathname === "/standings" && <div className="w-1.5 h-1.5 rounded-full bg-gray-900"></div>}
           </Link>
-          {/* Tab 3: Live */}
+          {/* Tab 3: Compare */}
+          <Link href="/compare"
+            className={`flex flex-col items-center gap-0.5 py-1 ${pathname === "/compare" ? "text-gray-900" : "text-gray-400"}`}>
+            {Icons.compare(pathname === "/compare")}
+            <span className="text-[9px] font-bold">השוואה</span>
+            {pathname === "/compare" && <div className="w-1.5 h-1.5 rounded-full bg-gray-900"></div>}
+          </Link>
+          {/* Tab 4: Live */}
           <Link href="/live"
-            className={`flex flex-col items-center gap-0.5 py-1 min-w-[60px] ${pathname === "/live" ? "text-gray-900" : "text-gray-400"}`}>
+            className={`flex flex-col items-center gap-0.5 py-1 ${pathname === "/live" ? "text-gray-900" : "text-gray-400"}`}>
             {Icons.live(pathname === "/live")}
-            <span className="text-[10px] font-bold">לייב</span>
+            <span className="text-[9px] font-bold">לייב</span>
             {pathname === "/live" && <div className="w-1.5 h-1.5 rounded-full bg-gray-900"></div>}
           </Link>
-          {/* Tab 4: Schedule */}
+          {/* Tab 5: Schedule */}
           <Link href="/schedule"
-            className={`flex flex-col items-center gap-0.5 py-1 min-w-[60px] ${pathname === "/schedule" || pathname === "/squads" ? "text-gray-900" : "text-gray-400"}`}>
-            {Icons.schedule(pathname === "/schedule" || pathname === "/squads")}
-            <span className="text-[10px] font-bold">לו״ז</span>
-            {(pathname === "/schedule" || pathname === "/squads") && <div className="w-1.5 h-1.5 rounded-full bg-gray-900"></div>}
+            className={`flex flex-col items-center gap-0.5 py-1 ${pathname === "/schedule" ? "text-gray-900" : "text-gray-400"}`}>
+            {Icons.schedule(pathname === "/schedule")}
+            <span className="text-[9px] font-bold">לו״ז</span>
+            {pathname === "/schedule" && <div className="w-1.5 h-1.5 rounded-full bg-gray-900"></div>}
           </Link>
         </div>
       </nav>

@@ -238,24 +238,7 @@ export default function StandingsPage() {
         </div>
       </div>
 
-      <CompletionTracker players={COMPLETION_DATA} />
-
-      {/* Hero & Roast of the day */}
-      {PLAYERS.length >= 2 && PLAYERS[0]?.name && (() => {
-        const sorted = [...PLAYERS].sort((a, b) => parseInt(b.today || "0") - parseInt(a.today || "0"));
-        const heroPlayer = sorted[0];
-        const roastPlayer = sorted[sorted.length - 1];
-        if (!heroPlayer?.name || !roastPlayer?.name) return null;
-        return (
-          <HeroRoast
-            hero={{ name: heroPlayer.name, points: parseInt(heroPlayer.today || "0"), highlight: `${heroPlayer.exact} מדויקות!` }}
-            roast={{ name: roastPlayer.name, points: parseInt(roastPlayer.today || "0"), highlight: `רק ${roastPlayer.today || "0"} — יום קשה` }}
-            matchday="יום משחק 3"
-          />
-        );
-      })()}
-
-      {/* Main leaderboard */}
+      {/* Main leaderboard — FIRST and most prominent */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden hover:shadow-lg transition-all mb-6">
         <div className="px-5 py-3 bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/40 border-b border-blue-100/50 flex items-center justify-between">
           <div>
@@ -343,6 +326,23 @@ export default function StandingsPage() {
           );
         })}
       </div>
+
+      {/* Hero & Roast + Completion */}
+      {PLAYERS.length >= 2 && PLAYERS[0]?.name && (() => {
+        const sorted = [...PLAYERS].sort((a, b) => parseInt(b.today || "0") - parseInt(a.today || "0"));
+        const heroPlayer = sorted[0];
+        const roastPlayer = sorted[sorted.length - 1];
+        if (!heroPlayer?.name || !roastPlayer?.name) return null;
+        return (
+          <HeroRoast
+            hero={{ name: heroPlayer.name, points: parseInt(heroPlayer.today || "0"), highlight: `${heroPlayer.exact} מדויקות!` }}
+            roast={{ name: roastPlayer.name, points: parseInt(roastPlayer.today || "0"), highlight: `רק ${roastPlayer.today || "0"} — יום קשה` }}
+            matchday="יום משחק 3"
+          />
+        );
+      })()}
+
+      <CompletionTracker players={COMPLETION_DATA} />
 
       {/* Comparison table */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden hover:shadow-lg transition-all mb-6">

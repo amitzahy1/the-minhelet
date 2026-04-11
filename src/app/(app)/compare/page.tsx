@@ -177,15 +177,30 @@ export default function ComparePage() {
     return buildColorMap(all);
   }, [BETTORS]);
 
+  // Lock check — hide predictions until deadline
+  const LOCK_DEADLINE = new Date("2026-06-10T14:00:00Z");
+  const isLocked = new Date() >= LOCK_DEADLINE;
+
   return (
     <div className="max-w-full mx-auto px-4 py-6 pb-24">
       <div className="mb-5">
         <h1 className="text-3xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>השוואת הימורים</h1>
-        <p className="text-base text-gray-600 mt-1">ראו מה כל מהמר בחר — השוואה מלאה בין כל המשתתפים</p>
+        <p className="text-base text-gray-600 mt-1">
+          {isLocked ? "ראו מה כל מהמר בחר — השוואה מלאה" : "ההימורים ייחשפו אחרי הנעילה ב-10.06.2026"}
+        </p>
       </div>
 
-      {/* View tabs */}
-      <div className="mb-5 flex gap-2">
+      {!isLocked && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-8 text-center mb-6">
+          <span className="text-4xl mb-3 block">🔒</span>
+          <h2 className="text-xl font-bold text-amber-800 mb-2">ההימורים עדיין סודיים!</h2>
+          <p className="text-sm text-amber-700">הניחושים של כל המהמרים ייחשפו רק אחרי נעילת ההימורים ב-10 ביוני 2026, 17:00.</p>
+          <p className="text-sm text-amber-600 mt-2">בינתיים — השלימו את ההימורים שלכם!</p>
+        </div>
+      )}
+
+      {/* View tabs — only visible after lock */}
+      {isLocked && <div className="mb-5 flex gap-2 flex-wrap">
         {[
           { key: "advancement" as View, label: "עולות + זוכה" },
           { key: "specials" as View, label: "הימורים מיוחדים" },
@@ -200,8 +215,9 @@ export default function ComparePage() {
             {tab.label}
           </button>
         ))}
-      </div>
+      </div>}
 
+      {isLocked && <>
       {/* === ADVANCEMENT VIEW === */}
       {view === "advancement" && (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
@@ -442,6 +458,7 @@ export default function ComparePage() {
           </div>
         </div>
       )}
+      </>}
     </div>
   );
 }

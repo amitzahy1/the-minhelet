@@ -77,7 +77,7 @@ const MOCK_BETTOR_PICKS: Record<string, Record<number, string>> = {
 
 export default function LivePage() {
   const fireConfetti = useConfetti();
-  const [activeTab, setActiveTab] = useState<"live" | "whatif" | "alive" | "reveals">("live");
+  const [activeTab, setActiveTab] = useState<"live" | "whatif" | "alive">("live");
   const { predictions, brackets, advancements, profiles } = useSharedData();
 
   useEffect(() => {
@@ -89,7 +89,6 @@ export default function LivePage() {
   }, [fireConfetti]);
 
   return (
-    <PullToRefresh onRefresh={async () => { await new Promise(r => setTimeout(r, 1500)); }}>
     <div className="max-w-3xl mx-auto px-4 py-6 pb-24">
       {/* Page header + tabs */}
       <div className="mb-6">
@@ -102,7 +101,6 @@ export default function LivePage() {
             { key: "live" as const, label: "משחקים חיים" },
             { key: "whatif" as const, label: "מה אם...?" },
             { key: "alive" as const, label: "מי חי?" },
-            { key: "reveals" as const, label: "חשיפת אלופות" },
           ]).map(tab => (
             <button key={tab.key} onClick={() => setActiveTab(tab.key)}
               className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all ${
@@ -117,9 +115,7 @@ export default function LivePage() {
       {activeTab === "live" && <LiveTab predictions={predictions} />}
       {activeTab === "whatif" && <WhatIfTab brackets={brackets} />}
       {activeTab === "alive" && <WhosAliveTab advancements={advancements} />}
-      {activeTab === "reveals" && <PredictionRevealsTab advancements={advancements} />}
     </div>
-    </PullToRefresh>
   );
 }
 

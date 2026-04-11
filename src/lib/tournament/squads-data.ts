@@ -12,6 +12,7 @@ export interface PlayerData {
   pos: "GK" | "DEF" | "MID" | "FW";
   starter?: boolean; // true = estimated starting XI
   photo?: string; // player photo URL from API-Football
+  marketValue?: number; // estimated market value in €M
 }
 
 export interface SquadData {
@@ -262,6 +263,9 @@ export const SQUADS_DATA: Record<string, SquadData> = {
   },
 };
 
+// --- Market values ---
+import { getMarketValue } from "./market-values";
+
 // --- API-Football data (48 teams with photos + optional club info) ---
 import apiSquads from "./squads-api.json";
 const API_DATA = apiSquads as Record<string, { players: { nameEn: string; num: number; pos: "GK"|"DEF"|"MID"|"FW"; photo: string; age: number; club?: string }[]; logo?: string }>;
@@ -291,17 +295,19 @@ export function getSquad(code: string): SquadData | null {
   const api = API_DATA[code];
 
   if (manual && api) {
-    // Merge: use manual structure but add photos + clubs from API
+    // Merge: use manual structure but add photos + clubs + market values from API
     const apiMap = new Map(api.players.map(p => [p.nameEn, p]));
     return {
       ...manual,
       players: manual.players.map(p => {
         const apiPlayer = apiMap.get(p.nameEn) || api.players.find(ap => ap.nameEn.includes(p.nameEn.split(" ").pop() || ""));
+        const mv = getMarketValue(p.nameEn);
         return {
           ...p,
           photo: apiPlayer?.photo || undefined,
           // Keep manual club if present, otherwise use API club
           club: p.club || apiPlayer?.club || "",
+          ...(mv !== null ? { marketValue: mv } : {}),
         };
       }),
     };
@@ -309,14 +315,18 @@ export function getSquad(code: string): SquadData | null {
 
   if (api) {
     // API-only team: build a SquadData from API with default formation + starters
-    const players = api.players.map(p => ({
-      name: p.nameEn, // No Hebrew available from API
-      nameEn: p.nameEn,
-      num: p.num,
-      club: p.club || "",
-      pos: p.pos,
-      photo: p.photo,
-    }));
+    const players = api.players.map(p => {
+      const mv = getMarketValue(p.nameEn);
+      return {
+        name: p.nameEn, // No Hebrew available from API
+        nameEn: p.nameEn,
+        num: p.num,
+        club: p.club || "",
+        pos: p.pos,
+        photo: p.photo,
+        ...(mv !== null ? { marketValue: mv } : {}),
+      };
+    });
     const starterNames = pickDefaultStarters(players);
     return {
       coach: "",

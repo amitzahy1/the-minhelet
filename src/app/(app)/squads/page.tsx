@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ALL_TEAMS } from "@/lib/tournament/groups";
 import { SQUADS_DATA, getSquad, getAvailableSquads } from "@/lib/tournament/squads-data";
 import { getTeamColor } from "@/lib/team-colors";
+import { formatMarketValue } from "@/lib/tournament/market-values";
 import { PageTransition } from "@/components/shared/PageTransition";
 
 const F: Record<string,string> = {
@@ -178,6 +179,11 @@ export default function SquadsPage() {
                             <span className="text-sm text-gray-500 ms-1">{p.nameEn}</span>
                             {p.club && <span className="block text-xs text-gray-400 mt-0.5">{p.club}</span>}
                           </div>
+                          {p.marketValue && (
+                            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-1.5 py-0.5 whitespace-nowrap" style={{ fontFamily: "var(--font-inter)" }}>
+                              {formatMarketValue(p.marketValue)}
+                            </span>
+                          )}
                           <span className="text-xs text-gray-400 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>#{p.num}</span>
                         </div>
                       ))}
@@ -206,6 +212,11 @@ export default function SquadsPage() {
                           <span className="text-sm text-gray-400 ms-1">{p.nameEn}</span>
                           {p.club && <span className="block text-xs text-gray-400 mt-0.5">{p.club}</span>}
                         </div>
+                        {p.marketValue && (
+                          <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-1.5 py-0.5 whitespace-nowrap" style={{ fontFamily: "var(--font-inter)" }}>
+                            {formatMarketValue(p.marketValue)}
+                          </span>
+                        )}
                         <span className="text-xs text-gray-400">{p.pos}</span>
                         <span className="text-xs text-gray-400 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>#{p.num}</span>
                       </div>

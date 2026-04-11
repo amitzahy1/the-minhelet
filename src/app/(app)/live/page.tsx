@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useConfetti } from "@/hooks/useConfetti";
 import { RegretMeter } from "@/components/shared/RegretMeter";
 import { getFlag } from "@/lib/flags";
@@ -73,9 +73,23 @@ const MOCK_BETTOR_PICKS: Record<string, Record<number, string>> = {
   "אורי": { 1: "ARG", 2: "NOR", 3: "BRA", 4: "ESP", 5: "GHA", 6: "ENG", 7: "POR", 8: "NED" },
 };
 
+// Mock bettor SCORE predictions for WhatIfTab (home-away for each match)
+const MOCK_BETTOR_SCORE_PREDS: Record<string, Record<number, { home: number; away: number }>> = {
+  "דני":     { 1: { home: 2, away: 0 }, 2: { home: 2, away: 1 }, 3: { home: 3, away: 0 }, 4: { home: 1, away: 0 }, 5: { home: 2, away: 1 }, 6: { home: 3, away: 0 }, 7: { home: 2, away: 0 }, 8: { home: 1, away: 0 } },
+  "יוני":    { 1: { home: 1, away: 0 }, 2: { home: 1, away: 1 }, 3: { home: 2, away: 1 }, 4: { home: 2, away: 0 }, 5: { home: 1, away: 0 }, 6: { home: 2, away: 0 }, 7: { home: 1, away: 0 }, 8: { home: 2, away: 1 } },
+  "דור דסא": { 1: { home: 3, away: 1 }, 2: { home: 2, away: 0 }, 3: { home: 1, away: 0 }, 4: { home: 2, away: 1 }, 5: { home: 3, away: 1 }, 6: { home: 1, away: 0 }, 7: { home: 2, away: 1 }, 8: { home: 1, away: 0 } },
+  "אמית":   { 1: { home: 2, away: 1 }, 2: { home: 3, away: 0 }, 3: { home: 2, away: 0 }, 4: { home: 1, away: 0 }, 5: { home: 2, away: 0 }, 6: { home: 2, away: 1 }, 7: { home: 1, away: 0 }, 8: { home: 2, away: 0 } },
+  "רון ב":  { 1: { home: 0, away: 1 }, 2: { home: 2, away: 0 }, 3: { home: 3, away: 1 }, 4: { home: 1, away: 0 }, 5: { home: 2, away: 0 }, 6: { home: 1, away: 0 }, 7: { home: 2, away: 0 }, 8: { home: 1, away: 1 } },
+  "רון ג":  { 1: { home: 1, away: 0 }, 2: { home: 1, away: 0 }, 3: { home: 2, away: 0 }, 4: { home: 0, away: 2 }, 5: { home: 1, away: 0 }, 6: { home: 0, away: 1 }, 7: { home: 1, away: 0 }, 8: { home: 0, away: 1 } },
+  "רועי":   { 1: { home: 2, away: 0 }, 2: { home: 2, away: 0 }, 3: { home: 1, away: 0 }, 4: { home: 3, away: 0 }, 5: { home: 2, away: 1 }, 6: { home: 2, away: 0 }, 7: { home: 0, away: 1 }, 8: { home: 2, away: 0 } },
+  "עידן":   { 1: { home: 1, away: 0 }, 2: { home: 2, away: 1 }, 3: { home: 2, away: 0 }, 4: { home: 1, away: 0 }, 5: { home: 1, away: 0 }, 6: { home: 3, away: 1 }, 7: { home: 2, away: 0 }, 8: { home: 1, away: 0 } },
+  "אוהד":   { 1: { home: 3, away: 0 }, 2: { home: 1, away: 0 }, 3: { home: 2, away: 1 }, 4: { home: 2, away: 0 }, 5: { home: 2, away: 0 }, 6: { home: 2, away: 0 }, 7: { home: 1, away: 0 }, 8: { home: 3, away: 0 } },
+  "אורי":   { 1: { home: 2, away: 1 }, 2: { home: 0, away: 2 }, 3: { home: 1, away: 0 }, 4: { home: 1, away: 0 }, 5: { home: 0, away: 1 }, 6: { home: 1, away: 0 }, 7: { home: 2, away: 0 }, 8: { home: 2, away: 1 } },
+};
+
 export default function LivePage() {
   const fireConfetti = useConfetti();
-  const [activeTab, setActiveTab] = useState<"live" | "whatif" | "alive">("live");
+  const [activeTab, setActiveTab] = useState<"live" | "whatif" | "alive" | "sim">("live");
   const { predictions, brackets, advancements, profiles } = useSharedData();
 
   useEffect(() => {
@@ -99,6 +113,7 @@ export default function LivePage() {
             { key: "live" as const, label: "משחקים חיים" },
             { key: "whatif" as const, label: "מה אם...?" },
             { key: "alive" as const, label: "מי חי?" },
+            { key: "sim" as const, label: "סימולציה" },
           ]).map(tab => (
             <button key={tab.key} onClick={() => setActiveTab(tab.key)}
               className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all ${
@@ -113,6 +128,7 @@ export default function LivePage() {
       {activeTab === "live" && <LiveTab predictions={predictions} />}
       {activeTab === "whatif" && <WhatIfTab brackets={brackets} />}
       {activeTab === "alive" && <WhosAliveTab advancements={advancements} />}
+      {activeTab === "sim" && <SimulationTab />}
     </div>
   );
 }
@@ -353,9 +369,39 @@ function LiveTab({ predictions }: { predictions: MatchPrediction[] }) {
   );
 }
 
+// Scoring config per stage (from migration defaults)
+function getScoringConfig(stage: string): { toto: number; exact: number } {
+  switch (stage) {
+    case "GROUP": return { toto: 2, exact: 1 };
+    case "R32": case "R16": return { toto: 3, exact: 1 };
+    case "QF": return { toto: 3, exact: 1 };
+    case "SF": return { toto: 3, exact: 2 };
+    case "THIRD": return { toto: 3, exact: 1 };
+    case "FINAL": return { toto: 4, exact: 2 };
+    default: return { toto: 2, exact: 1 };
+  }
+}
+
+function ScoreStepper({ value, onChange, label }: { value: number; onChange: (v: number) => void; label: string }) {
+  return (
+    <div className="flex flex-col items-center gap-1">
+      <span className="text-[10px] font-bold text-gray-400">{label}</span>
+      <div className="flex items-center gap-1">
+        <button onClick={() => onChange(Math.max(0, value - 1))}
+          className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold text-lg flex items-center justify-center transition-colors">-</button>
+        <span className="w-10 text-center font-black text-2xl tabular-nums text-gray-900" style={{ fontFamily: "var(--font-inter)" }}>{value}</span>
+        <button onClick={() => onChange(Math.min(15, value + 1))}
+          className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold text-lg flex items-center justify-center transition-colors">+</button>
+      </div>
+    </div>
+  );
+}
+
 function WhatIfTab({ brackets }: { brackets: BettorBracket[] }) {
   const [selectedMatch, setSelectedMatch] = useState(MOCK_WHATIF_MATCHES[0]);
-  const [simulatedWinner, setSimulatedWinner] = useState<string | null>(null);
+  const [homeGoals, setHomeGoals] = useState<number>(0);
+  const [awayGoals, setAwayGoals] = useState<number>(0);
+  const [hasSimulated, setHasSimulated] = useState(false);
 
   // Build bettor picks from real brackets data, or fall back to mock
   const hasRealBrackets = brackets.length > 0;
@@ -378,82 +424,154 @@ function WhatIfTab({ brackets }: { brackets: BettorBracket[] }) {
     return Object.keys(picks).length > 0 ? picks : MOCK_BETTOR_PICKS;
   }, [brackets, hasRealBrackets]);
 
-  const impact = useMemo(() => {
-    if (!simulatedWinner) return null;
+  const setQuickResult = useCallback((h: number, a: number) => {
+    setHomeGoals(h);
+    setAwayGoals(a);
+    setHasSimulated(true);
+  }, []);
 
-    return Object.entries(bettorPicks).map(([name, picks]) => {
-      const theirPick = picks[selectedMatch.id];
-      const gotItRight = theirPick === simulatedWinner;
-      const pickedFavorite = theirPick === selectedMatch.home;
-      const favoriteWon = simulatedWinner === selectedMatch.home;
-      const upsetForThem = pickedFavorite !== favoriteWon && theirPick !== simulatedWinner;
+  // Auto-simulate when score changes
+  useEffect(() => {
+    if (homeGoals > 0 || awayGoals > 0) setHasSimulated(true);
+  }, [homeGoals, awayGoals]);
+
+  const impact = useMemo(() => {
+    if (!hasSimulated) return null;
+    const { toto: totoPoints, exact: exactPoints } = getScoringConfig(selectedMatch.stage);
+    const simDir = homeGoals > awayGoals ? "1" : awayGoals > homeGoals ? "2" : "X";
+    const simWinner = homeGoals > awayGoals ? selectedMatch.home : awayGoals > homeGoals ? selectedMatch.away : null;
+    const isKnockout = selectedMatch.stage !== "GROUP";
+
+    return Object.entries(MOCK_BETTOR_SCORE_PREDS).map(([name, preds]) => {
+      const pred = preds[selectedMatch.id];
+      if (!pred) return null;
+
+      const predDir = pred.home > pred.away ? "1" : pred.away > pred.home ? "2" : "X";
+      const totoCorrect = predDir === simDir;
+      const exactCorrect = pred.home === homeGoals && pred.away === awayGoals;
+      const points = (totoCorrect ? totoPoints : 0) + (exactCorrect ? exactPoints : 0);
+
+      // Bracket check for knockout
+      const bracketPick = bettorPicks[name]?.[selectedMatch.id];
+      const bracketAlive = !isKnockout || !simWinner ? null : bracketPick === simWinner;
 
       return {
         name,
-        pick: theirPick,
-        correct: gotItRight,
-        pointsGained: gotItRight ? 3 : 0,
-        bracketAlive: gotItRight,
-        upset: upsetForThem,
+        predHome: pred.home,
+        predAway: pred.away,
+        totoCorrect,
+        exactCorrect,
+        points,
+        bracketAlive,
+        bracketPick,
         isYou: name === "אמית",
       };
-    }).sort((a, b) => b.pointsGained - a.pointsGained);
-  }, [selectedMatch, simulatedWinner, bettorPicks]);
+    }).filter(Boolean).sort((a, b) => b!.points - a!.points) as {
+      name: string; predHome: number; predAway: number; totoCorrect: boolean;
+      exactCorrect: boolean; points: number; bracketAlive: boolean | null;
+      bracketPick: string | undefined; isYou: boolean;
+    }[];
+  }, [selectedMatch, homeGoals, awayGoals, hasSimulated, bettorPicks]);
 
-  const winnersCount = impact?.filter(i => i.correct).length || 0;
-  const losersCount = impact?.filter(i => !i.correct).length || 0;
+  const totalPoints = impact?.reduce((s, i) => s + i.points, 0) || 0;
+  const exactCount = impact?.filter(i => i.exactCorrect).length || 0;
+  const totoCount = impact?.filter(i => i.totoCorrect && !i.exactCorrect).length || 0;
 
   return (
     <>
-      {/* Winner selector — compact, at top */}
+      {/* Score input */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-3">
-        <div className="px-3 py-2 bg-blue-50/50 border-b border-blue-100/50 flex items-center justify-between">
-          <span className="text-sm font-bold text-gray-800">{getFlag(selectedMatch.home)} {selectedMatch.homeName} vs {selectedMatch.awayName} {getFlag(selectedMatch.away)}</span>
+        <div className="px-4 py-2.5 bg-blue-50/50 border-b border-blue-100/50 flex items-center justify-between">
+          <span className="text-sm font-bold text-gray-800">
+            {getFlag(selectedMatch.home)} {selectedMatch.homeName} vs {selectedMatch.awayName} {getFlag(selectedMatch.away)}
+          </span>
+          <span className="text-[10px] text-gray-400 font-bold">{selectedMatch.stage}</span>
         </div>
-        <div className="p-2 flex gap-2">
-          <button onClick={() => setSimulatedWinner(selectedMatch.home)}
-            className={`flex-1 py-2.5 rounded-lg border-2 text-center font-bold text-sm transition-all ${
-              simulatedWinner === selectedMatch.home ? "border-green-400 bg-green-50 text-green-700" : "border-gray-200 text-gray-600"
-            }`}>
-            {getFlag(selectedMatch.home)} {selectedMatch.homeName}
+        <div className="px-4 py-4 flex items-center justify-center gap-6">
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-3xl">{getFlag(selectedMatch.home)}</span>
+            <span className="text-xs font-bold text-gray-700">{selectedMatch.homeName}</span>
+          </div>
+          <ScoreStepper value={homeGoals} onChange={(v) => { setHomeGoals(v); setHasSimulated(true); }} label="גולים" />
+          <span className="text-3xl text-gray-300 font-light mt-4">:</span>
+          <ScoreStepper value={awayGoals} onChange={(v) => { setAwayGoals(v); setHasSimulated(true); }} label="גולים" />
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-3xl">{getFlag(selectedMatch.away)}</span>
+            <span className="text-xs font-bold text-gray-700">{selectedMatch.awayName}</span>
+          </div>
+        </div>
+        {/* Quick buttons */}
+        <div className="px-4 pb-3 flex gap-2 justify-center">
+          <button onClick={() => setQuickResult(1, 0)}
+            className="px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-50 transition-colors">
+            {selectedMatch.homeName} מנצחת 1-0
           </button>
-          <button onClick={() => setSimulatedWinner(selectedMatch.away)}
-            className={`flex-1 py-2.5 rounded-lg border-2 text-center font-bold text-sm transition-all ${
-              simulatedWinner === selectedMatch.away ? "border-green-400 bg-green-50 text-green-700" : "border-gray-200 text-gray-600"
-            }`}>
-            {getFlag(selectedMatch.away)} {selectedMatch.awayName}
+          <button onClick={() => setQuickResult(0, 1)}
+            className="px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-50 transition-colors">
+            {selectedMatch.awayName} מנצחת 0-1
+          </button>
+          <button onClick={() => setQuickResult(1, 1)}
+            className="px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-50 transition-colors">
+            תיקו 1-1
           </button>
         </div>
       </div>
 
-      {/* Impact */}
-      {impact && simulatedWinner && (
+      {/* Impact table */}
+      {impact && hasSimulated && (
         <div className="space-y-2 mb-4">
-          <div className="grid grid-cols-2 gap-2">
-            <div className="bg-green-50 border border-green-200 rounded-lg p-2 text-center">
-              <p className="text-xl font-black text-green-600">{winnersCount}</p>
-              <p className="text-[10px] font-bold text-green-700">ניחשו נכון</p>
+          {/* Summary */}
+          <div className="grid grid-cols-3 gap-2">
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-2 text-center">
+              <p className="text-xl font-black text-amber-600">{exactCount}</p>
+              <p className="text-[10px] font-bold text-amber-700">מדויקת</p>
             </div>
-            <div className="bg-red-50 border border-red-200 rounded-lg p-2 text-center">
-              <p className="text-xl font-black text-red-600">{losersCount}</p>
-              <p className="text-[10px] font-bold text-red-700">טעו</p>
+            <div className="bg-green-50 border border-green-200 rounded-lg p-2 text-center">
+              <p className="text-xl font-black text-green-600">{totoCount}</p>
+              <p className="text-[10px] font-bold text-green-700">טוטו בלבד</p>
+            </div>
+            <div className="bg-purple-50 border border-purple-200 rounded-lg p-2 text-center">
+              <p className="text-xl font-black text-purple-600">{totalPoints}</p>
+              <p className="text-[10px] font-bold text-purple-700">סה״כ נק׳</p>
             </div>
           </div>
+
+          {/* Per-bettor results */}
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
             <div className="divide-y divide-gray-100">
               {impact.map(i => (
-                <div key={i.name} className={`flex items-center gap-2 px-3 py-2 ${i.isYou ? "bg-blue-50/40" : ""}`}>
-                  <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                    i.correct ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-                  }`}>{i.correct ? "✓" : "✗"}</span>
+                <div key={i.name} className={`flex items-center gap-2 px-3 py-2.5 ${i.isYou ? "bg-blue-50/40" : ""}`}>
+                  {/* Toto/exact indicators */}
+                  <span className="flex gap-0.5">
+                    {i.totoCorrect && <span className="text-green-500 text-sm" title="טוטו נכון">&#10003;</span>}
+                    {i.exactCorrect && <span className="text-amber-500 text-sm" title="מדויקת">&#9733;</span>}
+                    {!i.totoCorrect && <span className="text-red-400 text-sm">&#10007;</span>}
+                  </span>
                   <span className="font-bold text-xs text-gray-900 flex-1">{i.name}</span>
-                  <span className="text-[10px] text-gray-400">{getFlag(i.pick)} {i.pick}</span>
-                  <span className={`text-xs font-bold ${i.correct ? "text-green-600" : "text-red-500"}`}>
-                    {i.correct ? `+${i.pointsGained}` : "נפסל"}
+                  <span className="text-xs text-gray-500 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>
+                    {i.predHome}-{i.predAway}
+                  </span>
+                  {i.bracketAlive !== null && (
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                      i.bracketAlive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                    }`}>
+                      {i.bracketAlive ? "עץ חי" : "עץ מת"}
+                    </span>
+                  )}
+                  <span className={`text-sm font-black tabular-nums min-w-[28px] text-left ${
+                    i.points > 0 ? "text-green-600" : "text-gray-300"
+                  }`} style={{ fontFamily: "var(--font-inter)" }}>
+                    +{i.points}
                   </span>
                 </div>
               ))}
             </div>
+          </div>
+          {/* Legend */}
+          <div className="flex gap-3 text-[10px] text-gray-400 px-1">
+            <span className="flex items-center gap-1"><span className="text-green-500">&#10003;</span> טוטו נכון</span>
+            <span className="flex items-center gap-1"><span className="text-amber-500">&#9733;</span> מדויקת</span>
+            <span className="flex items-center gap-1"><span className="text-red-400">&#10007;</span> טעה</span>
           </div>
         </div>
       )}
@@ -463,7 +581,7 @@ function WhatIfTab({ brackets }: { brackets: BettorBracket[] }) {
         <summary className="px-3 py-2 cursor-pointer text-sm font-bold text-gray-600 hover:bg-gray-50">החלף משחק</summary>
         <div className="p-2 grid grid-cols-1 sm:grid-cols-2 gap-1 border-t border-gray-100">
           {MOCK_WHATIF_MATCHES.map(m => (
-            <button key={m.id} onClick={() => { setSelectedMatch(m); setSimulatedWinner(null); }}
+            <button key={m.id} onClick={() => { setSelectedMatch(m); setHomeGoals(0); setAwayGoals(0); setHasSimulated(false); }}
               className={`flex items-center justify-between px-3 py-2 rounded-lg border text-xs transition-all ${
                 selectedMatch.id === m.id ? "border-blue-300 bg-blue-50" : "border-gray-100 hover:bg-gray-50"
               }`}>
@@ -544,6 +662,23 @@ const MOCK_WHOS_ALIVE_DATA = [
     dead: ["GER"],
   },
 ];
+
+function SimulationTab() {
+  return (
+    <div className="space-y-4">
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 text-center">
+        <span className="text-4xl mb-3 block">🧪</span>
+        <h2 className="text-xl font-bold text-gray-900 mb-2">סימולטור טורניר</h2>
+        <p className="text-sm text-gray-600 mb-4">הזינו תוצאות לכל המשחקים הנותרים ותראו איך הטבלה משתנה</p>
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-amber-800">
+          <p className="font-bold mb-1">בקרוב!</p>
+          <p>הסימולטור המלא יהיה זמין כשהטורניר מתחיל (11.6.2026).</p>
+          <p className="mt-1">בינתיים — השתמשו בטאב "מה אם?" לבדיקת משחקים בודדים.</p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function WhosAliveTab({ advancements }: { advancements: BettorAdvancement[] }) {
   // Build WhosAlive data from real advancements, or fall back to mock

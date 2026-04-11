@@ -2,7 +2,15 @@
 
 import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { FLAGS, getFlag, getTeamNameHe } from "@/lib/flags";
+import { getFlag, getTeamNameHe } from "@/lib/flags";
+
+interface SpecialBets {
+  topScorer: { player: string; team: string };
+  topAssists: { player: string; team: string };
+  bestAttack: string;
+  dirtiestTeam: string;
+  matchup: string;
+}
 
 interface WhosAliveProps {
   bettors: {
@@ -12,6 +20,7 @@ interface WhosAliveProps {
     quarterfinalists: string[];
     alive: string[];
     dead: string[];
+    specialBets?: SpecialBets;
   }[];
 }
 
@@ -24,6 +33,13 @@ const MOCK_BETTORS: WhosAliveProps["bettors"] = [
     quarterfinalists: ["ARG", "GER", "FRA", "BRA", "ESP", "ENG", "NED", "POR"],
     alive: ["ARG", "FRA", "BRA", "ESP", "ENG", "NED", "POR"],
     dead: ["GER"],
+    specialBets: {
+      topScorer: { player: "Messi", team: "ARG" },
+      topAssists: { player: "De Bruyne", team: "BEL" },
+      bestAttack: "GER",
+      dirtiestTeam: "URU",
+      matchup: "1",
+    },
   },
   {
     name: "דני",
@@ -32,6 +48,13 @@ const MOCK_BETTORS: WhosAliveProps["bettors"] = [
     quarterfinalists: ["ARG", "FRA", "BRA", "GER", "ESP", "POR", "ENG", "NED"],
     alive: ["ARG", "FRA", "BRA", "ESP", "ENG", "NED"],
     dead: ["NZL", "GER", "POR"],
+    specialBets: {
+      topScorer: { player: "Mbappé", team: "FRA" },
+      topAssists: { player: "Pedri", team: "ESP" },
+      bestAttack: "FRA",
+      dirtiestTeam: "ARG",
+      matchup: "X",
+    },
   },
   {
     name: "יוני",
@@ -40,6 +63,13 @@ const MOCK_BETTORS: WhosAliveProps["bettors"] = [
     quarterfinalists: ["FRA", "BRA", "ENG", "ARG", "GER", "ESP", "NED", "POR"],
     alive: ["FRA", "BRA", "ENG", "ARG", "ESP", "NED", "POR"],
     dead: ["GER"],
+    specialBets: {
+      topScorer: { player: "Haaland", team: "NOR" },
+      topAssists: { player: "Saka", team: "ENG" },
+      bestAttack: "BRA",
+      dirtiestTeam: "MAR",
+      matchup: "2",
+    },
   },
   {
     name: "רון ב",
@@ -48,6 +78,13 @@ const MOCK_BETTORS: WhosAliveProps["bettors"] = [
     quarterfinalists: ["ENG", "FRA", "BRA", "POR", "ARG", "GER", "ESP", "NED"],
     alive: ["ENG", "FRA", "BRA", "ARG", "ESP", "NED"],
     dead: ["POR", "GER"],
+    specialBets: {
+      topScorer: { player: "Kane", team: "ENG" },
+      topAssists: { player: "Messi", team: "ARG" },
+      bestAttack: "ARG",
+      dirtiestTeam: "GER",
+      matchup: "1",
+    },
   },
   {
     name: "רועי",
@@ -56,6 +93,13 @@ const MOCK_BETTORS: WhosAliveProps["bettors"] = [
     quarterfinalists: ["GER", "FRA", "ARG", "BRA", "ESP", "ENG", "NED", "POR"],
     alive: ["FRA", "ARG", "BRA", "ESP", "ENG", "NED", "POR"],
     dead: ["GER"],
+    specialBets: {
+      topScorer: { player: "Vinícius Jr", team: "BRA" },
+      topAssists: { player: "Griezmann", team: "FRA" },
+      bestAttack: "ESP",
+      dirtiestTeam: "NED",
+      matchup: "X",
+    },
   },
   {
     name: "עידן",
@@ -64,6 +108,13 @@ const MOCK_BETTORS: WhosAliveProps["bettors"] = [
     quarterfinalists: ["FRA", "ARG", "BRA", "ENG", "GER", "ESP", "NED", "POR"],
     alive: ["FRA", "ARG", "BRA", "ENG", "ESP", "NED", "POR"],
     dead: ["GER"],
+    specialBets: {
+      topScorer: { player: "Mbappé", team: "FRA" },
+      topAssists: { player: "Bruno Fernandes", team: "POR" },
+      bestAttack: "ENG",
+      dirtiestTeam: "CRO",
+      matchup: "2",
+    },
   },
 ];
 
@@ -106,6 +157,98 @@ function TeamTag({
       <span>{getFlag(code)}</span>
       <span className="font-bold text-gray-400 line-through">{code}</span>
     </span>
+  );
+}
+
+function getTeamStatus(
+  team: string,
+  alive: string[],
+  dead: string[]
+): "alive" | "dead" | "unknown" {
+  if (alive.includes(team)) return "alive";
+  if (dead.includes(team)) return "dead";
+  return "unknown";
+}
+
+const STATUS_ICON: Record<"alive" | "dead" | "unknown", string> = {
+  alive: "🟢",
+  dead: "🔴",
+  unknown: "🟡",
+};
+
+const STATUS_SUFFIX: Record<"alive" | "dead" | "unknown", string> = {
+  alive: "הנבחרת בחיים",
+  dead: "הנבחרת הודחה",
+  unknown: "טרם הוכרע",
+};
+
+interface SpecialBetRow {
+  label: string;
+  value: string;
+  status: "alive" | "dead" | "unknown";
+  points: number;
+}
+
+function SpecialBetsSection({
+  specialBets,
+  alive,
+  dead,
+}: {
+  specialBets: SpecialBets;
+  alive: string[];
+  dead: string[];
+}) {
+  const rows: SpecialBetRow[] = [
+    {
+      label: "מלך שערים",
+      value: `${specialBets.topScorer.player} (${specialBets.topScorer.team})`,
+      status: getTeamStatus(specialBets.topScorer.team, alive, dead),
+      points: 9,
+    },
+    {
+      label: "מלך אסיסטים",
+      value: `${specialBets.topAssists.player} (${specialBets.topAssists.team})`,
+      status: getTeamStatus(specialBets.topAssists.team, alive, dead),
+      points: 7,
+    },
+    {
+      label: "התקפה הכי טובה",
+      value: specialBets.bestAttack,
+      status: getTeamStatus(specialBets.bestAttack, alive, dead),
+      points: 6,
+    },
+    {
+      label: "הכי כסחנית",
+      value: specialBets.dirtiestTeam,
+      status: getTeamStatus(specialBets.dirtiestTeam, alive, dead),
+      points: 5,
+    },
+    {
+      label: "מאצ׳אפ",
+      value: specialBets.matchup,
+      status: "unknown" as const,
+      points: 4,
+    },
+  ];
+
+  return (
+    <div className="px-4 py-2.5 border-t border-gray-100">
+      <p className="text-xs font-bold text-gray-500 mb-1.5">הימורים מיוחדים:</p>
+      <div className="space-y-1">
+        {rows.map((row) => (
+          <div key={row.label} className="flex items-center gap-1.5 text-xs">
+            <span>{STATUS_ICON[row.status]}</span>
+            <span className="font-bold text-gray-700">{row.label}:</span>
+            <span className="text-gray-600">
+              {row.value} — {STATUS_SUFFIX[row.status]}
+            </span>
+            <span className="text-gray-400 ms-auto whitespace-nowrap" style={{ fontFamily: "var(--font-inter)" }}>
+              שווה {row.points} נק&apos;
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -239,6 +382,15 @@ export default function WhosAlive({
                     />
                   ))}
               </div>
+
+              {/* Special bets */}
+              {bettor.specialBets && (
+                <SpecialBetsSection
+                  specialBets={bettor.specialBets}
+                  alive={bettor.alive}
+                  dead={bettor.dead}
+                />
+              )}
             </motion.div>
           );
         })}

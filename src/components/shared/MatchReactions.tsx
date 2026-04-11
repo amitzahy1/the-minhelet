@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 // ============================================================================
-// Match Reactions — emoji reactions + short comments below live match cards
+// Match Reactions — short comments below live match cards
 // Adds social engagement layer to the live experience
 // ============================================================================
 
@@ -23,15 +23,13 @@ interface Comment {
 
 interface MatchReactionsProps {
   matchId: string;
-  reactions: Reaction[];
+  reactions?: Reaction[];
   comments: Comment[];
   onReact?: (emoji: string) => void;
   onComment?: (text: string) => void;
 }
 
-const EMOJI_OPTIONS = ["⚽", "🔥", "😂", "😱", "💀", "👏"];
 const MAX_COMMENT_LENGTH = 100;
-const CURRENT_USER_ID = "4"; // mock current user
 
 // --- Mock data for demonstration ---
 export const MOCK_REACTIONS: MatchReactionsProps = {
@@ -54,58 +52,18 @@ export const MOCK_REACTIONS: MatchReactionsProps = {
 };
 
 export function MatchReactions({
-  matchId,
-  reactions,
   comments,
-  onReact,
   onComment,
 }: MatchReactionsProps) {
-  const [localReactions, setLocalReactions] = useState<Reaction[]>(reactions);
   const [localComments, setLocalComments] = useState<Comment[]>(comments);
   const [commentText, setCommentText] = useState("");
-  const [tappedEmoji, setTappedEmoji] = useState<string | null>(null);
-
-  // Count reactions per emoji
-  const reactionCounts = EMOJI_OPTIONS.map((emoji) => ({
-    emoji,
-    count: localReactions.filter((r) => r.emoji === emoji).length,
-    hasReacted: localReactions.some(
-      (r) => r.emoji === emoji && r.userId === CURRENT_USER_ID
-    ),
-  }));
-
-  const handleReact = (emoji: string) => {
-    setTappedEmoji(emoji);
-    setTimeout(() => setTappedEmoji(null), 300);
-
-    const alreadyReacted = localReactions.find(
-      (r) => r.emoji === emoji && r.userId === CURRENT_USER_ID
-    );
-
-    if (alreadyReacted) {
-      // Toggle off
-      setLocalReactions((prev) =>
-        prev.filter(
-          (r) => !(r.emoji === emoji && r.userId === CURRENT_USER_ID)
-        )
-      );
-    } else {
-      // Toggle on
-      setLocalReactions((prev) => [
-        ...prev,
-        { emoji, userId: CURRENT_USER_ID, userName: "אמית" },
-      ]);
-    }
-
-    onReact?.(emoji);
-  };
 
   const handleSubmitComment = () => {
     const trimmed = commentText.trim();
     if (!trimmed || trimmed.length > MAX_COMMENT_LENGTH) return;
 
     const newComment: Comment = {
-      userId: CURRENT_USER_ID,
+      userId: "4",
       userName: "אמית",
       text: trimmed,
       timestamp: "עכשיו",
@@ -118,46 +76,6 @@ export function MatchReactions({
 
   return (
     <div className="border-t border-gray-100 px-4 py-3" dir="rtl">
-      {/* Emoji reaction row */}
-      <div className="flex items-center gap-1.5 mb-3">
-        {reactionCounts.map(({ emoji, count, hasReacted }) => (
-          <motion.button
-            key={`${matchId}-${emoji}`}
-            onClick={() => handleReact(emoji)}
-            whileTap={{ scale: 1.3 }}
-            animate={
-              tappedEmoji === emoji
-                ? { scale: [1, 1.4, 1], rotate: [0, -10, 10, 0] }
-                : {}
-            }
-            transition={{ duration: 0.3 }}
-            className={`flex items-center gap-1 rounded-full px-2.5 py-1.5 text-sm border transition-colors ${
-              hasReacted
-                ? "bg-blue-50 border-blue-300 shadow-sm"
-                : "bg-gray-50 border-gray-200 hover:bg-gray-100"
-            }`}
-          >
-            <span className="text-base">{emoji}</span>
-            {count > 0 && (
-              <AnimatePresence mode="popLayout">
-                <motion.span
-                  key={count}
-                  initial={{ opacity: 0, scale: 0.5 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.5 }}
-                  className={`text-xs font-bold tabular-nums ${
-                    hasReacted ? "text-blue-600" : "text-gray-500"
-                  }`}
-                  style={{ fontFamily: "var(--font-inter)" }}
-                >
-                  {count}
-                </motion.span>
-              </AnimatePresence>
-            )}
-          </motion.button>
-        ))}
-      </div>
-
       {/* Comments list */}
       {localComments.length > 0 && (
         <div className="space-y-1.5 mb-3 max-h-36 overflow-y-auto">

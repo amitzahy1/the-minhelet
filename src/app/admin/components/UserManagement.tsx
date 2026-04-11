@@ -3,9 +3,13 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { createClient } from "@/lib/supabase/client";
 
 export function UserManagement() {
   const [users, setUsers] = useState<{ id: string; email: string; name: string; visible: boolean; lastLogin: string }[]>([]);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -37,6 +41,14 @@ export function UserManagement() {
     const updated = users.map(u => u.id === userId ? { ...u, visible: !u.visible } : u);
     const hidden = updated.filter(u => !u.visible).map(u => u.id);
     localStorage.setItem("wc2026-hidden-users", JSON.stringify(hidden));
+  }
+
+  async function saveNickname(userId: string) {
+    const supabase = createClient();
+    await supabase.from("profiles").update({ display_name: editName }).eq("id", userId);
+    setUsers(prev => prev.map(u => u.id === userId ? { ...u, name: editName } : u));
+    setEditingId(null);
+    setEditName("");
   }
 
   function hideAllTest() {
@@ -82,8 +94,23 @@ export function UserManagement() {
                     <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold text-gray-600">
                       {u.name[0]?.toUpperCase() || "?"}
                     </div>
-                    <div>
-                      <p className="font-bold text-sm text-gray-900">{u.name}</p>
+                    <div className="flex-1 min-w-0">
+                      {editingId === u.id ? (
+                        <div className="flex items-center gap-1.5">
+                          <Input value={editName} onChange={e => setEditName(e.target.value)} className="h-7 text-sm w-32" autoFocus
+                            onKeyDown={e => { if (e.key === "Enter") saveNickname(u.id); if (e.key === "Escape") setEditingId(null); }} />
+                          <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => saveNickname(u.id)}>שמור</Button>
+                          <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setEditingId(null)}>ביטול</Button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1.5">
+                          <p className="font-bold text-sm text-gray-900">{u.name}</p>
+                          <button onClick={() => { setEditingId(u.id); setEditName(u.name); }}
+                            className="text-gray-400 hover:text-blue-500 transition-colors" title="שנה כינוי">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                          </button>
+                        </div>
+                      )}
                       {u.email && <p className="text-xs text-gray-400" dir="ltr">{u.email}</p>}
                     </div>
                   </div>

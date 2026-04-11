@@ -240,7 +240,7 @@ export default function StandingsPage() {
       </div>
 
       {/* Main leaderboard — FIRST and most prominent */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden hover:shadow-lg transition-all mb-6">
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-visible hover:shadow-lg transition-all mb-6">
         <div className="px-5 py-3 bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/40 border-b border-blue-100/50 flex items-center justify-between">
           <div>
             <h2 className="text-base font-bold text-gray-800">טבלת דירוג</h2>

@@ -1,6 +1,7 @@
 "use client";
 import { LoadingPage } from "@/components/shared/LoadingAnimation";
 import { useSharedData } from "@/hooks/useSharedData";
+import { useBettingStore } from "@/stores/betting-store";
 import { getFlag, getTeamNameHe } from "@/lib/flags";
 import type { BettorProfile, BettorSpecialBets, BettorAdvancement, MatchPrediction } from "@/lib/supabase/shared-data";
 
@@ -89,6 +90,24 @@ function MatchBetsPanel({ match, profiles, specialBets, advancements, prediction
 
   // Find related special bets for this match's teams
   const relatedBets: { bettor: string; type: string; detail: string }[] = [];
+
+  // Always include current user's local bets
+  const myBets = useBettingStore.getState().specialBets;
+  if (myBets.winner && (myBets.winner === home || myBets.winner === away)) {
+    relatedBets.push({ bettor: "אתה", type: "אלוף", detail: `${getFlag(myBets.winner)} ${getTeamNameHe(myBets.winner)}` });
+  }
+  if (myBets.topScorerTeam && (myBets.topScorerTeam === home || myBets.topScorerTeam === away) && myBets.topScorerPlayer) {
+    relatedBets.push({ bettor: "אתה", type: "מלך שערים", detail: `${myBets.topScorerPlayer} (${getFlag(myBets.topScorerTeam)} ${getTeamNameHe(myBets.topScorerTeam)})` });
+  }
+  if (myBets.topAssistsTeam && (myBets.topAssistsTeam === home || myBets.topAssistsTeam === away) && myBets.topAssistsPlayer) {
+    relatedBets.push({ bettor: "אתה", type: "מלך בישולים", detail: `${myBets.topAssistsPlayer} (${getFlag(myBets.topAssistsTeam)} ${getTeamNameHe(myBets.topAssistsTeam)})` });
+  }
+  if (myBets.bestAttack && (myBets.bestAttack === home || myBets.bestAttack === away)) {
+    relatedBets.push({ bettor: "אתה", type: "התקפה הכי טובה", detail: `${getFlag(myBets.bestAttack)} ${getTeamNameHe(myBets.bestAttack)}` });
+  }
+  if (myBets.dirtiestTeam && (myBets.dirtiestTeam === home || myBets.dirtiestTeam === away)) {
+    relatedBets.push({ bettor: "אתה", type: "הכי כסחנית", detail: `${getFlag(myBets.dirtiestTeam)} ${getTeamNameHe(myBets.dirtiestTeam)}` });
+  }
 
   if (hasSpecialBets || hasAdvancements) {
     // Build a unique name list from profiles for consistent display

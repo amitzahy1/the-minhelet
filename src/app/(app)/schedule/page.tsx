@@ -109,6 +109,31 @@ function MatchBetsPanel({ match, profiles, specialBets, advancements, prediction
     relatedBets.push({ bettor: "אתה", type: "הכי כסחנית", detail: `${getFlag(myBets.dirtiestTeam)} ${getTeamNameHe(myBets.dirtiestTeam)}` });
   }
 
+  // Always show mock bettors' special bets (until real Supabase data replaces them)
+  {
+    const mockBettors = Object.keys(MOCK_SPECIAL_BETS);
+    for (const bettor of mockBettors) {
+      const sb = MOCK_SPECIAL_BETS[bettor];
+      if (!sb) continue;
+      if (sb.winner === home || sb.winner === away) {
+        relatedBets.push({ bettor, type: "אלוף", detail: `${getFlag(sb.winner)} ${getTeamNameHe(sb.winner)}` });
+      }
+      if (sb.topScorer.team === home || sb.topScorer.team === away) {
+        relatedBets.push({ bettor, type: "מלך שערים", detail: `${sb.topScorer.player} (${getFlag(sb.topScorer.team)} ${getTeamNameHe(sb.topScorer.team)})` });
+      }
+      if (sb.topAssists.team === home || sb.topAssists.team === away) {
+        relatedBets.push({ bettor, type: "מלך בישולים", detail: `${sb.topAssists.player} (${getFlag(sb.topAssists.team)} ${getTeamNameHe(sb.topAssists.team)})` });
+      }
+      if (sb.bestAttack === home || sb.bestAttack === away) {
+        relatedBets.push({ bettor, type: "התקפה הכי טובה", detail: `${getFlag(sb.bestAttack)} ${getTeamNameHe(sb.bestAttack)}` });
+      }
+      if (sb.dirtiestTeam === home || sb.dirtiestTeam === away) {
+        relatedBets.push({ bettor, type: "הכי כסחנית", detail: `${getFlag(sb.dirtiestTeam)} ${getTeamNameHe(sb.dirtiestTeam)}` });
+      }
+    }
+  }
+
+  // Also add real Supabase data if available (will override/supplement mock)
   if (hasSpecialBets || hasAdvancements) {
     // Build a unique name list from profiles for consistent display
     const allBettorNames = Array.from(new Set([
@@ -154,29 +179,6 @@ function MatchBetsPanel({ match, profiles, specialBets, advancements, prediction
       // Dirtiest team
       if (sb.dirtiestTeam && (sb.dirtiestTeam === home || sb.dirtiestTeam === away)) {
         relatedBets.push({ bettor: bettorName, type: "הכי כסחנית", detail: `${getFlag(sb.dirtiestTeam)} ${getTeamNameHe(sb.dirtiestTeam)}` });
-      }
-    }
-  } else {
-    // Fallback to mock special bets
-    const mockBettors = Object.keys(MOCK_SPECIAL_BETS);
-    for (const bettor of mockBettors) {
-      const sb = MOCK_SPECIAL_BETS[bettor];
-      if (!sb) continue;
-
-      if (sb.winner === home || sb.winner === away) {
-        relatedBets.push({ bettor, type: "אלוף", detail: `${getFlag(sb.winner)} ${getTeamNameHe(sb.winner)}` });
-      }
-      if (sb.topScorer.team === home || sb.topScorer.team === away) {
-        relatedBets.push({ bettor, type: "מלך שערים", detail: `${sb.topScorer.player} (${getFlag(sb.topScorer.team)} ${getTeamNameHe(sb.topScorer.team)})` });
-      }
-      if (sb.topAssists.team === home || sb.topAssists.team === away) {
-        relatedBets.push({ bettor, type: "מלך בישולים", detail: `${sb.topAssists.player} (${getFlag(sb.topAssists.team)} ${getTeamNameHe(sb.topAssists.team)})` });
-      }
-      if (sb.bestAttack === home || sb.bestAttack === away) {
-        relatedBets.push({ bettor, type: "התקפה הכי טובה", detail: `${getFlag(sb.bestAttack)} ${getTeamNameHe(sb.bestAttack)}` });
-      }
-      if (sb.dirtiestTeam === home || sb.dirtiestTeam === away) {
-        relatedBets.push({ bettor, type: "הכי כסחנית", detail: `${getFlag(sb.dirtiestTeam)} ${getTeamNameHe(sb.dirtiestTeam)}` });
       }
     }
   }

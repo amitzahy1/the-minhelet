@@ -2,6 +2,7 @@
 import { LoadingPage } from "@/components/shared/LoadingAnimation";
 import { useSharedData } from "@/hooks/useSharedData";
 import { useBettingStore } from "@/stores/betting-store";
+import { isLocked } from "@/lib/constants";
 import { getFlag, getTeamNameHe } from "@/lib/flags";
 import type { BettorProfile, BettorSpecialBets, BettorAdvancement, MatchPrediction } from "@/lib/supabase/shared-data";
 
@@ -74,6 +75,7 @@ function MatchBetsPanel({ match, profiles, specialBets, advancements, prediction
   const home = match.homeTla;
   const away = match.awayTla;
   const groupLetter = match.group?.replace("GROUP_", "") || "";
+  const locked = isLocked();
 
   // Real predictions for this match
   const realPredictions = predictions.filter(p => p.matchId === match.id);
@@ -199,8 +201,13 @@ function MatchBetsPanel({ match, profiles, specialBets, advancements, prediction
       className="overflow-hidden"
     >
       <div className="border-t border-gray-100 bg-gray-50/70 px-4 py-3 space-y-4">
-        {/* Score predictions */}
-        <div>
+        {!locked && (
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-center">
+            <p className="text-xs font-bold text-amber-700">הניחושים ייחשפו אחרי נעילת ההימורים (10.06.2026, 17:00)</p>
+          </div>
+        )}
+        {/* Score predictions — only after lock */}
+        {locked && <div>
           <p className="text-xs font-bold text-gray-500 mb-2">ניחושי תוצאה</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
             {hasPredictions
@@ -221,10 +228,10 @@ function MatchBetsPanel({ match, profiles, specialBets, advancements, prediction
               })
             }
           </div>
-        </div>
+        </div>}
 
-        {/* Related special bets */}
-        {Object.keys(groupedBets).length > 0 && (
+        {/* Related special bets — only after lock */}
+        {locked && Object.keys(groupedBets).length > 0 && (
           <div>
             <p className="text-xs font-bold text-gray-500 mb-2">הימורים מיוחדים הקשורים למשחק</p>
             <div className="space-y-2">
@@ -245,8 +252,8 @@ function MatchBetsPanel({ match, profiles, specialBets, advancements, prediction
           </div>
         )}
 
-        {/* Group info */}
-        {groupLetter && (
+        {/* Group info — only after lock */}
+        {locked && groupLetter && (
           <div>
             <p className="text-xs font-bold text-gray-500 mb-2">הימורים על בית {groupLetter}</p>
             <div className="bg-white rounded-lg border border-gray-200 px-3 py-2">

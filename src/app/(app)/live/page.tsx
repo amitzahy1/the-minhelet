@@ -8,6 +8,7 @@ import { GROUPS } from "@/lib/tournament/groups";
 import { MatchReactions, MOCK_REACTIONS } from "@/components/shared/MatchReactions";
 import WhosAlive from "@/components/shared/WhosAlive";
 import { useSharedData } from "@/hooks/useSharedData";
+import { isLocked } from "@/lib/constants";
 import type { MatchPrediction, BettorBracket, BettorAdvancement } from "@/lib/supabase/shared-data";
 
 // Live page — shows matches from last 24h and next 12h
@@ -237,8 +238,8 @@ function LiveTab({ predictions }: { predictions: MatchPrediction[] }) {
                     })()}
                   </div>
                 )}
-                {/* All bettors predictions — color coded */}
-                <div className="border-t border-gray-100 px-5 py-3">
+                {/* All bettors predictions — only after lock */}
+                {isLocked() && <div className="border-t border-gray-100 px-5 py-3">
                   <p className="text-xs text-gray-500 mb-2 font-bold">כל המהמרים:</p>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
                     {(hasRealPredictions ? friends : [...friends, { name: "אמית", pred: m.yourPrediction }]).map(f => {
@@ -263,7 +264,7 @@ function LiveTab({ predictions }: { predictions: MatchPrediction[] }) {
                     <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-gray-400"></span> כיוון נכון</span>
                     <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-400"></span> טעה</span>
                   </div>
-                </div>
+                </div>}
                 {/* Match Reactions */}
                 <MatchReactions
                   matchId={String(m.id)}

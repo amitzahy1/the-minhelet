@@ -57,15 +57,20 @@ function Sparkline({ data, highlight }: { data: number[]; highlight?: boolean })
   );
 }
 
-// Hover tooltip — mobile: bottom sheet, desktop: centered popup
-function PlayerTooltip({ player, visible }: { player: typeof MOCK_PLAYERS[0]; visible: boolean }) {
+// Tooltip — mobile: bottom sheet with close button, desktop: hover popup
+function PlayerTooltip({ player, visible, onClose }: { player: typeof MOCK_PLAYERS[0]; visible: boolean; onClose: () => void }) {
   if (!visible) return null;
   const b = player.breakdown;
   return (
     <>
-      <div className="fixed inset-0 z-[55] bg-black/20 sm:bg-transparent" />
+      <div className="fixed inset-0 z-[55] bg-black/20 sm:bg-transparent" onClick={onClose} />
       <div className="fixed z-[60] inset-x-3 bottom-20 sm:bottom-auto sm:inset-x-auto sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-72 bg-white rounded-xl shadow-2xl border border-gray-200 p-4 text-sm max-h-[70vh] overflow-y-auto" dir="rtl">
-      <p className="font-bold text-base mb-3 border-b border-gray-100 pb-2 text-gray-900">{player.name} — פירוט {player.total} נקודות</p>
+      <div className="flex items-center justify-between mb-3 border-b border-gray-100 pb-2">
+        <p className="font-bold text-base text-gray-900">{player.name} — {player.total} נק׳</p>
+        <button onClick={onClose} className="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 shrink-0 transition-colors" aria-label="סגור">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
       <div className="space-y-2.5">
         <div>
           <p className="text-xs text-gray-400 font-bold mb-1">הימורי משחקים ({player.matchPts})</p>
@@ -294,6 +299,7 @@ export default function StandingsPage() {
               className={`relative flex items-center px-4 py-3 border-b border-gray-100 last:border-0 transition-colors ${
                 p.isYou ? "bg-blue-50/50" : "hover:bg-gray-50/50"
               }`}
+              onClick={() => setHoveredPlayer(hoveredPlayer === p.id ? null : p.id)}
               onMouseEnter={() => setHoveredPlayer(p.id)}
               onMouseLeave={() => setHoveredPlayer(null)}
             >
@@ -308,7 +314,7 @@ export default function StandingsPage() {
               <div className="me-3 flex-1 min-w-0 relative">
                 <span className="font-bold text-base text-gray-900 cursor-pointer hover:text-blue-600 transition-colors">{p.name}</span>
                 {p.isYou && <span className="text-xs text-blue-500 ms-1.5 bg-blue-100 rounded px-1.5 py-0.5 font-bold">אתה</span>}
-                <PlayerTooltip player={p} visible={hoveredPlayer === p.id} />
+                <PlayerTooltip player={p} visible={hoveredPlayer === p.id} onClose={() => setHoveredPlayer(null)} />
               </div>
               {/* Mobile: show only the active tab value */}
               <span className={`w-12 text-center text-sm font-bold text-blue-600 sm:hidden`} style={{ fontFamily: "var(--font-inter)" }}>

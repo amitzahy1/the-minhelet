@@ -300,8 +300,6 @@ export default function StandingsPage() {
                 p.isYou ? "bg-blue-50/50" : "hover:bg-gray-50/50"
               }`}
               onClick={() => setHoveredPlayer(hoveredPlayer === p.id ? null : p.id)}
-              onMouseEnter={() => setHoveredPlayer(p.id)}
-              onMouseLeave={() => setHoveredPlayer(null)}
             >
               <span className="w-8 text-center font-bold text-base text-gray-400">
                 {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : i + 1}

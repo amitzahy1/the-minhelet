@@ -203,7 +203,7 @@ function MatchBetsPanel({ match, profiles, specialBets, advancements, prediction
       <div className="border-t border-gray-100 bg-gray-50/70 px-4 py-3 space-y-4">
         {!locked && (
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-center">
-            <p className="text-xs font-bold text-amber-700">הניחושים ייחשפו אחרי נעילת ההימורים (10.06.2026, 17:00)</p>
+            <p className="text-xs font-bold text-amber-700">הניחושים ייחשפו אחרי נעילת ההימורים (18.04.2026, 20:00 · דמו)</p>
           </div>
         )}
         {/* Score predictions — only after lock */}

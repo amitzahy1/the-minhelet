@@ -1,9 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-
-// Tournament lock deadline: June 10, 2026, 17:00 Israel time
-const DEADLINE = new Date("2026-06-10T14:00:00Z"); // 17:00 IST = 14:00 UTC
+import { LOCK_DEADLINE as DEADLINE } from "@/lib/constants";
 
 export function DeadlineCountdown() {
   const [timeLeft, setTimeLeft] = useState("");

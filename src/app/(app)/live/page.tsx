@@ -14,36 +14,21 @@ import type { MatchPrediction, BettorBracket, BettorAdvancement } from "@/lib/su
 // Live page — shows matches from last 24h and next 12h
 // In production: real-time updates from API-Football via Supabase Realtime
 
-const MOCK_LIVE_MATCHES = [
-  { id: 1, status: "live", minute: "72'", stage: "בית J · סיבוב 2",
-    home: { code: "ARG", name: "ארגנטינה", goals: 2 },
-    away: { code: "KSA", name: "ערב הסעודית", goals: 0 },
-    yourPrediction: "2-0", yourStatus: "exact", potentialPts: "+3",
-    friends: [{ name: "דני", pred: "3-0" }, { name: "יוני", pred: "1-0" }, { name: "רון", pred: "2-1" }, { name: "דור", pred: "2-0" }],
-  },
-  { id: 2, status: "live", minute: "45'+2", stage: "בית A · סיבוב 2",
-    home: { code: "MEX", name: "מקסיקו", goals: 1 },
-    away: { code: "CZE", name: "צ׳כיה", goals: 1 },
-    yourPrediction: "2-0", yourStatus: "wrong", potentialPts: "+0",
-    friends: [{ name: "דני", pred: "2-0" }, { name: "יוני", pred: "3-1" }],
-  },
-];
+// Live match data — populated from DB once tournament starts.
+// Kept as empty arrays so the page shows clean empty states before kickoff.
+type LiveMatchRow = { id: number; status: string; minute: string; stage: string;
+  home: { code: string; name: string; goals: number }; away: { code: string; name: string; goals: number };
+  yourPrediction: string; yourStatus: "exact" | "wrong" | "toto"; potentialPts: string;
+  friends: { name: string; pred: string }[]; };
+type UpcomingMatchRow = { id: number; status: string; time: string; stage: string;
+  home: { code: string; name: string }; away: { code: string; name: string }; yourPrediction: string | null; };
+type FinishedMatchRow = { id: number; status: string; stage: string;
+  home: { code: string; name: string; goals: number }; away: { code: string; name: string; goals: number };
+  yourPrediction: string; yourStatus: "exact" | "toto" | "wrong"; pts: string; };
 
-const MOCK_UPCOMING = [
-  { id: 3, status: "upcoming", time: "19:00", stage: "בית F · סיבוב 2",
-    home: { code: "JPN", name: "יפן" }, away: { code: "SWE", name: "שוודיה" }, yourPrediction: null },
-  { id: 4, status: "upcoming", time: "22:00", stage: "בית B · סיבוב 2",
-    home: { code: "CAN", name: "קנדה" }, away: { code: "SUI", name: "שווייץ" }, yourPrediction: "1-0" },
-];
-
-const MOCK_FINISHED = [
-  { id: 5, status: "finished", stage: "בית I · סיבוב 1",
-    home: { code: "FRA", name: "צרפת", goals: 3 }, away: { code: "IRQ", name: "עיראק", goals: 1 },
-    yourPrediction: "2-1", yourStatus: "toto", pts: "+2" },
-  { id: 6, status: "finished", stage: "בית C · סיבוב 1",
-    home: { code: "BRA", name: "ברזיל", goals: 2 }, away: { code: "HAI", name: "האיטי", goals: 0 },
-    yourPrediction: "2-0", yourStatus: "exact", pts: "+3" },
-];
+const MOCK_LIVE_MATCHES: LiveMatchRow[] = [];
+const MOCK_UPCOMING: UpcomingMatchRow[] = [];
+const MOCK_FINISHED: FinishedMatchRow[] = [];
 
 // What-If data
 const MOCK_WHATIF_MATCHES = [
@@ -142,6 +127,21 @@ function LiveTab({ predictions }: { predictions: MatchPrediction[] }) {
       name: p.displayName,
       pred: `${p.predictedHomeGoals}-${p.predictedAwayGoals}`,
     }));
+  }
+
+  const hasAnyMatches = MOCK_LIVE_MATCHES.length + MOCK_UPCOMING.length + MOCK_FINISHED.length > 0;
+
+  if (!hasAnyMatches) {
+    return (
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-6 py-12 text-center">
+        <div className="text-6xl mb-4">⚽</div>
+        <h2 className="text-xl font-black text-gray-800 mb-2">הטורניר עוד לא התחיל</h2>
+        <p className="text-sm text-gray-500 max-w-sm mx-auto leading-relaxed">
+          המשחקים יופיעו כאן כשהטורניר יתחיל.<br/>
+          בינתיים — תוודאו שהברקט שלכם מלא.
+        </p>
+      </div>
+    );
   }
 
   return (

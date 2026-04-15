@@ -1,30 +1,27 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import Link from "next/link";
 import { useBettingStore } from "@/stores/betting-store";
 import { ALL_TEAMS } from "@/lib/tournament/groups";
+import { SQUADS_DATA } from "@/lib/tournament/squads-data";
 import { getFlag } from "@/lib/flags";
 import { PageTransition } from "@/components/shared/PageTransition";
+import { useConfetti } from "@/hooks/useConfetti";
 
 const GROUPS = ["A","B","C","D","E","F","G","H","I","J","K","L"];
 
-const TEAM_PLAYERS: Record<string, string[]> = {
-  ARG: ["L. Messi", "L. Martínez", "J. Álvarez", "A. Mac Allister", "E. Fernández", "A. Garnacho", "P. Dybala"],
-  BRA: ["Vinícius Jr.", "Rodrygo", "Endrick", "B. Guimarães", "L. Paquetá", "Savinho", "Raphinha"],
-  FRA: ["K. Mbappé", "A. Griezmann", "O. Dembélé", "M. Thuram", "A. Tchouaméni", "W. Saliba"],
-  ENG: ["J. Bellingham", "B. Saka", "H. Kane", "P. Foden", "C. Palmer", "D. Rice"],
-  ESP: ["L. Yamal", "N. Williams", "Rodri", "Pedri", "D. Olmo", "A. Morata"],
-  GER: ["J. Musiala", "F. Wirtz", "K. Havertz", "İ. Gündoğan", "L. Sané", "N. Füllkrug"],
-  POR: ["C. Ronaldo", "B. Fernandes", "R. Leão", "B. Silva", "Vitinha", "Diogo Jota"],
-  NED: ["C. Gakpo", "X. Simons", "V. van Dijk", "F. de Jong", "M. Depay"],
-  ITA: ["F. Chiesa", "N. Barella", "G. Scamacca", "S. Tonali", "M. Retegui"],
-  BEL: ["K. De Bruyne", "R. Lukaku", "J. Doku", "L. Trossard"],
-  CRO: ["L. Modrić", "M. Kovačić", "I. Perišić", "A. Kramarić"],
-  URU: ["D. Núñez", "F. Valverde", "R. Bentancur"],
-  JPN: ["T. Kubo", "K. Mitoma", "D. Kamada"], KOR: ["Son Heung-min", "Lee Kang-in", "Kim Min-jae"],
-  MAR: ["H. Ziyech", "A. Hakimi", "Y. En-Nesyri"], USA: ["C. Pulisic", "G. Reyna", "W. McKennie", "T. Weah"],
-  MEX: ["H. Lozano", "S. Giménez"], COL: ["L. Díaz", "J. Arias", "R. Falcao"],
-};
+// Order: attackers first (FW → MID → DEF → GK). Top-scorer/top-assists candidates
+// usually sit at the top. Within each position, keep the squad order.
+const POS_ORDER: Record<string, number> = { FW: 0, MID: 1, DEF: 2, GK: 3 };
+function getSquadPlayers(team: string): string[] {
+  const squad = SQUADS_DATA[team];
+  if (!squad) return [];
+  return [...squad.players]
+    .sort((a, b) => (POS_ORDER[a.pos] ?? 99) - (POS_ORDER[b.pos] ?? 99))
+    .map(p => p.nameEn);
+}
 
 function SectionCard({ title, subtitle, points, warning, children }: { title: string; subtitle?: string; points: string; warning?: string; children: React.ReactNode }) {
   return (
@@ -62,18 +59,34 @@ function TeamSelect({ value, onChange, label, excludeCodes = [] }: { value: stri
 }
 
 function PlayerSelect({ team, value, onChange, label }: { team: string; value: string; onChange: (v: string) => void; label: string }) {
-  const players = team ? (TEAM_PLAYERS[team] || []) : [];
+  const players = team ? getSquadPlayers(team) : [];
+  const hasSquad = players.length > 0;
+  const listId = `players-${team}`;
   return (
     <div className="space-y-1.5">
       <label className="text-sm font-semibold text-gray-700">{label}</label>
       {!team ? (
         <div className="px-3 py-2.5 rounded-lg border border-dashed border-gray-200 text-sm text-gray-400 font-medium">בחרו קודם נבחרת</div>
       ) : (
-        <select value={value} onChange={e => onChange(e.target.value)}
-          className="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500" dir="ltr">
-          <option value="">בחרו שחקן...</option>
-          {players.map(p => <option key={p} value={p}>{p}</option>)}
-        </select>
+        <>
+          <input
+            type="text"
+            value={value}
+            onChange={e => onChange(e.target.value)}
+            list={hasSquad ? listId : undefined}
+            placeholder={hasSquad ? "בחרו או הקלידו שם שחקן..." : "הקלידו שם שחקן..."}
+            dir="ltr"
+            className="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          {hasSquad && (
+            <datalist id={listId}>
+              {players.map(p => <option key={p} value={p} />)}
+            </datalist>
+          )}
+          {!hasSquad && (
+            <p className="text-[11px] text-gray-400">הסגל לנבחרת הזו עוד לא עודכן — הקלידו שם שחקן ידנית</p>
+          )}
+        </>
       )}
     </div>
   );
@@ -146,6 +159,23 @@ export default function SpecialBetsPage() {
     sb.topScorerPlayer, sb.topAssistsPlayer, sb.bestAttack, sb.prolificGroup, sb.driestGroup,
     sb.dirtiestTeam, ...sb.matchups, sb.penaltiesOverUnder].filter(Boolean).length;
 
+  // Celebrate when all 25 special bets are filled (once per browser)
+  const fireConfetti = useConfetti();
+  const [showCelebration, setShowCelebration] = useState(false);
+  useEffect(() => {
+    if (filledCount !== 25) return;
+    const key = "wc2026-special-bets-celebrated-v1";
+    if (typeof window === "undefined") return;
+    if (localStorage.getItem(key)) return;
+    localStorage.setItem(key, "1");
+    setShowCelebration(true);
+    fireConfetti();
+    // Keep firing for a few seconds
+    const interval = setInterval(() => fireConfetti(), 800);
+    const timeout = setTimeout(() => clearInterval(interval), 3500);
+    return () => { clearInterval(interval); clearTimeout(timeout); };
+  }, [filledCount, fireConfetti]);
+
   return (
     <PageTransition>
     <div className="max-w-4xl mx-auto px-4 py-6 pb-24">
@@ -165,6 +195,70 @@ export default function SpecialBetsPage() {
           <span className="text-sm text-gray-400">/25</span>
         </div>
       </div>
+
+      {/* Celebration modal — fires when all 25 bets are filled */}
+      <AnimatePresence>
+        {showCelebration && (
+          <motion.div
+            key="celebration-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowCelebration(false)}
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
+            dir="rtl"
+          >
+            <motion.div
+              initial={{ scale: 0.6, opacity: 0, y: 30 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ type: "spring", bounce: 0.5, duration: 0.7 }}
+              onClick={e => e.stopPropagation()}
+              className="relative bg-gradient-to-br from-amber-50 via-white to-blue-50 rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border-4 border-amber-300"
+            >
+              <div className="absolute -top-16 -right-16 w-48 h-48 bg-amber-300/40 rounded-full blur-3xl" />
+              <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-blue-300/40 rounded-full blur-3xl" />
+              <div className="relative p-8 text-center">
+                <motion.div
+                  animate={{ rotate: [0, 10, -10, 10, 0], scale: [1, 1.2, 1] }}
+                  transition={{ duration: 1.2, repeat: Infinity, repeatDelay: 0.5 }}
+                  className="text-7xl mb-4"
+                >
+                  🏆
+                </motion.div>
+                <h2 className="text-4xl font-black text-gray-900 mb-2" style={{ fontFamily: "var(--font-secular)" }}>
+                  כל הכבוד!
+                </h2>
+                <p className="text-lg text-gray-700 mb-1 font-bold">סיימת את כל ההימורים!</p>
+                <p className="text-sm text-gray-500 mb-6">
+                  כל 25 ההימורים מולאו · הברקט שלך מוכן ✨<br/>
+                  עכשיו רק לחכות לשריקת הפתיחה
+                </p>
+                <div className="grid grid-cols-3 gap-2 mb-6 text-xs">
+                  <div className="bg-white/80 rounded-lg py-2 border border-gray-200"><div className="text-2xl">🏟️</div><div className="font-bold text-gray-700 mt-1">72 בתים</div></div>
+                  <div className="bg-white/80 rounded-lg py-2 border border-gray-200"><div className="text-2xl">🏅</div><div className="font-bold text-gray-700 mt-1">31 נוקאאוט</div></div>
+                  <div className="bg-white/80 rounded-lg py-2 border border-gray-200"><div className="text-2xl">⭐</div><div className="font-bold text-gray-700 mt-1">25 מיוחדים</div></div>
+                </div>
+                <div className="flex gap-2">
+                  <Link
+                    href="/compare"
+                    className="flex-1 py-3 rounded-xl bg-gradient-to-l from-blue-600 to-indigo-600 text-white font-bold text-sm shadow-lg hover:shadow-xl transition-shadow"
+                    onClick={() => setShowCelebration(false)}
+                  >
+                    לדף השוואה
+                  </Link>
+                  <button
+                    onClick={() => setShowCelebration(false)}
+                    className="px-6 py-3 rounded-xl border-2 border-gray-300 text-gray-700 font-bold text-sm hover:bg-gray-50 transition-colors"
+                  >
+                    סגור
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="space-y-5">
         <div className="flex items-center gap-3 pb-3 border-b-2 border-gray-200">

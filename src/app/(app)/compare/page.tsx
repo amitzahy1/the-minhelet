@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { PredictionHeatmap } from "@/components/shared/PredictionHeatmap";
 import { useSharedData } from "@/hooks/useSharedData";
+import { createClient } from "@/lib/supabase/client";
 
 // Color coding: each unique value gets a FIXED color — same pick = same color everywhere
 const VALUE_COLORS = [
@@ -180,7 +181,25 @@ export default function ComparePage() {
   // Lock check — hide predictions until deadline
   // DEMO MODE: using demo date. Real deadline (main): 2026-06-10T14:00:00Z
   const LOCK_DEADLINE = new Date("2026-04-18T17:00:00Z");
-  const isLocked = new Date() >= LOCK_DEADLINE;
+  const deadlineReached = new Date() >= LOCK_DEADLINE;
+
+  // Super admins (e.g. Or) can see all bets before the lock — for verification
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  useEffect(() => {
+    (async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user?.email) return;
+      const { data: admin } = await supabase
+        .from("admins")
+        .select("role")
+        .eq("email", user.email)
+        .single();
+      if (admin?.role === "SUPER_ADMIN") setIsSuperAdmin(true);
+    })();
+  }, []);
+
+  const isLocked = deadlineReached || isSuperAdmin;
 
   return (
     <div className="max-w-full mx-auto px-4 py-6 pb-24">
@@ -190,6 +209,17 @@ export default function ComparePage() {
           {isLocked ? "ראו מה כל מהמר בחר — השוואה מלאה" : "ההימורים ייחשפו אחרי הנעילה ב-18.04.2026 (דמו)"}
         </p>
       </div>
+
+      {/* Super-admin indicator: Or can see everything before the lock */}
+      {isSuperAdmin && !deadlineReached && (
+        <div className="mb-5 rounded-xl bg-gradient-to-l from-purple-50 to-indigo-50 border-2 border-purple-300 px-4 py-3 flex items-center gap-3">
+          <span className="text-2xl">👁️</span>
+          <div className="flex-1">
+            <p className="text-sm font-bold text-purple-900">מצב מנהל־על — רואה הכל לפני הנעילה</p>
+            <p className="text-xs text-purple-700">תצוגה זו גלויה רק לך, לא למהמרים אחרים</p>
+          </div>
+        </div>
+      )}
 
       {!isLocked && (
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-8 text-center mb-6">

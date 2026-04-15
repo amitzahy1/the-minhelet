@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useBettingStore } from "@/stores/betting-store";
@@ -159,21 +159,21 @@ export default function SpecialBetsPage() {
     sb.topScorerPlayer, sb.topAssistsPlayer, sb.bestAttack, sb.prolificGroup, sb.driestGroup,
     sb.dirtiestTeam, ...sb.matchups, sb.penaltiesOverUnder].filter(Boolean).length;
 
-  // Celebrate when all 25 special bets are filled (once per browser)
+  // Celebrate every time the user transitions from <25 to 25 filled bets
   const fireConfetti = useConfetti();
   const [showCelebration, setShowCelebration] = useState(false);
+  const prevCountRef = useRef(filledCount);
   useEffect(() => {
-    if (filledCount !== 25) return;
-    const key = "wc2026-special-bets-celebrated-v1";
-    if (typeof window === "undefined") return;
-    if (localStorage.getItem(key)) return;
-    localStorage.setItem(key, "1");
-    setShowCelebration(true);
-    fireConfetti();
-    // Keep firing for a few seconds
-    const interval = setInterval(() => fireConfetti(), 800);
-    const timeout = setTimeout(() => clearInterval(interval), 3500);
-    return () => { clearInterval(interval); clearTimeout(timeout); };
+    const prev = prevCountRef.current;
+    prevCountRef.current = filledCount;
+    // Only trigger on the transition (prev < 25 && now === 25), not on mount
+    if (prev < 25 && filledCount === 25) {
+      setShowCelebration(true);
+      fireConfetti();
+      const interval = setInterval(() => fireConfetti(), 800);
+      const timeout = setTimeout(() => clearInterval(interval), 3500);
+      return () => { clearInterval(interval); clearTimeout(timeout); };
+    }
   }, [filledCount, fireConfetti]);
 
   return (

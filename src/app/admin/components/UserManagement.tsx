@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { createClient } from "@/lib/supabase/client";
 
 export function UserManagement() {
   const [users, setUsers] = useState<{ id: string; email: string; name: string; visible: boolean; lastLogin: string }[]>([]);
@@ -44,11 +43,28 @@ export function UserManagement() {
   }
 
   async function saveNickname(userId: string) {
-    const supabase = createClient();
-    await supabase.from("profiles").update({ display_name: editName }).eq("id", userId);
-    setUsers(prev => prev.map(u => u.id === userId ? { ...u, name: editName } : u));
-    setEditingId(null);
-    setEditName("");
+    const name = editName.trim();
+    if (!name) {
+      alert("שם לא יכול להיות ריק");
+      return;
+    }
+    try {
+      const res = await fetch("/api/admin/users/update-nickname", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, displayName: name }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        alert("שגיאה בשמירה: " + (data.error || res.statusText));
+        return;
+      }
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, name } : u));
+      setEditingId(null);
+      setEditName("");
+    } catch (e) {
+      alert("שגיאה בשמירה: " + String(e));
+    }
   }
 
   function hideAllTest() {

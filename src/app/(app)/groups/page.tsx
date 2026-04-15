@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useMemo } from "react";
 import { useBettingStore } from "@/stores/betting-store";
 import { GROUPS as GROUPS_RAW } from "@/lib/tournament/groups";
@@ -208,6 +209,23 @@ export default function GroupsPage() {
         </div>
       )}
 
+      {/* All-groups-complete CTA → next step */}
+      {completedGroups === 12 && (
+        <Link
+          href="/knockout"
+          className="mb-4 bg-gradient-to-l from-green-500 to-emerald-600 text-white rounded-xl px-5 py-4 flex items-center justify-between gap-3 shadow-lg shadow-green-500/20 hover:shadow-green-500/30 hover:scale-[1.01] transition-all"
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">🎉</span>
+            <div>
+              <p className="text-base font-black">סיימת את שלב הבתים!</p>
+              <p className="text-sm text-green-50">המשך לשלב 2 — עץ הטורניר</p>
+            </div>
+          </div>
+          <span className="text-2xl font-black">←</span>
+        </Link>
+      )}
+
       {/* Compact progress */}
       <div className="mb-4 flex items-center gap-3 flex-wrap">
         <div className="flex items-center gap-2 bg-white rounded-lg border border-gray-200 px-3 py-2 shadow-sm shrink-0">
@@ -272,6 +290,17 @@ export default function GroupsPage() {
             className="px-8 py-3 rounded-xl bg-gray-900 text-white font-medium text-sm hover:bg-gray-800 transition-colors shadow-sm">
             ← המשך לבית {GROUP_LETTERS[currentGroupIndex + 1]}
           </button>
+        </div>
+      )}
+
+      {/* Last-group → next stage CTA */}
+      {currentGroupIndex === 11 && completedGroups === 12 && (
+        <div className="mt-6 text-center">
+          <Link href="/knockout"
+            className="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-gradient-to-l from-green-500 to-emerald-600 text-white font-bold text-base shadow-lg shadow-green-500/25 hover:shadow-green-500/35 hover:scale-[1.02] transition-all">
+            <span>עבור לעץ הטורניר</span>
+            <span className="text-xl">←</span>
+          </Link>
         </div>
       )}
     </div>

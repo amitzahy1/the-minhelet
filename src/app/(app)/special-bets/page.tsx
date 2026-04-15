@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useMemo } from "react";
 import { useBettingStore } from "@/stores/betting-store";
 import { ALL_TEAMS } from "@/lib/tournament/groups";
 import { getFlag } from "@/lib/flags";
@@ -25,7 +26,7 @@ const TEAM_PLAYERS: Record<string, string[]> = {
   MEX: ["H. Lozano", "S. Giménez"], COL: ["L. Díaz", "J. Arias", "R. Falcao"],
 };
 
-function SectionCard({ title, subtitle, points, children }: { title: string; subtitle?: string; points: string; children: React.ReactNode }) {
+function SectionCard({ title, subtitle, points, warning, children }: { title: string; subtitle?: string; points: string; warning?: string; children: React.ReactNode }) {
   return (
     <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden hover:shadow-lg transition-all">
       <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/40 border-b border-blue-100/50">
@@ -35,6 +36,11 @@ function SectionCard({ title, subtitle, points, children }: { title: string; sub
         </div>
         <span className="text-sm font-bold rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-1.5 shadow-md">{points}</span>
       </div>
+      {warning && (
+        <div className="px-5 py-2 bg-amber-50 border-b border-amber-200 text-xs font-medium text-amber-800 flex items-start gap-1.5">
+          <span>❕</span><span>{warning}</span>
+        </div>
+      )}
       <div className="p-5">{children}</div>
     </div>
   );
@@ -76,6 +82,65 @@ function PlayerSelect({ team, value, onChange, label }: { team: string; value: s
 export default function SpecialBetsPage() {
   const sb = useBettingStore((s) => s.specialBets);
   const set = useBettingStore((s) => s.setSpecialBet);
+  const knockout = useBettingStore((s) => s.knockout);
+
+  // Derive expected advances from the user's knockout tree
+  const expected = useMemo(() => ({
+    winner: knockout.final?.winner || "",
+    finalist1: knockout.sfl_0?.winner || "",
+    finalist2: knockout.sfr_0?.winner || "",
+    semifinalists: [
+      knockout.qfl_0?.winner || "",
+      knockout.qfl_1?.winner || "",
+      knockout.qfr_0?.winner || "",
+      knockout.qfr_1?.winner || "",
+    ],
+    quarterfinalists: [
+      knockout.r16l_0?.winner || "",
+      knockout.r16l_1?.winner || "",
+      knockout.r16l_2?.winner || "",
+      knockout.r16l_3?.winner || "",
+      knockout.r16r_0?.winner || "",
+      knockout.r16r_1?.winner || "",
+      knockout.r16r_2?.winner || "",
+      knockout.r16r_3?.winner || "",
+    ],
+  }), [knockout]);
+
+  // Auto-fill EMPTY fields from the knockout tree (never overwrites user choices)
+  useEffect(() => {
+    const state = useBettingStore.getState();
+    const current = state.specialBets;
+    const setBet = state.setSpecialBet;
+
+    if (!current.winner && expected.winner) setBet("winner", expected.winner);
+    if (!current.finalist1 && expected.finalist1) setBet("finalist1", expected.finalist1);
+    if (!current.finalist2 && expected.finalist2) setBet("finalist2", expected.finalist2);
+
+    const sfMerged = current.semifinalists.map((v, i) => v || expected.semifinalists[i]);
+    if (sfMerged.some((v, i) => v !== current.semifinalists[i])) setBet("semifinalists", sfMerged);
+
+    const qfMerged = current.quarterfinalists.map((v, i) => v || expected.quarterfinalists[i]);
+    if (qfMerged.some((v, i) => v !== current.quarterfinalists[i])) setBet("quarterfinalists", qfMerged);
+  }, [expected]);
+
+  // Mismatch detection (team sets — order doesn't matter)
+  const sameSet = (a: string[], b: string[]) => {
+    const A = a.filter(Boolean), B = b.filter(Boolean);
+    if (A.length === 0 || B.length === 0) return true;
+    if (A.length !== B.length) return false;
+    const as = new Set(A);
+    return B.every(x => as.has(x));
+  };
+
+  const winnerMismatch = sb.winner && expected.winner && sb.winner !== expected.winner
+    ? `לפי העץ שלך הזוכה היא ${expected.winner}` : "";
+  const finalsMismatch = !sameSet([sb.finalist1, sb.finalist2], [expected.finalist1, expected.finalist2])
+    ? `לפי העץ שלך: ${[expected.finalist1, expected.finalist2].filter(Boolean).join(", ")}` : "";
+  const sfMismatch = !sameSet(sb.semifinalists, expected.semifinalists)
+    ? `לפי העץ שלך: ${expected.semifinalists.filter(Boolean).join(", ")}` : "";
+  const qfMismatch = !sameSet(sb.quarterfinalists, expected.quarterfinalists)
+    ? `לפי העץ שלך: ${expected.quarterfinalists.filter(Boolean).join(", ")}` : "";
 
   const filledCount = [sb.winner, sb.finalist1, sb.finalist2, ...sb.semifinalists, ...sb.quarterfinalists,
     sb.topScorerPlayer, sb.topAssistsPlayer, sb.bestAttack, sb.prolificGroup, sb.driestGroup,
@@ -107,18 +172,18 @@ export default function SpecialBetsPage() {
           <div><h2 className="text-xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>הימורי עולות</h2><p className="text-sm text-gray-500">מי תעלה בכל שלב?</p></div>
         </div>
 
-        <SectionCard title="זוכה הטורניר" subtitle="מי לוקח את הגביע?" points="12 נק׳">
+        <SectionCard title="זוכה הטורניר" subtitle="מי לוקח את הגביע?" points="12 נק׳" warning={winnerMismatch}>
           <div className="max-w-xs"><TeamSelect value={sb.winner} onChange={(v) => set("winner", v)} label="הנבחרת הזוכה" /></div>
         </SectionCard>
 
-        <SectionCard title="עולות לגמר" subtitle="2 נבחרות" points="8 נק׳ כ״א">
+        <SectionCard title="עולות לגמר" subtitle="2 נבחרות" points="8 נק׳ כ״א" warning={finalsMismatch}>
           <div className="grid grid-cols-2 gap-3">
             <TeamSelect value={sb.finalist1} onChange={(v) => set("finalist1", v)} label="עולה לגמר 1" excludeCodes={[sb.finalist2]} />
             <TeamSelect value={sb.finalist2} onChange={(v) => set("finalist2", v)} label="עולה לגמר 2" excludeCodes={[sb.finalist1]} />
           </div>
         </SectionCard>
 
-        <SectionCard title="עולות לחצי גמר" subtitle="4 נבחרות" points="6 נק׳ כ״א">
+        <SectionCard title="עולות לחצי גמר" subtitle="4 נבחרות" points="6 נק׳ כ״א" warning={sfMismatch}>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {sb.semifinalists.map((v, i) => (
               <TeamSelect key={i} value={v} onChange={(val) => { const n = [...sb.semifinalists]; n[i] = val; set("semifinalists", n); }}
@@ -127,7 +192,7 @@ export default function SpecialBetsPage() {
           </div>
         </SectionCard>
 
-        <SectionCard title="עולות לרבע גמר" subtitle="8 נבחרות" points="4 נק׳ כ״א">
+        <SectionCard title="עולות לרבע גמר" subtitle="8 נבחרות" points="4 נק׳ כ״א" warning={qfMismatch}>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {sb.quarterfinalists.map((v, i) => (
               <TeamSelect key={i} value={v} onChange={(val) => { const n = [...sb.quarterfinalists]; n[i] = val; set("quarterfinalists", n); }}

@@ -229,6 +229,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen pb-20 sm:pb-0 bg-[#F8F9FB]" style={{ fontFamily: "var(--font-assistant), sans-serif" }} dir="rtl">
 
+      {/* DEMO MODE banner — sits on the demo branch only */}
+      <div className="bg-amber-400 text-amber-950 text-center text-xs sm:text-sm font-bold py-1.5 px-4">
+        ⚠️ מצב דמו — ההימורים והתוצאות כאן יימחקו בסוף השבוע · נעילה ב-18.04.2026 20:00
+      </div>
+
       {showOnboarding && <OnboardingWizard onDismiss={dismissOnboarding} onStart={() => { dismissOnboarding(); router.push("/groups"); }} />}
 
       {/* ════════════════════════════════════════════ */}

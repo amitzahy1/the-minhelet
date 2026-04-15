@@ -4,7 +4,6 @@ import { useCallback, useMemo } from "react";
 import { useBettingStore } from "@/stores/betting-store";
 import { GROUPS as GROUPS_RAW } from "@/lib/tournament/groups";
 import { calculateStandings } from "@/lib/tournament/standings";
-import { validateGroup } from "@/lib/validation/engine";
 import { FLAGS as __FLAGS } from "@/lib/flags";
 import { SwipeableGroups } from "@/components/shared/SwipeableGroups";
 import { SlotMachineScore } from "@/components/shared/SlotMachineScore";
@@ -59,12 +58,6 @@ function GroupView({ groupId }: { groupId: string }) {
 
   const filledCount = groupState.scores.filter(s => s.home !== null && s.away !== null).length;
   const isComplete = filledCount === 6;
-
-  // Validation
-  const validation = useMemo(() => {
-    if (!isComplete) return null;
-    return validateGroup(groupId, groupState.order, groupState.scores);
-  }, [groupId, groupState.order, groupState.scores, isComplete]);
 
   const handleScore = useCallback((matchIdx: number, side: "home" | "away", value: number) => {
     setGroupScore(groupId, matchIdx, side, value);
@@ -137,21 +130,6 @@ function GroupView({ groupId }: { groupId: string }) {
             </table>
           </div>
 
-          {/* Validation banner */}
-          {validation && !validation.isValid && (
-            <div className="mt-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
-              <p className="text-sm font-bold text-amber-800 mb-1">התוצאות לא תואמות לסדר הצפוי</p>
-              {validation.conflicts.map((c, i) => (
-                <p key={i} className="text-sm text-amber-700">{c}</p>
-              ))}
-              <p className="text-xs text-amber-600 mt-2">שנו את התוצאות או שהסדר יתעדכן אוטומטית לפי התוצאות</p>
-            </div>
-          )}
-          {validation && validation.isValid && isComplete && (
-            <div className="mt-3 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
-              <p className="text-sm font-bold text-green-700">הכל תואם — התוצאות מייצרות את הסדר שחזית</p>
-            </div>
-          )}
         </div>
 
         {/* LEFT — Match bets */}

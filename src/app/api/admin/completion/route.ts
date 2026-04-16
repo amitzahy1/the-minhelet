@@ -14,17 +14,19 @@ export async function GET() {
 
   const supabase = createClient(url, serviceKey);
 
-  // Load all brackets (service role bypasses RLS)
-  const { data: brackets } = await supabase
+  // Load all brackets (service role bypasses RLS) — no league_id filter so we catch all
+  const { data: brackets, error: bErr } = await supabase
     .from("user_brackets")
-    .select("user_id, group_predictions, knockout_tree, champion, profiles(display_name)")
-    .eq("league_id", "default");
+    .select("user_id, league_id, group_predictions, knockout_tree, champion, profiles(display_name)");
+
+  if (bErr) {
+    return NextResponse.json({ users: [], error: `brackets: ${bErr.message}`, debug: { bracketCount: 0 } });
+  }
 
   // Load all special bets
   const { data: specials } = await supabase
     .from("special_bets")
-    .select("user_id, top_scorer_player, top_assists_player, best_attack_team, most_prolific_group, driest_group, dirtiest_team, matchup_pick, penalties_over_under")
-    .eq("league_id", "default");
+    .select("user_id, top_scorer_player, top_assists_player, best_attack_team, most_prolific_group, driest_group, dirtiest_team, matchup_pick, penalties_over_under");
 
   // Load user emails
   const { data: authData } = await supabase.auth.admin.listUsers();

@@ -84,14 +84,14 @@ export function TodayMatches() {
         <h2 className="text-base font-bold text-gray-800">{heading}</h2>
         <span className="text-sm text-gray-400">{matches.length} משחקים</span>
       </div>
-      <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
         {matches.map((m) => {
           const isFinished = m.status === "FINISHED";
           const isLive = m.status === "IN_PLAY" || m.status === "PAUSED";
           return (
             <div
               key={m.id}
-              className={`shrink-0 w-44 bg-white rounded-xl border shadow-sm p-3 text-center transition-colors ${
+              className={`bg-white rounded-xl border shadow-sm p-3 text-center transition-colors ${
                 isLive ? "border-red-300 bg-red-50/30" : isFinished ? "border-green-200" : "border-gray-200"
               }`}
             >

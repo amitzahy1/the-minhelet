@@ -312,9 +312,6 @@ export default function StandingsPage() {
           <button onClick={handleExportCSV} className="px-3 py-2 rounded-lg border border-gray-200 text-xs font-bold text-gray-500 hover:bg-gray-100 transition-colors">
             CSV
           </button>
-          <button onClick={handleExportJSON} className="px-3 py-2 rounded-lg border border-gray-200 text-xs font-bold text-gray-500 hover:bg-gray-100 transition-colors">
-            גיבוי
-          </button>
         </div>
       </div>
 

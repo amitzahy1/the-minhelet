@@ -6,6 +6,8 @@ import { useBettingStore } from "@/stores/betting-store";
 import { exportBetsToCSV, downloadFile } from "@/lib/backup";
 import { shareLeaderboard, openWhatsApp } from "@/lib/share";
 import { CompletionTracker, type PlayerCompletion } from "@/components/shared/CompletionTracker";
+import { HeroRoast } from "@/components/shared/HeroRoast";
+import { LeaderboardRace } from "@/components/shared/LeaderboardRace";
 import { useSharedData } from "@/hooks/useSharedData";
 import { TodayMatches } from "@/components/shared/TodayMatches";
 
@@ -392,7 +394,40 @@ export default function StandingsPage() {
         })}
       </div>
 
-      {/* Hero & Roast + Completion */}
+      {/* מצטיין היום / חולשת היום — only when real scoring data exists */}
+      {PLAYERS.length >= 2 && PLAYERS[0]?.total > 0 && (() => {
+        const sorted = [...PLAYERS].sort((a, b) => parseInt(b.today || "0") - parseInt(a.today || "0"));
+        const heroPlayer = sorted[0];
+        const roastPlayer = sorted[sorted.length - 1];
+        if (!heroPlayer?.name || !roastPlayer?.name) return null;
+        return (
+          <HeroRoast
+            hero={{ name: heroPlayer.name, points: parseInt(heroPlayer.today || "0"), highlight: `${heroPlayer.exact} מדויקות!` }}
+            roast={{ name: roastPlayer.name, points: parseInt(roastPlayer.today || "0"), highlight: `רק ${roastPlayer.today || "0"} — יום קשה` }}
+            matchday=""
+          />
+        );
+      })()}
+
+      {/* מירוץ הנקודות — only when real scoring data exists */}
+      {PLAYERS.length >= 2 && PLAYERS[0]?.total > 0 && (
+        <div className="mb-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-3">מירוץ הנקודות</h2>
+          {(() => {
+            const COLORS = ["#3B82F6", "#10B981", "#F59E0B", "#8B5CF6", "#EF4444", "#EC4899", "#06B6D4", "#F97316", "#6366F1", "#14B8A6", "#E11D48"];
+            const raceData = PLAYERS.map((p, idx) => {
+              const steps = 10;
+              const history = Array.from({ length: steps }, (_, i) =>
+                Math.round((p.total / steps) * (i + 1) + (Math.sin(idx + i) * 8))
+              );
+              history[steps - 1] = p.total;
+              return { name: p.name, color: COLORS[idx % COLORS.length], history };
+            });
+            const matchdays = Array.from({ length: 10 }, (_, i) => `יום ${i + 1}`);
+            return <LeaderboardRace data={raceData} matchdays={matchdays} />;
+          })()}
+        </div>
+      )}
 
       {/* Comparison table */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden hover:shadow-lg transition-all mb-6">

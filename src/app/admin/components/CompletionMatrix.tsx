@@ -1,99 +1,30 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 
 interface UserCompletion {
   name: string;
   email: string;
-  groups: number;       // 0-12 completed groups
-  knockout: number;     // 0-31 matches with winner
-  specials: number;     // count of filled special bet fields
-  totalPct: number;     // 0-100% overall completion
+  groups: number;
+  knockout: number;
+  specials: number;
+  totalPct: number;
 }
-
-const GROUP_LETTERS = ["A","B","C","D","E","F","G","H","I","J","K","L"];
 
 export function CompletionMatrix() {
   const [users, setUsers] = useState<UserCompletion[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadCompletion();
+    (async () => {
+      try {
+        const res = await fetch("/api/admin/completion");
+        const data = await res.json();
+        if (data.users) setUsers(data.users);
+      } catch { /* ignore */ }
+      setLoading(false);
+    })();
   }, []);
-
-  async function loadCompletion() {
-    const supabase = createClient();
-
-    // Load all brackets
-    const { data: brackets } = await supabase
-      .from("user_brackets")
-      .select("user_id, group_predictions, knockout_tree, champion, profiles(display_name, id)")
-      .eq("league_id", "default");
-
-    // Load all special bets
-    const { data: specials } = await supabase
-      .from("special_bets")
-      .select("user_id, top_scorer_player, top_assists_player, best_attack_team, most_prolific_group, driest_group, dirtiest_team, matchup_pick, penalties_over_under")
-      .eq("league_id", "default");
-
-    // Load user emails from admin API
-    let emailMap: Record<string, string> = {};
-    try {
-      const res = await fetch("/api/admin/users");
-      const data = await res.json();
-      if (data.users) {
-        for (const u of data.users) {
-          emailMap[u.id] = u.email || "";
-        }
-      }
-    } catch { /* ignore */ }
-
-    const results: UserCompletion[] = [];
-
-    for (const b of brackets || []) {
-      const profile = b.profiles as unknown as { display_name: string; id: string } | null;
-      const name = profile?.display_name || "ללא שם";
-      const email = emailMap[b.user_id] || "";
-
-      // Count completed groups (6 scores each)
-      const gp = (b.group_predictions || {}) as Record<string, { scores: { home: number | null; away: number | null }[] }>;
-      let completedGroups = 0;
-      for (const letter of GROUP_LETTERS) {
-        const group = gp[letter];
-        if (group?.scores) {
-          const filled = group.scores.filter((s: { home: number | null; away: number | null }) => s.home !== null && s.away !== null).length;
-          if (filled === 6) completedGroups++;
-        }
-      }
-
-      // Count knockout matches with winner
-      const ko = (b.knockout_tree || {}) as Record<string, { winner: string | null }>;
-      const knockoutFilled = Object.values(ko).filter(m => m?.winner).length;
-
-      // Count filled special bets
-      const sb = specials?.find(s => s.user_id === b.user_id);
-      let specialsFilled = 0;
-      if (sb) {
-        const fields = [sb.top_scorer_player, sb.top_assists_player, sb.best_attack_team,
-          sb.most_prolific_group, sb.driest_group, sb.dirtiest_team, sb.matchup_pick, sb.penalties_over_under];
-        specialsFilled = fields.filter(Boolean).length;
-        // Champion comes from bracket, count it if present
-        if (b.champion) specialsFilled++;
-      }
-
-      const totalItems = 12 + 31 + 25; // groups + knockout + specials
-      const filledItems = completedGroups + knockoutFilled + specialsFilled;
-      const totalPct = Math.round((filledItems / totalItems) * 100);
-
-      results.push({ name, email, groups: completedGroups, knockout: knockoutFilled, specials: specialsFilled, totalPct });
-    }
-
-    // Sort: lowest completion first (who needs reminding)
-    results.sort((a, b) => a.totalPct - b.totalPct);
-    setUsers(results);
-    setLoading(false);
-  }
 
   const check = (done: boolean) => (
     <span className={`text-base font-bold ${done ? "text-green-600" : "text-red-400"}`}>
@@ -109,14 +40,14 @@ export function CompletionMatrix() {
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-lg font-bold text-gray-900 mb-1">מטריצת השלמה</h3>
-        <p className="text-sm text-gray-500">מי מילא מה — סטטוס לכל מהמר</p>
+        <h3 className="text-lg font-bold text-gray-900 mb-1">סטטוס מילוי הימורים</h3>
+        <p className="text-sm text-gray-500">תמונת מצב — מי מילא ומי עוד לא</p>
       </div>
 
       {loading ? (
         <p className="text-gray-400 text-center py-6">טוען נתונים...</p>
       ) : users.length === 0 ? (
-        <p className="text-gray-400 text-center py-6">אין נתונים עדיין — אף אחד לא התחיל למלא</p>
+        <p className="text-gray-400 text-center py-6">אין מהמרים שהתחילו למלא</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm border-collapse">

@@ -3,13 +3,11 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useBettingStore } from "@/stores/betting-store";
-import { exportBetsToCSV, exportBetsToJSON, downloadFile } from "@/lib/backup";
+import { exportBetsToCSV, downloadFile } from "@/lib/backup";
 import { shareLeaderboard, openWhatsApp } from "@/lib/share";
 import { CompletionTracker, type PlayerCompletion } from "@/components/shared/CompletionTracker";
 import { HeroRoast } from "@/components/shared/HeroRoast";
-import { RadarChart } from "@/components/shared/RadarChart";
 import { LeaderboardRace } from "@/components/shared/LeaderboardRace";
-import { PointsSankey } from "@/components/shared/PointsSankey";
 import { useSharedData } from "@/hooks/useSharedData";
 import { TodayMatches } from "@/components/shared/TodayMatches";
 
@@ -209,8 +207,6 @@ export default function StandingsPage() {
   const totalFilled = useBettingStore((s) => s.getTotalFilledMatches());
   const [hoveredPlayer, setHoveredPlayer] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<SortKey>("total");
-  const [radarPlayerId, setRadarPlayerId] = useState<string>("4"); // default to אמית
-
   // Load real data from Supabase (falls back to empty arrays if not configured)
   const { profiles, scoringLog } = useSharedData();
 
@@ -278,12 +274,6 @@ export default function StandingsPage() {
     const state = useBettingStore.getState();
     const csv = exportBetsToCSV(state);
     downloadFile(csv, `wc2026-bets-${new Date().toISOString().split("T")[0]}.csv`);
-  };
-
-  const handleExportJSON = () => {
-    const state = useBettingStore.getState();
-    const json = exportBetsToJSON(state);
-    downloadFile(json, `wc2026-backup-${new Date().toISOString().split("T")[0]}.json`, "application/json");
   };
 
   return (
@@ -454,48 +444,7 @@ export default function StandingsPage() {
         </div>
       </div>
 
-      {/* Player Radar Chart */}
-      {PLAYERS.length >= 2 && (() => {
-        const radarPlayer = PLAYERS.find((p) => p.id === radarPlayerId) || PLAYERS[0];
-        const leader = [...PLAYERS].sort((a, b) => b.total - a.total)[0];
-        if (!radarPlayer || !leader) return null;
-        const maxToto = Math.max(1, ...PLAYERS.map((p) => parseInt(p.toto) || 0));
-        const maxExact = Math.max(1, ...PLAYERS.map((p) => p.exact));
-        const maxGroups = Math.max(1, ...PLAYERS.map((p) => p.breakdown.totoGroup + p.breakdown.exactGroup));
-        const maxKnockout = Math.max(1, ...PLAYERS.map((p) => p.breakdown.totoKnockout + p.breakdown.exactKnockout));
-        const maxSpecials = Math.max(1, ...PLAYERS.map((p) => p.specPts));
-        const normalize = (p: typeof PLAYERS[0]) => ({
-          name: p.name || "",
-          toto: Math.round(((parseInt(p.toto) || 0) / maxToto) * 100),
-          exact: Math.round((p.exact / maxExact) * 100),
-          groups: Math.round(((p.breakdown.totoGroup + p.breakdown.exactGroup) / maxGroups) * 100),
-          knockout: Math.round(((p.breakdown.totoKnockout + p.breakdown.exactKnockout) / maxKnockout) * 100),
-          specials: Math.round((p.specPts / maxSpecials) * 100),
-        });
-        return (
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden hover:shadow-lg transition-all mb-6">
-            <div className="px-5 py-4 bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/40 border-b border-blue-100/50 flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-bold text-gray-800">פרופיל שחקן</h2>
-                <p className="text-sm text-gray-500">השוואה מול המוביל</p>
-              </div>
-              <select
-                value={radarPlayerId}
-                onChange={(e) => setRadarPlayerId(e.target.value)}
-                className="text-sm font-bold border border-gray-200 rounded-lg px-3 py-1.5 text-gray-700 bg-white"
-                dir="rtl"
-              >
-                {PLAYERS.map((p) => (
-                  <option key={p.id} value={p.id}>{p.name}</option>
-                ))}
-              </select>
-            </div>
-            <div className="p-5">
-              <RadarChart player={normalize(radarPlayer)} leader={normalize(leader)} />
-            </div>
-          </div>
-        );
-      })()}
+      {/* REMOVED: Player Radar Chart, Points Sankey, Head to Head — kept Leaderboard Race + Category Leaders */}
 
       {/* Leaderboard Race */}
       <div className="mb-6">
@@ -516,27 +465,6 @@ export default function StandingsPage() {
         })()}
       </div>
 
-      {/* Points Sankey */}
-      {PLAYERS.length > 0 && (() => {
-        const me = PLAYERS.find((p) => p.isYou) || PLAYERS[0];
-        if (!me) return null;
-        return (
-          <div className="mb-6">
-            <h2 className="text-lg font-bold text-gray-900 mb-3">מאיפה הנקודות של {me.name || ""}?</h2>
-            <PointsSankey
-              player={{
-                name: me.name || "",
-                toto: me.breakdown.totoGroup + me.breakdown.totoKnockout,
-                exact: me.breakdown.exactGroup + me.breakdown.exactKnockout,
-                groups: me.breakdown.groupAdvExact + me.breakdown.groupAdvPartial,
-                knockout: me.breakdown.advQF + me.breakdown.advSF + me.breakdown.advFinal,
-                specials: me.specPts,
-                total: me.total,
-              }}
-            />
-          </div>
-        );
-      })()}
 
       {/* Category leaders */}
       <div className="mb-6">
@@ -557,31 +485,6 @@ export default function StandingsPage() {
         </div>
       </div>
 
-      {/* Head to head */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden hover:shadow-lg transition-all">
-        <div className="px-5 py-4 bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/40 border-b border-blue-100/50">
-          <h2 className="text-lg font-bold text-gray-800">ראש בראש</h2>
-        </div>
-        <div className="p-4 space-y-2.5">
-          {[
-            { rival: "דני (מקום 1)", gap: -14, trend: "מתקרב", detail: "הוא חזק בטוטו" },
-            { rival: "יוני (מקום 2)", gap: -7, trend: "מתקרב", detail: "פער מצטמצם" },
-            { rival: "דור (מקום 3)", gap: -3, trend: "כמעט!", detail: "הוא מוביל בעולות" },
-            { rival: "רון ב (מקום 5)", gap: 10, trend: "מוביל", detail: "פער יציב" },
-          ].map(r => (
-            <div key={r.rival} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50">
-              <span className="text-sm text-gray-800 font-bold flex-1">{r.rival}</span>
-              <span className="text-sm text-gray-400 hidden sm:block">{r.detail}</span>
-              <span className={`text-lg font-black tabular-nums ${r.gap > 0 ? "text-green-600" : "text-red-500"}`} style={{ fontFamily: "var(--font-inter)" }}>
-                {r.gap > 0 ? `+${r.gap}` : r.gap}
-              </span>
-              <span className={`text-xs font-bold px-2.5 py-1 rounded-lg ${
-                r.trend === "מוביל" ? "bg-green-100 text-green-700" : r.trend === "כמעט!" ? "bg-amber-100 text-amber-700" : "bg-blue-100 text-blue-700"
-              }`}>{r.trend}</span>
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }

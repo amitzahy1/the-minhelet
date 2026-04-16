@@ -6,8 +6,6 @@ import { useBettingStore } from "@/stores/betting-store";
 import { exportBetsToCSV, downloadFile } from "@/lib/backup";
 import { shareLeaderboard, openWhatsApp } from "@/lib/share";
 import { CompletionTracker, type PlayerCompletion } from "@/components/shared/CompletionTracker";
-import { HeroRoast } from "@/components/shared/HeroRoast";
-import { LeaderboardRace } from "@/components/shared/LeaderboardRace";
 import { useSharedData } from "@/hooks/useSharedData";
 import { TodayMatches } from "@/components/shared/TodayMatches";
 
@@ -395,19 +393,6 @@ export default function StandingsPage() {
       </div>
 
       {/* Hero & Roast + Completion */}
-      {PLAYERS.length >= 2 && PLAYERS[0]?.name && (() => {
-        const sorted = [...PLAYERS].sort((a, b) => parseInt(b.today || "0") - parseInt(a.today || "0"));
-        const heroPlayer = sorted[0];
-        const roastPlayer = sorted[sorted.length - 1];
-        if (!heroPlayer?.name || !roastPlayer?.name) return null;
-        return (
-          <HeroRoast
-            hero={{ name: heroPlayer.name, points: parseInt(heroPlayer.today || "0"), highlight: `${heroPlayer.exact} מדויקות!` }}
-            roast={{ name: roastPlayer.name, points: parseInt(roastPlayer.today || "0"), highlight: `רק ${roastPlayer.today || "0"} — יום קשה` }}
-            matchday="יום משחק 3"
-          />
-        );
-      })()}
 
       {/* Comparison table */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden hover:shadow-lg transition-all mb-6">
@@ -445,46 +430,6 @@ export default function StandingsPage() {
         </div>
       </div>
 
-      {/* REMOVED: Player Radar Chart, Points Sankey, Head to Head — kept Leaderboard Race + Category Leaders */}
-
-      {/* Leaderboard Race */}
-      <div className="mb-6">
-        <h2 className="text-lg font-bold text-gray-900 mb-3">מירוץ הנקודות</h2>
-        {(() => {
-          const COLORS = ["#3B82F6", "#10B981", "#F59E0B", "#8B5CF6", "#EF4444", "#EC4899", "#06B6D4", "#F97316", "#6366F1", "#14B8A6", "#E11D48"];
-          const raceData = PLAYERS.map((p, idx) => {
-            // Generate mock 10-matchday history ending at the player's total
-            const steps = 10;
-            const history = Array.from({ length: steps }, (_, i) =>
-              Math.round((p.total / steps) * (i + 1) + (Math.sin(idx + i) * 8))
-            );
-            history[steps - 1] = p.total; // ensure final value matches
-            return { name: p.name, color: COLORS[idx % COLORS.length], history };
-          });
-          const matchdays = Array.from({ length: 10 }, (_, i) => `יום ${i + 1}`);
-          return <LeaderboardRace data={raceData} matchdays={matchdays} />;
-        })()}
-      </div>
-
-
-      {/* Category leaders */}
-      <div className="mb-6">
-        <h2 className="text-lg font-bold text-gray-900 mb-3">מלכי הקטגוריות</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {[
-            { title: "מלך הטוטו", name: "דני", value: "65%", bg: "bg-green-50 border-green-200" },
-            { title: "צלף מדויק", name: "דני", value: "16", bg: "bg-blue-50 border-blue-200" },
-            { title: "רצף הכי ארוך", name: "דני", value: "8", bg: "bg-amber-50 border-amber-200" },
-            { title: "יום הכי חזק", name: "אמית", value: "+23", bg: "bg-orange-50 border-orange-200" },
-          ].map(cat => (
-            <div key={cat.title} className={`rounded-xl border p-4 text-center ${cat.bg}`}>
-              <p className="text-sm text-gray-500 font-medium">{cat.title}</p>
-              <p className="text-2xl font-black text-gray-900 mt-1" style={{ fontFamily: "var(--font-inter)" }}>{cat.value}</p>
-              <p className="text-sm font-bold text-blue-600 mt-0.5">{cat.name}</p>
-            </div>
-          ))}
-        </div>
-      </div>
 
     </div>
   );

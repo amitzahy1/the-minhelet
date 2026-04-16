@@ -10,6 +10,7 @@ import { RadarChart } from "@/components/shared/RadarChart";
 import { LeaderboardRace } from "@/components/shared/LeaderboardRace";
 import { PointsSankey } from "@/components/shared/PointsSankey";
 import { useSharedData } from "@/hooks/useSharedData";
+import { TodayMatches } from "@/components/shared/TodayMatches";
 
 // Mock completion data — in production this comes from Supabase
 const MOCK_COMPLETION_DATA: PlayerCompletion[] = [
@@ -223,6 +224,9 @@ export default function StandingsPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6 pb-24">
+      {/* Today's matches — auto-hides when no matches today */}
+      <TodayMatches />
+
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>מי מוביל?</h1>

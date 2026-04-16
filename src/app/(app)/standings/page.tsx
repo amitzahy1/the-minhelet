@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useBettingStore } from "@/stores/betting-store";
 import { exportBetsToCSV, exportBetsToJSON, downloadFile } from "@/lib/backup";
@@ -60,29 +60,6 @@ function MissingBetsBanner() {
     sb.topScorerPlayer, sb.topAssistsPlayer, sb.bestAttack, sb.prolificGroup, sb.driestGroup,
     sb.dirtiestTeam, ...sb.matchups, sb.penaltiesOverUnder].filter(Boolean).length;
 
-  const [syncStatus, setSyncStatus] = useState<"idle" | "saving" | "success" | "error">("idle");
-  const [syncError, setSyncError] = useState("");
-
-  const forceSave = useCallback(async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setSyncStatus("saving");
-    try {
-      const { saveBetsToSupabase } = await import("@/lib/supabase/sync");
-      const state = useBettingStore.getState();
-      const result = await saveBetsToSupabase(state);
-      if (result.success) {
-        setSyncStatus("success");
-      } else {
-        setSyncStatus("error");
-        setSyncError(result.error || "Unknown error");
-      }
-    } catch (err) {
-      setSyncStatus("error");
-      setSyncError(String(err));
-    }
-  }, []);
-
   const allDone = groups === 12 && knockoutFilled === 31 && specialsFilled === 25;
 
   // Find the first incomplete stage to link to
@@ -129,27 +106,6 @@ function MissingBetsBanner() {
       </div>
     </Link>
       )}
-
-      {/* Cloud sync button — always visible when user has bets */}
-      <div className="flex items-center gap-2 mt-2">
-        <button
-          onClick={forceSave}
-          disabled={syncStatus === "saving"}
-          className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${
-            syncStatus === "success" ? "bg-green-100 text-green-700 border border-green-200" :
-            syncStatus === "error" ? "bg-red-100 text-red-700 border border-red-200" :
-            "bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200"
-          }`}
-        >
-          {syncStatus === "saving" ? "שומר..." :
-           syncStatus === "success" ? "נשמר בענן ✓" :
-           syncStatus === "error" ? "שגיאה — נסה שוב" :
-           "שמור לענן ☁️"}
-        </button>
-        {syncStatus === "error" && syncError && (
-          <span className="text-[10px] text-red-500 max-w-xs truncate">{syncError}</span>
-        )}
-      </div>
     </div>
   );
 }

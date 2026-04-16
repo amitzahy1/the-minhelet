@@ -27,7 +27,7 @@ const BETTING_PAGES = [
 
 // Tracking/social pages
 const TRACKING_ITEMS = [
-  { href: "/standings", label: "דירוג", iconKey: "leaderboard" as const },
+  { href: "/standings", label: "ראשי", iconKey: "leaderboard" as const },
   { href: "/compare", label: "השוואה", iconKey: "compare" as const },
   { href: "/live", label: "לייב", iconKey: "live" as const },
   { href: "/schedule", label: "לו״ז", iconKey: "schedule" as const },

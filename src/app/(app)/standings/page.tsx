@@ -267,7 +267,8 @@ export default function StandingsPage() {
     }).filter(Boolean) as typeof MOCK_PLAYERS;
   }, [profiles, scoringLog]);
 
-  const PLAYERS = realPlayers.length > 0 ? realPlayers : MOCK_PLAYERS;
+  // Always use real data — never fall back to mock (prevents flash of fake names)
+  const PLAYERS = realPlayers;
   const COMPLETION_DATA = MOCK_COMPLETION_DATA; // TODO: build from real data when available
 
   const handleExportCSV = () => {

@@ -239,7 +239,7 @@ export default function KnockoutPage() {
       {filledKnockout === 31 && (
         <Link
           href="/special-bets"
-          className="mb-4 bg-gradient-to-l from-purple-500 to-indigo-600 text-white rounded-xl px-5 py-4 flex items-center justify-between gap-3 shadow-lg shadow-purple-500/20 hover:shadow-purple-500/30 hover:scale-[1.01] transition-all"
+          className="mb-4 bg-gradient-to-l from-green-500 to-emerald-600 text-white rounded-xl px-5 py-4 flex items-center justify-between gap-3 shadow-lg shadow-green-500/20 hover:shadow-green-500/30 hover:scale-[1.01] transition-all"
         >
           <div className="flex items-center gap-3">
             <span className="text-2xl">🏆</span>

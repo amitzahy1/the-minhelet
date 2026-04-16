@@ -182,11 +182,17 @@ function GroupView({ groupId }: { groupId: string }) {
 export default function GroupsPage() {
   const currentGroupIndex = useBettingStore((s) => s.currentGroupIndex);
   const setCurrentGroupIndex = useBettingStore((s) => s.setCurrentGroupIndex);
-  const getCompletedGroupsCount = useBettingStore((s) => s.getCompletedGroupsCount);
-  const getTotalFilledGroups = useBettingStore((s) => s.getTotalFilledGroups);
-
-  const completedGroups = getCompletedGroupsCount();
-  const totalFilled = getTotalFilledGroups();
+  const completedGroups = useBettingStore((s) =>
+    GROUP_LETTERS.filter((l) =>
+      s.groups[l].scores.filter((sc) => sc.home !== null && sc.away !== null).length === 6
+    ).length
+  );
+  const totalFilled = useBettingStore((s) =>
+    GROUP_LETTERS.reduce(
+      (sum, l) => sum + s.groups[l].scores.filter((sc) => sc.home !== null && sc.away !== null).length,
+      0
+    )
+  );
   const groupId = GROUP_LETTERS[currentGroupIndex];
 
   return (

@@ -247,11 +247,11 @@ export default function SpecialBetsPage() {
                 </div>
                 <div className="flex gap-2">
                   <Link
-                    href="/compare"
+                    href="/"
                     className="flex-1 py-3 rounded-xl bg-gradient-to-l from-blue-600 to-indigo-600 text-white font-bold text-sm shadow-lg hover:shadow-xl transition-shadow"
                     onClick={() => setShowCelebration(false)}
                   >
-                    לדף השוואה
+                    לדף הראשי
                   </Link>
                   <button
                     onClick={() => setShowCelebration(false)}

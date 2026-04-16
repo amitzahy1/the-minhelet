@@ -4,19 +4,25 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useBettingStore } from "@/stores/betting-store";
-import { ALL_TEAMS } from "@/lib/tournament/groups";
-import { SQUADS_DATA } from "@/lib/tournament/squads-data";
+import { ALL_TEAMS, GROUPS as GROUP_DATA } from "@/lib/tournament/groups";
+import { getSquad } from "@/lib/tournament/squads-data";
 import { getFlag } from "@/lib/flags";
 import { PageTransition } from "@/components/shared/PageTransition";
 import { useConfetti } from "@/hooks/useConfetti";
 
-const GROUPS = ["A","B","C","D","E","F","G","H","I","J","K","L"];
+const GROUP_LETTERS = ["A","B","C","D","E","F","G","H","I","J","K","L"];
+
+function groupLabel(g: string): string {
+  const teams = GROUP_DATA[g];
+  const codes = teams ? teams.map(t => t.code).join(" ") : "";
+  return `בית ${g} · ${codes}`;
+}
 
 // Order: attackers first (FW → MID → DEF → GK). Top-scorer/top-assists candidates
 // usually sit at the top. Within each position, keep the squad order.
 const POS_ORDER: Record<string, number> = { FW: 0, MID: 1, DEF: 2, GK: 3 };
 function getSquadPlayers(team: string): string[] {
-  const squad = SQUADS_DATA[team];
+  const squad = getSquad(team);
   if (!squad) return [];
   return [...squad.players]
     .sort((a, b) => (POS_ORDER[a.pos] ?? 99) - (POS_ORDER[b.pos] ?? 99))
@@ -321,12 +327,12 @@ export default function SpecialBetsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <SectionCard title="הבית הכי פורה" subtitle="הכי הרבה שערים בבתים" points="5 נק׳">
             <select value={sb.prolificGroup} onChange={e => set("prolificGroup", e.target.value)} className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <option value="">בחרו בית...</option>{GROUPS.map(g => <option key={g} value={g}>בית {g}</option>)}
+              <option value="">בחרו בית...</option>{GROUP_LETTERS.map(g => <option key={g} value={g}>{groupLabel(g)}</option>)}
             </select>
           </SectionCard>
           <SectionCard title="הבית הכי יבש" subtitle="הכי מעט שערים בבתים" points="5 נק׳">
             <select value={sb.driestGroup} onChange={e => set("driestGroup", e.target.value)} className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <option value="">בחרו בית...</option>{GROUPS.filter(g => g !== sb.prolificGroup).map(g => <option key={g} value={g}>בית {g}</option>)}
+              <option value="">בחרו בית...</option>{GROUP_LETTERS.filter(g => g !== sb.prolificGroup).map(g => <option key={g} value={g}>{groupLabel(g)}</option>)}
             </select>
           </SectionCard>
         </div>

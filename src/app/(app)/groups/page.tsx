@@ -157,7 +157,7 @@ function GroupView({ groupId }: { groupId: string }) {
                   }`}>
                     <div className="flex items-center gap-1.5 flex-1 min-w-0">
                       <span className="text-lg shrink-0">{getFlag(ht.code)}</span>
-                      <span className="text-xs sm:text-sm font-bold text-gray-900">{ht.code}</span>
+                      <span className="text-xs sm:text-sm font-bold text-gray-900 truncate">{ht.name_he}</span>
                     </div>
                     <div className="flex items-center gap-1 shrink-0 mx-1 sm:mx-2">
                       <ScoreStepper value={groupState.scores[i].home} onChange={(v) => handleScore(i, "home", v)} />
@@ -165,7 +165,7 @@ function GroupView({ groupId }: { groupId: string }) {
                       <ScoreStepper value={groupState.scores[i].away} onChange={(v) => handleScore(i, "away", v)} />
                     </div>
                     <div className="flex items-center gap-1.5 flex-1 min-w-0 justify-end">
-                      <span className="text-xs sm:text-sm font-bold text-gray-900">{at.code}</span>
+                      <span className="text-xs sm:text-sm font-bold text-gray-900 truncate">{at.name_he}</span>
                       <span className="text-lg shrink-0">{getFlag(at.code)}</span>
                     </div>
                   </div>

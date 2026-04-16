@@ -50,13 +50,23 @@ export async function saveBetsToSupabase(
     return { success: false, error: "Not logged in" };
   }
 
+  // Resolve league UUID (look up from DB if not provided)
+  let resolvedLeagueId = leagueId;
+  if (!resolvedLeagueId) {
+    const { data: league } = await supabase.from("leagues").select("id").limit(1).single();
+    resolvedLeagueId = league?.id;
+    if (!resolvedLeagueId) {
+      return { success: false, error: "No league found in database" };
+    }
+  }
+
   // Derive third place qualifiers from group predictions
   const thirdPlaceTeams = deriveThirdPlaceTeams(state);
 
   // Save to user_brackets
   const bracketData = {
     user_id: user.id,
-    league_id: leagueId || "default",
+    league_id: resolvedLeagueId,
     group_predictions: state.groups,
     third_place_qualifiers: thirdPlaceTeams,
     knockout_tree: state.knockout,
@@ -76,7 +86,7 @@ export async function saveBetsToSupabase(
   // Save special bets
   const specialData = {
     user_id: user.id,
-    league_id: leagueId || "default",
+    league_id: resolvedLeagueId,
     top_scorer_player: state.specialBets.topScorerPlayer || null,
     top_assists_player: state.specialBets.topAssistsPlayer || null,
     best_attack_team: state.specialBets.bestAttack || null,
@@ -99,7 +109,7 @@ export async function saveBetsToSupabase(
   // Save advancement picks
   const advData = {
     user_id: user.id,
-    league_id: leagueId || "default",
+    league_id: resolvedLeagueId,
     group_qualifiers: {},
     advance_to_qf: state.specialBets.quarterfinalists.filter(Boolean),
     advance_to_sf: state.specialBets.semifinalists.filter(Boolean),
@@ -132,7 +142,13 @@ export async function loadBetsFromSupabase(
     return { data: null, error: "Not logged in" };
   }
 
-  const lid = leagueId || "default";
+  // Resolve league UUID
+  let lid = leagueId;
+  if (!lid) {
+    const { data: league } = await supabase.from("leagues").select("id").limit(1).single();
+    lid = league?.id || "";
+  }
+  if (!lid) return { data: null, error: "No league found" };
 
   // Load bracket
   const { data: bracket } = await supabase

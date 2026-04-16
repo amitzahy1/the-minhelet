@@ -101,6 +101,8 @@ function MissingBetsBanner() {
         </div>
       </div>
     </Link>
+      )}
+    </div>
   );
 }
 

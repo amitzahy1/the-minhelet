@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import { useBettingStore } from "@/stores/betting-store";
 import { exportBetsToCSV, exportBetsToJSON, downloadFile } from "@/lib/backup";
 import { shareLeaderboard, openWhatsApp } from "@/lib/share";
@@ -45,6 +46,63 @@ const MOCK_PLAYERS = [
   { id: "10", name: "אורי", matchPts: 60, advPts: 40, specPts: 13, total: 113, today: "+3", delta: -1, toto: "48%", exact: 7, streak: 2, bestDay: "+12",
     breakdown: { totoGroup: 20, exactGroup: 6, totoKnockout: 20, exactKnockout: 14, groupAdvExact: 25, groupAdvPartial: 3, advQF: 8, advSF: 0, advFinal: 0, winner: 0, topScorer: 0, topAssists: 0, bestAttack: 6, specials: 7 } },
 ];
+
+// ============================================================================
+// Missing-bets awareness banner — shows what the current user still needs to fill
+// ============================================================================
+function MissingBetsBanner() {
+  const groups = useBettingStore((s) => s.getCompletedGroupsCount());
+  const knockoutFilled = useBettingStore((s) => {
+    return Object.values(s.knockout).filter((m) => m.winner).length;
+  });
+  const sb = useBettingStore((s) => s.specialBets);
+  const specialsFilled = [sb.winner, sb.finalist1, sb.finalist2, ...sb.semifinalists, ...sb.quarterfinalists,
+    sb.topScorerPlayer, sb.topAssistsPlayer, sb.bestAttack, sb.prolificGroup, sb.driestGroup,
+    sb.dirtiestTeam, ...sb.matchups, sb.penaltiesOverUnder].filter(Boolean).length;
+
+  const allDone = groups === 12 && knockoutFilled === 31 && specialsFilled === 25;
+  if (allDone) return null;
+
+  // Find the first incomplete stage to link to
+  const nextPage = groups < 12 ? "/groups" : knockoutFilled < 31 ? "/knockout" : "/special-bets";
+  const nextLabel = groups < 12 ? "שלב הבתים" : knockoutFilled < 31 ? "עץ הטורניר" : "הימורים מיוחדים";
+
+  return (
+    <Link href={nextPage} className="block mb-5">
+      <div className="bg-gradient-to-l from-amber-50 to-orange-50 border-2 border-amber-300 rounded-2xl px-5 py-4 hover:shadow-md transition-shadow">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <span className="text-xl">⚠️</span>
+            <p className="text-base font-black text-amber-900">חסרים לך הימורים!</p>
+          </div>
+          <span className="text-sm font-bold text-amber-700 bg-amber-100 rounded-full px-3 py-1">
+            המשך ל{nextLabel} ←
+          </span>
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          <div className={`rounded-xl px-3 py-2 text-center ${groups === 12 ? "bg-green-100 border border-green-200" : "bg-white border border-amber-200"}`}>
+            <p className="text-lg font-black" style={{ fontFamily: "var(--font-inter)" }}>
+              {groups === 12 ? "✓" : `${groups}/12`}
+            </p>
+            <p className={`text-[11px] font-bold ${groups === 12 ? "text-green-700" : "text-amber-800"}`}>בתים</p>
+          </div>
+          <div className={`rounded-xl px-3 py-2 text-center ${knockoutFilled === 31 ? "bg-green-100 border border-green-200" : "bg-white border border-amber-200"}`}>
+            <p className="text-lg font-black" style={{ fontFamily: "var(--font-inter)" }}>
+              {knockoutFilled === 31 ? "✓" : `${knockoutFilled}/31`}
+            </p>
+            <p className={`text-[11px] font-bold ${knockoutFilled === 31 ? "text-green-700" : "text-amber-800"}`}>נוקאאוט</p>
+          </div>
+          <div className={`rounded-xl px-3 py-2 text-center ${specialsFilled === 25 ? "bg-green-100 border border-green-200" : "bg-white border border-amber-200"}`}>
+            <p className="text-lg font-black" style={{ fontFamily: "var(--font-inter)" }}>
+              {specialsFilled === 25 ? "✓" : `${specialsFilled}/25`}
+            </p>
+            <p className={`text-[11px] font-bold ${specialsFilled === 25 ? "text-green-700" : "text-amber-800"}`}>מיוחדים</p>
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+}
 
 function Sparkline({ data, highlight }: { data: number[]; highlight?: boolean }) {
   const max = Math.max(...data), min = Math.min(...data), range = max - min || 1;
@@ -226,6 +284,9 @@ export default function StandingsPage() {
     <div className="max-w-5xl mx-auto px-4 py-6 pb-24">
       {/* Today's matches — auto-hides when no matches today */}
       <TodayMatches />
+
+      {/* Smart missing-bets banner */}
+      <MissingBetsBanner />
 
       <div className="mb-6 flex items-center justify-between">
         <div>

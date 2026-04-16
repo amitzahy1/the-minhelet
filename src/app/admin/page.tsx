@@ -15,6 +15,7 @@ import { MatchResultsEntry } from "./components/MatchResultsEntry";
 import { UserManagement } from "./components/UserManagement";
 import { AdminsList } from "./components/AdminsList";
 import { AdminGuide } from "./components/AdminGuide";
+import { CompletionMatrix } from "./components/CompletionMatrix";
 
 interface ScoringConfig {
   toto_group: number; toto_r32: number; toto_r16: number;
@@ -114,6 +115,7 @@ export default function AdminPage() {
             <TabsTrigger value="guide">מדריך למנהל</TabsTrigger>
             <TabsTrigger value="users">משתמשים</TabsTrigger>
             <TabsTrigger value="admins">מנהלים</TabsTrigger>
+            <TabsTrigger value="completion">מטריצת השלמה</TabsTrigger>
           </TabsList>
 
           <TabsContent value="status"><SystemStatus /></TabsContent>
@@ -211,6 +213,7 @@ export default function AdminPage() {
           <TabsContent value="users"><UserManagement /></TabsContent>
           <TabsContent value="admins"><AdminsList /></TabsContent>
           <TabsContent value="guide"><AdminGuide /></TabsContent>
+          <TabsContent value="completion"><CompletionMatrix /></TabsContent>
         </Tabs>
       </div>
     </div>

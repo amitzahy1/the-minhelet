@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { useBettingStore } from "@/stores/betting-store";
 import { exportBetsToCSV, exportBetsToJSON, downloadFile } from "@/lib/backup";
@@ -60,47 +60,97 @@ function MissingBetsBanner() {
     sb.topScorerPlayer, sb.topAssistsPlayer, sb.bestAttack, sb.prolificGroup, sb.driestGroup,
     sb.dirtiestTeam, ...sb.matchups, sb.penaltiesOverUnder].filter(Boolean).length;
 
+  const [syncStatus, setSyncStatus] = useState<"idle" | "saving" | "success" | "error">("idle");
+  const [syncError, setSyncError] = useState("");
+
+  const forceSave = useCallback(async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setSyncStatus("saving");
+    try {
+      const { saveBetsToSupabase } = await import("@/lib/supabase/sync");
+      const state = useBettingStore.getState();
+      const result = await saveBetsToSupabase(state);
+      if (result.success) {
+        setSyncStatus("success");
+      } else {
+        setSyncStatus("error");
+        setSyncError(result.error || "Unknown error");
+      }
+    } catch (err) {
+      setSyncStatus("error");
+      setSyncError(String(err));
+    }
+  }, []);
+
   const allDone = groups === 12 && knockoutFilled === 31 && specialsFilled === 25;
-  if (allDone) return null;
 
   // Find the first incomplete stage to link to
   const nextPage = groups < 12 ? "/groups" : knockoutFilled < 31 ? "/knockout" : "/special-bets";
   const nextLabel = groups < 12 ? "שלב הבתים" : knockoutFilled < 31 ? "עץ הטורניר" : "הימורים מיוחדים";
 
+  const hasBets = groups > 0 || knockoutFilled > 0 || specialsFilled > 0;
+  if (!hasBets) return null;
+
   return (
-    <Link href={nextPage} className="block mb-5">
-      <div className="bg-gradient-to-l from-amber-50 to-orange-50 border-2 border-amber-300 rounded-2xl px-5 py-4 hover:shadow-md transition-shadow">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">⚠️</span>
-            <p className="text-base font-black text-amber-900">חסרים לך הימורים!</p>
-          </div>
-          <span className="text-sm font-bold text-amber-700 bg-amber-100 rounded-full px-3 py-1">
-            המשך ל{nextLabel} ←
-          </span>
-        </div>
-        <div className="grid grid-cols-3 gap-2">
-          <div className={`rounded-xl px-3 py-2 text-center ${groups === 12 ? "bg-green-100 border border-green-200" : "bg-white border border-amber-200"}`}>
-            <p className="text-lg font-black" style={{ fontFamily: "var(--font-inter)" }}>
-              {groups === 12 ? "✓" : `${groups}/12`}
-            </p>
-            <p className={`text-[11px] font-bold ${groups === 12 ? "text-green-700" : "text-amber-800"}`}>בתים</p>
-          </div>
-          <div className={`rounded-xl px-3 py-2 text-center ${knockoutFilled === 31 ? "bg-green-100 border border-green-200" : "bg-white border border-amber-200"}`}>
-            <p className="text-lg font-black" style={{ fontFamily: "var(--font-inter)" }}>
-              {knockoutFilled === 31 ? "✓" : `${knockoutFilled}/31`}
-            </p>
-            <p className={`text-[11px] font-bold ${knockoutFilled === 31 ? "text-green-700" : "text-amber-800"}`}>נוקאאוט</p>
-          </div>
-          <div className={`rounded-xl px-3 py-2 text-center ${specialsFilled === 25 ? "bg-green-100 border border-green-200" : "bg-white border border-amber-200"}`}>
-            <p className="text-lg font-black" style={{ fontFamily: "var(--font-inter)" }}>
-              {specialsFilled === 25 ? "✓" : `${specialsFilled}/25`}
-            </p>
-            <p className={`text-[11px] font-bold ${specialsFilled === 25 ? "text-green-700" : "text-amber-800"}`}>מיוחדים</p>
+    <div className="mb-5">
+      {!allDone && (
+        <Link href={nextPage} className="block">
+          <div className="bg-gradient-to-l from-amber-50 to-orange-50 border-2 border-amber-300 rounded-2xl px-5 py-4 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">⚠️</span>
+                <p className="text-base font-black text-amber-900">חסרים לך הימורים!</p>
+              </div>
+              <span className="text-sm font-bold text-amber-700 bg-amber-100 rounded-full px-3 py-1">
+                המשך ל{nextLabel} ←
+              </span>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <div className={`rounded-xl px-3 py-2 text-center ${groups === 12 ? "bg-green-100 border border-green-200" : "bg-white border border-amber-200"}`}>
+                <p className="text-lg font-black" style={{ fontFamily: "var(--font-inter)" }}>
+                  {groups === 12 ? "✓" : `${groups}/12`}
+                </p>
+                <p className={`text-[11px] font-bold ${groups === 12 ? "text-green-700" : "text-amber-800"}`}>בתים</p>
+              </div>
+              <div className={`rounded-xl px-3 py-2 text-center ${knockoutFilled === 31 ? "bg-green-100 border border-green-200" : "bg-white border border-amber-200"}`}>
+                <p className="text-lg font-black" style={{ fontFamily: "var(--font-inter)" }}>
+                  {knockoutFilled === 31 ? "✓" : `${knockoutFilled}/31`}
+                </p>
+                <p className={`text-[11px] font-bold ${knockoutFilled === 31 ? "text-green-700" : "text-amber-800"}`}>נוקאאוט</p>
+              </div>
+              <div className={`rounded-xl px-3 py-2 text-center ${specialsFilled === 25 ? "bg-green-100 border border-green-200" : "bg-white border border-amber-200"}`}>
+                <p className="text-lg font-black" style={{ fontFamily: "var(--font-inter)" }}>
+                  {specialsFilled === 25 ? "✓" : `${specialsFilled}/25`}
+                </p>
+                <p className={`text-[11px] font-bold ${specialsFilled === 25 ? "text-green-700" : "text-amber-800"}`}>מיוחדים</p>
           </div>
         </div>
       </div>
     </Link>
+      )}
+
+      {/* Cloud sync button — always visible when user has bets */}
+      <div className="flex items-center gap-2 mt-2">
+        <button
+          onClick={forceSave}
+          disabled={syncStatus === "saving"}
+          className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${
+            syncStatus === "success" ? "bg-green-100 text-green-700 border border-green-200" :
+            syncStatus === "error" ? "bg-red-100 text-red-700 border border-red-200" :
+            "bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200"
+          }`}
+        >
+          {syncStatus === "saving" ? "שומר..." :
+           syncStatus === "success" ? "נשמר בענן ✓" :
+           syncStatus === "error" ? "שגיאה — נסה שוב" :
+           "שמור לענן ☁️"}
+        </button>
+        {syncStatus === "error" && syncError && (
+          <span className="text-[10px] text-red-500 max-w-xs truncate">{syncError}</span>
+        )}
+      </div>
+    </div>
   );
 }
 

@@ -65,7 +65,16 @@ export interface ScoringEntry {
 
 // --- Loaders ---
 
-const LEAGUE_ID = "default";
+// Dynamically resolve the first available league UUID (cached after first call)
+let _leagueIdCache: string | null = null;
+async function getLeagueId(): Promise<string> {
+  if (_leagueIdCache) return _leagueIdCache;
+  const supabase = createClient();
+  const { data } = await supabase.from("leagues").select("id").limit(1).single();
+  const id: string = data?.id || "";
+  _leagueIdCache = id;
+  return id;
+}
 
 /**
  * Get all user profiles (visible bettors)
@@ -104,7 +113,7 @@ export async function loadAllBrackets(): Promise<BettorBracket[]> {
   const { data, error } = await supabase
     .from("user_brackets")
     .select("user_id, group_predictions, knockout_tree, champion, locked_at, profiles(display_name)")
-    .eq("league_id", LEAGUE_ID);
+    .eq("league_id", await getLeagueId());
 
   if (error) {
     console.error("Failed to load brackets:", error);
@@ -129,7 +138,7 @@ export async function loadAllSpecialBets(): Promise<BettorSpecialBets[]> {
   const { data, error } = await supabase
     .from("special_bets")
     .select("user_id, top_scorer_player, top_assists_player, best_attack_team, most_prolific_group, driest_group, dirtiest_team, matchup_pick, penalties_over_under, profiles(display_name)")
-    .eq("league_id", LEAGUE_ID);
+    .eq("league_id", await getLeagueId());
 
   if (error) {
     console.error("Failed to load special bets:", error);
@@ -158,7 +167,7 @@ export async function loadAllAdvancements(): Promise<BettorAdvancement[]> {
   const { data, error } = await supabase
     .from("advancement_picks")
     .select("user_id, group_qualifiers, advance_to_qf, advance_to_sf, advance_to_final, winner, profiles(display_name)")
-    .eq("league_id", LEAGUE_ID);
+    .eq("league_id", await getLeagueId());
 
   if (error) {
     console.error("Failed to load advancements:", error);
@@ -185,7 +194,7 @@ export async function loadMatchPredictions(matchId: number): Promise<MatchPredic
     .from("match_predictions")
     .select("user_id, match_id, predicted_home_goals, predicted_away_goals, points_earned, profiles(display_name)")
     .eq("match_id", matchId)
-    .eq("league_id", LEAGUE_ID);
+    .eq("league_id", await getLeagueId());
 
   if (error) {
     console.error("Failed to load match predictions:", error);
@@ -210,7 +219,7 @@ export async function loadAllMatchPredictions(): Promise<MatchPrediction[]> {
   const { data, error } = await supabase
     .from("match_predictions")
     .select("user_id, match_id, predicted_home_goals, predicted_away_goals, points_earned, profiles(display_name)")
-    .eq("league_id", LEAGUE_ID);
+    .eq("league_id", await getLeagueId());
 
   if (error) {
     console.error("Failed to load all match predictions:", error);
@@ -235,7 +244,7 @@ export async function loadScoringLog(): Promise<ScoringEntry[]> {
   const { data, error } = await supabase
     .from("scoring_log")
     .select("user_id, match_id, points, reason, created_at")
-    .eq("league_id", LEAGUE_ID)
+    .eq("league_id", await getLeagueId())
     .order("created_at", { ascending: true });
 
   if (error) {

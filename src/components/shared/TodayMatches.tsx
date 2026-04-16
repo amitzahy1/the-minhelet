@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { getFlag, getTeamNameHe } from "@/lib/flags";
-import { toIsraelTimeShort, toIsraelDateKey, getTodayIsrael } from "@/lib/timezone";
+import { toIsraelTimeShort, toIsraelDate, toIsraelDateKey, getTodayIsrael } from "@/lib/timezone";
 
 interface Match {
   id: number;
@@ -18,21 +18,60 @@ interface Match {
   awayGoals: number | null;
 }
 
+// Demo matches shown before the tournament starts — removed after first real match day
+const DEMO_MATCHES: Match[] = [
+  { id: -1, date: "2026-06-11T16:00:00Z", homeTeam: "Mexico", awayTeam: "South Korea", homeTla: "MEX", awayTla: "KOR", group: "GROUP_A", stage: "GROUP_STAGE", status: "SCHEDULED", homeGoals: null, awayGoals: null },
+  { id: -2, date: "2026-06-11T19:00:00Z", homeTeam: "Argentina", awayTeam: "Czech Republic", homeTla: "ARG", awayTla: "CZE", group: "GROUP_J", stage: "GROUP_STAGE", status: "SCHEDULED", homeGoals: null, awayGoals: null },
+  { id: -3, date: "2026-06-11T22:00:00Z", homeTeam: "France", awayTeam: "Iraq", homeTla: "FRA", awayTla: "IRQ", group: "GROUP_I", stage: "GROUP_STAGE", status: "SCHEDULED", homeGoals: null, awayGoals: null },
+];
+
 export function TodayMatches() {
   const [matches, setMatches] = useState<Match[]>([]);
+  const [heading, setHeading] = useState("משחקים קרובים");
 
   useEffect(() => {
     (async () => {
       try {
         const res = await fetch("/api/matches");
         const data = await res.json();
-        if (!data.matches) return;
+        if (!data.matches || data.matches.length === 0) {
+          // No API data — show demo preview
+          setMatches(DEMO_MATCHES);
+          setHeading("משחקים קרובים — תצוגה מקדימה");
+          return;
+        }
+
+        const allMatches = data.matches as Match[];
         const today = getTodayIsrael();
-        const todayMatches = (data.matches as Match[]).filter(
-          (m) => toIsraelDateKey(m.date) === today
-        );
-        setMatches(todayMatches);
-      } catch { /* silent — component gracefully hides */ }
+
+        // Try today's matches first
+        const todayMatches = allMatches.filter((m) => toIsraelDateKey(m.date) === today);
+        if (todayMatches.length > 0) {
+          setMatches(todayMatches);
+          setHeading("משחקים היום");
+          return;
+        }
+
+        // No matches today — show next upcoming matches (up to 4)
+        const upcoming = allMatches
+          .filter((m) => m.status === "SCHEDULED" || m.status === "TIMED")
+          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+          .slice(0, 4);
+
+        if (upcoming.length > 0) {
+          setMatches(upcoming);
+          const nextDate = toIsraelDate(upcoming[0].date);
+          setHeading(`המשחקים הבאים — ${nextDate}`);
+          return;
+        }
+
+        // Fallback: show demo
+        setMatches(DEMO_MATCHES);
+        setHeading("משחקים קרובים — תצוגה מקדימה");
+      } catch {
+        setMatches(DEMO_MATCHES);
+        setHeading("משחקים קרובים — תצוגה מקדימה");
+      }
     })();
   }, []);
 
@@ -42,7 +81,7 @@ export function TodayMatches() {
     <div className="mb-6">
       <div className="flex items-center gap-2 mb-3">
         <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
-        <h2 className="text-lg font-bold text-gray-800">משחקים היום</h2>
+        <h2 className="text-base font-bold text-gray-800">{heading}</h2>
         <span className="text-sm text-gray-400">{matches.length} משחקים</span>
       </div>
       <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1">

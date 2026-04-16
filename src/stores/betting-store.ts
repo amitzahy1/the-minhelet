@@ -225,8 +225,8 @@ export const useBettingStore = create<BettingState & BettingActions>()(
       skipHydration: true,
       onRehydrateStorage: () => {
         return (state) => {
-          // Auto-save daily snapshot on rehydrate
           if (state && typeof window !== "undefined") {
+            // Auto-save daily snapshot to localStorage
             try {
               const today = new Date().toISOString().split("T")[0];
               const key = `wc2026-backup-${today}`;
@@ -239,6 +239,22 @@ export const useBettingStore = create<BettingState & BettingActions>()(
                 }));
               }
             } catch { /* ignore */ }
+
+            // Auto-sync to Supabase on page load (catches data that was never synced)
+            setTimeout(async () => {
+              try {
+                const { saveBetsToSupabase } = await import("@/lib/supabase/sync");
+                const currentState = useBettingStore.getState();
+                const hasData = Object.values(currentState.groups).some(g =>
+                  g.scores.some(s => s.home !== null)
+                );
+                if (hasData) {
+                  const result = await saveBetsToSupabase(currentState);
+                  if (result.success) console.log("Auto-synced to Supabase on load");
+                  else console.warn("Auto-sync failed:", result.error);
+                }
+              } catch { /* silent */ }
+            }, 3000);
           }
         };
       },

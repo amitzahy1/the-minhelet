@@ -1,10 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useMemo } from "react";
 import { useBettingStore } from "@/stores/betting-store";
 import { GROUPS as GROUPS_RAW } from "@/lib/tournament/groups";
 import { calculateStandings } from "@/lib/tournament/standings";
-import { validateGroup } from "@/lib/validation/engine";
 import { FLAGS as __FLAGS } from "@/lib/flags";
 import { SwipeableGroups } from "@/components/shared/SwipeableGroups";
 import { SlotMachineScore } from "@/components/shared/SlotMachineScore";
@@ -59,12 +59,6 @@ function GroupView({ groupId }: { groupId: string }) {
 
   const filledCount = groupState.scores.filter(s => s.home !== null && s.away !== null).length;
   const isComplete = filledCount === 6;
-
-  // Validation
-  const validation = useMemo(() => {
-    if (!isComplete) return null;
-    return validateGroup(groupId, groupState.order, groupState.scores);
-  }, [groupId, groupState.order, groupState.scores, isComplete]);
 
   const handleScore = useCallback((matchIdx: number, side: "home" | "away", value: number) => {
     setGroupScore(groupId, matchIdx, side, value);
@@ -137,21 +131,6 @@ function GroupView({ groupId }: { groupId: string }) {
             </table>
           </div>
 
-          {/* Validation banner */}
-          {validation && !validation.isValid && (
-            <div className="mt-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
-              <p className="text-sm font-bold text-amber-800 mb-1">התוצאות לא תואמות לסדר הצפוי</p>
-              {validation.conflicts.map((c, i) => (
-                <p key={i} className="text-sm text-amber-700">{c}</p>
-              ))}
-              <p className="text-xs text-amber-600 mt-2">שנו את התוצאות או שהסדר יתעדכן אוטומטית לפי התוצאות</p>
-            </div>
-          )}
-          {validation && validation.isValid && isComplete && (
-            <div className="mt-3 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
-              <p className="text-sm font-bold text-green-700">הכל תואם — התוצאות מייצרות את הסדר שחזית</p>
-            </div>
-          )}
         </div>
 
         {/* LEFT — Match bets */}
@@ -178,7 +157,7 @@ function GroupView({ groupId }: { groupId: string }) {
                   }`}>
                     <div className="flex items-center gap-1.5 flex-1 min-w-0">
                       <span className="text-lg shrink-0">{getFlag(ht.code)}</span>
-                      <span className="text-xs sm:text-sm font-bold text-gray-900">{ht.code}</span>
+                      <span className="text-xs sm:text-sm font-bold text-gray-900 truncate">{ht.name_he}</span>
                     </div>
                     <div className="flex items-center gap-1 shrink-0 mx-1 sm:mx-2">
                       <ScoreStepper value={groupState.scores[i].home} onChange={(v) => handleScore(i, "home", v)} />
@@ -186,7 +165,7 @@ function GroupView({ groupId }: { groupId: string }) {
                       <ScoreStepper value={groupState.scores[i].away} onChange={(v) => handleScore(i, "away", v)} />
                     </div>
                     <div className="flex items-center gap-1.5 flex-1 min-w-0 justify-end">
-                      <span className="text-xs sm:text-sm font-bold text-gray-900">{at.code}</span>
+                      <span className="text-xs sm:text-sm font-bold text-gray-900 truncate">{at.name_he}</span>
                       <span className="text-lg shrink-0">{getFlag(at.code)}</span>
                     </div>
                   </div>
@@ -228,6 +207,23 @@ export default function GroupsPage() {
               : `השלמת ${completedGroups}/12 בתים. ${12 - completedGroups} בתים נותרו — אל תישארו מאחור!`}
           </p>
         </div>
+      )}
+
+      {/* All-groups-complete CTA → next step */}
+      {completedGroups === 12 && (
+        <Link
+          href="/knockout"
+          className="mb-4 bg-gradient-to-l from-green-500 to-emerald-600 text-white rounded-xl px-5 py-4 flex items-center justify-between gap-3 shadow-lg shadow-green-500/20 hover:shadow-green-500/30 hover:scale-[1.01] transition-all"
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">🎉</span>
+            <div>
+              <p className="text-base font-black">סיימת את שלב הבתים!</p>
+              <p className="text-sm text-green-50">המשך לשלב 2 — עץ הטורניר</p>
+            </div>
+          </div>
+          <span className="text-2xl font-black">←</span>
+        </Link>
       )}
 
       {/* Compact progress */}
@@ -294,6 +290,17 @@ export default function GroupsPage() {
             className="px-8 py-3 rounded-xl bg-gray-900 text-white font-medium text-sm hover:bg-gray-800 transition-colors shadow-sm">
             ← המשך לבית {GROUP_LETTERS[currentGroupIndex + 1]}
           </button>
+        </div>
+      )}
+
+      {/* Last-group → next stage CTA */}
+      {currentGroupIndex === 11 && completedGroups === 12 && (
+        <div className="mt-6 text-center">
+          <Link href="/knockout"
+            className="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-gradient-to-l from-green-500 to-emerald-600 text-white font-bold text-base shadow-lg shadow-green-500/25 hover:shadow-green-500/35 hover:scale-[1.02] transition-all">
+            <span>עבור לעץ הטורניר</span>
+            <span className="text-xl">←</span>
+          </Link>
         </div>
       )}
     </div>

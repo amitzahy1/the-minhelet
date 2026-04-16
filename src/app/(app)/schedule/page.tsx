@@ -8,6 +8,7 @@ import type { BettorProfile, BettorSpecialBets, BettorAdvancement, MatchPredicti
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { toIsraelTimeShort, toIsraelDate } from "@/lib/timezone";
 
 // Mock bettor predictions — in production from Supabase
 const MOCK_PREDICTIONS: Record<string, Record<string, string>> = {
@@ -315,24 +316,6 @@ export default function SchedulePage() {
     setLoading(false);
   }
 
-  function toIsraelTimeShort(utcDate: string): string {
-    const d = new Date(utcDate);
-    return d.toLocaleString("he-IL", {
-      timeZone: "Asia/Jerusalem",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  }
-
-  function toIsraelDate(utcDate: string): string {
-    const d = new Date(utcDate);
-    return d.toLocaleString("he-IL", {
-      timeZone: "Asia/Jerusalem",
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-    });
-  }
 
   // Group matches by date
   const grouped: Record<string, Match[]> = {};

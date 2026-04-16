@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useCallback, memo } from "react";
 import { useBettingStore } from "@/stores/betting-store";
 import { GROUPS } from "@/lib/tournament/groups";
@@ -233,6 +234,23 @@ export default function KnockoutPage() {
         </div>
         <p className="text-sm text-gray-500">המנצחת עוברת אוטומטית לשלב הבא</p>
       </div>
+
+      {/* All-bracket-complete CTA → special bets */}
+      {filledKnockout === 31 && (
+        <Link
+          href="/special-bets"
+          className="mb-4 bg-gradient-to-l from-purple-500 to-indigo-600 text-white rounded-xl px-5 py-4 flex items-center justify-between gap-3 shadow-lg shadow-purple-500/20 hover:shadow-purple-500/30 hover:scale-[1.01] transition-all"
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">🏆</span>
+            <div>
+              <p className="text-base font-black">סיימת את עץ הטורניר!</p>
+              <p className="text-sm text-purple-50">המשך לשלב 3 — הימורים מיוחדים</p>
+            </div>
+          </div>
+          <span className="text-2xl font-black">←</span>
+        </Link>
+      )}
 
       {/* Mobile: Round-by-round tabs */}
       <div className="sm:hidden mb-4">

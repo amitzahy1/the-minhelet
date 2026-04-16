@@ -115,7 +115,7 @@ export default function AdminPage() {
             <TabsTrigger value="guide">מדריך למנהל</TabsTrigger>
             <TabsTrigger value="users">משתמשים</TabsTrigger>
             <TabsTrigger value="admins">מנהלים</TabsTrigger>
-            <TabsTrigger value="completion">מטריצת השלמה</TabsTrigger>
+            <TabsTrigger value="completion">סטטוס מילוי</TabsTrigger>
           </TabsList>
 
           <TabsContent value="status"><SystemStatus /></TabsContent>

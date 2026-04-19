@@ -719,33 +719,44 @@ function DayTable({
                 const time = new Date(m.date).toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
                 const c = perMatchCounts[i];
                 return (
-                  <th key={m.id} className="py-2.5 px-2 text-center min-w-[10rem] border-e border-gray-100 last:border-e-0">
-                    <div className="flex flex-col items-center gap-1">
-                      <div className="flex items-center gap-1.5 text-[10px] text-gray-500 font-medium">
-                        <span className="bg-gray-100 rounded-md px-1.5 py-0.5">בית {m.group}</span>
+                  <th key={m.id} className="py-3 px-3 text-center min-w-[15rem] border-e border-gray-100 last:border-e-0">
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="flex items-center gap-2 text-[11px] text-gray-500 font-medium">
+                        <span className="bg-gray-100 rounded-md px-2 py-0.5 font-bold">בית {m.group}</span>
                         <span style={{ fontFamily: "var(--font-inter)" }}>{time}</span>
                       </div>
-                      <div className="flex items-center gap-2 my-0.5" dir="ltr">
-                        <div className="flex flex-col items-center">
-                          <span className="text-xl">{getFlag(m.homeTla)}</span>
-                          <span className="text-[9px] font-bold text-gray-600 max-w-[3rem] truncate">
+                      <div className="flex items-center gap-3 my-1" dir="ltr">
+                        <div className="flex flex-col items-center gap-1 w-16">
+                          <span className="text-4xl leading-none">{getFlag(m.homeTla)}</span>
+                          <span
+                            className="text-xs font-bold text-gray-800 text-center leading-tight"
+                            style={{ fontFamily: "var(--font-secular)" }}
+                            title={getTeamNameHe(m.homeTla) || m.homeTla}
+                          >
                             {getTeamNameHe(m.homeTla) || m.homeTla}
                           </span>
                         </div>
-                        <span className="text-base font-black tabular-nums text-gray-900 bg-white rounded-lg border border-gray-200 px-2 py-0.5 shadow-sm" style={{ fontFamily: "var(--font-inter)" }}>
+                        <span
+                          className="text-xl font-black tabular-nums text-gray-900 bg-white rounded-xl border-2 border-gray-200 px-3 py-1 shadow-sm"
+                          style={{ fontFamily: "var(--font-inter)" }}
+                        >
                           {m.homeGoals} - {m.awayGoals}
                         </span>
-                        <div className="flex flex-col items-center">
-                          <span className="text-xl">{getFlag(m.awayTla)}</span>
-                          <span className="text-[9px] font-bold text-gray-600 max-w-[3rem] truncate">
+                        <div className="flex flex-col items-center gap-1 w-16">
+                          <span className="text-4xl leading-none">{getFlag(m.awayTla)}</span>
+                          <span
+                            className="text-xs font-bold text-gray-800 text-center leading-tight"
+                            style={{ fontFamily: "var(--font-secular)" }}
+                            title={getTeamNameHe(m.awayTla) || m.awayTla}
+                          >
                             {getTeamNameHe(m.awayTla) || m.awayTla}
                           </span>
                         </div>
                       </div>
                       {(c.exact + c.toto > 0) && (
-                        <div className="flex items-center gap-1 text-[10px] font-bold">
-                          {c.exact > 0 && <span className="text-green-700">🎯{c.exact}</span>}
-                          {c.toto > 0 && <span className="text-amber-700">✓{c.toto}</span>}
+                        <div className="flex items-center gap-2 text-[11px] font-bold">
+                          {c.exact > 0 && <span className="text-green-700 bg-green-50 rounded-full px-2 py-0.5 border border-green-200">🎯 {c.exact}</span>}
+                          {c.toto > 0 && <span className="text-amber-700 bg-amber-50 rounded-full px-2 py-0.5 border border-amber-200">✓ {c.toto}</span>}
                         </div>
                       )}
                     </div>

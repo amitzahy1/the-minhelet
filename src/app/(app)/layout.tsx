@@ -237,18 +237,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   if (!appReady) {
     return (
       <div className="min-h-screen bg-[#F8F9FB] flex items-center justify-center" dir="rtl">
-        <div className="flex flex-col items-center gap-5 animate-fade-in">
-          <img src="/logo.png" alt="The Minhelet" className="w-24 h-24 rounded-full object-cover shadow-xl" />
+        <div className="flex flex-col items-center gap-6">
+          <img src="/logo.png" alt="The Minhelet" className="w-40 h-40 sm:w-52 sm:h-52 rounded-full object-cover shadow-2xl" />
           <div className="text-center">
-            <h1 className="text-2xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>THE MINHELET</h1>
-            <p className="text-sm text-gray-400 mt-1" style={{ fontFamily: "var(--font-inter)" }}>WORLD CUP 2026</p>
+            <h1 className="text-4xl sm:text-5xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>THE MINHELET</h1>
+            <p className="text-base sm:text-lg text-gray-400 mt-2" style={{ fontFamily: "var(--font-inter)" }}>WORLD CUP 2026</p>
           </div>
-          <div className="flex items-center gap-2 mt-2">
-            <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: "0ms" }} />
-            <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: "150ms" }} />
-            <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: "300ms" }} />
+          <div className="flex items-center gap-2.5 mt-3">
+            <div className="w-3 h-3 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: "0ms" }} />
+            <div className="w-3 h-3 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: "150ms" }} />
+            <div className="w-3 h-3 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: "300ms" }} />
           </div>
-          <p className="text-xs text-gray-400 mt-1">טוען את הנתונים...</p>
         </div>
       </div>
     );

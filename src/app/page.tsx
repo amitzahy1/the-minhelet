@@ -32,18 +32,22 @@ export default function LandingPage() {
     });
   }, [router]);
 
-  // Show nothing while checking auth
+  // Show branded splash while checking auth
   if (checkingAuth) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "#0a0f1a" }}>
-        <motion.div
-          animate={{ scale: [1, 1.1, 1], opacity: [0.7, 1, 0.7] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-          className="flex flex-col items-center gap-4"
-        >
-          <img src="/logo.png" alt="" className="w-28 h-28 rounded-full object-cover" />
-          <span className="text-white text-lg font-bold">טוען...</span>
-        </motion.div>
+      <div className="min-h-screen bg-[#F8F9FB] flex items-center justify-center" dir="rtl">
+        <div className="flex flex-col items-center gap-6">
+          <img src="/logo.png" alt="The Minhelet" className="w-40 h-40 sm:w-52 sm:h-52 rounded-full object-cover shadow-2xl" />
+          <div className="text-center">
+            <h1 className="text-4xl sm:text-5xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>THE MINHELET</h1>
+            <p className="text-base sm:text-lg text-gray-400 mt-2" style={{ fontFamily: "var(--font-inter)" }}>WORLD CUP 2026</p>
+          </div>
+          <div className="flex items-center gap-2.5 mt-3">
+            <div className="w-3 h-3 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: "0ms" }} />
+            <div className="w-3 h-3 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: "150ms" }} />
+            <div className="w-3 h-3 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: "300ms" }} />
+          </div>
+        </div>
       </div>
     );
   }

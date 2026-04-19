@@ -140,7 +140,7 @@ export async function loadAllSpecialBets(): Promise<BettorSpecialBets[]> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("special_bets")
-    .select("user_id, top_scorer_team, top_scorer_player, top_assists_team, top_assists_player, best_attack_team, most_prolific_group, driest_group, dirtiest_team, matchup_pick, penalties_over_under, profiles(display_name)")
+    .select("user_id, top_scorer_player, top_assists_player, best_attack_team, most_prolific_group, driest_group, dirtiest_team, matchup_pick, penalties_over_under, profiles(display_name)")
     .eq("league_id", await getLeagueId());
 
   if (error) {
@@ -151,9 +151,9 @@ export async function loadAllSpecialBets(): Promise<BettorSpecialBets[]> {
   return (data || []).map((d) => ({
     userId: d.user_id,
     displayName: (d.profiles as unknown as { display_name: string })?.display_name || "",
-    topScorerTeam: d.top_scorer_team,
+    topScorerTeam: (d as Record<string, unknown>).top_scorer_team as string ?? null,
     topScorerPlayer: d.top_scorer_player,
-    topAssistsTeam: d.top_assists_team,
+    topAssistsTeam: (d as Record<string, unknown>).top_assists_team as string ?? null,
     topAssistsPlayer: d.top_assists_player,
     bestAttackTeam: d.best_attack_team,
     prolificGroup: d.most_prolific_group,
@@ -309,9 +309,9 @@ export async function loadAllBetsViaServer(): Promise<{
     const specialBets: BettorSpecialBets[] = (json.specialBets || []).map((d: Record<string, unknown>) => ({
       userId: d.user_id,
       displayName: ((d.profiles as { display_name: string } | null)?.display_name) || "",
-      topScorerTeam: d.top_scorer_team,
+      topScorerTeam: d.top_scorer_team ?? null,
       topScorerPlayer: d.top_scorer_player,
-      topAssistsTeam: d.top_assists_team,
+      topAssistsTeam: d.top_assists_team ?? null,
       topAssistsPlayer: d.top_assists_player,
       bestAttackTeam: d.best_attack_team,
       prolificGroup: d.most_prolific_group,

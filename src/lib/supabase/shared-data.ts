@@ -5,6 +5,7 @@
 // ============================================================================
 
 import { createClient } from "@/lib/supabase/client";
+import { isLocked } from "@/lib/constants";
 
 // --- Types ---
 
@@ -273,4 +274,65 @@ export async function loadAllSharedData() {
   ]);
 
   return { profiles, brackets, specialBets, advancements };
+}
+
+/**
+ * After lock: load all bets via server API (bypasses RLS).
+ * Returns brackets, specialBets, advancements, and currentUserId.
+ */
+export async function loadAllBetsViaServer(): Promise<{
+  currentUserId: string;
+  brackets: BettorBracket[];
+  specialBets: BettorSpecialBets[];
+  advancements: BettorAdvancement[];
+} | null> {
+  if (!isLocked()) return null;
+
+  try {
+    const res = await fetch("/api/shared-bets");
+    if (!res.ok) return null;
+    const json = await res.json();
+
+    const brackets: BettorBracket[] = (json.brackets || []).map((d: Record<string, unknown>) => ({
+      userId: d.user_id,
+      displayName: ((d.profiles as { display_name: string } | null)?.display_name) || "",
+      groupPredictions: d.group_predictions || {},
+      knockoutTree: d.knockout_tree || {},
+      champion: d.champion,
+      lockedAt: d.locked_at,
+    }));
+
+    const specialBets: BettorSpecialBets[] = (json.specialBets || []).map((d: Record<string, unknown>) => ({
+      userId: d.user_id,
+      displayName: ((d.profiles as { display_name: string } | null)?.display_name) || "",
+      topScorerPlayer: d.top_scorer_player,
+      topAssistsPlayer: d.top_assists_player,
+      bestAttackTeam: d.best_attack_team,
+      prolificGroup: d.most_prolific_group,
+      driestGroup: d.driest_group,
+      dirtiestTeam: d.dirtiest_team,
+      matchupPick: d.matchup_pick,
+      penaltiesOverUnder: d.penalties_over_under,
+    }));
+
+    const advancements: BettorAdvancement[] = (json.advancements || []).map((d: Record<string, unknown>) => ({
+      userId: d.user_id,
+      displayName: ((d.profiles as { display_name: string } | null)?.display_name) || "",
+      groupQualifiers: d.group_qualifiers || {},
+      advanceToQF: d.advance_to_qf || [],
+      advanceToSF: d.advance_to_sf || [],
+      advanceToFinal: d.advance_to_final || [],
+      winner: d.winner || "",
+    }));
+
+    return {
+      currentUserId: json.currentUserId,
+      brackets,
+      specialBets,
+      advancements,
+    };
+  } catch (e) {
+    console.error("Failed to load bets via server:", e);
+    return null;
+  }
 }

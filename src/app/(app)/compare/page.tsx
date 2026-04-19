@@ -3,7 +3,6 @@
 import { useState, useMemo } from "react";
 import { PredictionHeatmap } from "@/components/shared/PredictionHeatmap";
 import { useSharedData } from "@/hooks/useSharedData";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 // Color coding: each unique value gets a FIXED color — same pick = same color everywhere
 const VALUE_COLORS = [
@@ -92,10 +91,9 @@ type View = "advancement" | "specials" | "groups" | "similarity" | "heatmap";
 
 export default function ComparePage() {
   const [view, setView] = useState<View>("advancement");
-  const currentUserId = useCurrentUser();
 
-  // Load real data from Supabase
-  const { brackets, specialBets, advancements } = useSharedData();
+  // Load real data from Supabase (after lock, uses server API to bypass RLS)
+  const { brackets, specialBets, advancements, currentUserId } = useSharedData();
 
   // Build real bettors from Supabase data
   const realBettors = useMemo((): Bettor[] => {

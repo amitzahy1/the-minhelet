@@ -271,40 +271,65 @@ export function UserBetsEditor() {
   }
 
   // ---------- Completion stats ----------
+  // These counts mirror /api/admin/completion EXACTLY so the numbers here
+  // match the "סטטוס מילוי" page.
+  // Total = 12 groups + 31 knockout + 25 special/advancement = 68
   const completion = useMemo(() => {
-    // Groups: number of matches fully filled / 72
-    let groupsFilled = 0;
+    // Groups: count FULLY completed groups (all 6 match scores filled)
+    let groupsCompleted = 0;
     for (const g of GROUP_LETTERS) {
       const gp = lockedBracket.group_predictions[g];
-      if (!gp) continue;
-      for (const s of gp.scores) if (isFilledScore(s)) groupsFilled += 1;
+      if (!gp?.scores) continue;
+      if (gp.scores.filter(isFilledScore).length === 6) groupsCompleted += 1;
     }
-    // Knockout: 31 = 16 R32 + 8 R16 + 4 QF + 2 SF + 1 final  (we don't score THIRD)
+
+    // Knockout: matches with winner set (31 max)
     let koFilled = 0;
     for (const stage of KO_STAGES) {
       for (const k of stage.keys) {
         const m = lockedBracket.knockout_tree[k];
-        if (m?.winner && m.winner.trim() !== "") koFilled += 1;
+        if (isFilledStr(m?.winner)) koFilled += 1;
       }
     }
-    // Special bets: 10 scalar fields in special + winner + 8 QF + 4 SF + 2 final = 25
-    let specialsFilled = 0;
-    for (const v of Object.values(lockedSpecial)) if (isFilledStr(v)) specialsFilled += 1;
-    specialsFilled += lockedAdv.advance_to_qf.filter(isFilledStr).length;
-    specialsFilled += lockedAdv.advance_to_sf.filter(isFilledStr).length;
-    specialsFilled += lockedAdv.advance_to_final.filter(isFilledStr).length;
-    specialsFilled += isFilledStr(lockedAdv.winner) ? 1 : 0;
+
+    // Special section = 10 items (NOT counting *_team fields)
+    // 1 top_scorer_player + 1 top_assists_player + 1 best_attack + 1 prolific +
+    // 1 driest + 1 dirtiest + up to 3 matchup_pick (split by commas) + 1 penalties = 10
+    let specialOnly = 0;
+    if (isFilledStr(lockedSpecial.top_scorer_player)) specialOnly += 1;
+    if (isFilledStr(lockedSpecial.top_assists_player)) specialOnly += 1;
+    if (isFilledStr(lockedSpecial.best_attack_team)) specialOnly += 1;
+    if (isFilledStr(lockedSpecial.most_prolific_group)) specialOnly += 1;
+    if (isFilledStr(lockedSpecial.driest_group)) specialOnly += 1;
+    if (isFilledStr(lockedSpecial.dirtiest_team)) specialOnly += 1;
+    if (isFilledStr(lockedSpecial.matchup_pick)) {
+      specialOnly += (lockedSpecial.matchup_pick || "").split(",").filter(Boolean).length;
+    }
+    if (isFilledStr(lockedSpecial.penalties_over_under)) specialOnly += 1;
+
+    // Advancement section = 15 items (8 QF + 4 SF + 2 final + 1 winner)
+    let advanceOnly = 0;
+    advanceOnly += lockedAdv.advance_to_qf.filter(isFilledStr).length;
+    advanceOnly += lockedAdv.advance_to_sf.filter(isFilledStr).length;
+    advanceOnly += lockedAdv.advance_to_final.filter(isFilledStr).length;
+    if (isFilledStr(lockedAdv.winner)) advanceOnly += 1;
+
+    const specialsFilled = specialOnly + advanceOnly;
+    const totalFilled = groupsCompleted + koFilled + specialsFilled;
+    const totalItems = 12 + 31 + 25;
 
     return {
-      groupsFilled,
-      groupsTotal: 72,
+      groupsCompleted,
+      groupsTotal: 12,
       koFilled,
       koTotal: 31,
+      specialOnly,
+      specialOnlyTotal: 10,
+      advanceOnly,
+      advanceOnlyTotal: 15,
       specialsFilled,
       specialsTotal: 25,
-      overallPct: Math.round(
-        ((groupsFilled + koFilled + specialsFilled) / (72 + 31 + 25)) * 100
-      ),
+      overallPct: Math.round((totalFilled / totalItems) * 100),
     };
   }, [lockedBracket, lockedSpecial, lockedAdv]);
 
@@ -506,14 +531,14 @@ export function UserBetsEditor() {
           {selectedUser && !loading && (
             <div className="mt-3 flex items-center gap-3 flex-wrap text-xs">
               <span className="font-bold text-gray-700">סטטוס מילוי של {selectedUser.name}:</span>
-              <Badge variant="outline" className={completion.groupsFilled === 72 ? "text-green-700 bg-green-50" : "text-amber-700 bg-amber-50"}>
-                בתים {completion.groupsFilled}/72
+              <Badge variant="outline" className={completion.groupsCompleted === 12 ? "text-green-700 bg-green-50" : "text-amber-700 bg-amber-50"}>
+                בתים {completion.groupsCompleted}/12
               </Badge>
               <Badge variant="outline" className={completion.koFilled === 31 ? "text-green-700 bg-green-50" : "text-amber-700 bg-amber-50"}>
                 נוקאאוט {completion.koFilled}/31
               </Badge>
               <Badge variant="outline" className={completion.specialsFilled === 25 ? "text-green-700 bg-green-50" : "text-amber-700 bg-amber-50"}>
-                מיוחדים {completion.specialsFilled}/25
+                מיוחדים+עולות {completion.specialsFilled}/25
               </Badge>
               <Badge variant="outline" className={fullyComplete ? "text-green-700 bg-green-50" : ""}>
                 סה״כ {completion.overallPct}%
@@ -543,10 +568,10 @@ export function UserBetsEditor() {
       {!loading && selectedUser && !fullyComplete && (
         <Tabs defaultValue="groups" dir="rtl">
           <TabsList>
-            <TabsTrigger value="groups">בתים {completion.groupsFilled === 72 && "✓"}</TabsTrigger>
+            <TabsTrigger value="groups">בתים {completion.groupsCompleted === 12 && "✓"}</TabsTrigger>
             <TabsTrigger value="knockout">נוקאאוט {completion.koFilled === 31 && "✓"}</TabsTrigger>
-            <TabsTrigger value="special">מיוחדים</TabsTrigger>
-            <TabsTrigger value="advancement">עולות</TabsTrigger>
+            <TabsTrigger value="special">מיוחדים {completion.specialOnly === 10 && "✓"}</TabsTrigger>
+            <TabsTrigger value="advancement">עולות {completion.advanceOnly === 15 && "✓"}</TabsTrigger>
           </TabsList>
 
           {/* =============== GROUPS =============== */}

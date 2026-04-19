@@ -94,7 +94,7 @@ export default function ComparePage() {
   const [view, setView] = useState<View>("advancement");
 
   // Load real data from Supabase (after lock, uses server API to bypass RLS)
-  const { brackets, specialBets, advancements, currentUserId } = useSharedData();
+  const { brackets, specialBets, advancements, currentUserId, loading } = useSharedData();
 
   // Build real bettors from Supabase data
   const realBettors = useMemo((): Bettor[] => {
@@ -164,7 +164,7 @@ export default function ComparePage() {
     });
   }, [brackets, specialBets, advancements, currentUserId]);
 
-  const BETTORS = realBettors.length > 0 ? realBettors : MOCK_BETTORS;
+  const BETTORS = realBettors;
 
   // Build color maps for each category
   const advColors = useMemo(() => buildColorMap([
@@ -207,8 +207,21 @@ export default function ComparePage() {
         </div>
       )}
 
-      {/* View tabs — only visible after lock */}
-      {isLocked && <div className="mb-5 flex gap-2 flex-wrap">
+      {isLocked && loading && (
+        <div className="text-center py-12">
+          <div className="inline-block w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-3"></div>
+          <p className="text-sm text-gray-500 font-bold">טוען את ההימורים של כולם...</p>
+        </div>
+      )}
+
+      {isLocked && !loading && BETTORS.length === 0 && (
+        <div className="bg-gray-50 border border-gray-200 rounded-2xl p-8 text-center">
+          <p className="text-sm text-gray-500">אין עדיין הימורים להצגה</p>
+        </div>
+      )}
+
+      {/* View tabs — only visible after lock + data loaded */}
+      {isLocked && !loading && BETTORS.length > 0 && <div className="mb-5 flex gap-2 flex-wrap">
         {[
           { key: "advancement" as View, label: "עולות + זוכה" },
           { key: "specials" as View, label: "הימורים מיוחדים" },
@@ -225,7 +238,7 @@ export default function ComparePage() {
         ))}
       </div>}
 
-      {isLocked && <>
+      {isLocked && !loading && BETTORS.length > 0 && <>
       {/* === ADVANCEMENT VIEW === */}
       {view === "advancement" && (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">

@@ -43,10 +43,20 @@ export async function GET() {
       .filter((m) => m.status === "FINISHED" && m.homeGoals != null && m.awayGoals != null)
       .map((m) => {
         // Normalize group: "GROUP_A" / "Group A" / "A" → single letter for CHAR(1) column.
+        // Naive /([A-L])/ wrongly matched the "G" in "GROUP" — strip prefix first.
         let g: string | null = null;
         if (m.group) {
-          const match = m.group.toString().match(/([A-L])/i);
-          g = match ? match[1].toUpperCase() : null;
+          const str = m.group.toString().toUpperCase().trim();
+          if (/^[A-L]$/.test(str)) {
+            g = str;
+          } else {
+            const cleaned = str.replace(/^GROUP[_\s-]*/i, "");
+            if (/^[A-L]$/.test(cleaned)) g = cleaned;
+            else {
+              const tail = cleaned.match(/([A-L])\s*$/);
+              g = tail ? tail[1] : null;
+            }
+          }
         }
         return {
         match_id: String(m.id),

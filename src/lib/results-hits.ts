@@ -123,6 +123,16 @@ export function hitCounts(hits: BettorHit[]): { exact: number; toto: number; mis
 /** Normalize Football-Data group string (e.g. "GROUP_A") to a single letter. */
 export function normalizeGroupLetter(raw: string | undefined | null): string {
   if (!raw) return "";
-  const m = raw.toString().match(/([A-L])/i);
-  return m ? m[1].toUpperCase() : "";
+  const str = raw.toString().toUpperCase().trim();
+  // Already a single letter — easy path.
+  if (/^[A-L]$/.test(str)) return str;
+  // Strip "GROUP" / "GROUP_" / "GROUP " prefix, then expect a single letter.
+  // The previous regex /([A-L])/ matched the FIRST letter A-L anywhere, so
+  // "GROUP_A" resolved to "G" (from the word GROUP) — silently corrupting
+  // every hit computation.
+  const cleaned = str.replace(/^GROUP[_\s-]*/i, "");
+  if (/^[A-L]$/.test(cleaned)) return cleaned;
+  // Last resort: pick the final A-L letter in the string.
+  const tail = cleaned.match(/([A-L])\s*$/);
+  return tail ? tail[1] : "";
 }

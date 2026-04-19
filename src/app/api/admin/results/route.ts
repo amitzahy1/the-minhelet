@@ -73,10 +73,20 @@ export async function POST(request: Request) {
 
   const rows = results.map((r) => {
     // Group may arrive as "GROUP_A", "Group A", or plain "A" — DB column is CHAR(1).
+    // NOTE: naive /([A-L])/ matched "G" in "GROUP" — strip prefix first.
     let g: string | null = null;
     if (r.group_id) {
-      const m = r.group_id.toString().match(/([A-L])/i);
-      g = m ? m[1].toUpperCase() : null;
+      const str = r.group_id.toString().toUpperCase().trim();
+      if (/^[A-L]$/.test(str)) {
+        g = str;
+      } else {
+        const cleaned = str.replace(/^GROUP[_\s-]*/i, "");
+        if (/^[A-L]$/.test(cleaned)) g = cleaned;
+        else {
+          const tail = cleaned.match(/([A-L])\s*$/);
+          g = tail ? tail[1] : null;
+        }
+      }
     }
     return {
     match_id: String(r.match_id),

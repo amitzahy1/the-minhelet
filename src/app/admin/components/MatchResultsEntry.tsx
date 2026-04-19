@@ -93,11 +93,16 @@ function normalizeStage(s: string): string {
   return STAGE_MAP[s] ?? s;
 }
 
-/** Football-Data may return group as "GROUP_A" / "Group A" / "A". We store a single letter. */
+/** Football-Data may return group as "GROUP_A" / "Group A" / "A". We store a single letter.
+ *  ⚠️ Must not match the G in "GROUP" — use the shared helper logic. */
 function normalizeGroupLetter(g: string | null | undefined): string | null {
   if (!g) return null;
-  const m = g.toString().match(/([A-L])/i);
-  return m ? m[1].toUpperCase() : null;
+  const str = g.toString().toUpperCase().trim();
+  if (/^[A-L]$/.test(str)) return str;
+  const cleaned = str.replace(/^GROUP[_\s-]*/i, "");
+  if (/^[A-L]$/.test(cleaned)) return cleaned;
+  const tail = cleaned.match(/([A-L])\s*$/);
+  return tail ? tail[1] : null;
 }
 
 function formatDate(iso: string | null): string {

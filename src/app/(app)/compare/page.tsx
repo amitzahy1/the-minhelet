@@ -619,13 +619,11 @@ function DayTable({
   brackets: ResultsViewProps["brackets"];
   currentUserId: string | null;
 }) {
-  // For each match, compute hits for all bettors.
   const matchHits = useMemo(() =>
     matches.map((m) => ({ match: m, hits: computeGroupHits(m, brackets) })),
     [matches, brackets]
   );
 
-  // Collect every bettor that appears in any match's hits (plus all bracket owners).
   const allBettors = useMemo(() => {
     const seen = new Map<string, string>();
     for (const b of brackets) seen.set(b.userId, b.displayName || "ללא שם");
@@ -635,7 +633,6 @@ function DayTable({
     return Array.from(seen.entries()).map(([userId, name]) => ({ userId, name }));
   }, [brackets, matchHits]);
 
-  // Per-bettor: per-match pick + totals.
   type Row = {
     userId: string;
     name: string;
@@ -671,106 +668,182 @@ function DayTable({
     );
   }, [allBettors, matches, matchHits]);
 
-  // Day-level summary — one quick stat per match
   const perMatchCounts = matchHits.map(({ hits }) => hitCounts(hits));
+  const dayTop = rows[0];
+  const totalBols = rows.reduce((s, r) => s + r.exacts, 0);
+  const totalTotos = rows.reduce((s, r) => s + r.totos, 0);
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-      <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
-          <h3 className="text-sm font-bold text-gray-800">{dateLabel}</h3>
-          <span className="text-xs text-gray-500">· {matches.length} משחקים</span>
+    <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
+      {/* Day header with gradient, matching the rest of the site */}
+      <div className="bg-gradient-to-l from-indigo-50/60 via-blue-50/40 to-white border-b border-blue-100/50 px-5 py-3.5">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-2.5">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-60" />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500" />
+            </span>
+            <h3 className="text-base font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>{dateLabel}</h3>
+            <span className="text-xs font-medium text-gray-500">· {matches.length} משחקים נגמרו</span>
+          </div>
+          <div className="flex items-center gap-2 text-[11px]">
+            {totalBols > 0 && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-green-50 text-green-700 border border-green-200 px-2 py-0.5 font-bold">
+                🎯 {totalBols} תוצאות מדויקות
+              </span>
+            )}
+            {totalTotos > 0 && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 font-bold">
+                ✓ {totalTotos} טוטו
+              </span>
+            )}
+            {dayTop && dayTop.points > 0 && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-2.5 py-0.5 font-bold shadow-sm">
+                👑 {dayTop.name} · {dayTop.points} נק׳
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full text-xs">
+        <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-200 bg-white">
-              <th className="py-2 px-2 text-start sticky start-0 bg-white z-10 border-e border-gray-100 min-w-[5.5rem]">
-                מהמר
+            <tr className="bg-gradient-to-l from-white to-gray-50/50 border-b border-gray-200">
+              <th className="py-3 px-3 text-start sticky start-0 bg-white z-10 border-e border-gray-100 min-w-[7rem]">
+                <span className="text-xs font-bold text-gray-500 uppercase tracking-wide" style={{ fontFamily: "var(--font-inter)" }}>
+                  מהמר
+                </span>
               </th>
               {matches.map((m, i) => {
                 const time = new Date(m.date).toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
                 const c = perMatchCounts[i];
                 return (
-                  <th key={m.id} className="py-2 px-2 text-center min-w-[9rem]">
-                    <div className="flex items-center justify-center gap-1 text-sm" dir="ltr">
-                      <span className="text-base">{getFlag(m.homeTla)}</span>
-                      <span className="font-black tabular-nums text-gray-900" style={{ fontFamily: "var(--font-inter)" }}>
-                        {m.homeGoals}-{m.awayGoals}
-                      </span>
-                      <span className="text-base">{getFlag(m.awayTla)}</span>
-                    </div>
-                    <div className="text-[10px] text-gray-400 mt-0.5 font-normal">
-                      {getTeamNameHe(m.homeTla) || m.homeTla} - {getTeamNameHe(m.awayTla) || m.awayTla}
-                    </div>
-                    <div className="text-[9px] text-gray-400 mt-0.5 font-normal" style={{ fontFamily: "var(--font-inter)" }}>
-                      {time} · בית {m.group}
-                    </div>
-                    {(c.exact + c.toto > 0) && (
-                      <div className="text-[10px] mt-1 font-medium">
-                        {c.exact > 0 && <span className="text-green-700">🎯{c.exact}</span>}
-                        {c.exact > 0 && c.toto > 0 && <span className="text-gray-300 mx-0.5">·</span>}
-                        {c.toto > 0 && <span className="text-amber-700">✓{c.toto}</span>}
+                  <th key={m.id} className="py-2.5 px-2 text-center min-w-[10rem] border-e border-gray-100 last:border-e-0">
+                    <div className="flex flex-col items-center gap-1">
+                      <div className="flex items-center gap-1.5 text-[10px] text-gray-500 font-medium">
+                        <span className="bg-gray-100 rounded-md px-1.5 py-0.5">בית {m.group}</span>
+                        <span style={{ fontFamily: "var(--font-inter)" }}>{time}</span>
                       </div>
-                    )}
+                      <div className="flex items-center gap-2 my-0.5" dir="ltr">
+                        <div className="flex flex-col items-center">
+                          <span className="text-xl">{getFlag(m.homeTla)}</span>
+                          <span className="text-[9px] font-bold text-gray-600 max-w-[3rem] truncate">
+                            {getTeamNameHe(m.homeTla) || m.homeTla}
+                          </span>
+                        </div>
+                        <span className="text-base font-black tabular-nums text-gray-900 bg-white rounded-lg border border-gray-200 px-2 py-0.5 shadow-sm" style={{ fontFamily: "var(--font-inter)" }}>
+                          {m.homeGoals} - {m.awayGoals}
+                        </span>
+                        <div className="flex flex-col items-center">
+                          <span className="text-xl">{getFlag(m.awayTla)}</span>
+                          <span className="text-[9px] font-bold text-gray-600 max-w-[3rem] truncate">
+                            {getTeamNameHe(m.awayTla) || m.awayTla}
+                          </span>
+                        </div>
+                      </div>
+                      {(c.exact + c.toto > 0) && (
+                        <div className="flex items-center gap-1 text-[10px] font-bold">
+                          {c.exact > 0 && <span className="text-green-700">🎯{c.exact}</span>}
+                          {c.toto > 0 && <span className="text-amber-700">✓{c.toto}</span>}
+                        </div>
+                      )}
+                    </div>
                   </th>
                 );
               })}
-              <th className="py-2 px-3 text-center bg-gray-50 border-s border-gray-200 min-w-[4rem]">
-                נק׳
+              <th className="py-3 px-3 text-center bg-gradient-to-l from-blue-50 to-indigo-50 border-s border-blue-100 min-w-[5rem]">
+                <span className="text-xs font-bold text-blue-700 uppercase tracking-wide" style={{ fontFamily: "var(--font-inter)" }}>
+                  נק׳ היום
+                </span>
               </th>
             </tr>
           </thead>
           <tbody>
-            {rows.map((row) => {
+            {rows.map((row, rowIdx) => {
               const isYou = row.userId === currentUserId;
+              const isLead = rowIdx === 0 && row.points > 0;
               return (
                 <tr
                   key={row.userId}
-                  className={`border-t border-gray-100 ${isYou ? "bg-blue-50/60" : "hover:bg-gray-50/50"}`}
+                  className={`border-t border-gray-100 transition-colors ${
+                    isYou ? "bg-gradient-to-l from-blue-50/70 to-indigo-50/30" : "hover:bg-gray-50/60"
+                  }`}
                 >
                   <td
-                    className={`py-2 px-2 font-bold sticky start-0 z-10 border-e border-gray-100 whitespace-nowrap ${
-                      isYou ? "bg-blue-50/60" : "bg-white"
+                    className={`py-3 px-3 font-bold sticky start-0 z-10 border-e border-gray-100 whitespace-nowrap ${
+                      isYou ? "bg-blue-50/80" : "bg-white"
                     }`}
                   >
-                    {row.name}
-                    {isYou && (
-                      <span className="ms-1 text-[9px] bg-blue-100 text-blue-600 rounded px-1">אתה</span>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {isLead && <span className="text-base" title="מוביל יומי">👑</span>}
+                      <span className="text-sm text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>
+                        {row.name}
+                      </span>
+                      {isYou && (
+                        <span className="text-[10px] font-bold bg-blue-100 text-blue-700 rounded-full px-2 py-0.5">
+                          אתה
+                        </span>
+                      )}
+                    </div>
                   </td>
                   {row.cells.map((cell, i) => {
-                    const bg =
-                      cell.hit === "exact"
-                        ? "bg-green-50 text-green-800"
-                        : cell.hit === "toto"
-                        ? "bg-amber-50 text-amber-800"
-                        : cell.hit === "miss"
-                        ? "bg-red-50 text-red-700"
-                        : "bg-white text-gray-300";
-                    const icon = cell.hit === "exact" ? "🎯" : cell.hit === "toto" ? "✓" : cell.hit === "miss" ? "✗" : "—";
+                    let bg = "bg-white";
+                    let text = "text-gray-300";
+                    let badge = "";
+                    let badgeBg = "";
+                    if (cell.hit === "exact") {
+                      bg = "bg-gradient-to-br from-green-50 to-emerald-50";
+                      text = "text-green-900";
+                      badge = "🎯";
+                      badgeBg = "bg-green-500 text-white";
+                    } else if (cell.hit === "toto") {
+                      bg = "bg-gradient-to-br from-amber-50 to-yellow-50";
+                      text = "text-amber-900";
+                      badge = "✓";
+                      badgeBg = "bg-amber-500 text-white";
+                    } else if (cell.hit === "miss") {
+                      bg = "bg-red-50/40";
+                      text = "text-red-700";
+                      badge = "✗";
+                      badgeBg = "bg-red-400 text-white";
+                    }
                     return (
-                      <td key={i} className={`py-1.5 px-2 text-center border-e border-gray-100 ${bg}`}>
+                      <td
+                        key={i}
+                        className={`py-2 px-2 text-center border-e border-gray-100 last:border-e-0 ${bg}`}
+                      >
                         {cell.hit === "empty" ? (
-                          <span className="text-gray-300">—</span>
+                          <span className="text-gray-300 text-xs">לא הימר/ה</span>
                         ) : (
-                          <div className="flex items-center justify-center gap-1 font-bold">
-                            <span className="tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>
+                          <div className="inline-flex items-center gap-1.5">
+                            <span className={`font-black tabular-nums text-sm ${text}`} style={{ fontFamily: "var(--font-inter)" }}>
                               {cell.pred.home}-{cell.pred.away}
                             </span>
-                            <span className="text-sm">{icon}</span>
+                            <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold ${badgeBg}`}>
+                              {badge}
+                            </span>
                           </div>
                         )}
                       </td>
                     );
                   })}
-                  <td className="py-2 px-3 text-center font-black bg-gray-50 border-s border-gray-200">
-                    <span className="tabular-nums text-gray-900 text-sm" style={{ fontFamily: "var(--font-inter)" }}>
-                      {row.points}
-                    </span>
+                  <td className="py-2 px-3 text-center bg-gradient-to-l from-blue-50/60 to-indigo-50/30 border-s border-blue-100">
+                    <div className="inline-flex flex-col items-center">
+                      <span
+                        className={`text-xl font-black tabular-nums ${row.points > 0 ? "text-blue-700" : "text-gray-300"}`}
+                        style={{ fontFamily: "var(--font-inter)" }}
+                      >
+                        {row.points}
+                      </span>
+                      {(row.exacts + row.totos > 0) && (
+                        <span className="text-[9px] font-bold text-gray-500">
+                          {row.exacts > 0 && <span className="text-green-700">🎯{row.exacts}</span>}
+                          {row.exacts > 0 && row.totos > 0 && " "}
+                          {row.totos > 0 && <span className="text-amber-700">✓{row.totos}</span>}
+                        </span>
+                      )}
+                    </div>
                   </td>
                 </tr>
               );
@@ -779,11 +852,19 @@ function DayTable({
         </table>
       </div>
 
-      <div className="px-4 py-2 bg-gray-50 border-t border-gray-200 flex items-center gap-4 text-[10px] text-gray-500">
-        <span>🎯 תוצאה מדויקת · {EXACT_PTS} נק׳</span>
-        <span>✓ טוטו (1X2) · {TOTO_PTS} נק׳</span>
-        <span>✗ פספוס · 0</span>
-        <span>— לא הימרו</span>
+      <div className="px-4 py-2.5 bg-gray-50/50 border-t border-gray-100 flex items-center gap-3 text-[11px] text-gray-500 flex-wrap">
+        <span className="inline-flex items-center gap-1">
+          <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-green-500 text-white text-[9px] font-bold">🎯</span>
+          תוצאה מדויקת · <b className="text-gray-700">{EXACT_PTS} נק׳</b>
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-amber-500 text-white text-[9px] font-bold">✓</span>
+          טוטו (1X2) · <b className="text-gray-700">{TOTO_PTS} נק׳</b>
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-red-400 text-white text-[9px] font-bold">✗</span>
+          פספוס · 0
+        </span>
       </div>
     </div>
   );

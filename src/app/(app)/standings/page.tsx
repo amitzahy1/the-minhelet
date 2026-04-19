@@ -9,6 +9,7 @@ import { CompletionTracker, type PlayerCompletion } from "@/components/shared/Co
 import { HeroRoast } from "@/components/shared/HeroRoast";
 import { LeaderboardRace } from "@/components/shared/LeaderboardRace";
 import { useSharedData } from "@/hooks/useSharedData";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { TodayMatches } from "@/components/shared/TodayMatches";
 
 // Mock completion data — in production this comes from Supabase
@@ -207,6 +208,7 @@ export default function StandingsPage() {
   const totalFilled = useBettingStore((s) => s.getTotalFilledMatches());
   const [hoveredPlayer, setHoveredPlayer] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<SortKey>("total");
+  const currentUserId = useCurrentUser();
   // Load real data from Supabase (falls back to empty arrays if not configured)
   const { profiles, scoringLog } = useSharedData();
 
@@ -261,11 +263,11 @@ export default function StandingsPage() {
         exact: exactHits,
         streak: 0,
         bestDay: "+0",
-        isYou: false as boolean,
+        isYou: profile.id === currentUserId,
         breakdown,
       };
     }).filter(Boolean) as typeof MOCK_PLAYERS;
-  }, [profiles, scoringLog]);
+  }, [profiles, scoringLog, currentUserId]);
 
   // Always use real data — never fall back to mock (prevents flash of fake names)
   const PLAYERS = realPlayers;

@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { PredictionHeatmap } from "@/components/shared/PredictionHeatmap";
 import { useSharedData } from "@/hooks/useSharedData";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 // Color coding: each unique value gets a FIXED color — same pick = same color everywhere
 const VALUE_COLORS = [
@@ -91,6 +92,7 @@ type View = "advancement" | "specials" | "groups" | "similarity" | "heatmap";
 
 export default function ComparePage() {
   const [view, setView] = useState<View>("advancement");
+  const currentUserId = useCurrentUser();
 
   // Load real data from Supabase
   const { brackets, specialBets, advancements } = useSharedData();
@@ -153,9 +155,10 @@ export default function ComparePage() {
         matchup3: sb?.matchupPick?.split(",")[2] || "",
         penalties: sb?.penaltiesOverUnder || "",
         groups,
+        isYou: bracket.userId === currentUserId,
       };
     });
-  }, [brackets, specialBets, advancements]);
+  }, [brackets, specialBets, advancements, currentUserId]);
 
   const BETTORS = realBettors.length > 0 ? realBettors : MOCK_BETTORS;
 

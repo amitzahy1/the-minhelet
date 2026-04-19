@@ -7,6 +7,7 @@ import { useBettingStore } from "@/stores/betting-store";
 import { createClient } from "@/lib/supabase/client";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { DeadlineCountdown } from "@/components/shared/DeadlineCountdown";
+import { DemoBanner } from "@/components/shared/DemoBanner";
 
 const Icons = {
   bets: (a: boolean) => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={a ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6M9 15l3 3 3-3"/></svg>,
@@ -230,9 +231,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen pb-20 sm:pb-0 bg-[#F8F9FB]" style={{ fontFamily: "var(--font-assistant), sans-serif" }} dir="rtl">
 
       {/* DEMO MODE banner — sits on the demo branch only */}
-      <div className="bg-amber-400 text-amber-950 text-center text-xs sm:text-sm font-bold py-1.5 px-4">
-        ⚠️ מצב דמו — ההימורים והתוצאות כאן יימחקו בסוף השבוע · נעילה ב-18.04.2026 20:00
-      </div>
+      <DemoBanner />
 
       {showOnboarding && <OnboardingWizard onDismiss={dismissOnboarding} onStart={() => { dismissOnboarding(); router.push("/groups"); }} />}
 

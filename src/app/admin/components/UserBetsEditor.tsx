@@ -904,6 +904,7 @@ export function UserBetsEditor() {
                                 { val: "2", label: mu.p2 },
                               ].map((opt) => {
                                 const active = myPick === opt.val;
+                                const lockedAndActive = isLocked && active;
                                 return (
                                   <button
                                     key={opt.val}
@@ -915,14 +916,17 @@ export function UserBetsEditor() {
                                       setSpecialField("matchup_pick", joinMatchupPicks(next));
                                     }}
                                     className={`flex-1 py-2 rounded-lg border text-xs font-bold transition-colors ${
-                                      isLocked
-                                        ? "border-gray-200 text-gray-400 cursor-not-allowed bg-gray-50"
+                                      lockedAndActive
+                                        ? "bg-blue-100 border-blue-500 text-blue-800 cursor-not-allowed"
+                                        : isLocked
+                                        ? "border-gray-200 text-gray-300 cursor-not-allowed bg-gray-50"
                                         : active
                                         ? "bg-blue-50 border-blue-300 text-blue-700"
                                         : "border-gray-200 text-gray-600 hover:bg-gray-50"
                                     }`}
                                   >
                                     {opt.label}
+                                    {lockedAndActive && " 🔒"}
                                   </button>
                                 );
                               })}

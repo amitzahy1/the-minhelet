@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { DeadlineCountdown } from "@/components/shared/DeadlineCountdown";
 import { DemoBanner } from "@/components/shared/DemoBanner";
+import { useSharedData } from "@/hooks/useSharedData";
 
 const Icons = {
   bets: (a: boolean) => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={a ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6M9 15l3 3 3-3"/></svg>,
@@ -197,6 +198,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showBetsMenu, setShowBetsMenu] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [authReady, setAuthReady] = useState(false);
+  const { loading: dataLoading } = useSharedData();
+
+  const appReady = authReady && !dataLoading;
 
   useEffect(() => {
     useBettingStore.persist.rehydrate();
@@ -209,6 +214,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         const seen = localStorage.getItem("wc2026-onboarding-seen");
         if (!seen) setShowOnboarding(true);
       }
+      setAuthReady(true);
     });
   }, []);
 
@@ -226,6 +232,27 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const initial = userName ? userName[0].toUpperCase() : userEmail ? userEmail[0].toUpperCase() : "?";
   const isBettingPage = BETTING_PAGES.some(p => pathname === p.href);
   const isTrackingPage = TRACKING_ITEMS.some(p => pathname === p.href);
+
+  // Splash screen while loading
+  if (!appReady) {
+    return (
+      <div className="min-h-screen bg-[#F8F9FB] flex items-center justify-center" dir="rtl">
+        <div className="flex flex-col items-center gap-5 animate-fade-in">
+          <img src="/logo.png" alt="The Minhelet" className="w-24 h-24 rounded-full object-cover shadow-xl" />
+          <div className="text-center">
+            <h1 className="text-2xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>THE MINHELET</h1>
+            <p className="text-sm text-gray-400 mt-1" style={{ fontFamily: "var(--font-inter)" }}>WORLD CUP 2026</p>
+          </div>
+          <div className="flex items-center gap-2 mt-2">
+            <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: "0ms" }} />
+            <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: "150ms" }} />
+            <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: "300ms" }} />
+          </div>
+          <p className="text-xs text-gray-400 mt-1">טוען את הנתונים...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen pb-20 sm:pb-0 bg-[#F8F9FB]" style={{ fontFamily: "var(--font-assistant), sans-serif" }} dir="rtl">

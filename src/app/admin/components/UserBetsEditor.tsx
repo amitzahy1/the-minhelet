@@ -92,6 +92,88 @@ const TEAMS_SORTED = [...ALL_TEAMS].sort((a, b) =>
   (a.name_he || a.code).localeCompare(b.name_he || b.code, "he")
 );
 
+// -------------------------------------------------------------------------
+// Knockout team derivation (mirrors src/app/(app)/knockout/page.tsx)
+// -------------------------------------------------------------------------
+
+// R32 slot references (h/a) use FIFA notation: A1 = winner of A, A2 = runner-up, A3 = 3rd.
+const R32_MATCHUPS: Record<string, { h: string; a: string }> = {
+  r32l_0: { h: "A2", a: "B2" },
+  r32l_1: { h: "E1", a: "D3" },
+  r32l_2: { h: "F1", a: "C2" },
+  r32l_3: { h: "C1", a: "F2" },
+  r32l_4: { h: "A1", a: "C3" },
+  r32l_5: { h: "H1", a: "J2" },
+  r32l_6: { h: "B1", a: "E3" },
+  r32l_7: { h: "D2", a: "G2" },
+  r32r_0: { h: "I1", a: "F3" },
+  r32r_1: { h: "G1", a: "H3" },
+  r32r_2: { h: "K2", a: "L2" },
+  r32r_3: { h: "J1", a: "H2" },
+  r32r_4: { h: "D1", a: "B3" },
+  r32r_5: { h: "L1", a: "I3" },
+  r32r_6: { h: "E2", a: "I2" },
+  r32r_7: { h: "K1", a: "J3" },
+};
+
+// For later rounds, each match is fed by two previous-round matches.
+const LATER_FEEDERS: Record<string, [string, string]> = {
+  r16l_0: ["r32l_0", "r32l_1"],
+  r16l_1: ["r32l_2", "r32l_3"],
+  r16l_2: ["r32l_4", "r32l_5"],
+  r16l_3: ["r32l_6", "r32l_7"],
+  r16r_0: ["r32r_0", "r32r_1"],
+  r16r_1: ["r32r_2", "r32r_3"],
+  r16r_2: ["r32r_4", "r32r_5"],
+  r16r_3: ["r32r_6", "r32r_7"],
+  qfl_0: ["r16l_0", "r16l_1"],
+  qfl_1: ["r16l_2", "r16l_3"],
+  qfr_0: ["r16r_0", "r16r_1"],
+  qfr_1: ["r16r_2", "r16r_3"],
+  sfl_0: ["qfl_0", "qfl_1"],
+  sfr_0: ["qfr_0", "qfr_1"],
+  final: ["sfl_0", "sfr_0"],
+};
+
+function resolveGroupSlot(
+  slot: string,
+  groups: Record<string, GroupState>
+): string | null {
+  const groupLetter = slot[0];
+  const position = parseInt(slot[1], 10) - 1;
+  const group = groups[groupLetter];
+  if (!group) return null;
+  const teamIdx = group.order?.[position];
+  const groupTeams = GROUPS[groupLetter];
+  if (!groupTeams || teamIdx === undefined) return null;
+  return groupTeams[teamIdx]?.code ?? null;
+}
+
+function deriveMatchTeams(
+  matchKey: string,
+  groups: Record<string, GroupState>,
+  knockout: Record<string, KnockoutMatchState>
+): { team1: string | null; team2: string | null } {
+  if (matchKey in R32_MATCHUPS) {
+    const { h, a } = R32_MATCHUPS[matchKey];
+    return { team1: resolveGroupSlot(h, groups), team2: resolveGroupSlot(a, groups) };
+  }
+  const feeders = LATER_FEEDERS[matchKey];
+  if (!feeders) return { team1: null, team2: null };
+  const [f1, f2] = feeders;
+  return {
+    team1: knockout[f1]?.winner ?? null,
+    team2: knockout[f2]?.winner ?? null,
+  };
+}
+
+function teamLabel(code: string | null | undefined): string {
+  if (!code) return "ממתין...";
+  const team = ALL_TEAMS.find((t) => t.code === code);
+  if (!team) return code;
+  return `${getFlag(code)} ${team.name_he}`;
+}
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -376,7 +458,18 @@ export function UserBetsEditor() {
     if (Object.keys(allowed).length === 0) return;
     setBracket((prev) => {
       const existing = prev.knockout_tree[key] || { score1: null, score2: null, winner: null };
-      return { ...prev, knockout_tree: { ...prev.knockout_tree, [key]: { ...existing, ...allowed } } };
+      const nextState = { ...existing, ...allowed };
+      // Auto-compute winner from scores when both entered and distinct (only if winner is still unlocked)
+      if (!isFilledStr(locked.winner)) {
+        const s1 = nextState.score1;
+        const s2 = nextState.score2;
+        if (s1 !== null && s1 !== undefined && s2 !== null && s2 !== undefined && s1 !== s2) {
+          const { team1, team2 } = deriveMatchTeams(key, prev.group_predictions, prev.knockout_tree);
+          const auto = s1 > s2 ? team1 : team2;
+          if (auto) nextState.winner = auto;
+        }
+      }
+      return { ...prev, knockout_tree: { ...prev.knockout_tree, [key]: nextState } };
     });
     setDirty((d) => ({ ...d, bracket: true }));
   }
@@ -620,6 +713,10 @@ export function UserBetsEditor() {
                 <CardTitle className="text-base">נוקאאוט — {selectedUser.name}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-5">
+                <p className="text-xs text-gray-500">
+                  הנבחרות בכל משחק נגזרות מהבחירות בשלב הבתים והתוצאות ברבעי הגמר.
+                  רשימת המנצחים מוגבלת לשתי הנבחרות של המשחק. תוצאה שונה בין הצדדים — המנצח נקבע אוטומטית.
+                </p>
                 {KO_STAGES.map((stage) => (
                   <div key={stage.stage}>
                     <p className="text-sm font-bold text-gray-700 mb-2">{stage.label}</p>
@@ -630,17 +727,34 @@ export function UserBetsEditor() {
                         const s1Locked = lm.score1 !== null && lm.score1 !== undefined;
                         const s2Locked = lm.score2 !== null && lm.score2 !== undefined;
                         const wLocked = isFilledStr(lm.winner);
+                        const { team1, team2 } = deriveMatchTeams(k, bracket.group_predictions, bracket.knockout_tree);
+                        const winnerOptions: Array<{ code: string; label: string }> = [];
+                        if (team1) winnerOptions.push({ code: team1, label: teamLabel(team1) });
+                        if (team2) winnerOptions.push({ code: team2, label: teamLabel(team2) });
+                        const missingTeams = !team1 || !team2;
                         return (
-                          <div key={k} className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-gray-50 border border-gray-200">
-                            <span className="text-xs text-gray-500 w-20 shrink-0" style={{ fontFamily: "var(--font-inter)" }}>{k}</span>
+                          <div
+                            key={k}
+                            className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-gray-50 border border-gray-200"
+                          >
+                            <span
+                              className="text-xs text-gray-400 shrink-0 w-14"
+                              style={{ fontFamily: "var(--font-inter)" }}
+                            >
+                              {k}
+                            </span>
+                            <span className="text-sm font-medium text-end truncate flex-1 min-w-0">
+                              {teamLabel(team1)}
+                            </span>
                             <Input
                               type="number"
                               min={0}
                               value={m.score1 ?? ""}
-                              disabled={s1Locked}
+                              disabled={s1Locked || missingTeams}
                               onChange={(e) =>
                                 updateKnockout(k, {
-                                  score1: e.target.value === "" ? null : Math.max(0, parseInt(e.target.value) || 0),
+                                  score1:
+                                    e.target.value === "" ? null : Math.max(0, parseInt(e.target.value) || 0),
                                 })
                               }
                               placeholder={s1Locked ? "🔒" : "-"}
@@ -652,22 +766,41 @@ export function UserBetsEditor() {
                               type="number"
                               min={0}
                               value={m.score2 ?? ""}
-                              disabled={s2Locked}
+                              disabled={s2Locked || missingTeams}
                               onChange={(e) =>
                                 updateKnockout(k, {
-                                  score2: e.target.value === "" ? null : Math.max(0, parseInt(e.target.value) || 0),
+                                  score2:
+                                    e.target.value === "" ? null : Math.max(0, parseInt(e.target.value) || 0),
                                 })
                               }
                               placeholder={s2Locked ? "🔒" : "-"}
                               className={`w-14 text-center font-bold ${s2Locked ? "bg-gray-100" : ""}`}
                               dir="ltr"
                             />
-                            <span className="text-xs text-gray-500 ms-2">מנצח:</span>
-                            <TeamSelect
+                            <span className="text-sm font-medium truncate flex-1 min-w-0">
+                              {teamLabel(team2)}
+                            </span>
+                            <select
+                              className={`rounded-lg border border-gray-300 px-2 py-1.5 text-xs w-40 shrink-0 ${
+                                wLocked || missingTeams ? "bg-gray-100 text-gray-500" : "bg-white"
+                              }`}
                               value={m.winner || ""}
-                              locked={wLocked}
-                              onChange={(v) => updateKnockout(k, { winner: v || null })}
-                            />
+                              disabled={wLocked || missingTeams}
+                              onChange={(e) => updateKnockout(k, { winner: e.target.value || null })}
+                              title="מנצח"
+                            >
+                              <option value="">— מנצח —</option>
+                              {winnerOptions.map((o) => (
+                                <option key={o.code} value={o.code}>
+                                  {o.label}
+                                </option>
+                              ))}
+                              {/* If an existing (locked) winner doesn't match the 2 teams, preserve it */}
+                              {m.winner &&
+                                !winnerOptions.some((o) => o.code === m.winner) && (
+                                  <option value={m.winner}>{teamLabel(m.winner)}</option>
+                                )}
+                            </select>
                           </div>
                         );
                       })}
@@ -695,7 +828,7 @@ export function UserBetsEditor() {
               </CardHeader>
               <CardContent>
                 <div className="grid sm:grid-cols-2 gap-3">
-                  <Field label="מלך שערים — שחקן" locked={isFilledStr(lockedSpecial.top_scorer_player)}>
+                  <Field label="מלך השערים (שם השחקן)" locked={isFilledStr(lockedSpecial.top_scorer_player)}>
                     <Input
                       value={special.top_scorer_player || ""}
                       onChange={(e) => setSpecialField("top_scorer_player", e.target.value)}
@@ -703,14 +836,7 @@ export function UserBetsEditor() {
                       className={isFilledStr(lockedSpecial.top_scorer_player) ? "bg-gray-100" : ""}
                     />
                   </Field>
-                  <Field label="מלך שערים — נבחרת" locked={isFilledStr(lockedSpecial.top_scorer_team)}>
-                    <TeamSelect
-                      value={special.top_scorer_team || ""}
-                      locked={isFilledStr(lockedSpecial.top_scorer_team)}
-                      onChange={(v) => setSpecialField("top_scorer_team", v)}
-                    />
-                  </Field>
-                  <Field label="מלך בישולים — שחקן" locked={isFilledStr(lockedSpecial.top_assists_player)}>
+                  <Field label="מלך הבישולים (שם השחקן)" locked={isFilledStr(lockedSpecial.top_assists_player)}>
                     <Input
                       value={special.top_assists_player || ""}
                       onChange={(e) => setSpecialField("top_assists_player", e.target.value)}
@@ -718,51 +844,51 @@ export function UserBetsEditor() {
                       className={isFilledStr(lockedSpecial.top_assists_player) ? "bg-gray-100" : ""}
                     />
                   </Field>
-                  <Field label="מלך בישולים — נבחרת" locked={isFilledStr(lockedSpecial.top_assists_team)}>
-                    <TeamSelect
-                      value={special.top_assists_team || ""}
-                      locked={isFilledStr(lockedSpecial.top_assists_team)}
-                      onChange={(v) => setSpecialField("top_assists_team", v)}
-                    />
-                  </Field>
-                  <Field label="התקפה טובה ביותר" locked={isFilledStr(lockedSpecial.best_attack_team)}>
+                  <Field
+                    label="נבחרת הכי התקפית (הכי הרבה שערים)"
+                    locked={isFilledStr(lockedSpecial.best_attack_team)}
+                  >
                     <TeamSelect
                       value={special.best_attack_team || ""}
                       locked={isFilledStr(lockedSpecial.best_attack_team)}
                       onChange={(v) => setSpecialField("best_attack_team", v)}
                     />
                   </Field>
-                  <Field label="בית פורה" locked={isFilledStr(lockedSpecial.most_prolific_group)}>
+                  <Field label="בית פורה (הכי הרבה שערים בשלב הבתים)" locked={isFilledStr(lockedSpecial.most_prolific_group)}>
                     <GroupSelect
                       value={special.most_prolific_group || ""}
                       locked={isFilledStr(lockedSpecial.most_prolific_group)}
                       onChange={(v) => setSpecialField("most_prolific_group", v)}
                     />
                   </Field>
-                  <Field label="בית יבש" locked={isFilledStr(lockedSpecial.driest_group)}>
+                  <Field label="בית יבש (הכי מעט שערים בשלב הבתים)" locked={isFilledStr(lockedSpecial.driest_group)}>
                     <GroupSelect
                       value={special.driest_group || ""}
                       locked={isFilledStr(lockedSpecial.driest_group)}
                       onChange={(v) => setSpecialField("driest_group", v)}
                     />
                   </Field>
-                  <Field label="כסחנית" locked={isFilledStr(lockedSpecial.dirtiest_team)}>
+                  <Field label="כסחנית (הכי הרבה כרטיסים)" locked={isFilledStr(lockedSpecial.dirtiest_team)}>
                     <TeamSelect
                       value={special.dirtiest_team || ""}
                       locked={isFilledStr(lockedSpecial.dirtiest_team)}
                       onChange={(v) => setSpecialField("dirtiest_team", v)}
                     />
                   </Field>
-                  <Field label="מאצ׳אפים (לדוגמה 1,X,2)" locked={isFilledStr(lockedSpecial.matchup_pick)}>
+                  <Field
+                    label="מאצ׳אפים שחקנים — מי יצבור יותר שערים + בישולים (1/X/2, מופרדים בפסיק)"
+                    locked={isFilledStr(lockedSpecial.matchup_pick)}
+                  >
                     <Input
                       value={special.matchup_pick || ""}
                       onChange={(e) => setSpecialField("matchup_pick", e.target.value)}
                       disabled={isFilledStr(lockedSpecial.matchup_pick)}
                       className={isFilledStr(lockedSpecial.matchup_pick) ? "bg-gray-100" : ""}
                       dir="ltr"
+                      placeholder="1,X,2"
                     />
                   </Field>
-                  <Field label="פנדלים OVER/UNDER" locked={isFilledStr(lockedSpecial.penalties_over_under)}>
+                  <Field label="פנדלים — מעל/מתחת 18.5" locked={isFilledStr(lockedSpecial.penalties_over_under)}>
                     <select
                       className={`rounded-lg border border-gray-300 px-3 py-2 text-sm w-full ${isFilledStr(lockedSpecial.penalties_over_under) ? "bg-gray-100" : "bg-white"}`}
                       value={special.penalties_over_under || ""}
@@ -770,11 +896,15 @@ export function UserBetsEditor() {
                       onChange={(e) => setSpecialField("penalties_over_under", e.target.value)}
                     >
                       <option value="">—</option>
-                      <option value="OVER">OVER</option>
-                      <option value="UNDER">UNDER</option>
+                      <option value="OVER">מעל 18.5</option>
+                      <option value="UNDER">מתחת 18.5</option>
                     </select>
                   </Field>
                 </div>
+                <p className="mt-3 text-xs text-gray-400">
+                  שדות עזר <code>top_scorer_team</code> / <code>top_assists_team</code> קיימים ב-DB אך לא נספרים להימור
+                  עצמו — לכן הוסתרו מכאן.
+                </p>
               </CardContent>
             </Card>
           </TabsContent>

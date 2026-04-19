@@ -351,7 +351,7 @@ export default function SpecialBetsPage() {
           { id: 1, p1: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Bellingham", p2: "🇪🇸 Yamal" },
           { id: 2, p1: "🇦🇷 Messi", p2: "🇵🇹 Ronaldo" },
         ].map(mu => (
-          <SectionCard key={mu.id} title={`${mu.p1} vs ${mu.p2}`} subtitle="מי יצבור יותר?" points="5 נק׳">
+          <SectionCard key={mu.id} title={`${mu.p1} vs ${mu.p2}`} subtitle="מי יצבור יותר שערים + בישולים?" points="5 נק׳">
             <div className="flex gap-2">
               {[{ val: "1", label: mu.p1 }, { val: "X", label: "שווה" }, { val: "2", label: mu.p2 }].map(opt => (
                 <button key={opt.val} onClick={() => { const n = [...sb.matchups]; n[mu.id] = opt.val; set("matchups", n); }}

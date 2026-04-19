@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { PredictionHeatmap } from "@/components/shared/PredictionHeatmap";
 import { useSharedData } from "@/hooks/useSharedData";
 import { GROUPS } from "@/lib/tournament/groups";
 import { MATCHUPS } from "@/lib/matchups";
+import { computeGroupHits, hitCounts, normalizeGroupLetter, type BettorHit, type FinishedMatch } from "@/lib/results-hits";
+import { getFlag, getTeamNameHe } from "@/lib/flags";
 
 // Color coding: each unique value gets a FIXED color — same pick = same color everywhere
 const VALUE_COLORS = [
@@ -76,13 +78,66 @@ const F: Record<string,string> = {
   KSA:"🇸🇦",DEN:"🇩🇰",
 };
 
-type View = "advancement" | "specials" | "groups" | "similarity" | "heatmap";
+type View = "results" | "advancement" | "specials" | "groups" | "similarity" | "heatmap";
+
+interface MatchApi {
+  id: number;
+  date: string;
+  homeTla: string;
+  awayTla: string;
+  group?: string;
+  stage?: string;
+  status?: string;
+  homeGoals?: number | null;
+  awayGoals?: number | null;
+}
 
 export default function ComparePage() {
-  const [view, setView] = useState<View>("advancement");
+  const [view, setView] = useState<View>("results");
 
   // Load real data from Supabase (after lock, uses server API to bypass RLS)
   const { brackets, specialBets, advancements, currentUserId, loading } = useSharedData();
+
+  // Finished matches for the "תוצאות" tab
+  const [allMatches, setAllMatches] = useState<MatchApi[]>([]);
+  const [loadingMatches, setLoadingMatches] = useState(true);
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const res = await fetch("/api/matches");
+        const data = await res.json();
+        if (alive) setAllMatches((data.matches as MatchApi[]) || []);
+      } catch {
+        if (alive) setAllMatches([]);
+      }
+      if (alive) setLoadingMatches(false);
+    })();
+    return () => { alive = false; };
+  }, []);
+
+  const finishedGroupMatches: FinishedMatch[] = useMemo(() => {
+    return allMatches
+      .filter(
+        (m) =>
+          m.status === "FINISHED" &&
+          m.homeGoals !== null && m.homeGoals !== undefined &&
+          m.awayGoals !== null && m.awayGoals !== undefined &&
+          (m.stage === "GROUP_STAGE" || !m.stage) // group stage only for now
+      )
+      .map((m) => ({
+        id: m.id,
+        date: m.date,
+        homeTla: m.homeTla,
+        awayTla: m.awayTla,
+        group: normalizeGroupLetter(m.group),
+        stage: m.stage || "GROUP_STAGE",
+        homeGoals: m.homeGoals as number,
+        awayGoals: m.awayGoals as number,
+      }))
+      .filter((m) => !!m.group) // must have a group letter
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [allMatches]);
 
   // Build real bettors from Supabase data
   const realBettors = useMemo((): Bettor[] => {
@@ -211,6 +266,7 @@ export default function ComparePage() {
       {/* View tabs — only visible after lock + data loaded */}
       {isLocked && !loading && BETTORS.length > 0 && <div className="mb-5 flex gap-2 flex-wrap">
         {[
+          { key: "results" as View, label: "תוצאות ותפיסות" },
           { key: "advancement" as View, label: "עולות + זוכה" },
           { key: "specials" as View, label: "הימורים מיוחדים" },
           { key: "groups" as View, label: "עולות מהבתים" },
@@ -227,6 +283,16 @@ export default function ComparePage() {
       </div>}
 
       {isLocked && !loading && BETTORS.length > 0 && <>
+      {/* === RESULTS VIEW === per-match who-hit-what */}
+      {view === "results" && (
+        <ResultsView
+          matches={finishedGroupMatches}
+          brackets={brackets}
+          currentUserId={currentUserId}
+          loading={loadingMatches}
+        />
+      )}
+
       {/* === ADVANCEMENT VIEW === */}
       {view === "advancement" && (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
@@ -472,6 +538,224 @@ export default function ComparePage() {
         </div>
       )}
       </>}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Results view — per-finished-match who hit, who missed
+// Intentionally minimal palette: subtle card + 1 icon color per section,
+// unlike the rainbow tables in the other views.
+// ---------------------------------------------------------------------------
+
+interface ResultsViewProps {
+  matches: FinishedMatch[];
+  brackets: { userId: string; displayName: string; groupPredictions: Record<string, { order: number[]; scores: { home: number | null; away: number | null }[] }>; knockoutTree: Record<string, { score1: number | null; score2: number | null; winner: string | null }>; champion: string | null; lockedAt: string | null }[];
+  currentUserId: string | null;
+  loading: boolean;
+}
+
+function ResultsView({ matches, brackets, currentUserId, loading }: ResultsViewProps) {
+  if (loading) {
+    return (
+      <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center">
+        <div className="inline-block w-6 h-6 border-2 border-gray-200 border-t-gray-600 rounded-full animate-spin mb-2" />
+        <p className="text-sm text-gray-500">טוען תוצאות...</p>
+      </div>
+    );
+  }
+
+  if (matches.length === 0) {
+    return (
+      <div className="bg-white rounded-2xl border border-gray-200 p-10 text-center">
+        <span className="text-4xl mb-3 block">📋</span>
+        <p className="text-sm text-gray-600 font-bold mb-1">עדיין אין תוצאות להצגה</p>
+        <p className="text-xs text-gray-400">
+          ברגע שמנהל יזין תוצאה של משחק (או שסינכרון אוטומטי יביא תוצאה חיה),
+          תראו פה את כל המשחקים שהסתיימו ומי תפס את התוצאה.
+        </p>
+      </div>
+    );
+  }
+
+  // Group matches by date (Israel-formatted)
+  const byDate: Record<string, FinishedMatch[]> = {};
+  for (const m of matches) {
+    const d = new Date(m.date);
+    const key = d.toLocaleDateString("he-IL", { weekday: "long", day: "2-digit", month: "long" });
+    if (!byDate[key]) byDate[key] = [];
+    byDate[key].push(m);
+  }
+
+  return (
+    <div className="space-y-6">
+      {Object.entries(byDate).map(([dateLabel, dayMatches]) => (
+        <div key={dateLabel}>
+          <h3 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+            {dateLabel}
+            <span className="text-xs font-medium text-gray-400">· {dayMatches.length} משחקים</span>
+          </h3>
+          <div className="grid gap-3 md:grid-cols-2">
+            {dayMatches.map((m) => (
+              <ResultCard key={m.id} match={m} brackets={brackets} currentUserId={currentUserId} />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ResultCard({
+  match,
+  brackets,
+  currentUserId,
+}: {
+  match: FinishedMatch;
+  brackets: ResultsViewProps["brackets"];
+  currentUserId: string | null;
+}) {
+  const hits: BettorHit[] = useMemo(
+    () => computeGroupHits(match, brackets).filter((h) => h.hit !== "empty"),
+    [match, brackets]
+  );
+  const counts = hitCounts(hits);
+
+  const exacts = hits.filter((h) => h.hit === "exact");
+  const totos = hits.filter((h) => h.hit === "toto");
+  const misses = hits.filter((h) => h.hit === "miss");
+
+  const time = new Date(match.date).toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+      {/* Header */}
+      <div className="px-4 py-2.5 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
+        <div className="flex items-center gap-2 text-xs text-gray-500">
+          <span className="font-bold text-gray-700">בית {match.group}</span>
+          <span>·</span>
+          <span style={{ fontFamily: "var(--font-inter)" }}>{time}</span>
+        </div>
+        <span className="text-[10px] font-bold text-green-700 bg-green-100 rounded-full px-2 py-0.5">
+          הסתיים
+        </span>
+      </div>
+
+      {/* Match score */}
+      <div className="px-4 py-4 flex items-center justify-between gap-2 border-b border-gray-100">
+        <div className="flex items-center gap-2 flex-1 min-w-0 justify-end">
+          <span className="text-sm font-bold text-gray-900 truncate">
+            {getTeamNameHe(match.homeTla) || match.homeTla}
+          </span>
+          <span className="text-2xl">{getFlag(match.homeTla)}</span>
+        </div>
+        <div className="text-xl font-black tabular-nums text-gray-900 px-3" style={{ fontFamily: "var(--font-inter)" }}>
+          {match.homeGoals} - {match.awayGoals}
+        </div>
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <span className="text-2xl">{getFlag(match.awayTla)}</span>
+          <span className="text-sm font-bold text-gray-900 truncate">
+            {getTeamNameHe(match.awayTla) || match.awayTla}
+          </span>
+        </div>
+      </div>
+
+      {/* Hit summary */}
+      <div className="px-4 py-2.5 bg-gradient-to-l from-white to-gray-50 border-b border-gray-100 flex items-center gap-4 text-xs">
+        <span className="flex items-center gap-1">
+          <span className="text-base">🎯</span>
+          <span className="font-bold text-green-700">{counts.exact}</span>
+          <span className="text-gray-500">בול</span>
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="text-base text-amber-600">✓</span>
+          <span className="font-bold text-amber-700">{counts.toto}</span>
+          <span className="text-gray-500">1X2</span>
+        </span>
+        {counts.miss > 0 && (
+          <span className="flex items-center gap-1">
+            <span className="text-base text-red-500">✗</span>
+            <span className="font-bold text-red-600">{counts.miss}</span>
+            <span className="text-gray-500">פספוס</span>
+          </span>
+        )}
+        {hits.length === 0 && <span className="text-gray-400">אין ניחושים</span>}
+      </div>
+
+      {/* Hit groups */}
+      <div className="px-4 py-3 space-y-2.5 text-xs">
+        {exacts.length > 0 && (
+          <HitGroup
+            label="בולים"
+            icon="🎯"
+            color="text-green-700"
+            hits={exacts}
+            currentUserId={currentUserId}
+          />
+        )}
+        {totos.length > 0 && (
+          <HitGroup
+            label="תפסו 1X2"
+            icon="✓"
+            color="text-amber-700"
+            hits={totos}
+            currentUserId={currentUserId}
+          />
+        )}
+        {misses.length > 0 && (
+          <HitGroup
+            label="פספוסים"
+            icon="✗"
+            color="text-red-600"
+            hits={misses}
+            currentUserId={currentUserId}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function HitGroup({
+  label,
+  icon,
+  color,
+  hits,
+  currentUserId,
+}: {
+  label: string;
+  icon: string;
+  color: string;
+  hits: BettorHit[];
+  currentUserId: string | null;
+}) {
+  return (
+    <div>
+      <p className={`text-[11px] font-bold mb-1 ${color}`}>
+        {icon} {label} ({hits.length})
+      </p>
+      <div className="flex flex-wrap gap-1.5">
+        {hits.map((h) => {
+          const you = h.userId === currentUserId;
+          return (
+            <span
+              key={h.userId}
+              className={`inline-flex items-center gap-1 rounded-lg px-2 py-0.5 border ${
+                you ? "bg-blue-50 border-blue-300" : "bg-white border-gray-200"
+              }`}
+            >
+              <span className="text-[11px] font-bold text-gray-800">
+                {h.name}
+                {you && <span className="ms-1 text-[9px] bg-blue-100 text-blue-600 rounded px-1">אתה</span>}
+              </span>
+              <span className="text-[10px] text-gray-500 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>
+                {h.pred.home}-{h.pred.away}
+              </span>
+            </span>
+          );
+        })}
+      </div>
     </div>
   );
 }

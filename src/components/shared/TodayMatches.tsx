@@ -6,25 +6,7 @@ import { getFlag, getTeamNameHe } from "@/lib/flags";
 import { toIsraelTimeShort, toIsraelDate, toIsraelDateKey, getTodayIsrael } from "@/lib/timezone";
 import { useSharedData } from "@/hooks/useSharedData";
 import { isLocked } from "@/lib/constants";
-import { GROUPS } from "@/lib/tournament/groups";
-
-// Positions (in GROUPS[letter] order) of the 6 group-stage matches
-const GROUP_MATCH_PAIRS: Array<[number, number]> = [
-  [0, 1], [2, 3], [0, 2], [1, 3], [0, 3], [1, 2],
-];
-
-type HitKind = "exact" | "toto" | "miss";
-
-function classifyHit(
-  pred: { home: number | null; away: number | null },
-  actual: { home: number; away: number }
-): HitKind {
-  if (pred.home === null || pred.away === null) return "miss";
-  if (pred.home === actual.home && pred.away === actual.away) return "exact";
-  const predOut = pred.home > pred.away ? "H" : pred.home < pred.away ? "A" : "D";
-  const actOut = actual.home > actual.away ? "H" : actual.home < actual.away ? "A" : "D";
-  return predOut === actOut ? "toto" : "miss";
-}
+import { computeGroupHits, hitCounts, normalizeGroupLetter } from "@/lib/results-hits";
 
 interface Match {
   id: number;
@@ -68,22 +50,32 @@ export function TodayMatches() {
         const allMatches = data.matches as Match[];
         const today = getTodayIsrael();
 
+        // 1. Matches ON today (by calendar date) — show them all regardless of status.
+        //    Keeps live/finished matches visible during matchday instead of
+        //    prematurely skipping to the next day.
         const todayMatches = allMatches.filter((m) => toIsraelDateKey(m.date) === today);
         if (todayMatches.length > 0) {
+          todayMatches.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
           setMatches(todayMatches);
           setHeading("משחקים היום");
           return;
         }
 
-        const upcoming = allMatches
-          .filter((m) => m.status === "SCHEDULED" || m.status === "TIMED")
-          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-          .slice(0, 4);
-
-        if (upcoming.length > 0) {
-          setMatches(upcoming);
-          const nextDate = toIsraelDate(upcoming[0].date);
-          setHeading(`המשחקים הבאים — ${nextDate}`);
+        // 2. No matches today → find the earliest DATE with any match >= today,
+        //    then show ALL matches on that date (finished included). Switching
+        //    to a by-status filter here is wrong: a full matchday can have some
+        //    matches already marked FINISHED (via admin entry) while the rest
+        //    are still SCHEDULED — we still want to show the whole day together.
+        const futureOrToday = allMatches.filter((m) => toIsraelDateKey(m.date) >= today);
+        if (futureOrToday.length > 0) {
+          const earliestDate = futureOrToday
+            .map((m) => toIsraelDateKey(m.date))
+            .sort()[0];
+          const matchesOnDate = allMatches
+            .filter((m) => toIsraelDateKey(m.date) === earliestDate)
+            .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+          setMatches(matchesOnDate);
+          setHeading(`המשחקים הבאים — ${toIsraelDate(matchesOnDate[0].date)}`);
           return;
         }
 
@@ -113,51 +105,27 @@ export function TodayMatches() {
     return bets;
   }
 
-  /**
-   * Derive each bettor's predicted score for a finished group match from
-   * their stored group_predictions. The store saves scores in a fixed
-   * order (GROUP_MATCH_PAIRS) keyed by canonical team positions.
-   */
   function getGroupPredictions(
     homeTla: string,
     awayTla: string,
     groupLetter: string,
     actualHome: number,
-    actualAway: number
-  ): Array<{ userId: string; name: string; pred: { home: number | null; away: number | null }; hit: HitKind }> {
-    const teams = GROUPS[groupLetter];
-    if (!teams) return [];
-    const homeIdx = teams.findIndex((t) => t.code === homeTla);
-    const awayIdx = teams.findIndex((t) => t.code === awayTla);
-    if (homeIdx < 0 || awayIdx < 0) return [];
-
-    // Find which of the 6 pairs matches this match, and whether it's flipped.
-    let pairIdx = -1;
-    let flipped = false;
-    for (let i = 0; i < GROUP_MATCH_PAIRS.length; i++) {
-      const [a, b] = GROUP_MATCH_PAIRS[i];
-      if (a === homeIdx && b === awayIdx) { pairIdx = i; flipped = false; break; }
-      if (a === awayIdx && b === homeIdx) { pairIdx = i; flipped = true; break; }
-    }
-    if (pairIdx < 0) return [];
-
-    const out: Array<{ userId: string; name: string; pred: { home: number | null; away: number | null }; hit: HitKind }> = [];
-    for (const b of brackets) {
-      const stored = b.groupPredictions?.[groupLetter]?.scores?.[pairIdx];
-      if (!stored || (stored.home === null && stored.away === null)) continue;
-      const pred = flipped
-        ? { home: stored.away, away: stored.home }
-        : { home: stored.home, away: stored.away };
-      out.push({
-        userId: b.userId,
-        name: b.displayName || "ללא שם",
-        pred,
-        hit: classifyHit(pred, { home: actualHome, away: actualAway }),
-      });
-    }
-    // Sort: exact first, then toto, then miss. Within each, alphabetical.
-    const rank: Record<HitKind, number> = { exact: 0, toto: 1, miss: 2 };
-    return out.sort((a, b) => rank[a.hit] - rank[b.hit] || a.name.localeCompare(b.name, "he"));
+    actualAway: number,
+    matchId: number
+  ) {
+    return computeGroupHits(
+      {
+        id: matchId,
+        date: "",
+        homeTla,
+        awayTla,
+        group: groupLetter,
+        stage: "GROUP_STAGE",
+        homeGoals: actualHome,
+        awayGoals: actualAway,
+      },
+      brackets
+    ).filter((h) => h.hit !== "empty");
   }
 
   return (
@@ -175,13 +143,14 @@ export function TodayMatches() {
           const relatedBets = getRelatedBets(m.homeTla, m.awayTla);
           const matchPredictions = locked ? predictions.filter(p => p.matchId === m.id) : [];
           // For finished GROUP matches, also build per-bettor hit/miss from stored bracket picks.
-          const groupLetter = m.group ? m.group.replace(/^GROUP_/, "").trim() : "";
+          const groupLetter = normalizeGroupLetter(m.group);
           const groupHits = (locked && isFinished && groupLetter && m.homeGoals !== null && m.awayGoals !== null)
-            ? getGroupPredictions(m.homeTla, m.awayTla, groupLetter, m.homeGoals, m.awayGoals)
+            ? getGroupPredictions(m.homeTla, m.awayTla, groupLetter, m.homeGoals, m.awayGoals, m.id)
             : [];
-          const exactCount = groupHits.filter(h => h.hit === "exact").length;
-          const totoCount = groupHits.filter(h => h.hit === "toto").length;
-          const missCount = groupHits.filter(h => h.hit === "miss").length;
+          const counts = hitCounts(groupHits);
+          const exactCount = counts.exact;
+          const totoCount = counts.toto;
+          const missCount = counts.miss;
 
           return (
             <div key={m.id} className="col-span-1">

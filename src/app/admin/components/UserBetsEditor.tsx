@@ -498,7 +498,9 @@ export function UserBetsEditor() {
   }
 
   function setSpecialField<K extends keyof SpecialRow>(k: K, v: string) {
-    if (isFilledStr(lockedSpecial[k])) return;
+    // matchup_pick is per-slot — the global lock guard doesn't apply.
+    // Per-slot locking is enforced by the UI (disabled buttons) and the server.
+    if (k !== "matchup_pick" && isFilledStr(lockedSpecial[k])) return;
     setSpecial((prev) => ({ ...prev, [k]: v }));
     setDirty((d) => ({ ...d, special: true }));
   }

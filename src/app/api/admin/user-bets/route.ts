@@ -23,7 +23,8 @@ type Json = unknown;
 
 const BRACKET_SCALAR_FIELDS = ["champion"] as const;
 const ADVANCEMENT_SCALAR_FIELDS = ["winner"] as const;
-const SPECIAL_FIELDS = [
+// scalar fields — simple fill-empty-only
+const SPECIAL_SCALAR_FIELDS = [
   "top_scorer_player",
   "top_scorer_team",
   "top_assists_player",
@@ -32,9 +33,9 @@ const SPECIAL_FIELDS = [
   "most_prolific_group",
   "driest_group",
   "dirtiest_team",
-  "matchup_pick",
   "penalties_over_under",
 ] as const;
+// matchup_pick is stored as "1,X,2" — fill-empty-only PER SLOT, not globally.
 
 function getAdminClient(): SupabaseClient | null {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -483,7 +484,7 @@ export async function PATCH(request: Request) {
 
     const updates: Record<string, unknown> = {};
 
-    for (const f of SPECIAL_FIELDS) {
+    for (const f of SPECIAL_SCALAR_FIELDS) {
       if (!(f in special)) continue;
       const existingVal = existing?.[f];
       const incomingVal = special[f];
@@ -492,6 +493,33 @@ export async function PATCH(request: Request) {
         applied.special.push(f);
       } else if (!isEmpty(existingVal)) {
         skipped.push(f);
+      }
+    }
+
+    // matchup_pick: per-slot fill-empty-only. Storage format is "1,X,2".
+    if ("matchup_pick" in special) {
+      const existingStr = (existing?.matchup_pick as string | null | undefined) ?? "";
+      const incomingStr = (special.matchup_pick as string | null | undefined) ?? "";
+      const ep = existingStr.split(",");
+      const ip = incomingStr.split(",");
+      const merged = [0, 1, 2].map((i) => {
+        const e = (ep[i] ?? "").trim();
+        const inc = (ip[i] ?? "").trim();
+        return isEmpty(e) ? inc : e;
+      });
+      for (let i = 0; i < 3; i++) {
+        const before = (ep[i] ?? "").trim();
+        const after = merged[i];
+        if (before !== after && !isEmpty(after)) {
+          applied.special.push(`matchup_pick[${i}]`);
+        } else if (!isEmpty(before) && before !== (ip[i] ?? "").trim() && !isEmpty((ip[i] ?? "").trim())) {
+          skipped.push(`matchup_pick[${i}]`);
+        }
+      }
+      // Only update if any slot actually changed
+      const finalStr = merged.every(isEmpty) ? null : merged.join(",");
+      if (finalStr !== (existingStr || null)) {
+        updates["matchup_pick"] = finalStr;
       }
     }
 

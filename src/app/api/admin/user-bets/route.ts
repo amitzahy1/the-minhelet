@@ -561,3 +561,70 @@ export async function PATCH(request: Request) {
     errors: errors.length > 0 ? errors : undefined,
   });
 }
+
+// ---------------------------------------------------------------------------
+// DELETE — reset a user's bets entirely (all three tables)
+// Destructive; use only when the user's bets are corrupted and must be
+// re-entered. Logged to admin_audit_log with a summary of what was wiped.
+// ---------------------------------------------------------------------------
+
+export async function DELETE(request: Request) {
+  const adminEmail = await verifyAdmin();
+  if (!adminEmail) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+
+  const supabase = getAdminClient();
+  if (!supabase) return NextResponse.json({ error: "Missing server config" }, { status: 500 });
+
+  const { searchParams } = new URL(request.url);
+  const userId = searchParams.get("userId");
+  const note = searchParams.get("note") ?? "";
+  if (!userId) return NextResponse.json({ error: "userId is required" }, { status: 400 });
+
+  // Snapshot what's about to be deleted (so it's recoverable via audit log)
+  const [{ data: bracket }, { data: adv }, { data: special }] = await Promise.all([
+    supabase.from("user_brackets").select("*").eq("user_id", userId).maybeSingle(),
+    supabase.from("advancement_picks").select("*").eq("user_id", userId).maybeSingle(),
+    supabase.from("special_bets").select("*").eq("user_id", userId).maybeSingle(),
+  ]);
+
+  const [bRes, aRes, sRes] = await Promise.all([
+    supabase.from("user_brackets").delete().eq("user_id", userId),
+    supabase.from("advancement_picks").delete().eq("user_id", userId),
+    supabase.from("special_bets").delete().eq("user_id", userId),
+  ]);
+
+  const errors: string[] = [];
+  if (bRes.error) errors.push(`brackets: ${bRes.error.message}`);
+  if (aRes.error) errors.push(`advancement: ${aRes.error.message}`);
+  if (sRes.error) errors.push(`special: ${sRes.error.message}`);
+
+  // Audit: one entry per table actually cleared
+  const audits = [];
+  if (bracket) audits.push({
+    admin_email: adminEmail, target_user_id: userId, table_name: "user_brackets",
+    field_name: "__reset__", old_value: bracket, new_value: null, note: note || "Admin reset",
+  });
+  if (adv) audits.push({
+    admin_email: adminEmail, target_user_id: userId, table_name: "advancement_picks",
+    field_name: "__reset__", old_value: adv, new_value: null, note: note || "Admin reset",
+  });
+  if (special) audits.push({
+    admin_email: adminEmail, target_user_id: userId, table_name: "special_bets",
+    field_name: "__reset__", old_value: special, new_value: null, note: note || "Admin reset",
+  });
+  if (audits.length > 0) {
+    await supabase.from("admin_audit_log").insert(audits);
+  }
+
+  return NextResponse.json({
+    success: errors.length === 0,
+    admin: adminEmail,
+    userId,
+    wiped: {
+      bracket: !!bracket,
+      advancement: !!adv,
+      special: !!special,
+    },
+    errors: errors.length > 0 ? errors : undefined,
+  });
+}

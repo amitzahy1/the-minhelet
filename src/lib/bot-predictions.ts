@@ -73,25 +73,58 @@ function higherRanked(code1: string, code2: string): string {
   return r1 <= r2 ? code1 : code2;
 }
 
+/** Players in each matchup and their team code — used to pick matchup winners. */
+const MATCHUP_PLAYERS = [
+  { p1: "Messi", team1: "ARG", p2: "Ronaldo", team2: "POR" },
+  { p1: "Raphinha", team1: "BRA", p2: "Vinícius", team2: "BRA" },
+  { p1: "Mbappé", team1: "FRA", p2: "Harry Kane", team2: "ENG" },
+];
+
 /** Known "star" player per country — used for top-scorer / top-assists picks. */
-const TEAM_STAR: Record<string, { scorer: string; assists: string }> = {
-  FRA: { scorer: "Kylian Mbappé", assists: "Antoine Griezmann" },
-  ESP: { scorer: "Álvaro Morata", assists: "Pedri" },
-  ARG: { scorer: "Lionel Messi", assists: "Lionel Messi" },
-  ENG: { scorer: "Harry Kane", assists: "Jude Bellingham" },
-  POR: { scorer: "Cristiano Ronaldo", assists: "Bernardo Silva" },
-  BRA: { scorer: "Vinícius Jr.", assists: "Raphinha" },
-  NED: { scorer: "Memphis Depay", assists: "Frenkie de Jong" },
-  MAR: { scorer: "Youssef En-Nesyri", assists: "Hakim Ziyech" },
-  BEL: { scorer: "Romelu Lukaku", assists: "Kevin De Bruyne" },
-  GER: { scorer: "Kai Havertz", assists: "Jamal Musiala" },
-  CRO: { scorer: "Andrej Kramarić", assists: "Luka Modrić" },
-  COL: { scorer: "Luis Díaz", assists: "James Rodríguez" },
-  SEN: { scorer: "Sadio Mané", assists: "Ismaïla Sarr" },
-  URU: { scorer: "Darwin Núñez", assists: "Federico Valverde" },
-  USA: { scorer: "Christian Pulisic", assists: "Tyler Adams" },
-  MEX: { scorer: "Raúl Jiménez", assists: "Hirving Lozano" },
+const TEAM_STAR: Record<string, { scorer: string; assists: string; scorerRep: number; assistsRep: number }> = {
+  FRA: { scorer: "Kylian Mbappé", assists: "Antoine Griezmann", scorerRep: 95, assistsRep: 82 },
+  ESP: { scorer: "Álvaro Morata", assists: "Pedri", scorerRep: 75, assistsRep: 85 },
+  ARG: { scorer: "Lautaro Martínez", assists: "Lionel Messi", scorerRep: 82, assistsRep: 95 },
+  ENG: { scorer: "Harry Kane", assists: "Jude Bellingham", scorerRep: 92, assistsRep: 80 },
+  POR: { scorer: "Cristiano Ronaldo", assists: "Bernardo Silva", scorerRep: 80, assistsRep: 75 },
+  BRA: { scorer: "Vinícius Jr.", assists: "Raphinha", scorerRep: 88, assistsRep: 78 },
+  NED: { scorer: "Memphis Depay", assists: "Frenkie de Jong", scorerRep: 75, assistsRep: 72 },
+  MAR: { scorer: "Youssef En-Nesyri", assists: "Hakim Ziyech", scorerRep: 68, assistsRep: 70 },
+  BEL: { scorer: "Romelu Lukaku", assists: "Kevin De Bruyne", scorerRep: 78, assistsRep: 90 },
+  GER: { scorer: "Kai Havertz", assists: "Jamal Musiala", scorerRep: 72, assistsRep: 78 },
+  CRO: { scorer: "Andrej Kramarić", assists: "Luka Modrić", scorerRep: 65, assistsRep: 82 },
+  COL: { scorer: "Luis Díaz", assists: "James Rodríguez", scorerRep: 74, assistsRep: 76 },
+  SEN: { scorer: "Sadio Mané", assists: "Ismaïla Sarr", scorerRep: 72, assistsRep: 65 },
+  URU: { scorer: "Darwin Núñez", assists: "Federico Valverde", scorerRep: 73, assistsRep: 72 },
+  USA: { scorer: "Christian Pulisic", assists: "Tyler Adams", scorerRep: 68, assistsRep: 60 },
+  MEX: { scorer: "Raúl Jiménez", assists: "Hirving Lozano", scorerRep: 65, assistsRep: 62 },
 };
+
+/** How far a team reaches in the predicted bracket (higher = further). */
+function teamFinalRound(
+  code: string,
+  knockout: Record<string, { winner: string }>
+): { round: number; label: string } {
+  // champion? reached final & won
+  if (knockout["final"]?.winner === code) return { round: 6, label: "אלוף" };
+  // made the final (lost in final)
+  if (knockout["sfl_0"]?.winner === code || knockout["sfr_0"]?.winner === code) {
+    return { round: 5, label: "גמר" };
+  }
+  // made semi
+  for (const k of ["qfl_0", "qfl_1", "qfr_0", "qfr_1"]) {
+    if (knockout[k]?.winner === code) return { round: 4, label: "חצי גמר" };
+  }
+  // made QF
+  for (const k of ["r16l_0", "r16l_1", "r16l_2", "r16l_3", "r16r_0", "r16r_1", "r16r_2", "r16r_3"]) {
+    if (knockout[k]?.winner === code) return { round: 3, label: "רבע גמר" };
+  }
+  // made R16
+  for (const k of Object.keys(R32_MATCHUPS)) {
+    if (knockout[k]?.winner === code) return { round: 2, label: "שמינית" };
+  }
+  return { round: 1, label: "בתים" };
+}
 
 /** Generate a complete bot prediction using team rankings. */
 export function generateBotPrediction(): BotPrediction {
@@ -184,46 +217,92 @@ export function generateBotPrediction(): BotPrediction {
   }
 
   // ---------- Special bets ----------
-  // Pick top scorer from the predicted finalist's roster
-  const winnerStar = TEAM_STAR[champion];
-  const runnerUpCode = finalists.find((c) => c !== champion) || champion;
-  const runnerUpStar = TEAM_STAR[runnerUpCode];
-  const topScorer = winnerStar?.scorer ?? "Kylian Mbappé";
-  const topScorerTeam = champion;
-  const topAssists = (runnerUpStar?.assists && runnerUpStar.assists !== winnerStar?.scorer)
-    ? runnerUpStar.assists
-    : (winnerStar?.assists ?? "Pedri");
-  const topAssistsTeam = runnerUpStar ? runnerUpCode : champion;
+  // Pick top scorer / top assists by combining:
+  //   (a) how far their team actually reaches in OUR predicted bracket
+  //   (b) their known reputation score
+  // A forward on a team that exits in R32 has less upside than one whose team goes to the final.
+  const scorerCandidates = Object.entries(TEAM_STAR).map(([code, star]) => {
+    const depth = teamFinalRound(code, knockout);
+    return { code, player: star.scorer, rep: star.scorerRep, depth: depth.round, depthLabel: depth.label };
+  }).sort((a, b) => (b.depth * 30 + b.rep) - (a.depth * 30 + a.rep));
 
-  rationale.push(`מלך שערים: ${topScorer} (${topScorerTeam}) — כוכב הנבחרת המנצחת.`);
-  rationale.push(`מלך בישולים: ${topAssists} (${topAssistsTeam}) — מקשר מנבחרת סגנית האלופה.`);
+  const assistsCandidates = Object.entries(TEAM_STAR).map(([code, star]) => {
+    const depth = teamFinalRound(code, knockout);
+    return { code, player: star.assists, rep: star.assistsRep, depth: depth.round, depthLabel: depth.label };
+  }).sort((a, b) => (b.depth * 30 + b.rep) - (a.depth * 30 + a.rep));
 
-  // Best attack = champion (goes furthest = most goals)
+  const topPick = scorerCandidates[0];
+  const topScorer = topPick.player;
+  const topScorerTeam = topPick.code;
+
+  // Different player for assists (avoid same player for both)
+  const assistsPick = assistsCandidates.find((a) => a.player !== topPick.player) || assistsCandidates[0];
+  const topAssists = assistsPick.player;
+  const topAssistsTeam = assistsPick.code;
+
+  rationale.push(
+    `מלך שערים: ${topScorer} (${topScorerTeam}) — ${getTeamByCode(topPick.code)?.name_he} מגיעה עד ${topPick.depthLabel} בסימולציה, ודירוג הכוכבים שלו ${topPick.rep}/100.`
+  );
+  rationale.push(
+    `מלך בישולים: ${topAssists} (${topAssistsTeam}) — ${getTeamByCode(assistsPick.code)?.name_he} מגיעה עד ${assistsPick.depthLabel}, ודירוג היצירתיות שלו ${assistsPick.rep}/100.`
+  );
+
+  // Best attack = champion (plays the most games + scores the most)
   const bestAttackTeam = champion;
-  rationale.push(`התקפה הטובה ביותר: ${championTeam?.name_he} — עברה הכי הרבה סבבים.`);
+  rationale.push(
+    `התקפה הטובה: ${championTeam?.name_he} — 7 משחקים בדרך לאליפות = הכי הרבה הזדמנויות לשערים.`
+  );
 
-  // Most prolific group = group with best avg rank
+  // Most prolific group = group with best avg rank (more balanced strong teams = open matches)
   const mostProlificGroup = groupsRanked[0].letter;
-  // Driest group = group with worst avg rank
+  // Driest group = group with worst avg rank (weaker teams = less goals)
   const driestGroup = groupsRanked[groupsRanked.length - 1].letter;
-  rationale.push(`בית פורה: ${mostProlificGroup} (ממוצע דירוג ${groupsRanked[0].avg.toFixed(0)}).`);
-  rationale.push(`בית יבש: ${driestGroup} (ממוצע דירוג ${groupsRanked[groupsRanked.length - 1].avg.toFixed(0)}).`);
+  rationale.push(
+    `בית פורה: ${mostProlificGroup} — ממוצע דירוג ${groupsRanked[0].avg.toFixed(0)}, נבחרות איכותיות → יותר שערים.`
+  );
+  rationale.push(
+    `בית יבש: ${driestGroup} — ממוצע דירוג ${groupsRanked[groupsRanked.length - 1].avg.toFixed(0)}, נבחרות חלשות → מעט שערים, משחקים זהירים.`
+  );
 
-  // Dirtiest team: pick a mid-ranked team historically known for cards
-  // Uruguay is a classic "dirty" pick in WC lore — usable as heuristic
+  // Dirtiest team: historical data says South American sides (Uruguay, Argentina) lead in cards
   const dirtiest = "URU";
-  rationale.push(`כסחנית: אורוגוואי — היסטורית מובילה בכרטיסים במונדיאלים.`);
+  rationale.push(
+    `כסחנית: אורוגוואי — במונדיאל 2022 הייתה בין המובילות בכרטיסים, ובנבחרת יש שחקנים פיזיים (Giménez, Gómez).`
+  );
 
-  // Matchups — use FIFA rank of each player's team to decide
-  // Messi (ARG #3) vs Ronaldo (POR #5) → 1 (Messi)
-  // Raphinha (BRA #6) vs Vinícius (BRA #6) → X (tie — same team)
-  // Mbappé (FRA #1) vs Kane (ENG #4) → 1 (Mbappé)
-  const matchupPick = joinMatchupPicks(["1", "X", "1"]);
-  rationale.push(`מאצ׳אפים: 1 (Messi), X (Raphinha-Vinícius — אותה נבחרת), 1 (Mbappé).`);
+  // Matchups — decide based on each player's team's predicted depth
+  const matchupLogic = MATCHUP_PLAYERS.map((mu) => {
+    const d1 = teamFinalRound(mu.team1, knockout);
+    const d2 = teamFinalRound(mu.team2, knockout);
+    let pick: "1" | "X" | "2";
+    let note: string;
+    if (mu.team1 === mu.team2) {
+      pick = "X";
+      note = `שניהם מ${getTeamByCode(mu.team1)?.name_he} — משחקים באותם משחקים, סביר לתיקו.`;
+    } else if (d1.round > d2.round) {
+      pick = "1";
+      note = `${mu.p1} → ${d1.label}, ${mu.p2} → ${d2.label}. ${mu.p1} מקבל יותר משחקים.`;
+    } else if (d2.round > d1.round) {
+      pick = "2";
+      note = `${mu.p2} → ${d2.label}, ${mu.p1} → ${d1.label}. ${mu.p2} מקבל יותר משחקים.`;
+    } else {
+      // Same depth — decide by player rep
+      const rep1 = TEAM_STAR[mu.team1]?.scorerRep ?? 70;
+      const rep2 = TEAM_STAR[mu.team2]?.scorerRep ?? 70;
+      pick = rep1 >= rep2 ? "1" : "2";
+      note = `שתי הנבחרות מגיעות ל${d1.label}. ${pick === "1" ? mu.p1 : mu.p2} עם דירוג כוכב גבוה יותר (${pick === "1" ? rep1 : rep2} vs ${pick === "1" ? rep2 : rep1}).`;
+    }
+    return { pick, note };
+  });
+  const matchupPick = joinMatchupPicks(matchupLogic.map((m) => m.pick));
+  rationale.push("מאצ׳אפים:");
+  matchupLogic.forEach((m, i) => rationale.push(`  ${i + 1}. ${m.note} → ${m.pick}`));
 
-  // Penalties over/under — champion-biased runs usually add up → OVER
+  // Penalties over/under — champion runs typically accumulate many penalty kicks
   const penalties = "OVER";
-  rationale.push(`פנדלים: מעל 18.5 — סבבי נוקאאוט ארוכים נוטים להצטבר לסך גבוה.`);
+  rationale.push(
+    `פנדלים: מעל 18.5 — 104 משחקים זה הרבה, ובשלבי הנוקאאוט יש הרבה פנדלים (כולל הארכות).`
+  );
 
   return {
     group_predictions: groupPredictions,

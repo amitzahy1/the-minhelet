@@ -622,6 +622,51 @@ export function UserBetsEditor() {
                 טען מחדש
               </Button>
             )}
+
+            {selectedUserId && !loading && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-red-300 text-red-600 hover:bg-red-50"
+                onClick={async () => {
+                  if (!selectedUser) return;
+                  if (
+                    !confirm(
+                      `למחוק את כל ההימורים של ${selectedUser.name}? (בתים + נוקאאוט + מיוחדים + עולות). הערכים יישמרו ב-audit log. פעולה לא ניתנת לביטול.`
+                    )
+                  )
+                    return;
+                  setSaving(true);
+                  setMessage(null);
+                  try {
+                    const res = await fetch(
+                      `/api/admin/user-bets?userId=${encodeURIComponent(selectedUserId)}&note=${encodeURIComponent(
+                        note || "Admin reset via UI"
+                      )}`,
+                      { method: "DELETE" }
+                    );
+                    const data = await res.json();
+                    if (!res.ok || !data.success) {
+                      setMessage("שגיאה: " + (data.errors?.join(" | ") || data.error || res.statusText));
+                    } else {
+                      const w = data.wiped || {};
+                      setMessage(
+                        `נמחקו: ${[w.bracket && "בתים/נוקאאוט", w.advancement && "עולות", w.special && "מיוחדים"]
+                          .filter(Boolean)
+                          .join(", ") || "—"} ✓`
+                      );
+                      await loadUserBets(selectedUserId);
+                    }
+                  } catch (e) {
+                    setMessage("שגיאת רשת: " + String(e));
+                  }
+                  setSaving(false);
+                  setTimeout(() => setMessage(null), 5000);
+                }}
+              >
+                🗑️ אפס הימורים
+              </Button>
+            )}
           </div>
 
           {selectedUser && !loading && (

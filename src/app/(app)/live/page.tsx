@@ -108,9 +108,21 @@ export default function LivePage() {
       </div>
 
       {activeTab === "live" && <LiveTab predictions={predictions} />}
-      {activeTab === "whatif" && <WhatIfTab brackets={brackets} />}
+      {activeTab === "whatif" && (
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-8 text-center">
+          <span className="text-4xl mb-3 block">🔮</span>
+          <h3 className="text-lg font-bold text-gray-900 mb-2">מה אם...?</h3>
+          <p className="text-sm text-gray-500">הטאב יהיה זמין כשהטורניר יתחיל — תוכלו לבדוק איך תוצאות משפיעות על הניקוד</p>
+        </div>
+      )}
       {activeTab === "alive" && <WhosAliveTab advancements={advancements} />}
-      {activeTab === "sim" && <SimulationTab />}
+      {activeTab === "sim" && (
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-8 text-center">
+          <span className="text-4xl mb-3 block">🎮</span>
+          <h3 className="text-lg font-bold text-gray-900 mb-2">סימולציה</h3>
+          <p className="text-sm text-gray-500">הסימולציה תהיה זמינה כשהטורניר יתחיל — תוכלו לסמלץ תוצאות ולראות מי מנצח</p>
+        </div>
+      )}
     </div>
   );
 }
@@ -119,10 +131,10 @@ function LiveTab({ predictions }: { predictions: MatchPrediction[] }) {
   // Build friends list per match from real predictions, or fall back to mock
   const hasRealPredictions = predictions.length > 0;
 
-  function getFriendsForMatch(matchId: number, mockFriends: { name: string; pred: string }[]) {
-    if (!hasRealPredictions) return mockFriends;
+  function getFriendsForMatch(matchId: number, _mockFriends: { name: string; pred: string }[]) {
+    if (!hasRealPredictions) return [];
     const matchPreds = predictions.filter(p => p.matchId === matchId);
-    if (matchPreds.length === 0) return mockFriends;
+    if (matchPreds.length === 0) return [];
     return matchPreds.map(p => ({
       name: p.displayName,
       pred: `${p.predictedHomeGoals}-${p.predictedAwayGoals}`,
@@ -404,7 +416,7 @@ function WhatIfTab({ brackets }: { brackets: BettorBracket[] }) {
   const hasRealBrackets = brackets.length > 0;
 
   const bettorPicks: Record<string, Record<number, string>> = useMemo(() => {
-    if (!hasRealBrackets) return MOCK_BETTOR_PICKS;
+    if (!hasRealBrackets) return {};
     const picks: Record<string, Record<number, string>> = {};
     for (const b of brackets) {
       const userPicks: Record<number, string> = {};
@@ -418,7 +430,7 @@ function WhatIfTab({ brackets }: { brackets: BettorBracket[] }) {
         picks[b.displayName] = userPicks;
       }
     }
-    return Object.keys(picks).length > 0 ? picks : MOCK_BETTOR_PICKS;
+    return picks;
   }, [brackets, hasRealBrackets]);
 
   const setQuickResult = useCallback((h: number, a: number) => {
@@ -1036,7 +1048,7 @@ function SimulationTab() {
 function WhosAliveTab({ advancements }: { advancements: BettorAdvancement[] }) {
   // Build WhosAlive data from real advancements, or fall back to mock
   const bettors = useMemo(() => {
-    if (advancements.length === 0) return MOCK_WHOS_ALIVE_DATA;
+    if (advancements.length === 0) return [];
 
     const realData = advancements.map(a => {
       const allPicked = [
@@ -1057,7 +1069,7 @@ function WhosAliveTab({ advancements }: { advancements: BettorAdvancement[] }) {
       };
     });
 
-    return realData.length > 0 ? realData : MOCK_WHOS_ALIVE_DATA;
+    return realData;
   }, [advancements]);
 
   return <WhosAlive bettors={bettors} />;

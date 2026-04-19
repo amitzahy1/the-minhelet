@@ -17,6 +17,7 @@ import { AdminsList } from "./components/AdminsList";
 import { AdminGuide } from "./components/AdminGuide";
 import { CompletionMatrix } from "./components/CompletionMatrix";
 import { UserBetsEditor } from "./components/UserBetsEditor";
+import { BotGenerator } from "./components/BotGenerator";
 
 interface ScoringConfig {
   toto_group: number; toto_r32: number; toto_r16: number;
@@ -118,6 +119,7 @@ export default function AdminPage() {
             <TabsTrigger value="admins">מנהלים</TabsTrigger>
             <TabsTrigger value="completion">סטטוס מילוי</TabsTrigger>
             <TabsTrigger value="edit-bets">עריכת הימורים</TabsTrigger>
+            <TabsTrigger value="bot">🤖 בוט</TabsTrigger>
           </TabsList>
 
           <TabsContent value="status"><SystemStatus /></TabsContent>
@@ -217,6 +219,7 @@ export default function AdminPage() {
           <TabsContent value="guide"><AdminGuide /></TabsContent>
           <TabsContent value="completion"><CompletionMatrix /></TabsContent>
           <TabsContent value="edit-bets"><UserBetsEditor /></TabsContent>
+          <TabsContent value="bot"><BotGenerator /></TabsContent>
         </Tabs>
       </div>
     </div>

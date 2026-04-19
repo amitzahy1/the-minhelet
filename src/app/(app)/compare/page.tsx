@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import { PredictionHeatmap } from "@/components/shared/PredictionHeatmap";
 import { useSharedData } from "@/hooks/useSharedData";
 import { GROUPS } from "@/lib/tournament/groups";
+import { MATCHUPS } from "@/lib/matchups";
 
 // Color coding: each unique value gets a FIXED color — same pick = same color everywhere
 const VALUE_COLORS = [
@@ -311,9 +312,11 @@ export default function ComparePage() {
                   <th className="py-3 px-2 text-center">כסחנית</th>
                   <th className="py-3 px-2 text-center">בית פורה</th>
                   <th className="py-3 px-2 text-center">בית יבש</th>
-                  <th className="py-3 px-1 text-center text-[9px]">Mbappé<br/>vs Vinícius</th>
-                  <th className="py-3 px-1 text-center text-[9px]">Bellingham<br/>vs Yamal</th>
-                  <th className="py-3 px-1 text-center text-[9px]">Messi<br/>vs Ronaldo</th>
+                  {MATCHUPS.map(mu => (
+                    <th key={mu.id} className="py-3 px-1 text-center text-[9px]">
+                      {mu.p1Short}<br/>vs {mu.p2Short}
+                    </th>
+                  ))}
                   <th className="py-3 px-2 text-center">פנדלים</th>
                 </tr>
               </thead>

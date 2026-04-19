@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GROUPS, GROUP_LETTERS, ALL_TEAMS } from "@/lib/tournament/groups";
 import { getFlag } from "@/lib/flags";
+import { MATCHUPS, parseMatchupPick, joinMatchupPicks } from "@/lib/matchups";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -875,19 +876,60 @@ export function UserBetsEditor() {
                       onChange={(v) => setSpecialField("dirtiest_team", v)}
                     />
                   </Field>
-                  <Field
-                    label="מאצ׳אפים שחקנים — מי יצבור יותר שערים + בישולים (1/X/2, מופרדים בפסיק)"
-                    locked={isFilledStr(lockedSpecial.matchup_pick)}
-                  >
-                    <Input
-                      value={special.matchup_pick || ""}
-                      onChange={(e) => setSpecialField("matchup_pick", e.target.value)}
-                      disabled={isFilledStr(lockedSpecial.matchup_pick)}
-                      className={isFilledStr(lockedSpecial.matchup_pick) ? "bg-gray-100" : ""}
-                      dir="ltr"
-                      placeholder="1,X,2"
-                    />
-                  </Field>
+                  <div className="sm:col-span-2">
+                    <p className="text-xs text-gray-600 font-medium mb-2">
+                      מאצ׳אפים שחקנים — מי יצבור יותר שערים + בישולים
+                    </p>
+                    <div className="space-y-2">
+                      {MATCHUPS.map((mu) => {
+                        const picks = parseMatchupPick(special.matchup_pick);
+                        const lockedPicks = parseMatchupPick(lockedSpecial.matchup_pick);
+                        const myPick = picks[mu.id] || "";
+                        const isLocked = isFilledStr(lockedPicks[mu.id]);
+                        return (
+                          <div
+                            key={mu.id}
+                            className={`px-3 py-2 rounded-lg border ${isLocked ? "bg-gray-50 border-gray-200" : "bg-white border-gray-200"}`}
+                          >
+                            <div className="flex items-center justify-between mb-1.5">
+                              <span className="text-sm font-bold">{mu.p1} vs {mu.p2}</span>
+                              {isLocked && <span className="text-[10px] text-gray-400">🔒 נעול</span>}
+                            </div>
+                            <div className="flex gap-2">
+                              {[
+                                { val: "1", label: mu.p1 },
+                                { val: "X", label: "שווה" },
+                                { val: "2", label: mu.p2 },
+                              ].map((opt) => {
+                                const active = myPick === opt.val;
+                                return (
+                                  <button
+                                    key={opt.val}
+                                    type="button"
+                                    disabled={isLocked}
+                                    onClick={() => {
+                                      const next = [...picks];
+                                      next[mu.id] = opt.val;
+                                      setSpecialField("matchup_pick", joinMatchupPicks(next));
+                                    }}
+                                    className={`flex-1 py-2 rounded-lg border text-xs font-bold transition-colors ${
+                                      isLocked
+                                        ? "border-gray-200 text-gray-400 cursor-not-allowed bg-gray-50"
+                                        : active
+                                        ? "bg-blue-50 border-blue-300 text-blue-700"
+                                        : "border-gray-200 text-gray-600 hover:bg-gray-50"
+                                    }`}
+                                  >
+                                    {opt.label}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
                   <Field label="פנדלים — מעל/מתחת 18.5" locked={isFilledStr(lockedSpecial.penalties_over_under)}>
                     <select
                       className={`rounded-lg border border-gray-300 px-3 py-2 text-sm w-full ${isFilledStr(lockedSpecial.penalties_over_under) ? "bg-gray-100" : "bg-white"}`}

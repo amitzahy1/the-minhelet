@@ -9,6 +9,7 @@ import { getSquad } from "@/lib/tournament/squads-data";
 import { getFlag } from "@/lib/flags";
 import { PageTransition } from "@/components/shared/PageTransition";
 import { useConfetti } from "@/hooks/useConfetti";
+import { MATCHUPS } from "@/lib/matchups";
 
 const GROUP_LETTERS = ["A","B","C","D","E","F","G","H","I","J","K","L"];
 
@@ -346,11 +347,7 @@ export default function SpecialBetsPage() {
           <div><h2 className="text-xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>מאצ׳אפים</h2><p className="text-sm text-gray-500">שערים + בישולים בכל הטורניר</p></div>
         </div>
 
-        {[
-          { id: 0, p1: "🇫🇷 Mbappé", p2: "🇧🇷 Vinícius Jr." },
-          { id: 1, p1: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 Bellingham", p2: "🇪🇸 Yamal" },
-          { id: 2, p1: "🇦🇷 Messi", p2: "🇵🇹 Ronaldo" },
-        ].map(mu => (
+        {MATCHUPS.map(mu => (
           <SectionCard key={mu.id} title={`${mu.p1} vs ${mu.p2}`} subtitle="מי יצבור יותר שערים + בישולים?" points="5 נק׳">
             <div className="flex gap-2">
               {[{ val: "1", label: mu.p1 }, { val: "X", label: "שווה" }, { val: "2", label: mu.p2 }].map(opt => (

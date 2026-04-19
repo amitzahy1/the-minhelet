@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { useBettingStore } from "@/stores/betting-store";
 import { exportBetsToCSV, downloadFile } from "@/lib/backup";
@@ -13,6 +13,8 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { isLocked } from "@/lib/constants";
 import { GROUPS } from "@/lib/tournament/groups";
 import { TodayMatches } from "@/components/shared/TodayMatches";
+import { computeLiveScores, computeTodayScores } from "@/lib/scoring/live-scorer";
+import { normalizeGroupLetter, type FinishedMatch } from "@/lib/results-hits";
 
 // Mock completion data — in production this comes from Supabase
 const MOCK_COMPLETION_DATA: PlayerCompletion[] = [
@@ -206,6 +208,18 @@ function reasonToCategory(reason: string): "matchPts" | "advPts" | "specPts" {
   return "specPts";
 }
 
+interface MatchApi {
+  id: number;
+  date: string;
+  homeTla: string;
+  awayTla: string;
+  group?: string;
+  stage?: string;
+  status?: string;
+  homeGoals?: number | null;
+  awayGoals?: number | null;
+}
+
 export default function StandingsPage() {
   const totalFilled = useBettingStore((s) => s.getTotalFilledMatches());
   const [hoveredPlayer, setHoveredPlayer] = useState<string | null>(null);
@@ -214,43 +228,93 @@ export default function StandingsPage() {
   // Load real data from Supabase (falls back to empty arrays if not configured)
   const { profiles, scoringLog, brackets, specialBets, advancements } = useSharedData();
 
-  // Build real players from Supabase profiles + scoring log
+  // Load finished matches for live scoring
+  const [finishedMatches, setFinishedMatches] = useState<FinishedMatch[]>([]);
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const res = await fetch("/api/matches");
+        const data = await res.json();
+        const all: MatchApi[] = data.matches || [];
+        const finished = all
+          .filter(
+            (m) =>
+              m.status === "FINISHED" &&
+              m.homeGoals !== null && m.homeGoals !== undefined &&
+              m.awayGoals !== null && m.awayGoals !== undefined
+          )
+          .map((m) => ({
+            id: m.id,
+            date: m.date,
+            homeTla: m.homeTla,
+            awayTla: m.awayTla,
+            group: normalizeGroupLetter(m.group),
+            stage: m.stage || "GROUP_STAGE",
+            homeGoals: m.homeGoals as number,
+            awayGoals: m.awayGoals as number,
+          }));
+        if (alive) setFinishedMatches(finished);
+      } catch {
+        if (alive) setFinishedMatches([]);
+      }
+    })();
+    return () => { alive = false; };
+  }, []);
+
+  // Live-computed scores (from finished matches + brackets, fills the gap
+  // left by an empty scoring_log table in the demo).
+  const liveScores = useMemo(
+    () => computeLiveScores(brackets, finishedMatches),
+    [brackets, finishedMatches]
+  );
+  const todayScores = useMemo(
+    () => computeTodayScores(brackets, finishedMatches),
+    [brackets, finishedMatches]
+  );
+
+  // Build real players from Supabase profiles + live scoring
   const realPlayers = useMemo(() => {
     if (profiles.length === 0) return [];
 
-    return profiles.map((profile, idx) => {
-      // Aggregate scoring entries for this user
+    return profiles.map((profile) => {
       if (!profile.id) return null;
       const userEntries = scoringLog.filter((e) => e.userId === profile.id);
+      const live = liveScores[profile.id];
 
+      // Start from scoring_log aggregates (historic/server scoring, if any)
       const breakdown = {
         totoGroup: 0, exactGroup: 0, totoKnockout: 0, exactKnockout: 0,
         groupAdvExact: 0, groupAdvPartial: 0, advQF: 0, advSF: 0,
         advFinal: 0, winner: 0, topScorer: 0, topAssists: 0,
         bestAttack: 0, specials: 0,
       };
-
-      let matchPts = 0, advPts = 0, specPts = 0, total = 0;
-
       for (const entry of userEntries) {
         const bucket = REASON_TO_BUCKET[entry.reason];
-        if (bucket) {
-          breakdown[bucket] += entry.points;
-        }
-        const cat = reasonToCategory(entry.reason);
-        if (cat === "matchPts") matchPts += entry.points;
-        else if (cat === "advPts") advPts += entry.points;
-        else specPts += entry.points;
-        total += entry.points;
+        if (bucket) breakdown[bucket] += entry.points;
       }
 
-      // Count exact-score hits and compute toto percentage
-      const exactHits = userEntries.filter((e) => e.reason === "exact_group" || e.reason === "exact_knockout").length;
-      const totoHits = userEntries.filter((e) =>
-        ["toto_group", "exact_group", "toto_knockout", "exact_knockout"].includes(e.reason)
-      ).length;
-      const matchCount = totoHits + userEntries.filter((e) => e.reason === "miss").length;
-      const totoPct = matchCount > 0 ? Math.round((totoHits / matchCount) * 100) : 0;
+      // Overlay live-computed match scoring (group stage — replaces whatever was in
+      // scoring_log for match rows, since the live computation is authoritative).
+      if (live) {
+        breakdown.totoGroup = live.totoGroup;
+        breakdown.exactGroup = live.exactGroup;
+        breakdown.totoKnockout = live.totoKnockout;
+        breakdown.exactKnockout = live.exactKnockout;
+      }
+
+      // Totals by bucket
+      const matchPts = breakdown.totoGroup + breakdown.exactGroup + breakdown.totoKnockout + breakdown.exactKnockout;
+      const advPts = breakdown.groupAdvExact + breakdown.groupAdvPartial + breakdown.advQF + breakdown.advSF + breakdown.advFinal + breakdown.winner;
+      const specPts = breakdown.topScorer + breakdown.topAssists + breakdown.bestAttack + breakdown.specials;
+      const total = matchPts + advPts + specPts;
+
+      // Stats
+      const exactHits = live?.exactHits ?? 0;
+      const totoHits = live?.totoHits ?? 0;
+      const played = live?.totalFinished ?? 0;
+      const totoPct = played > 0 ? Math.round((totoHits / played) * 100) : 0;
+      const todayPts = todayScores[profile.id] ?? 0;
 
       return {
         id: profile.id,
@@ -259,17 +323,17 @@ export default function StandingsPage() {
         advPts,
         specPts,
         total,
-        today: "+0",
+        today: todayPts > 0 ? `+${todayPts}` : "0",
         delta: 0,
         toto: `${totoPct}%`,
         exact: exactHits,
         streak: 0,
-        bestDay: "+0",
+        bestDay: `+${Math.max(todayPts, 0)}`,
         isYou: profile.id === currentUserId,
         breakdown,
       };
     }).filter(Boolean) as typeof MOCK_PLAYERS;
-  }, [profiles, scoringLog, currentUserId]);
+  }, [profiles, scoringLog, liveScores, todayScores, currentUserId]);
 
   // Always use real data — never fall back to mock (prevents flash of fake names)
   const PLAYERS = realPlayers;

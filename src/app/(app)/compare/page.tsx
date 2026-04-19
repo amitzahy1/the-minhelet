@@ -293,46 +293,45 @@ export default function ComparePage() {
         />
       )}
 
-      {/* === ADVANCEMENT VIEW === */}
+      {/* === ADVANCEMENT VIEW === transposed: bettors as columns, bet rows */}
       {view === "advancement" && (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/40 border-b border-blue-100/50 text-xs font-bold text-gray-600" style={{ fontFamily: "var(--font-inter)" }}>
-                  <th className="py-3 px-2 text-start sticky start-0 bg-white z-10 border-e border-gray-100 w-16 max-w-[4rem]">מהמר</th>
-                  <th className="py-3 px-2 text-center">זוכה</th>
-                  <th className="py-3 px-2 text-center">גמר 1</th>
-                  <th className="py-3 px-2 text-center">גמר 2</th>
-                  <th className="py-3 px-2 text-center">חצי 1</th>
-                  <th className="py-3 px-2 text-center">חצי 2</th>
-                  <th className="py-3 px-2 text-center">חצי 3</th>
-                  <th className="py-3 px-2 text-center">חצי 4</th>
-                  <th className="py-3 px-2 text-center">רבע 1</th>
-                  <th className="py-3 px-2 text-center">רבע 2</th>
-                  <th className="py-3 px-2 text-center">רבע 3</th>
-                  <th className="py-3 px-2 text-center">רבע 4</th>
-                  <th className="py-3 px-2 text-center">רבע 5</th>
-                  <th className="py-3 px-2 text-center">רבע 6</th>
-                  <th className="py-3 px-2 text-center">רבע 7</th>
-                  <th className="py-3 px-2 text-center">רבע 8</th>
+                  <th className="py-3 px-3 text-start sticky start-0 bg-white z-10 border-e border-gray-100 min-w-[5.5rem]">הימור</th>
+                  {BETTORS.map(b => (
+                    <th key={b.name} className={`py-3 px-2 text-center whitespace-nowrap min-w-[5rem] border-e border-gray-100 last:border-e-0 ${b.isYou ? "bg-blue-50/60" : ""}`}>
+                      <div className="font-bold text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>{b.name}</div>
+                      {b.isYou && <div className="mt-0.5 inline-block text-[9px] text-blue-600 bg-blue-100 rounded px-1">אתה</div>}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                {BETTORS.map(b => (
-                  <tr key={b.name} className={`border-t border-gray-100 ${b.isYou ? "bg-blue-50/40" : "hover:bg-gray-50"}`}>
-                    <td className="py-2 px-2 font-bold text-gray-900 sticky start-0 bg-inherit z-10 border-e border-gray-100 whitespace-nowrap w-16 max-w-[4rem] truncate text-xs">
-                      {b.name} {b.isYou && <span className="text-[10px] text-blue-500 bg-blue-100 rounded px-1 ms-0.5">אתה</span>}
-                    </td>
-                    <td className={`py-2 px-2 text-center font-bold text-amber-700 text-xs ${getValueColor(b.winner, advColors)}`}>{F[b.winner]} {b.winner}</td>
-                    <td className={`py-2 px-2 text-center text-xs ${getValueColor(b.finalist1, advColors)}`}>{F[b.finalist1]} {b.finalist1}</td>
-                    <td className={`py-2 px-2 text-center text-xs ${getValueColor(b.finalist2, advColors)}`}>{F[b.finalist2]} {b.finalist2}</td>
-                    {b.sf.map((t, i) => (
-                      <td key={`sf${i}`} className={`py-2 px-2 text-center text-gray-600 text-xs ${getValueColor(t, advColors)}`}>{F[t]} {t}</td>
-                    ))}
-                    {b.qf.map((t, i) => (
-                      <td key={`qf${i}`} className={`py-2 px-2 text-center text-gray-500 text-[10px] ${getValueColor(t, advColors)}`}>{F[t]} {t}</td>
-                    ))}
+                {([
+                  { label: "זוכה", render: (b: Bettor) => ({ val: b.winner, node: <><span className="font-bold text-amber-700">{F[b.winner]} {b.winner}</span></> }), highlight: true },
+                  { label: "גמר 1", render: (b: Bettor) => ({ val: b.finalist1, node: <span className="text-gray-700">{F[b.finalist1]} {b.finalist1}</span> }) },
+                  { label: "גמר 2", render: (b: Bettor) => ({ val: b.finalist2, node: <span className="text-gray-700">{F[b.finalist2]} {b.finalist2}</span> }) },
+                  ...[0, 1, 2, 3].map((i) => ({ label: `חצי ${i + 1}`, render: (b: Bettor) => ({ val: b.sf[i] || "", node: <span className="text-gray-600">{F[b.sf[i]]} {b.sf[i]}</span> }) })),
+                  ...[0, 1, 2, 3, 4, 5, 6, 7].map((i) => ({ label: `רבע ${i + 1}`, render: (b: Bettor) => ({ val: b.qf[i] || "", node: <span className="text-gray-500 text-[11px]">{F[b.qf[i]]} {b.qf[i]}</span> }) })),
+                ] as Array<{ label: string; render: (b: Bettor) => { val: string; node: React.ReactNode }; highlight?: boolean }>).map((row, rowIdx) => (
+                  <tr key={row.label} className={`border-t border-gray-100 ${row.highlight ? "bg-amber-50/30" : rowIdx % 2 ? "bg-gray-50/40" : ""}`}>
+                    <th scope="row" className={`py-2 px-3 text-start font-bold text-xs sticky start-0 z-10 border-e border-gray-100 whitespace-nowrap ${row.highlight ? "bg-amber-50/80 text-amber-900" : "bg-white text-gray-700"}`}>
+                      {row.label}
+                    </th>
+                    {BETTORS.map((b) => {
+                      const { val, node } = row.render(b);
+                      return (
+                        <td
+                          key={b.name}
+                          className={`py-2 px-2 text-center text-xs border-e border-gray-100 last:border-e-0 ${getValueColor(val, advColors)} ${b.isYou ? "ring-1 ring-inset ring-blue-200" : ""}`}
+                        >
+                          {node}
+                        </td>
+                      );
+                    })}
                   </tr>
                 ))}
               </tbody>
@@ -364,44 +363,55 @@ export default function ComparePage() {
         </div>
       )}
 
-      {/* === SPECIALS VIEW === */}
+      {/* === SPECIALS VIEW === transposed: bettors as columns, bet rows */}
       {view === "specials" && (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/40 border-b border-blue-100/50 text-xs font-bold text-gray-600" style={{ fontFamily: "var(--font-inter)" }}>
-                  <th className="py-3 px-2 text-start sticky start-0 bg-white z-10 border-e border-gray-100 w-16 max-w-[4rem]">מהמר</th>
-                  <th className="py-3 px-2 text-center">מלך שערים</th>
-                  <th className="py-3 px-2 text-center">מלך בישולים</th>
-                  <th className="py-3 px-2 text-center">התקפה</th>
-                  <th className="py-3 px-2 text-center">כסחנית</th>
-                  <th className="py-3 px-2 text-center">בית פורה</th>
-                  <th className="py-3 px-2 text-center">בית יבש</th>
-                  {MATCHUPS.map(mu => (
-                    <th key={mu.id} className="py-3 px-1 text-center text-[9px]">
-                      {mu.p1Short}<br/>vs {mu.p2Short}
+                  <th className="py-3 px-3 text-start sticky start-0 bg-white z-10 border-e border-gray-100 min-w-[8rem]">הימור</th>
+                  {BETTORS.map(b => (
+                    <th key={b.name} className={`py-3 px-2 text-center whitespace-nowrap min-w-[5.5rem] border-e border-gray-100 last:border-e-0 ${b.isYou ? "bg-blue-50/60" : ""}`}>
+                      <div className="font-bold text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>{b.name}</div>
+                      {b.isYou && <div className="mt-0.5 inline-block text-[9px] text-blue-600 bg-blue-100 rounded px-1">אתה</div>}
                     </th>
                   ))}
-                  <th className="py-3 px-2 text-center">פנדלים</th>
                 </tr>
               </thead>
               <tbody>
-                {BETTORS.map(b => (
-                  <tr key={b.name} className={`border-t border-gray-100 ${b.isYou ? "bg-blue-50/40" : "hover:bg-gray-50"}`}>
-                    <td className="py-2 px-2 font-bold text-gray-900 sticky start-0 bg-inherit z-10 border-e border-gray-100 whitespace-nowrap w-16 max-w-[4rem] truncate text-xs">
-                      {b.name} {b.isYou && <span className="text-[10px] text-blue-500 bg-blue-100 rounded px-1 ms-0.5">אתה</span>}
-                    </td>
-                    <td className={`py-2 px-2 text-center text-xs font-medium ${getValueColor(b.topScorer, specColors)}`}>{b.topScorer}</td>
-                    <td className={`py-2 px-2 text-center text-xs font-medium ${getValueColor(b.topAssists, specColors)}`}>{b.topAssists}</td>
-                    <td className={`py-2 px-2 text-center text-xs ${getValueColor(b.bestAttack, specColors)}`}>{F[b.bestAttack]} {b.bestAttack}</td>
-                    <td className={`py-2 px-2 text-center text-xs ${getValueColor(b.dirtiestTeam, specColors)}`}>{F[b.dirtiestTeam]} {b.dirtiestTeam}</td>
-                    <td className={`py-2 px-2 text-center text-xs ${getValueColor(b.prolificGroup, specColors)}`}>{b.prolificGroup}</td>
-                    <td className={`py-2 px-2 text-center text-xs ${getValueColor(b.driestGroup, specColors)}`}>{b.driestGroup}</td>
-                    <td className={`py-2 px-2 text-center text-xs ${getValueColor(b.matchup1, specColors)}`}>{b.matchup1}</td>
-                    <td className={`py-2 px-2 text-center text-xs ${getValueColor(b.matchup2, specColors)}`}>{b.matchup2}</td>
-                    <td className={`py-2 px-2 text-center text-xs ${getValueColor(b.matchup3, specColors)}`}>{b.matchup3}</td>
-                    <td className={`py-2 px-2 text-center text-xs ${getValueColor(b.penalties, specColors)}`}>{b.penalties === "OVER" ? "מעל" : b.penalties === "UNDER" ? "מתחת" : b.penalties}</td>
+                {([
+                  { label: "מלך שערים", render: (b: Bettor) => ({ val: b.topScorer, node: <span className="font-medium text-gray-700">{b.topScorer}</span> }) },
+                  { label: "מלך בישולים", render: (b: Bettor) => ({ val: b.topAssists, node: <span className="font-medium text-gray-700">{b.topAssists}</span> }) },
+                  { label: "התקפה טובה ביותר", render: (b: Bettor) => ({ val: b.bestAttack, node: <span className="text-gray-700">{F[b.bestAttack]} {b.bestAttack}</span> }) },
+                  { label: "כסחנית", render: (b: Bettor) => ({ val: b.dirtiestTeam, node: <span className="text-gray-700">{F[b.dirtiestTeam]} {b.dirtiestTeam}</span> }) },
+                  { label: "בית פורה", render: (b: Bettor) => ({ val: b.prolificGroup, node: <span className="text-gray-700">בית {b.prolificGroup}</span> }) },
+                  { label: "בית יבש", render: (b: Bettor) => ({ val: b.driestGroup, node: <span className="text-gray-700">בית {b.driestGroup}</span> }) },
+                  ...MATCHUPS.map((mu, i) => ({
+                    label: `${mu.flag1} ${mu.p1Short} vs ${mu.p2Short} ${mu.flag2}`,
+                    render: (b: Bettor) => {
+                      const pick = [b.matchup1, b.matchup2, b.matchup3][i] || "";
+                      const picked = pick === "1" ? mu.p1Short : pick === "2" ? mu.p2Short : pick === "X" ? "שווה" : "";
+                      return { val: pick, node: <span className="text-gray-700">{picked}</span> };
+                    },
+                  })),
+                  { label: "פנדלים (מעל/מתחת 18.5)", render: (b: Bettor) => ({ val: b.penalties, node: <span className="text-gray-700">{b.penalties === "OVER" ? "מעל" : b.penalties === "UNDER" ? "מתחת" : b.penalties}</span> }) },
+                ] as Array<{ label: string; render: (b: Bettor) => { val: string; node: React.ReactNode } }>).map((row, rowIdx) => (
+                  <tr key={row.label} className={`border-t border-gray-100 ${rowIdx % 2 ? "bg-gray-50/40" : ""}`}>
+                    <th scope="row" className="py-2.5 px-3 text-start font-bold text-xs sticky start-0 bg-white z-10 border-e border-gray-100 whitespace-nowrap text-gray-700">
+                      {row.label}
+                    </th>
+                    {BETTORS.map((b) => {
+                      const { val, node } = row.render(b);
+                      return (
+                        <td
+                          key={b.name}
+                          className={`py-2 px-2 text-center text-xs border-e border-gray-100 last:border-e-0 ${getValueColor(val, specColors)} ${b.isYou ? "ring-1 ring-inset ring-blue-200" : ""}`}
+                        >
+                          {node}
+                        </td>
+                      );
+                    })}
                   </tr>
                 ))}
               </tbody>

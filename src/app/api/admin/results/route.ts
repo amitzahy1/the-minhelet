@@ -71,10 +71,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "results array is required" }, { status: 400 });
   }
 
-  const rows = results.map((r) => ({
+  const rows = results.map((r) => {
+    // Group may arrive as "GROUP_A", "Group A", or plain "A" — DB column is CHAR(1).
+    let g: string | null = null;
+    if (r.group_id) {
+      const m = r.group_id.toString().match(/([A-L])/i);
+      g = m ? m[1].toUpperCase() : null;
+    }
+    return {
     match_id: String(r.match_id),
     stage: r.stage,
-    group_id: r.group_id ?? null,
+    group_id: g,
     home_team: r.home_team,
     away_team: r.away_team,
     home_goals: r.home_goals ?? null,
@@ -85,7 +92,8 @@ export async function POST(request: Request) {
     scheduled_at: r.scheduled_at ?? null,
     entered_by: adminEmail,
     updated_at: new Date().toISOString(),
-  }));
+    };
+  });
 
   const { data, error } = await supabase
     .from("demo_match_results")

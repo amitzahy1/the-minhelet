@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { getFlag } from "@/lib/flags";
+import { getTeamByCode } from "@/lib/tournament/groups";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -91,6 +93,13 @@ function normalizeStage(s: string): string {
   return STAGE_MAP[s] ?? s;
 }
 
+/** Football-Data may return group as "GROUP_A" / "Group A" / "A". We store a single letter. */
+function normalizeGroupLetter(g: string | null | undefined): string | null {
+  if (!g) return null;
+  const m = g.toString().match(/([A-L])/i);
+  return m ? m[1].toUpperCase() : null;
+}
+
 function formatDate(iso: string | null): string {
   if (!iso) return "";
   const d = new Date(iso);
@@ -101,6 +110,18 @@ function formatTime(iso: string | null): string {
   if (!iso) return "";
   const d = new Date(iso);
   return d.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
+}
+
+function teamNameHe(code: string | null | undefined): string {
+  if (!code) return "TBD";
+  if (code === "TBD" || code.toUpperCase() === "TBD") return "טרם נקבע";
+  const team = getTeamByCode(code);
+  return team?.name_he ?? code;
+}
+
+function teamFlag(code: string | null | undefined): string {
+  if (!code || code === "TBD") return "⏳";
+  return getFlag(code);
 }
 
 // ---------------------------------------------------------------------------
@@ -133,7 +154,6 @@ export function MatchResultsEntry() {
       const mergedKeys = new Set<string>();
       const merged: Row[] = [];
 
-      // 1. Rows driven by the fixture list
       for (const m of fdMatches) {
         const key = String(m.id);
         mergedKeys.add(key);
@@ -141,7 +161,7 @@ export function MatchResultsEntry() {
         merged.push({
           matchId: key,
           stage: normalizeStage(m.stage),
-          groupId: m.group || null,
+          groupId: normalizeGroupLetter(m.group),
           home: m.homeTla || m.homeTeam || "TBD",
           away: m.awayTla || m.awayTeam || "TBD",
           scheduledAt: m.date,
@@ -153,13 +173,12 @@ export function MatchResultsEntry() {
         });
       }
 
-      // 2. Rows that only exist in our DB (manual entries for fixtures we don't have yet)
       for (const r of savedResults) {
         if (mergedKeys.has(r.match_id)) continue;
         merged.push({
           matchId: r.match_id,
           stage: r.stage,
-          groupId: r.group_id,
+          groupId: normalizeGroupLetter(r.group_id),
           home: r.home_team,
           away: r.away_team,
           scheduledAt: r.scheduled_at,
@@ -216,7 +235,7 @@ export function MatchResultsEntry() {
           results: dirty.map((r) => ({
             match_id: r.matchId,
             stage: r.stage,
-            group_id: r.groupId,
+            group_id: normalizeGroupLetter(r.groupId),
             home_team: r.home,
             away_team: r.away,
             home_goals: r.homeGoals,
@@ -231,7 +250,6 @@ export function MatchResultsEntry() {
         setMessage("שגיאה בשמירה: " + (data.error || res.statusText));
       } else {
         setMessage(`נשמרו ${data.upserted} תוצאות ✓`);
-        // Mark saved rows as clean + has_saved
         const dirtyKeys = new Set(dirty.map((r) => r.matchId));
         setRows((prev) =>
           prev.map((r) =>
@@ -244,6 +262,11 @@ export function MatchResultsEntry() {
     }
     setSaving(false);
     setTimeout(() => setMessage(null), 4000);
+  }
+
+  function discardChanges() {
+    if (!confirm("לבטל את כל השינויים שלא נשמרו? הערכים יטענו מחדש מהשרת.")) return;
+    loadAll();
   }
 
   async function handleSync() {
@@ -265,11 +288,16 @@ export function MatchResultsEntry() {
     setTimeout(() => setMessage(null), 4000);
   }
 
+  // -------------------------------------------------------------------------
+  // Render
+  // -------------------------------------------------------------------------
+
   return (
     <div className="space-y-4">
+      {/* Sync Card */}
       <Card>
         <CardContent className="pt-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
               <p className="text-base font-bold text-gray-800">סנכרון אוטומטי</p>
               <p className="text-sm text-gray-500">משיכת תוצאות חיות מ-Football-Data.org</p>
@@ -281,7 +309,9 @@ export function MatchResultsEntry() {
           <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">
             <span>סה״כ משחקים: <b>{rows.length}</b></span>
             <span>נשמרו: <b className="text-green-700">{savedCount}</b></span>
-            {dirtyCount > 0 && <span>ממתינים: <b className="text-amber-700">{dirtyCount}</b></span>}
+            {dirtyCount > 0 && (
+              <span>ממתינים לשמירה: <b className="text-amber-700">{dirtyCount}</b></span>
+            )}
           </div>
           {message && (
             <p
@@ -295,14 +325,12 @@ export function MatchResultsEntry() {
         </CardContent>
       </Card>
 
+      {/* Manual Entry Card */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between flex-wrap gap-2">
-            <CardTitle className="text-base">הזנת תוצאות ידנית</CardTitle>
-            <div className="flex items-center gap-2">
-              <Button size="sm" onClick={saveDirty} disabled={saving || dirtyCount === 0}>
-                {saving ? "שומר..." : `שמור שינויים${dirtyCount ? ` (${dirtyCount})` : ""}`}
-              </Button>
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <CardTitle className="text-base">הזנת תוצאות ידנית</CardTitle>
               <div className="flex gap-1 flex-wrap">
                 {[{ key: "ALL", label: "הכל" }, ...STAGE_ORDER.map((s) => ({ key: s, label: STAGE_LABEL[s] }))].map((s) => (
                   <button
@@ -319,6 +347,39 @@ export function MatchResultsEntry() {
                 ))}
               </div>
             </div>
+
+            {/* Prominent save bar (sticky-feel via color) */}
+            {dirtyCount > 0 && (
+              <div className="flex items-center justify-between gap-3 rounded-lg border-2 border-amber-300 bg-amber-50 px-4 py-3">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">💾</span>
+                  <div>
+                    <p className="text-sm font-bold text-amber-900">
+                      {dirtyCount} {dirtyCount === 1 ? "תוצאה לא נשמרה" : "תוצאות לא נשמרו"}
+                    </p>
+                    <p className="text-xs text-amber-700">לחץ שמירה כדי לעדכן את ה-DB</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={discardChanges}
+                    disabled={saving}
+                  >
+                    בטל
+                  </Button>
+                  <Button
+                    size="lg"
+                    onClick={saveDirty}
+                    disabled={saving}
+                    className="bg-green-600 hover:bg-green-700 text-white font-bold"
+                  >
+                    {saving ? "שומר..." : `שמור ${dirtyCount} תוצאות`}
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </CardHeader>
         <CardContent>
@@ -331,76 +392,119 @@ export function MatchResultsEntry() {
           ) : (
             <div className="space-y-2 max-h-[65vh] overflow-y-auto">
               {filtered.map((r) => (
-                <div
+                <MatchRow
                   key={r.matchId}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg border ${
-                    r.dirty
-                      ? "bg-amber-50 border-amber-300"
-                      : r.hasSaved
-                      ? "bg-green-50 border-green-200"
-                      : "bg-white border-gray-200"
-                  }`}
-                >
-                  <span
-                    className="text-xs text-gray-400 w-16 shrink-0"
-                    style={{ fontFamily: "var(--font-inter)" }}
-                  >
-                    {formatDate(r.scheduledAt)}
-                    <br />
-                    {formatTime(r.scheduledAt)}
-                  </span>
-                  {r.groupId && (
-                    <Badge variant="outline" className="text-xs w-8 justify-center shrink-0">
-                      {r.groupId}
-                    </Badge>
-                  )}
-                  <Badge variant="outline" className="text-[10px] w-12 justify-center shrink-0">
-                    {STAGE_LABEL[r.stage] || r.stage}
-                  </Badge>
-                  <span className="font-bold text-sm w-12 text-end shrink-0" dir="ltr">
-                    {r.home}
-                  </span>
-                  <Input
-                    type="number"
-                    min={0}
-                    value={r.homeGoals ?? ""}
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      updateRow(r.matchId, {
-                        homeGoals: v === "" ? null : Math.max(0, parseInt(v) || 0),
-                      });
-                    }}
-                    className="w-14 text-center font-bold"
-                    dir="ltr"
-                    placeholder="-"
-                  />
-                  <span className="text-gray-300">:</span>
-                  <Input
-                    type="number"
-                    min={0}
-                    value={r.awayGoals ?? ""}
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      updateRow(r.matchId, {
-                        awayGoals: v === "" ? null : Math.max(0, parseInt(v) || 0),
-                      });
-                    }}
-                    className="w-14 text-center font-bold"
-                    dir="ltr"
-                    placeholder="-"
-                  />
-                  <span className="font-bold text-sm w-12 shrink-0" dir="ltr">
-                    {r.away}
-                  </span>
-                  <span className="ms-auto text-xs text-gray-400 shrink-0">
-                    {r.hasSaved ? "נשמר" : r.dirty ? "ממתין" : ""}
-                  </span>
-                </div>
+                  row={r}
+                  onHomeChange={(v) => updateRow(r.matchId, { homeGoals: v })}
+                  onAwayChange={(v) => updateRow(r.matchId, { awayGoals: v })}
+                />
               ))}
             </div>
           )}
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Row component
+// ---------------------------------------------------------------------------
+
+function MatchRow({
+  row,
+  onHomeChange,
+  onAwayChange,
+}: {
+  row: Row;
+  onHomeChange: (v: number | null) => void;
+  onAwayChange: (v: number | null) => void;
+}) {
+  const bg = row.dirty
+    ? "bg-amber-50 border-amber-300"
+    : row.hasSaved
+    ? "bg-green-50 border-green-200"
+    : "bg-white border-gray-200";
+
+  return (
+    <div className={`flex items-center gap-3 px-3 py-2.5 rounded-lg border ${bg}`}>
+      {/* Date / time */}
+      <span
+        className="text-xs text-gray-400 w-14 shrink-0 text-center"
+        style={{ fontFamily: "var(--font-inter)" }}
+      >
+        {formatDate(row.scheduledAt)}
+        <br />
+        {formatTime(row.scheduledAt)}
+      </span>
+
+      {/* Stage + group badges */}
+      <div className="flex flex-col items-center gap-0.5 shrink-0">
+        <Badge variant="outline" className="text-[10px] w-14 justify-center h-5 px-1">
+          {STAGE_LABEL[row.stage] || row.stage}
+        </Badge>
+        {row.groupId && (
+          <Badge variant="outline" className="text-[10px] w-14 justify-center h-5 px-1 bg-gray-100">
+            בית {row.groupId}
+          </Badge>
+        )}
+      </div>
+
+      {/* Team 1 (home) — on the right in RTL, text-end so the name hugs the score */}
+      <div
+        className="flex items-center gap-2 flex-1 min-w-0 justify-end"
+        title={row.home}
+      >
+        <span className="text-sm font-bold text-gray-900 truncate">{teamNameHe(row.home)}</span>
+        <span className="text-xl shrink-0">{teamFlag(row.home)}</span>
+      </div>
+
+      {/* Scores */}
+      <Input
+        type="number"
+        min={0}
+        value={row.homeGoals ?? ""}
+        onChange={(e) => {
+          const v = e.target.value;
+          onHomeChange(v === "" ? null : Math.max(0, parseInt(v) || 0));
+        }}
+        className="w-12 text-center font-bold text-base shrink-0"
+        dir="ltr"
+        placeholder="-"
+      />
+      <span className="text-gray-300 font-bold shrink-0">:</span>
+      <Input
+        type="number"
+        min={0}
+        value={row.awayGoals ?? ""}
+        onChange={(e) => {
+          const v = e.target.value;
+          onAwayChange(v === "" ? null : Math.max(0, parseInt(v) || 0));
+        }}
+        className="w-12 text-center font-bold text-base shrink-0"
+        dir="ltr"
+        placeholder="-"
+      />
+
+      {/* Team 2 (away) — on the left in RTL */}
+      <div
+        className="flex items-center gap-2 flex-1 min-w-0 justify-start"
+        title={row.away}
+      >
+        <span className="text-xl shrink-0">{teamFlag(row.away)}</span>
+        <span className="text-sm font-bold text-gray-900 truncate">{teamNameHe(row.away)}</span>
+      </div>
+
+      {/* Status indicator */}
+      <span className="text-[10px] w-12 shrink-0 text-start">
+        {row.dirty ? (
+          <span className="text-amber-700 font-bold">ממתין</span>
+        ) : row.hasSaved ? (
+          <span className="text-green-700">✓ נשמר</span>
+        ) : (
+          <span className="text-gray-300">—</span>
+        )}
+      </span>
     </div>
   );
 }

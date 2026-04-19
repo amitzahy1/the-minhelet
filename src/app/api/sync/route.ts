@@ -41,10 +41,17 @@ export async function GET() {
     const supabase = createClient(url, serviceKey);
     const rows = result.matches
       .filter((m) => m.status === "FINISHED" && m.homeGoals != null && m.awayGoals != null)
-      .map((m) => ({
+      .map((m) => {
+        // Normalize group: "GROUP_A" / "Group A" / "A" → single letter for CHAR(1) column.
+        let g: string | null = null;
+        if (m.group) {
+          const match = m.group.toString().match(/([A-L])/i);
+          g = match ? match[1].toUpperCase() : null;
+        }
+        return {
         match_id: String(m.id),
         stage: STAGE_MAP[m.stage] ?? m.stage,
-        group_id: m.group ?? null,
+        group_id: g,
         home_team: m.homeTeam,
         away_team: m.awayTeam,
         home_goals: m.homeGoals,
@@ -53,7 +60,8 @@ export async function GET() {
         scheduled_at: m.date,
         entered_by: "football-data-sync",
         updated_at: new Date().toISOString(),
-      }));
+        };
+      });
 
     if (rows.length > 0) {
       const { data, error } = await supabase

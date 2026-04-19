@@ -123,3 +123,44 @@ export function computeTodayScores(
   for (const [uid, s] of Object.entries(scores)) out[uid] = s.total;
   return out;
 }
+
+/**
+ * Per-user cumulative-points series across the sequence of finished matches
+ * (chronological). Used to draw the "trend" sparkline on the leaderboard.
+ * Returns `[0, ...afterEachMatch]` so the line always starts at zero and
+ * grows as matches complete. If fewer than 2 finished matches exist, returns
+ * a flat two-point series so the sparkline renders without NaN.
+ */
+export function computePlayerHistories(
+  brackets: BettorBracket[],
+  matches: FinishedMatch[]
+): Record<string, number[]> {
+  const sorted = [...matches].sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+  );
+  const cumulative: Record<string, number[]> = {};
+  for (const b of brackets) cumulative[b.userId] = [0];
+
+  for (const match of sorted) {
+    const isGroup = match.stage === "GROUP_STAGE" || match.stage === "GROUP";
+    if (!isGroup) continue;
+
+    const hits = computeGroupHits(match, brackets);
+    const deltaByUser: Record<string, number> = {};
+    for (const h of hits) {
+      if (h.hit === "exact") deltaByUser[h.userId] = GROUP_TOTO_PTS + GROUP_EXACT_BONUS_PTS;
+      else if (h.hit === "toto") deltaByUser[h.userId] = GROUP_TOTO_PTS;
+    }
+    for (const uid of Object.keys(cumulative)) {
+      const series = cumulative[uid];
+      const last = series[series.length - 1];
+      series.push(last + (deltaByUser[uid] || 0));
+    }
+  }
+
+  // Guarantee every series has at least 2 points so SVG polyline renders.
+  for (const uid of Object.keys(cumulative)) {
+    if (cumulative[uid].length < 2) cumulative[uid] = [0, 0];
+  }
+  return cumulative;
+}

@@ -13,7 +13,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { isLocked } from "@/lib/constants";
 import { GROUPS } from "@/lib/tournament/groups";
 import { TodayMatches } from "@/components/shared/TodayMatches";
-import { computeLiveScores, computeTodayScores } from "@/lib/scoring/live-scorer";
+import { computeLiveScores, computeTodayScores, computePlayerHistories } from "@/lib/scoring/live-scorer";
 import { normalizeGroupLetter, type FinishedMatch } from "@/lib/results-hits";
 
 // Mock completion data — in production this comes from Supabase
@@ -272,6 +272,11 @@ export default function StandingsPage() {
     () => computeTodayScores(brackets, finishedMatches),
     [brackets, finishedMatches]
   );
+  // Cumulative points per bettor across all finished matches — drives the sparkline.
+  const playerHistories = useMemo(
+    () => computePlayerHistories(brackets, finishedMatches),
+    [brackets, finishedMatches]
+  );
 
   // Build real players from Supabase profiles + live scoring
   const realPlayers = useMemo(() => {
@@ -420,7 +425,12 @@ export default function StandingsPage() {
         </div>
 
         {[...PLAYERS].sort((a, b) => b[activeTab] - a[activeTab]).map((p, i) => {
-          const history = [30 + i * 5, 50 + i * 4, 70 + i * 3, 90 + i * 2, 110 + i, 130 - i * 2, p.total];
+          // Real cumulative history from finished matches. Fallback to a flat
+          // [0, total] when no matches are finished yet so the line renders.
+          const realHistory = playerHistories[p.id];
+          const history = realHistory && realHistory.length >= 2
+            ? realHistory
+            : [0, p.total || 0];
           return (
             <div key={p.id}
               className={`relative flex items-center px-4 py-3 border-b border-gray-100 last:border-0 transition-colors ${

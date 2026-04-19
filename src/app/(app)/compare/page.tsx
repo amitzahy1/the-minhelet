@@ -296,47 +296,17 @@ export default function ComparePage() {
       {/* === ADVANCEMENT VIEW === transposed: bettors as columns, bet rows */}
       {view === "advancement" && (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/40 border-b border-blue-100/50 text-xs font-bold text-gray-600" style={{ fontFamily: "var(--font-inter)" }}>
-                  <th className="py-3 px-3 text-start sticky start-0 bg-white z-10 border-e border-gray-100 min-w-[5.5rem]">הימור</th>
-                  {BETTORS.map(b => (
-                    <th key={b.name} className={`py-3 px-2 text-center whitespace-nowrap min-w-[5rem] border-e border-gray-100 last:border-e-0 ${b.isYou ? "bg-blue-50/60" : ""}`}>
-                      <div className="font-bold text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>{b.name}</div>
-                      {b.isYou && <div className="mt-0.5 inline-block text-[9px] text-blue-600 bg-blue-100 rounded px-1">אתה</div>}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {([
-                  { label: "זוכה", render: (b: Bettor) => ({ val: b.winner, node: <><span className="font-bold text-amber-700">{F[b.winner]} {b.winner}</span></> }), highlight: true },
-                  { label: "גמר 1", render: (b: Bettor) => ({ val: b.finalist1, node: <span className="text-gray-700">{F[b.finalist1]} {b.finalist1}</span> }) },
-                  { label: "גמר 2", render: (b: Bettor) => ({ val: b.finalist2, node: <span className="text-gray-700">{F[b.finalist2]} {b.finalist2}</span> }) },
-                  ...[0, 1, 2, 3].map((i) => ({ label: `חצי ${i + 1}`, render: (b: Bettor) => ({ val: b.sf[i] || "", node: <span className="text-gray-600">{F[b.sf[i]]} {b.sf[i]}</span> }) })),
-                  ...[0, 1, 2, 3, 4, 5, 6, 7].map((i) => ({ label: `רבע ${i + 1}`, render: (b: Bettor) => ({ val: b.qf[i] || "", node: <span className="text-gray-500 text-[11px]">{F[b.qf[i]]} {b.qf[i]}</span> }) })),
-                ] as Array<{ label: string; render: (b: Bettor) => { val: string; node: React.ReactNode }; highlight?: boolean }>).map((row, rowIdx) => (
-                  <tr key={row.label} className={`border-t border-gray-100 ${row.highlight ? "bg-amber-50/30" : rowIdx % 2 ? "bg-gray-50/40" : ""}`}>
-                    <th scope="row" className={`py-2 px-3 text-start font-bold text-xs sticky start-0 z-10 border-e border-gray-100 whitespace-nowrap ${row.highlight ? "bg-amber-50/80 text-amber-900" : "bg-white text-gray-700"}`}>
-                      {row.label}
-                    </th>
-                    {BETTORS.map((b) => {
-                      const { val, node } = row.render(b);
-                      return (
-                        <td
-                          key={b.name}
-                          className={`py-2 px-2 text-center text-xs border-e border-gray-100 last:border-e-0 ${getValueColor(val, advColors)} ${b.isYou ? "ring-1 ring-inset ring-blue-200" : ""}`}
-                        >
-                          {node}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <TransposedBetTable
+            bettors={BETTORS}
+            colorMap={advColors}
+            rows={[
+              { label: "זוכה", render: (b) => ({ val: b.winner, node: <span className="font-bold text-amber-700">{F[b.winner]} {b.winner}</span> }), highlight: true },
+              { label: "גמר 1", render: (b) => ({ val: b.finalist1, node: <span className="text-gray-700">{F[b.finalist1]} {b.finalist1}</span> }) },
+              { label: "גמר 2", render: (b) => ({ val: b.finalist2, node: <span className="text-gray-700">{F[b.finalist2]} {b.finalist2}</span> }) },
+              ...[0, 1, 2, 3].map((i) => ({ label: `חצי ${i + 1}`, render: (b: Bettor) => ({ val: b.sf[i] || "", node: <span className="text-gray-700">{F[b.sf[i]]} {b.sf[i]}</span> }) })),
+              ...[0, 1, 2, 3, 4, 5, 6, 7].map((i) => ({ label: `רבע ${i + 1}`, render: (b: Bettor) => ({ val: b.qf[i] || "", node: <span className="text-gray-700">{F[b.qf[i]]} {b.qf[i]}</span> }) })),
+            ]}
+          />
           {/* Popular picks — computed from real data */}
           {(() => {
             function topPick(arr: string[]): { value: string; count: number } | null {
@@ -366,57 +336,27 @@ export default function ComparePage() {
       {/* === SPECIALS VIEW === transposed: bettors as columns, bet rows */}
       {view === "specials" && (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/40 border-b border-blue-100/50 text-xs font-bold text-gray-600" style={{ fontFamily: "var(--font-inter)" }}>
-                  <th className="py-3 px-3 text-start sticky start-0 bg-white z-10 border-e border-gray-100 min-w-[8rem]">הימור</th>
-                  {BETTORS.map(b => (
-                    <th key={b.name} className={`py-3 px-2 text-center whitespace-nowrap min-w-[5.5rem] border-e border-gray-100 last:border-e-0 ${b.isYou ? "bg-blue-50/60" : ""}`}>
-                      <div className="font-bold text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>{b.name}</div>
-                      {b.isYou && <div className="mt-0.5 inline-block text-[9px] text-blue-600 bg-blue-100 rounded px-1">אתה</div>}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {([
-                  { label: "מלך שערים", render: (b: Bettor) => ({ val: b.topScorer, node: <span className="font-medium text-gray-700">{b.topScorer}</span> }) },
-                  { label: "מלך בישולים", render: (b: Bettor) => ({ val: b.topAssists, node: <span className="font-medium text-gray-700">{b.topAssists}</span> }) },
-                  { label: "התקפה טובה ביותר", render: (b: Bettor) => ({ val: b.bestAttack, node: <span className="text-gray-700">{F[b.bestAttack]} {b.bestAttack}</span> }) },
-                  { label: "כסחנית", render: (b: Bettor) => ({ val: b.dirtiestTeam, node: <span className="text-gray-700">{F[b.dirtiestTeam]} {b.dirtiestTeam}</span> }) },
-                  { label: "בית פורה", render: (b: Bettor) => ({ val: b.prolificGroup, node: <span className="text-gray-700">בית {b.prolificGroup}</span> }) },
-                  { label: "בית יבש", render: (b: Bettor) => ({ val: b.driestGroup, node: <span className="text-gray-700">בית {b.driestGroup}</span> }) },
-                  ...MATCHUPS.map((mu, i) => ({
-                    label: `${mu.flag1} ${mu.p1Short} vs ${mu.p2Short} ${mu.flag2}`,
-                    render: (b: Bettor) => {
-                      const pick = [b.matchup1, b.matchup2, b.matchup3][i] || "";
-                      const picked = pick === "1" ? mu.p1Short : pick === "2" ? mu.p2Short : pick === "X" ? "שווה" : "";
-                      return { val: pick, node: <span className="text-gray-700">{picked}</span> };
-                    },
-                  })),
-                  { label: "פנדלים (מעל/מתחת 18.5)", render: (b: Bettor) => ({ val: b.penalties, node: <span className="text-gray-700">{b.penalties === "OVER" ? "מעל" : b.penalties === "UNDER" ? "מתחת" : b.penalties}</span> }) },
-                ] as Array<{ label: string; render: (b: Bettor) => { val: string; node: React.ReactNode } }>).map((row, rowIdx) => (
-                  <tr key={row.label} className={`border-t border-gray-100 ${rowIdx % 2 ? "bg-gray-50/40" : ""}`}>
-                    <th scope="row" className="py-2.5 px-3 text-start font-bold text-xs sticky start-0 bg-white z-10 border-e border-gray-100 whitespace-nowrap text-gray-700">
-                      {row.label}
-                    </th>
-                    {BETTORS.map((b) => {
-                      const { val, node } = row.render(b);
-                      return (
-                        <td
-                          key={b.name}
-                          className={`py-2 px-2 text-center text-xs border-e border-gray-100 last:border-e-0 ${getValueColor(val, specColors)} ${b.isYou ? "ring-1 ring-inset ring-blue-200" : ""}`}
-                        >
-                          {node}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <TransposedBetTable
+            bettors={BETTORS}
+            colorMap={specColors}
+            rows={[
+              { label: "מלך שערים", render: (b) => ({ val: b.topScorer, node: <span className="font-medium text-gray-700">{b.topScorer}</span> }) },
+              { label: "מלך בישולים", render: (b) => ({ val: b.topAssists, node: <span className="font-medium text-gray-700">{b.topAssists}</span> }) },
+              { label: "התקפה טובה ביותר", render: (b) => ({ val: b.bestAttack, node: <span className="text-gray-700">{F[b.bestAttack]} {b.bestAttack}</span> }) },
+              { label: "כסחנית", render: (b) => ({ val: b.dirtiestTeam, node: <span className="text-gray-700">{F[b.dirtiestTeam]} {b.dirtiestTeam}</span> }) },
+              { label: "בית פורה", render: (b) => ({ val: b.prolificGroup, node: <span className="text-gray-700">בית {b.prolificGroup}</span> }) },
+              { label: "בית יבש", render: (b) => ({ val: b.driestGroup, node: <span className="text-gray-700">בית {b.driestGroup}</span> }) },
+              ...MATCHUPS.map((mu, i) => ({
+                label: `${mu.flag1} ${mu.p1Short} vs ${mu.p2Short} ${mu.flag2}`,
+                render: (b: Bettor) => {
+                  const pick = [b.matchup1, b.matchup2, b.matchup3][i] || "";
+                  const picked = pick === "1" ? mu.p1Short : pick === "2" ? mu.p2Short : pick === "X" ? "שווה" : "";
+                  return { val: pick, node: <span className="text-gray-700">{picked}</span> };
+                },
+              })),
+              { label: "פנדלים (מעל/מתחת 18.5)", render: (b) => ({ val: b.penalties, node: <span className="text-gray-700">{b.penalties === "OVER" ? "מעל" : b.penalties === "UNDER" ? "מתחת" : b.penalties}</span> }) },
+            ]}
+          />
         </div>
       )}
 
@@ -618,6 +558,93 @@ function ResultsView({ matches, brackets, currentUserId, loading }: ResultsViewP
   );
 }
 
+// ---------------------------------------------------------------------------
+// Shared transposed-table component (bettors as columns, bets as rows)
+// Used by both the advancement and specials tabs so they look identical.
+// ---------------------------------------------------------------------------
+
+interface TransposedRow {
+  label: string;
+  render: (b: Bettor) => { val: string; node: React.ReactNode };
+  highlight?: boolean;
+}
+
+function TransposedBetTable({
+  bettors,
+  rows,
+  colorMap,
+}: {
+  bettors: Bettor[];
+  rows: TransposedRow[];
+  colorMap: Record<string, string>;
+}) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead>
+          <tr
+            className="bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/40 border-b border-blue-100/50 text-xs font-bold text-gray-600"
+            style={{ fontFamily: "var(--font-inter)" }}
+          >
+            <th className="py-3 px-3 text-start sticky start-0 bg-white z-10 border-e border-gray-100 min-w-[7rem] w-[7rem]">
+              הימור
+            </th>
+            {bettors.map((b) => (
+              <th
+                key={b.name}
+                className={`py-3 px-2 text-center whitespace-nowrap min-w-[5.5rem] w-[5.5rem] border-e border-gray-100 last:border-e-0 ${
+                  b.isYou ? "bg-blue-50/60" : ""
+                }`}
+              >
+                <div className="font-bold text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>
+                  {b.name}
+                </div>
+                {b.isYou && (
+                  <div className="mt-0.5 inline-block text-[9px] text-blue-600 bg-blue-100 rounded px-1">
+                    אתה
+                  </div>
+                )}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, rowIdx) => (
+            <tr
+              key={row.label}
+              className={`border-t border-gray-100 ${
+                row.highlight ? "bg-amber-50/40" : rowIdx % 2 ? "bg-gray-50/40" : ""
+              }`}
+            >
+              <th
+                scope="row"
+                className={`py-2.5 px-3 text-start font-bold text-xs sticky start-0 z-10 border-e border-gray-100 whitespace-nowrap ${
+                  row.highlight ? "bg-amber-50/90 text-amber-900" : "bg-white text-gray-700"
+                }`}
+              >
+                {row.label}
+              </th>
+              {bettors.map((b) => {
+                const { val, node } = row.render(b);
+                return (
+                  <td
+                    key={b.name}
+                    className={`py-2 px-2 text-center text-xs border-e border-gray-100 last:border-e-0 ${getValueColor(val, colorMap)} ${
+                      b.isYou ? "ring-1 ring-inset ring-blue-200" : ""
+                    }`}
+                  >
+                    {node}
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 function DayTable({
   dateLabel,
   matches,
@@ -716,7 +743,108 @@ function DayTable({
         </div>
       </div>
 
-      <div className="overflow-x-auto">
+      {/* Mobile: card-per-match layout (<md) */}
+      <div className="md:hidden divide-y divide-gray-100">
+        {matches.map((m, mi) => {
+          const mHits = matchHits[mi].hits;
+          const time = new Date(m.date).toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
+          return (
+            <div key={m.id} className="px-4 py-3">
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <div className="flex items-center gap-1.5 text-[10px] text-gray-500 font-medium">
+                  <span className="bg-gray-100 rounded-md px-1.5 py-0.5 font-bold">בית {m.group}</span>
+                  <span style={{ fontFamily: "var(--font-inter)" }}>{time}</span>
+                </div>
+                <div className="flex items-center gap-2" dir="ltr">
+                  <span className="text-2xl">{getFlag(m.homeTla)}</span>
+                  <span className="text-base font-black tabular-nums bg-white rounded-lg border-2 border-gray-200 px-2 py-0.5" style={{ fontFamily: "var(--font-inter)" }}>
+                    {m.homeGoals}-{m.awayGoals}
+                  </span>
+                  <span className="text-2xl">{getFlag(m.awayTla)}</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between text-[11px] text-gray-500 mb-2">
+                <span className="font-bold text-gray-700">{getTeamNameHe(m.homeTla)}</span>
+                <span className="text-gray-300 text-xs">vs</span>
+                <span className="font-bold text-gray-700">{getTeamNameHe(m.awayTla)}</span>
+              </div>
+              <div className="space-y-1">
+                {mHits.map((h) => {
+                  const you = h.userId === currentUserId;
+                  let badgeBg = "bg-gray-100 text-gray-300";
+                  let bg = "bg-white";
+                  let icon = "—";
+                  let text = "text-gray-300";
+                  let delta = 0;
+                  if (h.hit === "exact") {
+                    badgeBg = "bg-green-500 text-white"; bg = "bg-green-50"; icon = "🎯"; text = "text-green-900"; delta = EXACT_PTS;
+                  } else if (h.hit === "toto") {
+                    badgeBg = "bg-amber-500 text-white"; bg = "bg-amber-50"; icon = "✓"; text = "text-amber-900"; delta = TOTO_PTS;
+                  } else if (h.hit === "miss") {
+                    badgeBg = "bg-red-400 text-white"; bg = "bg-red-50/60"; icon = "✗"; text = "text-red-700";
+                  }
+                  return (
+                    <div
+                      key={h.userId}
+                      className={`flex items-center justify-between px-3 py-1.5 rounded-lg border ${bg} ${you ? "border-blue-300 ring-1 ring-blue-200" : "border-gray-100"}`}
+                    >
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-[11px] font-bold shrink-0 ${badgeBg}`}>
+                          {icon}
+                        </span>
+                        <span className="text-sm font-bold text-gray-900 truncate" style={{ fontFamily: "var(--font-secular)" }}>
+                          {h.name}
+                        </span>
+                        {you && <span className="text-[9px] bg-blue-100 text-blue-600 rounded px-1 font-bold">אתה</span>}
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {h.hit === "empty" ? (
+                          <span className="text-[11px] text-gray-400">לא הימר/ה</span>
+                        ) : (
+                          <>
+                            <span className={`text-sm font-black tabular-nums ${text}`} style={{ fontFamily: "var(--font-inter)" }}>
+                              {h.pred.home}-{h.pred.away}
+                            </span>
+                            {delta > 0 && (
+                              <span className="text-[11px] font-bold text-blue-700 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>
+                                +{delta}
+                              </span>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+        {/* Mobile day totals */}
+        <div className="px-4 py-3 bg-gradient-to-l from-blue-50/50 to-indigo-50/30">
+          <p className="text-xs font-bold text-gray-700 mb-1.5">סה״כ היום</p>
+          <div className="flex flex-wrap gap-1.5">
+            {rows.filter(r => r.points > 0).map((r, i) => {
+              const isYou = r.userId === currentUserId;
+              return (
+                <span key={r.userId} className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold ${
+                  i === 0 ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white" :
+                  isYou ? "bg-blue-100 text-blue-700 border border-blue-200" :
+                  "bg-white text-gray-700 border border-gray-200"
+                }`}>
+                  {i === 0 && <span>👑</span>}
+                  <span style={{ fontFamily: "var(--font-secular)" }}>{r.name}</span>
+                  <span className="tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>· {r.points}</span>
+                </span>
+              );
+            })}
+            {rows.every(r => r.points === 0) && <span className="text-xs text-gray-500">אף מהמר עוד לא צבר נקודות</span>}
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop: full table (≥md) */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-gradient-to-l from-white to-gray-50/50 border-b border-gray-200">

@@ -5,42 +5,65 @@ import { LOCK_DEADLINE } from "@/lib/constants";
 
 const TOURNAMENT_START = new Date("2026-06-11T00:00:00Z");
 
-function getStageInfo(now: Date): string {
+// Format: "18.04.2026 20:00"
+function formatDate(d: Date): string {
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+  const hours = String(d.getHours()).padStart(2, "0");
+  const minutes = String(d.getMinutes()).padStart(2, "0");
+  return `${day}.${month}.${year} ${hours}:${minutes}`;
+}
+
+const LOCK_DATE_STR = formatDate(new Date(LOCK_DEADLINE.getTime() + 3 * 60 * 60 * 1000)); // UTC+3
+const TOURNAMENT_DATE_STR = formatDate(new Date(TOURNAMENT_START.getTime() + 3 * 60 * 60 * 1000));
+
+function getStageInfo(now: Date): { stage: string; details: string } {
   if (now < LOCK_DEADLINE) {
     const diff = LOCK_DEADLINE.getTime() - now.getTime();
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    if (days > 0) {
-      return `מצב דמו — נעילה בעוד ${days} ימים ${hours} שעות · 18.04.2026 20:00`;
-    }
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    return `מצב דמו — נעילה בעוד ${hours}:${String(minutes).padStart(2, "0")} · 18.04.2026 20:00`;
+    const countdown = days > 0
+      ? `בעוד ${days} ימים ${hours} שעות`
+      : `בעוד ${hours}:${String(Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, "0")}`;
+    return {
+      stage: `שלב הימורים — נעילה ${countdown}`,
+      details: `נעילה ב-${LOCK_DATE_STR} · השלימו את כל ההימורים לפני הנעילה`,
+    };
   }
 
   if (now < TOURNAMENT_START) {
-    return "מצב דמו — ההימורים ננעלו! השוואת ההימורים נפתחה לצפייה";
+    return {
+      stage: "ההימורים ננעלו!",
+      details: `ננעל ב-${LOCK_DATE_STR} · השוואת הימורים פתוחה לצפייה · הטורניר מתחיל ב-${TOURNAMENT_DATE_STR}`,
+    };
   }
 
-  return "מצב דמו — הטורניר בעיצומו!";
+  return {
+    stage: "הטורניר בעיצומו!",
+    details: "עקבו בלייב אחרי הניקוד",
+  };
 }
 
 export function DemoBanner() {
-  const [text, setText] = useState("");
+  const [info, setInfo] = useState<{ stage: string; details: string } | null>(null);
 
   useEffect(() => {
     function update() {
-      setText(getStageInfo(new Date()));
+      setInfo(getStageInfo(new Date()));
     }
     update();
     const interval = setInterval(update, 60000);
     return () => clearInterval(interval);
   }, []);
 
-  if (!text) return null;
+  if (!info) return null;
 
   return (
     <div className="bg-amber-400 text-amber-950 text-center text-xs sm:text-sm font-bold py-1.5 px-4">
-      ⚠️ {text}
+      <span>⚠️ מצב דמו — {info.stage}</span>
+      <span className="hidden sm:inline"> · {info.details}</span>
+      <span className="sm:hidden block text-[10px] font-medium mt-0.5 opacity-80">{info.details}</span>
     </div>
   );
 }

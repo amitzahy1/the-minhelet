@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { PredictionHeatmap } from "@/components/shared/PredictionHeatmap";
 import { useSharedData } from "@/hooks/useSharedData";
+import { GROUPS } from "@/lib/tournament/groups";
 
 // Color coding: each unique value gets a FIXED color — same pick = same color everywhere
 const VALUE_COLORS = [
@@ -106,15 +107,20 @@ export default function ComparePage() {
 
       // Extract group qualifiers (top-2 from each group)
       const groups: Record<string, string[]> = {};
-      if (adv?.groupQualifiers) {
-        for (const [groupId, teams] of Object.entries(adv.groupQualifiers)) {
+      const hasGroupQualifiers = adv?.groupQualifiers && Object.keys(adv.groupQualifiers).length > 0;
+      if (hasGroupQualifiers) {
+        for (const [groupId, teams] of Object.entries(adv!.groupQualifiers)) {
           groups[groupId] = (teams || []).slice(0, 2);
         }
       } else if (bracket.groupPredictions) {
-        // Fallback: derive from group predictions order
+        // Fallback: derive team codes from group predictions order indices
         for (const [groupId, pred] of Object.entries(bracket.groupPredictions)) {
-          if (pred?.order) {
-            groups[groupId] = pred.order.slice(0, 2).map(String);
+          if (pred?.order && GROUPS[groupId]) {
+            const teamCodes = pred.order
+              .slice(0, 2)
+              .map((idx: number) => GROUPS[groupId][idx]?.code || "")
+              .filter(Boolean);
+            if (teamCodes.length > 0) groups[groupId] = teamCodes;
           }
         }
       }
@@ -265,15 +271,29 @@ export default function ComparePage() {
               </tbody>
             </table>
           </div>
-          {/* Popular picks */}
-          <div className="px-5 py-3 bg-gray-50 border-t border-gray-200">
-            <p className="text-sm font-bold text-gray-700 mb-2">הבחירות הפופולריות:</p>
-            <div className="flex gap-4 text-sm">
-              <span>זוכה: <strong className="text-amber-700">{F["ARG"]} ARG (4 מהמרים)</strong></span>
-              <span>עולה לגמר: <strong>{F["FRA"]} FRA (7 מהמרים)</strong></span>
-              <span>מלך שערים: <strong>Mbappé (3)</strong></span>
-            </div>
-          </div>
+          {/* Popular picks — computed from real data */}
+          {(() => {
+            function topPick(arr: string[]): { value: string; count: number } | null {
+              const counts: Record<string, number> = {};
+              for (const v of arr) { if (v) counts[v] = (counts[v] || 0) + 1; }
+              const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+              return top ? { value: top[0], count: top[1] } : null;
+            }
+            const topWinner = topPick(BETTORS.map(b => b.winner));
+            const topFinalist = topPick(BETTORS.flatMap(b => [b.finalist1, b.finalist2]));
+            const topScorer = topPick(BETTORS.map(b => b.topScorer));
+            if (!topWinner && !topFinalist && !topScorer) return null;
+            return (
+              <div className="px-5 py-3 bg-gray-50 border-t border-gray-200">
+                <p className="text-sm font-bold text-gray-700 mb-2">הבחירות הפופולריות:</p>
+                <div className="flex gap-4 text-sm flex-wrap">
+                  {topWinner && <span>זוכה: <strong className="text-amber-700">{F[topWinner.value] || ""} {topWinner.value} ({topWinner.count} מהמרים)</strong></span>}
+                  {topFinalist && <span>עולה לגמר: <strong>{F[topFinalist.value] || ""} {topFinalist.value} ({topFinalist.count} מהמרים)</strong></span>}
+                  {topScorer && <span>מלך שערים: <strong>{topScorer.value} ({topScorer.count})</strong></span>}
+                </div>
+              </div>
+            );
+          })()}
         </div>
       )}
 
@@ -444,19 +464,10 @@ export default function ComparePage() {
             <h3 className="text-lg font-bold text-gray-900">מפת חום — דיוק בבתים</h3>
             <p className="text-sm text-gray-500">כמה כל מהמר צדק בניחושי העולות מכל בית</p>
           </div>
-          <div className="p-4">
-            <PredictionHeatmap data={BETTORS.map(b => ({
-              name: b.name,
-              groups: Object.fromEntries(
-                Object.entries(b.groups).map(([group]) => {
-                  // Calculate a mock accuracy per group for each bettor
-                  // Use a deterministic formula based on bettor name + group
-                  const seed = b.name.length * 17 + group.charCodeAt(0) * 13;
-                  const accuracy = [0, 25, 50, 75, 100][seed % 5];
-                  return [group, accuracy];
-                })
-              ),
-            }))} />
+          <div className="p-8 text-center">
+            <span className="text-4xl mb-3 block">📊</span>
+            <p className="text-sm text-gray-500 font-bold">מפת החום תהיה זמינה אחרי תחילת הטורניר</p>
+            <p className="text-xs text-gray-400 mt-1">כאן תוכלו לראות כמה כל מהמר צדק בניחושים לכל בית</p>
           </div>
         </div>
       )}

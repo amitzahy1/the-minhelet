@@ -139,7 +139,7 @@ export function SplashScreen() {
         </motion.div>
 
         {/* Title — letter by letter reveal with 3D flip */}
-        <div className="mb-2 overflow-hidden" style={{ perspective: "600px" }}>
+        <div className="mb-2 overflow-hidden" dir="ltr" style={{ perspective: "600px" }}>
           <h1 className="text-5xl sm:text-7xl font-black text-gray-900 tracking-tight flex justify-center" style={{ fontFamily: "var(--font-secular)" }}>
             {titleText.split("").map((char, i) => (
               <motion.span

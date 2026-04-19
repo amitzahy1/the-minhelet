@@ -35,19 +35,33 @@ export default function LandingPage() {
   // Show branded splash while checking auth
   if (checkingAuth) {
     return (
-      <div className="min-h-screen bg-[#F8F9FB] flex items-center justify-center" dir="rtl">
-        <div className="flex flex-col items-center gap-6">
-          <img src="/logo.png" alt="The Minhelet" className="w-40 h-40 sm:w-52 sm:h-52 rounded-full object-cover shadow-2xl" />
-          <div className="text-center">
-            <h1 className="text-4xl sm:text-5xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>THE MINHELET</h1>
-            <p className="text-base sm:text-lg text-gray-400 mt-2" style={{ fontFamily: "var(--font-inter)" }}>WORLD CUP 2026</p>
+      <div className="min-h-screen bg-gradient-to-b from-[#F8F9FB] via-white to-[#EEF2FF] flex items-center justify-center overflow-hidden" dir="rtl">
+        <div className="absolute inset-0 opacity-[0.03]" style={{
+          backgroundImage: "radial-gradient(circle at 1px 1px, #6366f1 1px, transparent 0)",
+          backgroundSize: "40px 40px",
+        }} />
+        <div className="relative flex flex-col items-center">
+          <div className="relative mb-8">
+            <div className="absolute inset-0 w-56 h-56 sm:w-72 sm:h-72 rounded-full bg-blue-500/10 blur-2xl animate-pulse" />
+            <div className="absolute inset-0 w-56 h-56 sm:w-72 sm:h-72 rounded-full border-2 border-blue-200/40 animate-spin" style={{ animationDuration: "8s" }} />
+            <img src="/logo.png" alt="The Minhelet" className="relative w-56 h-56 sm:w-72 sm:h-72 rounded-full object-cover shadow-2xl ring-4 ring-white/80" />
           </div>
-          <div className="flex items-center gap-2.5 mt-3">
-            <div className="w-3 h-3 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: "0ms" }} />
-            <div className="w-3 h-3 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: "150ms" }} />
-            <div className="w-3 h-3 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: "300ms" }} />
+          <h1 className="text-5xl sm:text-7xl font-black text-gray-900 tracking-tight mb-2" style={{ fontFamily: "var(--font-secular)" }}>THE MINHELET</h1>
+          <div className="flex items-center gap-4 mb-10">
+            <div className="h-px w-12 sm:w-20 bg-gradient-to-l from-blue-400/60 to-transparent" />
+            <p className="text-lg sm:text-xl font-bold text-blue-500/70 uppercase tracking-[0.25em]" style={{ fontFamily: "var(--font-inter)" }}>World Cup 2026</p>
+            <div className="h-px w-12 sm:w-20 bg-gradient-to-r from-blue-400/60 to-transparent" />
+          </div>
+          <div className="w-48 sm:w-64 h-1.5 bg-gray-200/60 rounded-full overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-500 rounded-full" style={{ animation: "shimmer 1.5s ease-in-out infinite", backgroundSize: "200% 100%" }} />
           </div>
         </div>
+        <style jsx>{`
+          @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+          }
+        `}</style>
       </div>
     );
   }

@@ -65,6 +65,7 @@ interface Bettor {
   penalties: string;
   groups: Record<string, string[]>;
   isYou?: boolean;
+  completionPct?: number;
 }
 
 // Mock data — in production comes from Supabase
@@ -160,6 +161,37 @@ export default function ComparePage() {
         penalties: sb?.penaltiesOverUnder || "",
         groups,
         isYou: bracket.userId === currentUserId,
+        completionPct: (() => {
+          // Count filled specials (same logic as admin completion API)
+          let specials = 0;
+          if (sb?.topScorerPlayer) specials++;
+          if (sb?.topAssistsPlayer) specials++;
+          if (sb?.bestAttackTeam) specials++;
+          if (sb?.prolificGroup) specials++;
+          if (sb?.driestGroup) specials++;
+          if (sb?.dirtiestTeam) specials++;
+          if (sb?.matchupPick) specials += sb.matchupPick.split(",").filter(Boolean).length;
+          if (sb?.penaltiesOverUnder) specials++;
+          if (adv) {
+            specials += (adv.advanceToQF || []).filter(Boolean).length;
+            specials += (adv.advanceToSF || []).filter(Boolean).length;
+            specials += (adv.advanceToFinal || []).filter(Boolean).length;
+            if (adv.winner) specials++;
+          }
+          // Count groups and knockout from bracket
+          let groupsDone = 0;
+          const gp = bracket.groupPredictions || {};
+          for (const letter of ["A","B","C","D","E","F","G","H","I","J","K","L"]) {
+            const g = gp[letter];
+            if (g?.scores) {
+              const filled = g.scores.filter((s: { home: number | null; away: number | null }) => s.home !== null && s.away !== null).length;
+              if (filled === 6) groupsDone++;
+            }
+          }
+          const ko = bracket.knockoutTree || {};
+          const koFilled = Object.values(ko).filter((m: { winner?: string | null }) => m?.winner).length;
+          return Math.round(((groupsDone + koFilled + specials) / 68) * 100);
+        })(),
       };
     });
   }, [brackets, specialBets, advancements, currentUserId]);
@@ -268,7 +300,7 @@ export default function ComparePage() {
                 {BETTORS.map(b => (
                   <tr key={b.name} className={`border-t border-gray-100 ${b.isYou ? "bg-blue-50/40" : "hover:bg-gray-50"}`}>
                     <td className="py-2 px-2 font-bold text-gray-900 sticky start-0 bg-inherit z-10 border-e border-gray-100 whitespace-nowrap w-16 max-w-[4rem] truncate text-xs">
-                      {b.name} {b.isYou && <span className="text-[10px] text-blue-500 bg-blue-100 rounded px-1 ms-0.5">אתה</span>}
+                      {b.name} {b.isYou && <span className="text-[10px] text-blue-500 bg-blue-100 rounded px-1 ms-0.5">אתה</span>}{b.completionPct !== undefined && b.completionPct < 100 && <span className="text-[9px] text-amber-600 bg-amber-50 rounded px-1 ms-0.5">{b.completionPct}%</span>}
                     </td>
                     <td className={`py-2 px-2 text-center font-bold text-amber-700 text-xs ${getValueColor(b.winner, advColors)}`}>{F[b.winner]} {b.winner}</td>
                     <td className={`py-2 px-2 text-center text-xs ${getValueColor(b.finalist1, advColors)}`}>{F[b.finalist1]} {b.finalist1}</td>
@@ -334,7 +366,7 @@ export default function ComparePage() {
                 {BETTORS.map(b => (
                   <tr key={b.name} className={`border-t border-gray-100 ${b.isYou ? "bg-blue-50/40" : "hover:bg-gray-50"}`}>
                     <td className="py-2 px-2 font-bold text-gray-900 sticky start-0 bg-inherit z-10 border-e border-gray-100 whitespace-nowrap w-16 max-w-[4rem] truncate text-xs">
-                      {b.name} {b.isYou && <span className="text-[10px] text-blue-500 bg-blue-100 rounded px-1 ms-0.5">אתה</span>}
+                      {b.name} {b.isYou && <span className="text-[10px] text-blue-500 bg-blue-100 rounded px-1 ms-0.5">אתה</span>}{b.completionPct !== undefined && b.completionPct < 100 && <span className="text-[9px] text-amber-600 bg-amber-50 rounded px-1 ms-0.5">{b.completionPct}%</span>}
                     </td>
                     <td className={`py-2 px-2 text-center text-xs font-medium ${getValueColor(b.topScorer, specColors)}`}>{b.topScorer}</td>
                     <td className={`py-2 px-2 text-center text-xs font-medium ${getValueColor(b.topAssists, specColors)}`}>{b.topAssists}</td>

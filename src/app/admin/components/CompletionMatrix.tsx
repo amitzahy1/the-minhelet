@@ -87,6 +87,7 @@ export function CompletionMatrix() {
                 <th className="py-3 px-2 text-center whitespace-nowrap">נוקאאוט<br/><span className="text-gray-400 font-normal">/31</span></th>
                 <th className="py-3 px-2 text-center whitespace-nowrap">מיוחדים<br/><span className="text-gray-400 font-normal">/25</span></th>
                 <th className="py-3 px-3 text-center">סה״כ</th>
+                <th className="py-3 px-2 text-center">פעולות</th>
               </tr>
             </thead>
             <tbody>
@@ -118,6 +119,25 @@ export function CompletionMatrix() {
                     <span className={`inline-block rounded-full px-2.5 py-1 text-xs font-bold ${pctColor(u.totalPct)}`} style={{ fontFamily: "var(--font-inter)" }}>
                       {u.totalPct}%
                     </span>
+                  </td>
+                  <td className="py-3 px-2 text-center">
+                    {u.totalPct < 100 && (
+                      <button
+                        onClick={() => {
+                          const missing: string[] = [];
+                          if (u.groups < 12) missing.push(`בתים (${u.groups}/12)`);
+                          if (u.knockout < 31) missing.push(`נוקאאוט (${u.knockout}/31)`);
+                          if (u.specials < 25) missing.push(`מיוחדים (${u.specials}/25)`);
+                          const text = `היי ${u.name}! ההימורים ננעלו ועדיין חסרים לך: ${missing.join(", ")}. בוא נשלים ביחד! 🏆`;
+                          navigator.clipboard.writeText(text);
+                          alert("ההודעה הועתקה! הדבק בוואטסאפ או במייל");
+                        }}
+                        className="text-[10px] font-bold text-blue-600 hover:text-blue-800 whitespace-nowrap"
+                        title="העתק תזכורת"
+                      >
+                        📋 העתק תזכורת
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

@@ -10,6 +10,8 @@ import { HeroRoast } from "@/components/shared/HeroRoast";
 import { LeaderboardRace } from "@/components/shared/LeaderboardRace";
 import { useSharedData } from "@/hooks/useSharedData";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { isLocked } from "@/lib/constants";
+import { GROUPS } from "@/lib/tournament/groups";
 import { TodayMatches } from "@/components/shared/TodayMatches";
 
 // Mock completion data — in production this comes from Supabase
@@ -210,7 +212,7 @@ export default function StandingsPage() {
   const [activeTab, setActiveTab] = useState<SortKey>("total");
   const currentUserId = useCurrentUser();
   // Load real data from Supabase (falls back to empty arrays if not configured)
-  const { profiles, scoringLog } = useSharedData();
+  const { profiles, scoringLog, brackets, specialBets, advancements } = useSharedData();
 
   // Build real players from Supabase profiles + scoring log
   const realPlayers = useMemo(() => {
@@ -467,6 +469,82 @@ export default function StandingsPage() {
         </div>
       </div>
 
+      {/* Post-lock completion summary — visible to all users */}
+      {isLocked() && profiles.length > 0 && (
+        <div className="mt-8 bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
+          <div className="px-5 py-4 bg-gradient-to-l from-white via-amber-50/30 to-orange-50/40 border-b border-amber-100/50">
+            <h3 className="text-lg font-bold text-gray-900">סטטוס מילוי הימורים</h3>
+            <p className="text-sm text-gray-500">מי מילא ומי עוד לא — תמונת מצב</p>
+          </div>
+          <div className="p-4 space-y-2">
+            {profiles.map((profile) => {
+              const b = brackets.find((br) => br.userId === profile.id);
+              const sb = specialBets.find((s) => s.userId === profile.id);
+              const adv = advancements.find((a) => a.userId === profile.id);
+
+              // Count completed groups
+              let groupsDone = 0;
+              if (b?.groupPredictions) {
+                for (const letter of ["A","B","C","D","E","F","G","H","I","J","K","L"]) {
+                  const g = (b.groupPredictions as Record<string, { scores?: { home: number | null; away: number | null }[] }>)[letter];
+                  if (g?.scores) {
+                    const filled = g.scores.filter((s) => s.home !== null && s.away !== null).length;
+                    if (filled === 6) groupsDone++;
+                  }
+                }
+              }
+
+              // Count knockout
+              const koFilled = b?.knockoutTree
+                ? Object.values(b.knockoutTree as Record<string, { winner?: string | null }>).filter((m) => m?.winner).length
+                : 0;
+
+              // Count specials + advancement
+              let specFilled = 0;
+              if (sb) {
+                if (sb.topScorerPlayer) specFilled++;
+                if (sb.topAssistsPlayer) specFilled++;
+                if (sb.bestAttackTeam) specFilled++;
+                if (sb.prolificGroup) specFilled++;
+                if (sb.driestGroup) specFilled++;
+                if (sb.dirtiestTeam) specFilled++;
+                if (sb.matchupPick) specFilled += sb.matchupPick.split(",").filter(Boolean).length;
+                if (sb.penaltiesOverUnder) specFilled++;
+              }
+              if (adv) {
+                specFilled += (adv.advanceToQF || []).filter(Boolean).length;
+                specFilled += (adv.advanceToSF || []).filter(Boolean).length;
+                specFilled += (adv.advanceToFinal || []).filter(Boolean).length;
+                if (adv.winner) specFilled++;
+              }
+
+              const total = groupsDone + koFilled + specFilled;
+              const pct = Math.round((total / 68) * 100);
+              const isComplete = pct === 100;
+              const isMe = profile.id === currentUserId;
+
+              return (
+                <div key={profile.id} className={`flex items-center gap-3 px-4 py-3 rounded-xl ${isMe ? "bg-blue-50" : "bg-gray-50"}`}>
+                  <span className="font-bold text-sm text-gray-900 w-20 truncate">
+                    {profile.displayName || "ללא שם"}
+                    {isMe && <span className="text-[10px] text-blue-500 ms-1">אתה</span>}
+                  </span>
+                  <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all ${isComplete ? "bg-green-500" : pct >= 50 ? "bg-amber-500" : "bg-red-400"}`}
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                  <span className={`font-black text-sm w-12 text-end ${isComplete ? "text-green-600" : pct >= 50 ? "text-amber-600" : "text-red-500"}`} style={{ fontFamily: "var(--font-inter)" }}>
+                    {pct}%
+                  </span>
+                  {isComplete && <span className="text-green-600 text-sm">✓</span>}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
     </div>
   );

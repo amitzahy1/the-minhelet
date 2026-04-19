@@ -89,7 +89,9 @@ export async function saveBetsToSupabase(
     user_id: user.id,
     league_id: resolvedLeagueId,
     top_scorer_player: state.specialBets.topScorerPlayer || null,
+    top_scorer_team: state.specialBets.topScorerTeam || null,
     top_assists_player: state.specialBets.topAssistsPlayer || null,
+    top_assists_team: state.specialBets.topAssistsTeam || null,
     best_attack_team: state.specialBets.bestAttack || null,
     most_prolific_group: state.specialBets.prolificGroup || null,
     driest_group: state.specialBets.driestGroup || null,
@@ -107,11 +109,23 @@ export async function saveBetsToSupabase(
     return { success: false, error: specialError.message };
   }
 
+  // Derive group qualifiers from group predictions (top 2 per group)
+  const groupQualifiers: Record<string, string[]> = {};
+  for (const [groupId, group] of Object.entries(state.groups)) {
+    if (group.order && group.order.length >= 2 && GROUPS[groupId]) {
+      const top2 = group.order
+        .slice(0, 2)
+        .map((idx: number) => GROUPS[groupId][idx]?.code)
+        .filter(Boolean);
+      if (top2.length > 0) groupQualifiers[groupId] = top2;
+    }
+  }
+
   // Save advancement picks
   const advData = {
     user_id: user.id,
     league_id: resolvedLeagueId,
-    group_qualifiers: {},
+    group_qualifiers: groupQualifiers,
     advance_to_qf: state.specialBets.quarterfinalists.filter(Boolean),
     advance_to_sf: state.specialBets.semifinalists.filter(Boolean),
     advance_to_final: [state.specialBets.finalist1, state.specialBets.finalist2].filter(Boolean),
@@ -189,9 +203,9 @@ export async function loadBetsFromSupabase(
         finalist2: advancement?.advance_to_final?.[1] || "",
         semifinalists: advancement?.advance_to_sf || ["", "", "", ""],
         quarterfinalists: advancement?.advance_to_qf || ["", "", "", "", "", "", "", ""],
-        topScorerTeam: "",
+        topScorerTeam: special?.top_scorer_team || "",
         topScorerPlayer: special?.top_scorer_player || "",
-        topAssistsTeam: "",
+        topAssistsTeam: special?.top_assists_team || "",
         topAssistsPlayer: special?.top_assists_player || "",
         bestAttack: special?.best_attack_team || "",
         prolificGroup: special?.most_prolific_group || "",

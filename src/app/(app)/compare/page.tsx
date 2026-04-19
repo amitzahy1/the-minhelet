@@ -356,39 +356,36 @@ export default function ComparePage() {
 
       {/* === GROUPS VIEW === */}
       {view === "groups" && (
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {["A","B","C","D","E","F","G","H","I","J","K","L"].map(groupId => (
-            <div key={groupId} className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
-              <div className="px-5 py-3 bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/40 border-b border-blue-100/50">
-                <h3 className="text-base font-bold text-gray-800">בית {groupId} — מי העלה את מי?</h3>
+            <div key={groupId} className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+              <div className="px-3 py-2 bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/40 border-b border-blue-100/50">
+                <h3 className="text-sm font-bold text-gray-800">בית {groupId}</h3>
               </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="text-xs text-gray-500 font-semibold border-b border-gray-200">
-                      <th className="py-2 px-2 text-start sticky start-0 bg-white z-10 border-e border-gray-100 w-16 max-w-[4rem]">מהמר</th>
-                      <th className="py-2 px-3 text-center">מקום 1</th>
-                      <th className="py-2 px-3 text-center">מקום 2</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {BETTORS.map(b => {
-                      const picks = b.groups[groupId as keyof typeof b.groups];
-                      if (!picks) return null;
-                      return (
-                        <tr key={b.name} className={`border-t border-gray-100 ${b.isYou ? "bg-blue-50/40" : "hover:bg-gray-50"}`}>
-                          <td className="py-2.5 px-2 font-bold text-gray-900 sticky start-0 bg-inherit z-10 border-e border-gray-100 whitespace-nowrap w-16 max-w-[4rem] truncate text-xs">{b.name}</td>
-                          <td className={`py-2.5 px-3 text-center font-medium ${getValueColor(picks[0], groupColors)}`}>{F[picks[0]]} {picks[0]}</td>
-                          <td className={`py-2.5 px-3 text-center font-medium ${getValueColor(picks[1], groupColors)}`}>{F[picks[1]]} {picks[1]}</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="text-[10px] text-gray-400 font-semibold border-b border-gray-100">
+                    <th className="py-1.5 px-2 text-start">מהמר</th>
+                    <th className="py-1.5 px-2 text-center">1</th>
+                    <th className="py-1.5 px-2 text-center">2</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {BETTORS.map(b => {
+                    const picks = b.groups[groupId as keyof typeof b.groups];
+                    if (!picks) return null;
+                    return (
+                      <tr key={b.name} className={`border-t border-gray-50 ${b.isYou ? "bg-blue-50/40" : ""}`}>
+                        <td className="py-1.5 px-2 font-bold text-gray-800 truncate max-w-[4rem]">{b.name}</td>
+                        <td className={`py-1.5 px-2 text-center ${getValueColor(picks[0], groupColors)}`}>{F[picks[0]]} {picks[0]}</td>
+                        <td className={`py-1.5 px-2 text-center ${getValueColor(picks[1], groupColors)}`}>{F[picks[1]]} {picks[1]}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           ))}
-          <p className="text-sm text-gray-400 text-center">כל 12 הבתים — מקומות 1 ו-2 שכל מהמר בחר</p>
         </div>
       )}
 

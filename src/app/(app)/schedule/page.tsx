@@ -86,10 +86,10 @@ function MatchBetsPanel({ match, profiles, specialBets, advancements, prediction
   const hasSpecialBets = specialBets.length > 0;
   const hasAdvancements = advancements.length > 0;
 
-  // Bettor list: use real profiles if available, else mock
+  // Bettor list: only real profiles
   const bettors = hasPredictions
     ? realPredictions.map(p => p.displayName)
-    : Object.keys(MOCK_PREDICTIONS);
+    : [];
 
   // Find related special bets for this match's teams
   const relatedBets: { bettor: string; type: string; detail: string }[] = [];
@@ -112,31 +112,7 @@ function MatchBetsPanel({ match, profiles, specialBets, advancements, prediction
     relatedBets.push({ bettor: "אתה", type: "הכי כסחנית", detail: `${getFlag(myBets.dirtiestTeam)} ${getTeamNameHe(myBets.dirtiestTeam)}` });
   }
 
-  // Always show mock bettors' special bets (until real Supabase data replaces them)
-  {
-    const mockBettors = Object.keys(MOCK_SPECIAL_BETS);
-    for (const bettor of mockBettors) {
-      const sb = MOCK_SPECIAL_BETS[bettor];
-      if (!sb) continue;
-      if (sb.winner === home || sb.winner === away) {
-        relatedBets.push({ bettor, type: "אלוף", detail: `${getFlag(sb.winner)} ${getTeamNameHe(sb.winner)}` });
-      }
-      if (sb.topScorer.team === home || sb.topScorer.team === away) {
-        relatedBets.push({ bettor, type: "מלך שערים", detail: `${sb.topScorer.player} (${getFlag(sb.topScorer.team)} ${getTeamNameHe(sb.topScorer.team)})` });
-      }
-      if (sb.topAssists.team === home || sb.topAssists.team === away) {
-        relatedBets.push({ bettor, type: "מלך בישולים", detail: `${sb.topAssists.player} (${getFlag(sb.topAssists.team)} ${getTeamNameHe(sb.topAssists.team)})` });
-      }
-      if (sb.bestAttack === home || sb.bestAttack === away) {
-        relatedBets.push({ bettor, type: "התקפה הכי טובה", detail: `${getFlag(sb.bestAttack)} ${getTeamNameHe(sb.bestAttack)}` });
-      }
-      if (sb.dirtiestTeam === home || sb.dirtiestTeam === away) {
-        relatedBets.push({ bettor, type: "הכי כסחנית", detail: `${getFlag(sb.dirtiestTeam)} ${getTeamNameHe(sb.dirtiestTeam)}` });
-      }
-    }
-  }
-
-  // Also add real Supabase data if available (will override/supplement mock)
+  // Add real Supabase data for all bettors
   if (hasSpecialBets || hasAdvancements) {
     // Build a unique name list from profiles for consistent display
     const allBettorNames = Array.from(new Set([
@@ -253,37 +229,29 @@ function MatchBetsPanel({ match, profiles, specialBets, advancements, prediction
           </div>
         )}
 
-        {/* Group info — only after lock */}
-        {locked && groupLetter && (
+        {/* Group info — only after lock, from real advancements */}
+        {locked && groupLetter && hasAdvancements && (
           <div>
             <p className="text-xs font-bold text-gray-500 mb-2">הימורים על בית {groupLetter}</p>
             <div className="bg-white rounded-lg border border-gray-200 px-3 py-2">
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {bettors.slice(0, 6).map((bettor, i) => {
-                  const mockOrder = i % 2 === 0
-                    ? [home, away, "---", "---"]
-                    : [away, home, "---", "---"];
-                  return (
-                    <div key={bettor} className="text-xs border border-gray-100 rounded-lg p-2">
-                      <p className="font-bold text-gray-800 mb-1">{bettor}</p>
-                      <div className="space-y-0.5">
-                        {mockOrder.map((t, j) => (
-                          <div key={j} className={`flex items-center gap-1.5 ${j < 2 ? "text-green-700 font-medium" : "text-gray-400"}`}>
-                            <span className="text-[10px] w-3 shrink-0" style={{ fontFamily: "var(--font-inter)" }}>{j + 1}.</span>
-                            {t !== "---" ? (
-                              <>
-                                <span>{getFlag(t)}</span>
-                                <span className="truncate">{getTeamNameHe(t)}</span>
-                              </>
-                            ) : (
-                              <span className="text-gray-300">...</span>
-                            )}
-                          </div>
-                        ))}
-                      </div>
+                {advancements.filter(a => {
+                  const gq = a.groupQualifiers?.[groupLetter];
+                  return gq && gq.length > 0;
+                }).map((adv) => (
+                  <div key={adv.userId} className="text-xs border border-gray-100 rounded-lg p-2">
+                    <p className="font-bold text-gray-800 mb-1">{adv.displayName}</p>
+                    <div className="space-y-0.5">
+                      {(adv.groupQualifiers[groupLetter] || []).slice(0, 2).map((t, j) => (
+                        <div key={j} className="flex items-center gap-1.5 text-green-700 font-medium">
+                          <span className="text-[10px] w-3 shrink-0" style={{ fontFamily: "var(--font-inter)" }}>{j + 1}.</span>
+                          <span>{getFlag(t)}</span>
+                          <span className="truncate">{getTeamNameHe(t)}</span>
+                        </div>
+                      ))}
                     </div>
-                  );
-                })}
+                  </div>
+                ))}
               </div>
               <p className="text-[10px] text-gray-400 mt-1.5 text-center">מקומות 1-2 = עולות מהבית</p>
             </div>

@@ -6,6 +6,30 @@
 import { GROUPS } from "./tournament/groups";
 import type { BettorBracket } from "./supabase/shared-data";
 
+// Football-Data.org (like most external sources) often returns ISO 3166-1
+// alpha-3 codes instead of FIFA codes. Map the common divergences so team
+// lookups against our GROUPS (which use FIFA codes) still resolve.
+const TLA_ALIAS: Record<string, string> = {
+  ZAF: "RSA",   // South Africa
+  CHE: "SUI",   // Switzerland
+  HTI: "HAI",   // Haiti
+  PRY: "PAR",   // Paraguay
+  DEU: "GER",   // Germany
+  CUW: "CUR",   // Curaçao
+  NLD: "NED",   // Netherlands
+  URY: "URU",   // Uruguay
+  SAU: "KSA",   // Saudi Arabia
+  DZA: "ALG",   // Algeria
+  PRT: "POR",   // Portugal
+  HRV: "CRO",   // Croatia
+};
+
+function normalizeTla(tla: string | null | undefined): string {
+  if (!tla) return "";
+  const upper = tla.toString().toUpperCase();
+  return TLA_ALIAS[upper] ?? upper;
+}
+
 export const GROUP_MATCH_PAIRS: Array<[number, number]> = [
   [0, 1], [2, 3], [0, 2], [1, 3], [0, 3], [1, 2],
 ];
@@ -51,8 +75,10 @@ export function computeGroupHits(
 ): BettorHit[] {
   const teams = GROUPS[match.group];
   if (!teams) return [];
-  const homeIdx = teams.findIndex((t) => t.code === match.homeTla);
-  const awayIdx = teams.findIndex((t) => t.code === match.awayTla);
+  const homeCode = normalizeTla(match.homeTla);
+  const awayCode = normalizeTla(match.awayTla);
+  const homeIdx = teams.findIndex((t) => t.code === homeCode);
+  const awayIdx = teams.findIndex((t) => t.code === awayCode);
   if (homeIdx < 0 || awayIdx < 0) return [];
 
   // Match the pair (order-insensitive) and record if flipped vs canonical.

@@ -543,9 +543,9 @@ export default function ComparePage() {
 }
 
 // ---------------------------------------------------------------------------
-// Results view — per-finished-match who hit, who missed
-// Intentionally minimal palette: subtle card + 1 icon color per section,
-// unlike the rainbow tables in the other views.
+// Results view — per-day TABLE: rows = bettors, columns = matches of that day
+// Each cell: bettor's prediction + icon. Points column = sum of 3/2/0 pts.
+// Compact, scannable, shows "who picked what" side by side.
 // ---------------------------------------------------------------------------
 
 interface ResultsViewProps {
@@ -554,6 +554,9 @@ interface ResultsViewProps {
   currentUserId: string | null;
   loading: boolean;
 }
+
+const EXACT_PTS = 3; // bol
+const TOTO_PTS = 2;  // 1X2 only
 
 function ResultsView({ matches, brackets, currentUserId, loading }: ResultsViewProps) {
   if (loading) {
@@ -578,7 +581,7 @@ function ResultsView({ matches, brackets, currentUserId, loading }: ResultsViewP
     );
   }
 
-  // Group matches by date (Israel-formatted)
+  // Group matches by Israel date label; within each day sort matches by time asc.
   const byDate: Record<string, FinishedMatch[]> = {};
   for (const m of matches) {
     const d = new Date(m.date);
@@ -586,175 +589,201 @@ function ResultsView({ matches, brackets, currentUserId, loading }: ResultsViewP
     if (!byDate[key]) byDate[key] = [];
     byDate[key].push(m);
   }
+  for (const key of Object.keys(byDate)) {
+    byDate[key].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {Object.entries(byDate).map(([dateLabel, dayMatches]) => (
-        <div key={dateLabel}>
-          <h3 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
-            {dateLabel}
-            <span className="text-xs font-medium text-gray-400">· {dayMatches.length} משחקים</span>
-          </h3>
-          <div className="grid gap-3 md:grid-cols-2">
-            {dayMatches.map((m) => (
-              <ResultCard key={m.id} match={m} brackets={brackets} currentUserId={currentUserId} />
-            ))}
-          </div>
-        </div>
+        <DayTable
+          key={dateLabel}
+          dateLabel={dateLabel}
+          matches={dayMatches}
+          brackets={brackets}
+          currentUserId={currentUserId}
+        />
       ))}
     </div>
   );
 }
 
-function ResultCard({
-  match,
+function DayTable({
+  dateLabel,
+  matches,
   brackets,
   currentUserId,
 }: {
-  match: FinishedMatch;
+  dateLabel: string;
+  matches: FinishedMatch[];
   brackets: ResultsViewProps["brackets"];
   currentUserId: string | null;
 }) {
-  const hits: BettorHit[] = useMemo(
-    () => computeGroupHits(match, brackets).filter((h) => h.hit !== "empty"),
-    [match, brackets]
+  // For each match, compute hits for all bettors.
+  const matchHits = useMemo(() =>
+    matches.map((m) => ({ match: m, hits: computeGroupHits(m, brackets) })),
+    [matches, brackets]
   );
-  const counts = hitCounts(hits);
 
-  const exacts = hits.filter((h) => h.hit === "exact");
-  const totos = hits.filter((h) => h.hit === "toto");
-  const misses = hits.filter((h) => h.hit === "miss");
+  // Collect every bettor that appears in any match's hits (plus all bracket owners).
+  const allBettors = useMemo(() => {
+    const seen = new Map<string, string>();
+    for (const b of brackets) seen.set(b.userId, b.displayName || "ללא שם");
+    for (const { hits } of matchHits) {
+      for (const h of hits) if (!seen.has(h.userId)) seen.set(h.userId, h.name);
+    }
+    return Array.from(seen.entries()).map(([userId, name]) => ({ userId, name }));
+  }, [brackets, matchHits]);
 
-  const time = new Date(match.date).toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
+  // Per-bettor: per-match pick + totals.
+  type Row = {
+    userId: string;
+    name: string;
+    cells: Array<{ pred: { home: number | null; away: number | null }; hit: BettorHit["hit"] }>;
+    points: number;
+    exacts: number;
+    totos: number;
+  };
+
+  const rows: Row[] = useMemo(() => {
+    const byUser: Record<string, Row> = {};
+    for (const { userId, name } of allBettors) {
+      byUser[userId] = {
+        userId,
+        name,
+        cells: matches.map(() => ({ pred: { home: null, away: null }, hit: "empty" })),
+        points: 0,
+        exacts: 0,
+        totos: 0,
+      };
+    }
+    matchHits.forEach(({ hits }, matchIdx) => {
+      for (const h of hits) {
+        const row = byUser[h.userId];
+        if (!row) continue;
+        row.cells[matchIdx] = { pred: h.pred, hit: h.hit };
+        if (h.hit === "exact") { row.points += EXACT_PTS; row.exacts += 1; }
+        else if (h.hit === "toto") { row.points += TOTO_PTS; row.totos += 1; }
+      }
+    });
+    return Object.values(byUser).sort(
+      (a, b) => b.points - a.points || b.exacts - a.exacts || a.name.localeCompare(b.name, "he")
+    );
+  }, [allBettors, matches, matchHits]);
+
+  // Day-level summary — one quick stat per match
+  const perMatchCounts = matchHits.map(({ hits }) => hitCounts(hits));
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
-      {/* Header */}
-      <div className="px-4 py-2.5 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
-        <div className="flex items-center gap-2 text-xs text-gray-500">
-          <span className="font-bold text-gray-700">בית {match.group}</span>
-          <span>·</span>
-          <span style={{ fontFamily: "var(--font-inter)" }}>{time}</span>
-        </div>
-        <span className="text-[10px] font-bold text-green-700 bg-green-100 rounded-full px-2 py-0.5">
-          הסתיים
-        </span>
-      </div>
-
-      {/* Match score */}
-      <div className="px-4 py-4 flex items-center justify-between gap-2 border-b border-gray-100">
-        <div className="flex items-center gap-2 flex-1 min-w-0 justify-end">
-          <span className="text-sm font-bold text-gray-900 truncate">
-            {getTeamNameHe(match.homeTla) || match.homeTla}
-          </span>
-          <span className="text-2xl">{getFlag(match.homeTla)}</span>
-        </div>
-        <div className="text-xl font-black tabular-nums text-gray-900 px-3" style={{ fontFamily: "var(--font-inter)" }}>
-          {match.homeGoals} - {match.awayGoals}
-        </div>
-        <div className="flex items-center gap-2 flex-1 min-w-0">
-          <span className="text-2xl">{getFlag(match.awayTla)}</span>
-          <span className="text-sm font-bold text-gray-900 truncate">
-            {getTeamNameHe(match.awayTla) || match.awayTla}
-          </span>
+    <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+      <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+          <h3 className="text-sm font-bold text-gray-800">{dateLabel}</h3>
+          <span className="text-xs text-gray-500">· {matches.length} משחקים</span>
         </div>
       </div>
 
-      {/* Hit summary */}
-      <div className="px-4 py-2.5 bg-gradient-to-l from-white to-gray-50 border-b border-gray-100 flex items-center gap-4 text-xs">
-        <span className="flex items-center gap-1">
-          <span className="text-base">🎯</span>
-          <span className="font-bold text-green-700">{counts.exact}</span>
-          <span className="text-gray-500">בול</span>
-        </span>
-        <span className="flex items-center gap-1">
-          <span className="text-base text-amber-600">✓</span>
-          <span className="font-bold text-amber-700">{counts.toto}</span>
-          <span className="text-gray-500">1X2</span>
-        </span>
-        {counts.miss > 0 && (
-          <span className="flex items-center gap-1">
-            <span className="text-base text-red-500">✗</span>
-            <span className="font-bold text-red-600">{counts.miss}</span>
-            <span className="text-gray-500">פספוס</span>
-          </span>
-        )}
-        {hits.length === 0 && <span className="text-gray-400">אין ניחושים</span>}
+      <div className="overflow-x-auto">
+        <table className="w-full text-xs">
+          <thead>
+            <tr className="border-b border-gray-200 bg-white">
+              <th className="py-2 px-2 text-start sticky start-0 bg-white z-10 border-e border-gray-100 min-w-[5.5rem]">
+                מהמר
+              </th>
+              {matches.map((m, i) => {
+                const time = new Date(m.date).toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
+                const c = perMatchCounts[i];
+                return (
+                  <th key={m.id} className="py-2 px-2 text-center min-w-[9rem]">
+                    <div className="flex items-center justify-center gap-1 text-sm" dir="ltr">
+                      <span className="text-base">{getFlag(m.homeTla)}</span>
+                      <span className="font-black tabular-nums text-gray-900" style={{ fontFamily: "var(--font-inter)" }}>
+                        {m.homeGoals}-{m.awayGoals}
+                      </span>
+                      <span className="text-base">{getFlag(m.awayTla)}</span>
+                    </div>
+                    <div className="text-[10px] text-gray-400 mt-0.5 font-normal">
+                      {getTeamNameHe(m.homeTla) || m.homeTla} - {getTeamNameHe(m.awayTla) || m.awayTla}
+                    </div>
+                    <div className="text-[9px] text-gray-400 mt-0.5 font-normal" style={{ fontFamily: "var(--font-inter)" }}>
+                      {time} · בית {m.group}
+                    </div>
+                    {(c.exact + c.toto > 0) && (
+                      <div className="text-[10px] mt-1 font-medium">
+                        {c.exact > 0 && <span className="text-green-700">🎯{c.exact}</span>}
+                        {c.exact > 0 && c.toto > 0 && <span className="text-gray-300 mx-0.5">·</span>}
+                        {c.toto > 0 && <span className="text-amber-700">✓{c.toto}</span>}
+                      </div>
+                    )}
+                  </th>
+                );
+              })}
+              <th className="py-2 px-3 text-center bg-gray-50 border-s border-gray-200 min-w-[4rem]">
+                נק׳
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => {
+              const isYou = row.userId === currentUserId;
+              return (
+                <tr
+                  key={row.userId}
+                  className={`border-t border-gray-100 ${isYou ? "bg-blue-50/60" : "hover:bg-gray-50/50"}`}
+                >
+                  <td
+                    className={`py-2 px-2 font-bold sticky start-0 z-10 border-e border-gray-100 whitespace-nowrap ${
+                      isYou ? "bg-blue-50/60" : "bg-white"
+                    }`}
+                  >
+                    {row.name}
+                    {isYou && (
+                      <span className="ms-1 text-[9px] bg-blue-100 text-blue-600 rounded px-1">אתה</span>
+                    )}
+                  </td>
+                  {row.cells.map((cell, i) => {
+                    const bg =
+                      cell.hit === "exact"
+                        ? "bg-green-50 text-green-800"
+                        : cell.hit === "toto"
+                        ? "bg-amber-50 text-amber-800"
+                        : cell.hit === "miss"
+                        ? "bg-red-50 text-red-700"
+                        : "bg-white text-gray-300";
+                    const icon = cell.hit === "exact" ? "🎯" : cell.hit === "toto" ? "✓" : cell.hit === "miss" ? "✗" : "—";
+                    return (
+                      <td key={i} className={`py-1.5 px-2 text-center border-e border-gray-100 ${bg}`}>
+                        {cell.hit === "empty" ? (
+                          <span className="text-gray-300">—</span>
+                        ) : (
+                          <div className="flex items-center justify-center gap-1 font-bold">
+                            <span className="tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>
+                              {cell.pred.home}-{cell.pred.away}
+                            </span>
+                            <span className="text-sm">{icon}</span>
+                          </div>
+                        )}
+                      </td>
+                    );
+                  })}
+                  <td className="py-2 px-3 text-center font-black bg-gray-50 border-s border-gray-200">
+                    <span className="tabular-nums text-gray-900 text-sm" style={{ fontFamily: "var(--font-inter)" }}>
+                      {row.points}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
 
-      {/* Hit groups */}
-      <div className="px-4 py-3 space-y-2.5 text-xs">
-        {exacts.length > 0 && (
-          <HitGroup
-            label="בולים"
-            icon="🎯"
-            color="text-green-700"
-            hits={exacts}
-            currentUserId={currentUserId}
-          />
-        )}
-        {totos.length > 0 && (
-          <HitGroup
-            label="תפסו 1X2"
-            icon="✓"
-            color="text-amber-700"
-            hits={totos}
-            currentUserId={currentUserId}
-          />
-        )}
-        {misses.length > 0 && (
-          <HitGroup
-            label="פספוסים"
-            icon="✗"
-            color="text-red-600"
-            hits={misses}
-            currentUserId={currentUserId}
-          />
-        )}
-      </div>
-    </div>
-  );
-}
-
-function HitGroup({
-  label,
-  icon,
-  color,
-  hits,
-  currentUserId,
-}: {
-  label: string;
-  icon: string;
-  color: string;
-  hits: BettorHit[];
-  currentUserId: string | null;
-}) {
-  return (
-    <div>
-      <p className={`text-[11px] font-bold mb-1 ${color}`}>
-        {icon} {label} ({hits.length})
-      </p>
-      <div className="flex flex-wrap gap-1.5">
-        {hits.map((h) => {
-          const you = h.userId === currentUserId;
-          return (
-            <span
-              key={h.userId}
-              className={`inline-flex items-center gap-1 rounded-lg px-2 py-0.5 border ${
-                you ? "bg-blue-50 border-blue-300" : "bg-white border-gray-200"
-              }`}
-            >
-              <span className="text-[11px] font-bold text-gray-800">
-                {h.name}
-                {you && <span className="ms-1 text-[9px] bg-blue-100 text-blue-600 rounded px-1">אתה</span>}
-              </span>
-              <span className="text-[10px] text-gray-500 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>
-                {h.pred.home}-{h.pred.away}
-              </span>
-            </span>
-          );
-        })}
+      <div className="px-4 py-2 bg-gray-50 border-t border-gray-200 flex items-center gap-4 text-[10px] text-gray-500">
+        <span>🎯 תוצאה מדויקת · {EXACT_PTS} נק׳</span>
+        <span>✓ טוטו (1X2) · {TOTO_PTS} נק׳</span>
+        <span>✗ פספוס · 0</span>
+        <span>— לא הימרו</span>
       </div>
     </div>
   );

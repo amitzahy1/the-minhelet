@@ -244,13 +244,13 @@ export function TodayMatches() {
                               <p className="text-[10px] font-bold text-gray-500 mb-1">
                                 תוצאה: <span className="tabular-nums text-gray-700">{m.homeGoals}-{m.awayGoals}</span>
                                 <span className="mx-1.5">·</span>
-                                <span className="text-green-700">🎯 {exactCount} בול</span>
+                                <span className="text-green-700">🎯 {exactCount} תפסו תוצאה</span>
                                 <span className="mx-1">·</span>
-                                <span className="text-amber-700">✓ {totoCount} 1X2</span>
+                                <span className="text-amber-700">✓ {totoCount} תפסו טוטו</span>
                                 {missCount > 0 && (
                                   <>
                                     <span className="mx-1">·</span>
-                                    <span className="text-red-600">✗ {missCount}</span>
+                                    <span className="text-red-600">✗ {missCount} פספסו</span>
                                   </>
                                 )}
                               </p>

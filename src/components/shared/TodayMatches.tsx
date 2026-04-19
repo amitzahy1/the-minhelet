@@ -6,6 +6,25 @@ import { getFlag, getTeamNameHe } from "@/lib/flags";
 import { toIsraelTimeShort, toIsraelDate, toIsraelDateKey, getTodayIsrael } from "@/lib/timezone";
 import { useSharedData } from "@/hooks/useSharedData";
 import { isLocked } from "@/lib/constants";
+import { GROUPS } from "@/lib/tournament/groups";
+
+// Positions (in GROUPS[letter] order) of the 6 group-stage matches
+const GROUP_MATCH_PAIRS: Array<[number, number]> = [
+  [0, 1], [2, 3], [0, 2], [1, 3], [0, 3], [1, 2],
+];
+
+type HitKind = "exact" | "toto" | "miss";
+
+function classifyHit(
+  pred: { home: number | null; away: number | null },
+  actual: { home: number; away: number }
+): HitKind {
+  if (pred.home === null || pred.away === null) return "miss";
+  if (pred.home === actual.home && pred.away === actual.away) return "exact";
+  const predOut = pred.home > pred.away ? "H" : pred.home < pred.away ? "A" : "D";
+  const actOut = actual.home > actual.away ? "H" : actual.home < actual.away ? "A" : "D";
+  return predOut === actOut ? "toto" : "miss";
+}
 
 interface Match {
   id: number;
@@ -32,7 +51,7 @@ export function TodayMatches() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [heading, setHeading] = useState("משחקים קרובים");
   const [expandedId, setExpandedId] = useState<number | null>(null);
-  const { predictions, specialBets, profiles } = useSharedData();
+  const { predictions, specialBets, brackets, profiles } = useSharedData();
   const locked = isLocked();
 
   useEffect(() => {
@@ -94,6 +113,53 @@ export function TodayMatches() {
     return bets;
   }
 
+  /**
+   * Derive each bettor's predicted score for a finished group match from
+   * their stored group_predictions. The store saves scores in a fixed
+   * order (GROUP_MATCH_PAIRS) keyed by canonical team positions.
+   */
+  function getGroupPredictions(
+    homeTla: string,
+    awayTla: string,
+    groupLetter: string,
+    actualHome: number,
+    actualAway: number
+  ): Array<{ userId: string; name: string; pred: { home: number | null; away: number | null }; hit: HitKind }> {
+    const teams = GROUPS[groupLetter];
+    if (!teams) return [];
+    const homeIdx = teams.findIndex((t) => t.code === homeTla);
+    const awayIdx = teams.findIndex((t) => t.code === awayTla);
+    if (homeIdx < 0 || awayIdx < 0) return [];
+
+    // Find which of the 6 pairs matches this match, and whether it's flipped.
+    let pairIdx = -1;
+    let flipped = false;
+    for (let i = 0; i < GROUP_MATCH_PAIRS.length; i++) {
+      const [a, b] = GROUP_MATCH_PAIRS[i];
+      if (a === homeIdx && b === awayIdx) { pairIdx = i; flipped = false; break; }
+      if (a === awayIdx && b === homeIdx) { pairIdx = i; flipped = true; break; }
+    }
+    if (pairIdx < 0) return [];
+
+    const out: Array<{ userId: string; name: string; pred: { home: number | null; away: number | null }; hit: HitKind }> = [];
+    for (const b of brackets) {
+      const stored = b.groupPredictions?.[groupLetter]?.scores?.[pairIdx];
+      if (!stored || (stored.home === null && stored.away === null)) continue;
+      const pred = flipped
+        ? { home: stored.away, away: stored.home }
+        : { home: stored.home, away: stored.away };
+      out.push({
+        userId: b.userId,
+        name: b.displayName || "ללא שם",
+        pred,
+        hit: classifyHit(pred, { home: actualHome, away: actualAway }),
+      });
+    }
+    // Sort: exact first, then toto, then miss. Within each, alphabetical.
+    const rank: Record<HitKind, number> = { exact: 0, toto: 1, miss: 2 };
+    return out.sort((a, b) => rank[a.hit] - rank[b.hit] || a.name.localeCompare(b.name, "he"));
+  }
+
   return (
     <div className="mb-6">
       <div className="flex items-center gap-2 mb-3">
@@ -108,6 +174,14 @@ export function TodayMatches() {
           const isExpanded = expandedId === m.id;
           const relatedBets = getRelatedBets(m.homeTla, m.awayTla);
           const matchPredictions = locked ? predictions.filter(p => p.matchId === m.id) : [];
+          // For finished GROUP matches, also build per-bettor hit/miss from stored bracket picks.
+          const groupLetter = m.group ? m.group.replace(/^GROUP_/, "").trim() : "";
+          const groupHits = (locked && isFinished && groupLetter && m.homeGoals !== null && m.awayGoals !== null)
+            ? getGroupPredictions(m.homeTla, m.awayTla, groupLetter, m.homeGoals, m.awayGoals)
+            : [];
+          const exactCount = groupHits.filter(h => h.hit === "exact").length;
+          const totoCount = groupHits.filter(h => h.hit === "toto").length;
+          const missCount = groupHits.filter(h => h.hit === "miss").length;
 
           return (
             <div key={m.id} className="col-span-1">
@@ -189,16 +263,60 @@ export function TodayMatches() {
                         <p className="text-[11px] text-amber-700 font-medium text-center py-1">
                           ההימורים ייחשפו אחרי הנעילה
                         </p>
-                      ) : matchPredictions.length === 0 && relatedBets.length === 0 ? (
+                      ) : matchPredictions.length === 0 && relatedBets.length === 0 && groupHits.length === 0 ? (
                         <p className="text-[11px] text-gray-400 text-center py-1">
                           אין הימורים למשחק הזה
                         </p>
                       ) : (
                         <div className="space-y-1.5">
+                          {/* Group-stage predictions vs actual result (only for FINISHED group matches) */}
+                          {groupHits.length > 0 && (
+                            <div>
+                              <p className="text-[10px] font-bold text-gray-500 mb-1">
+                                תוצאה: <span className="tabular-nums text-gray-700">{m.homeGoals}-{m.awayGoals}</span>
+                                <span className="mx-1.5">·</span>
+                                <span className="text-green-700">🎯 {exactCount} בול</span>
+                                <span className="mx-1">·</span>
+                                <span className="text-amber-700">✓ {totoCount} 1X2</span>
+                                {missCount > 0 && (
+                                  <>
+                                    <span className="mx-1">·</span>
+                                    <span className="text-red-600">✗ {missCount}</span>
+                                  </>
+                                )}
+                              </p>
+                              <div className="grid grid-cols-2 gap-1">
+                                {groupHits.map((h) => {
+                                  const bg =
+                                    h.hit === "exact"
+                                      ? "bg-green-50 border-green-300"
+                                      : h.hit === "toto"
+                                      ? "bg-amber-50 border-amber-300"
+                                      : "bg-red-50 border-red-200";
+                                  const icon = h.hit === "exact" ? "🎯" : h.hit === "toto" ? "✓" : "✗";
+                                  return (
+                                    <div
+                                      key={h.userId}
+                                      className={`flex items-center justify-between rounded-lg px-2 py-1 border ${bg}`}
+                                    >
+                                      <span className="text-[11px] font-bold text-gray-800 truncate">{h.name}</span>
+                                      <span className="flex items-center gap-1 shrink-0">
+                                        <span className="text-[11px] font-black tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>
+                                          {h.pred.home}-{h.pred.away}
+                                        </span>
+                                        <span className="text-xs">{icon}</span>
+                                      </span>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+
                           {/* Score predictions */}
                           {matchPredictions.length > 0 && (
                             <div>
-                              <p className="text-[10px] font-bold text-gray-500 mb-1">ניחושי תוצאה</p>
+                              <p className="text-[10px] font-bold text-gray-500 mb-1">ניחושי תוצאה (live)</p>
                               <div className="grid grid-cols-2 gap-1">
                                 {matchPredictions.map((p, i) => (
                                   <div key={i} className="flex items-center justify-between bg-white rounded-lg px-2 py-1 border border-gray-100">

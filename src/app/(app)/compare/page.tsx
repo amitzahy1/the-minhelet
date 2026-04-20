@@ -10,6 +10,7 @@ import { getFlag, getTeamNameHe } from "@/lib/flags";
 import { SpecialTrackerView } from "./SpecialTrackerView";
 import WhosAlive from "@/components/shared/WhosAlive";
 import type { BettorAdvancement } from "@/lib/supabase/shared-data";
+import { formatLockDeadline } from "@/lib/constants";
 import Link from "next/link";
 
 // Color coding: each unique value gets a FIXED color — same pick = same color everywhere
@@ -241,7 +242,7 @@ export default function ComparePage() {
       <div className="mb-5">
         <h1 className="text-3xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>השוואת הימורים</h1>
         <p className="text-base text-gray-600 mt-1">
-          {isLocked ? "ראו מה כל מהמר בחר — השוואה מלאה" : "ההימורים ייחשפו אחרי הנעילה ב-18.04.2026 (דמו)"}
+          {isLocked ? "ראו מה כל מהמר בחר — השוואה מלאה" : `ההימורים ייחשפו אחרי הנעילה ב-${formatLockDeadline()}`}
         </p>
       </div>
 

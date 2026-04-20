@@ -10,7 +10,9 @@ import { DeadlineCountdown } from "@/components/shared/DeadlineCountdown";
 import { DemoBanner } from "@/components/shared/DemoBanner";
 import { SplashScreen } from "@/components/shared/SplashScreen";
 import { SaveIndicator } from "@/components/shared/SaveIndicator";
+import { ToastHost } from "@/components/shared/ToastHost";
 import { useSharedData } from "@/hooks/useSharedData";
+import { formatLockDeadline } from "@/lib/constants";
 
 const Icons = {
   bets: (a: boolean) => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={a ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6M9 15l3 3 3-3"/></svg>,
@@ -65,35 +67,96 @@ function OnboardingWizard({ onDismiss, onStart }: { onDismiss: () => void; onSta
         <div className="px-6 pb-6 overflow-y-auto flex-1">
           {page === 0 && (
             <div className="space-y-4">
-              <h3 className="text-2xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>3 שלבים להשלמה</h3>
-              <p className="text-base text-gray-600">לפני שהמונדיאל מתחיל, יש להשלים 3 שלבי הימורים:</p>
+              <h3 className="text-2xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>3 שלבי הימורים</h3>
+              <p className="text-base text-gray-600">לפני תחילת המונדיאל יש להשלים את שלושת השלבים:</p>
               <div className="space-y-3">
-                <div className="bg-blue-50 rounded-xl p-4 border border-blue-200"><span className="inline-block w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold text-center leading-6 me-2">1</span><strong>שלב הבתים</strong> — ניחוש תוצאות ל-72 משחקי בתים</div>
-                <div className="bg-amber-50 rounded-xl p-4 border border-amber-200"><span className="inline-block w-6 h-6 rounded-full bg-amber-600 text-white text-xs font-bold text-center leading-6 me-2">2</span><strong>עץ הנוק-אאוט</strong> — מי מנצחת מהשמינית עד הגמר</div>
-                <div className="bg-purple-50 rounded-xl p-4 border border-purple-200"><span className="inline-block w-6 h-6 rounded-full bg-purple-600 text-white text-xs font-bold text-center leading-6 me-2">3</span><strong>הימורים מיוחדים</strong> — מלך שערים, זוכה, בית פורה, ועוד</div>
+                <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="inline-block w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold text-center leading-6">1</span>
+                    <strong>שלב הבתים</strong>
+                    <span className="text-xs font-bold text-blue-700 bg-blue-100 rounded-full px-2 py-0.5">72 משחקים</span>
+                  </div>
+                  <p className="text-sm text-gray-600 ps-8">תוצאה מדויקת לכל משחק · סדרו את הטבלה הצפויה</p>
+                </div>
+                <div className="bg-amber-50 rounded-xl p-4 border border-amber-200">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="inline-block w-6 h-6 rounded-full bg-amber-600 text-white text-xs font-bold text-center leading-6">2</span>
+                    <strong>עץ הנוק-אאוט</strong>
+                    <span className="text-xs font-bold text-amber-700 bg-amber-100 rounded-full px-2 py-0.5">31 משחקים</span>
+                  </div>
+                  <p className="text-sm text-gray-600 ps-8">מי עולה מהשמינית ועד הגמר</p>
+                </div>
+                <div className="bg-purple-50 rounded-xl p-4 border border-purple-200">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="inline-block w-6 h-6 rounded-full bg-purple-600 text-white text-xs font-bold text-center leading-6">3</span>
+                    <strong>הימורים מיוחדים</strong>
+                    <span className="text-xs font-bold text-purple-700 bg-purple-100 rounded-full px-2 py-0.5">25 הימורים</span>
+                  </div>
+                  <p className="text-sm text-gray-600 ps-8">זוכה, גמר, מלך שערים, בית פורה ועוד</p>
+                </div>
               </div>
+              <p className="text-xs text-gray-500 text-center bg-gray-50 rounded-lg py-2 border border-gray-100">סה״כ 128 הימורים · אפשר לחזור ולשנות עד הנעילה</p>
             </div>
           )}
           {page === 1 && (
             <div className="space-y-4">
-              <h3 className="text-2xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>איך מנצחים?</h3>
-              <p className="text-base text-gray-600">ניקוד על כל ניחוש נכון:</p>
-              <div className="space-y-2 text-sm">
-                <div className="bg-green-50 rounded-lg p-3 border border-green-200"><strong>תוצאה מדויקת</strong> = 3 נקודות (בתים)</div>
-                <div className="bg-blue-50 rounded-lg p-3 border border-blue-200"><strong>כיוון נכון (1X2)</strong> = 2 נקודות (בתים)</div>
-                <div className="bg-amber-50 rounded-lg p-3 border border-amber-200"><strong>עולה מדויקת מהבית</strong> = 5 נקודות</div>
-                <div className="bg-purple-50 rounded-lg p-3 border border-purple-200"><strong>ניחוש הזוכה</strong> = 12 נקודות</div>
+              <h3 className="text-2xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>ניקוד בקצרה</h3>
+              <p className="text-base text-gray-600">משחקי בתים ונוקאאוט:</p>
+              <div className="overflow-hidden rounded-xl border border-gray-200">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50 text-gray-600 text-xs">
+                    <tr>
+                      <th className="py-2 ps-4 text-start font-semibold">שלב</th>
+                      <th className="py-2 text-center font-semibold">תוצאה מדויקת</th>
+                      <th className="py-2 pe-4 text-center font-semibold">כיוון נכון</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-t border-gray-100"><td className="py-2 ps-4 font-bold">בתים</td><td className="text-center font-black text-green-600" style={{ fontFamily: "var(--font-inter)" }}>3 נק׳</td><td className="py-2 pe-4 text-center font-black text-blue-600" style={{ fontFamily: "var(--font-inter)" }}>2 נק׳</td></tr>
+                    <tr className="border-t border-gray-100"><td className="py-2 ps-4 font-bold">נוקאאוט</td><td className="text-center font-black text-green-600" style={{ fontFamily: "var(--font-inter)" }}>3 נק׳</td><td className="py-2 pe-4 text-center font-black text-blue-600" style={{ fontFamily: "var(--font-inter)" }}>2 נק׳</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <p className="text-sm text-gray-600 mt-3">הימורי עולות ומיוחדים:</p>
+              <div className="grid grid-cols-2 gap-1.5 text-xs">
+                <div className="bg-purple-50 rounded-lg py-1.5 px-2 border border-purple-100 flex items-center justify-between"><span>זוכה</span><span className="font-black text-purple-700" style={{ fontFamily: "var(--font-inter)" }}>12</span></div>
+                <div className="bg-purple-50 rounded-lg py-1.5 px-2 border border-purple-100 flex items-center justify-between"><span>גמר</span><span className="font-black text-purple-700" style={{ fontFamily: "var(--font-inter)" }}>8</span></div>
+                <div className="bg-purple-50 rounded-lg py-1.5 px-2 border border-purple-100 flex items-center justify-between"><span>חצי גמר</span><span className="font-black text-purple-700" style={{ fontFamily: "var(--font-inter)" }}>6</span></div>
+                <div className="bg-purple-50 rounded-lg py-1.5 px-2 border border-purple-100 flex items-center justify-between"><span>רבע גמר</span><span className="font-black text-purple-700" style={{ fontFamily: "var(--font-inter)" }}>4</span></div>
+                <div className="bg-amber-50 rounded-lg py-1.5 px-2 border border-amber-100 flex items-center justify-between"><span>מלך שערים</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>9</span></div>
+                <div className="bg-amber-50 rounded-lg py-1.5 px-2 border border-amber-100 flex items-center justify-between"><span>מלך בישולים</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>7</span></div>
+                <div className="bg-amber-50 rounded-lg py-1.5 px-2 border border-amber-100 flex items-center justify-between"><span>התקפה הכי טובה</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>6</span></div>
+                <div className="bg-amber-50 rounded-lg py-1.5 px-2 border border-amber-100 flex items-center justify-between"><span>בית פורה / יבש</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>5</span></div>
+                <div className="bg-amber-50 rounded-lg py-1.5 px-2 border border-amber-100 flex items-center justify-between"><span>נבחרת כסחנית</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>5</span></div>
+                <div className="bg-amber-50 rounded-lg py-1.5 px-2 border border-amber-100 flex items-center justify-between"><span>מאצ׳אפ (כל אחד)</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>5</span></div>
+                <div className="bg-amber-50 rounded-lg py-1.5 px-2 border border-amber-100 flex items-center justify-between col-span-2"><span>סה״כ פנדלים (אובר/אנדר 18.5)</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>5</span></div>
               </div>
             </div>
           )}
           {page === 2 && (
             <div className="space-y-4">
-              <h3 className="text-2xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>מתי ננעל?</h3>
-              <div className="bg-red-50 rounded-xl p-4 border border-red-200 text-center">
-                <p className="text-lg font-black text-red-700">10 ביוני 2026, 17:00</p>
-                <p className="text-sm text-red-600 mt-1">אחרי — אי אפשר לשנות!</p>
+              <h3 className="text-2xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>שמירה, נעילה ומעקב</h3>
+              <div className="bg-blue-50 rounded-xl p-4 border border-blue-200 flex items-start gap-3">
+                <span className="text-2xl">💾</span>
+                <div>
+                  <p className="font-bold text-blue-900">שמירה אוטומטית כל 5 הימורים</p>
+                  <p className="text-sm text-blue-700 mt-0.5">בנוסף — כפתור "שמור" בתחתית כל דף לשליטה ידנית. לא יעלמו לך הימורים.</p>
+                </div>
               </div>
-              <p className="text-base text-gray-600">אחרי הנעילה תוכלו לראות את ההימורים של כולם, לעקוב בזמן אמת, ולהתחרות!</p>
+              <div className="bg-red-50 rounded-xl p-4 border border-red-200 flex items-start gap-3">
+                <span className="text-2xl">🔒</span>
+                <div>
+                  <p className="font-bold text-red-900">הנעילה: {formatLockDeadline()}</p>
+                  <p className="text-sm text-red-700 mt-0.5">אחרי הנעילה — אי אפשר לשנות הימורים.</p>
+                </div>
+              </div>
+              <div className="bg-green-50 rounded-xl p-4 border border-green-200 flex items-start gap-3">
+                <span className="text-2xl">🏆</span>
+                <div>
+                  <p className="font-bold text-green-900">אחרי הנעילה</p>
+                  <p className="text-sm text-green-700 mt-0.5">טבלה חיה, מעקב בזמן אמת והשוואה בין מהמרים.</p>
+                </div>
+              </div>
             </div>
           )}
         </div>
@@ -481,6 +544,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Pre-lock: floating save-status indicator (hidden by isLocked inside component) */}
       <SaveIndicator />
+      <ToastHost />
 
       {/* Floating help */}
       <button

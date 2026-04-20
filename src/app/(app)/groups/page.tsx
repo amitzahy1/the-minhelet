@@ -223,6 +223,29 @@ export default function GroupsPage() {
         <p className="text-base text-gray-600 mt-1">סדרו את הקבוצות, הזינו תוצאות — הטבלה מתעדכנת אוטומטית לפי חוקי FIFA</p>
       </div>
 
+      {/* Advancement scoring rule (Model B — lenient) */}
+      <details className="mb-4 rounded-xl border border-blue-200 bg-blue-50/60 px-4 py-3 text-sm">
+        <summary className="cursor-pointer font-bold text-blue-900 flex items-center gap-2 list-none">
+          <span>ℹ️ איך נספרות עולות מהבית?</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="transition-transform">
+            <path d="M6 9l6 6 6-6"/>
+          </svg>
+        </summary>
+        <div className="mt-2 space-y-1.5 text-blue-900 text-[13px] leading-relaxed">
+          <p>
+            מונדיאל 2026 — 48 נבחרות, 12 בתים של 4. לשלב שמינית הגמר עולות 32 נבחרות:
+            1-2 מכל בית (24 נבחרות) + 8 המקומות השלישיים הטובים ביותר (מתוך 12).
+          </p>
+          <p className="font-bold">
+            ✓ כל נבחרת שהיגיעה לשמינית הגמר נחשבת "עולה" — גם אם עלתה ממקום שלישי.
+          </p>
+          <p className="text-blue-800/90">
+            אם הימרת שקבוצה X תעלה מהבית והיא באמת הגיעה לשמינית (בכל מסלול), תקבל/י ניקוד:
+            שתי הנבחרות שהימרת עליהן עלו → <b>עולה מדויקת</b>, אחת מהן עלתה → <b>חלקי</b>.
+          </p>
+        </div>
+      </details>
+
       {/* Peer pressure — who hasn't finished? */}
       {completedGroups < 12 && (
         <div className="mb-4 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-center gap-2">

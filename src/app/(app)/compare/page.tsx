@@ -746,28 +746,30 @@ function DayTable({
           const mHits = matchHits[mi].hits;
           const time = new Date(m.date).toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
           return (
-            <div key={m.id} className="px-4 py-3">
-              {/* Meta row: group + time */}
-              <div className="flex items-center justify-end gap-1.5 text-[10px] text-gray-500 font-medium mb-2">
-                <span className="bg-gray-100 rounded-md px-1.5 py-0.5 font-bold">בית {m.group}</span>
-                <span style={{ fontFamily: "var(--font-inter)" }}>{time}</span>
-              </div>
-              {/* Match row: team1 name + flag — score pill — flag + team2 name (RTL natural) */}
-              <div className="flex items-center gap-2 mb-2">
+            <div key={m.id} className="px-3 py-3">
+              {/* Single-line match header: meta (group + time) inline with teams + score */}
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                {/* Team1 name + flag (RTL start) */}
                 <div className="flex items-center gap-1.5 flex-1 min-w-0 justify-end text-end">
-                  <span className="text-sm font-bold text-gray-900 truncate" style={{ fontFamily: "var(--font-secular)" }}>
+                  <span className="text-[13px] font-bold text-gray-900 truncate" style={{ fontFamily: "var(--font-secular)" }}>
                     {getTeamNameHe(m.homeTla)}
                   </span>
-                  <span className="text-2xl shrink-0">{getFlag(m.homeTla)}</span>
+                  <span className="text-xl shrink-0">{getFlag(m.homeTla)}</span>
                 </div>
-                <span className="text-base font-black tabular-nums bg-white rounded-lg border-2 border-gray-200 px-2.5 py-0.5 shrink-0" style={{ fontFamily: "var(--font-inter)" }}>
+                <span className="text-sm font-black tabular-nums bg-white rounded-md border-2 border-gray-200 px-2 py-0.5 shrink-0" style={{ fontFamily: "var(--font-inter)" }}>
                   {m.homeGoals}-{m.awayGoals}
                 </span>
+                {/* Team2 flag + name */}
                 <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                  <span className="text-2xl shrink-0">{getFlag(m.awayTla)}</span>
-                  <span className="text-sm font-bold text-gray-900 truncate" style={{ fontFamily: "var(--font-secular)" }}>
+                  <span className="text-xl shrink-0">{getFlag(m.awayTla)}</span>
+                  <span className="text-[13px] font-bold text-gray-900 truncate" style={{ fontFamily: "var(--font-secular)" }}>
                     {getTeamNameHe(m.awayTla)}
                   </span>
+                </div>
+                {/* Meta chips (group + time) inline at the far end (RTL left) */}
+                <div className="flex items-center gap-1 shrink-0 text-[10px] text-gray-500 font-medium">
+                  <span className="bg-gray-100 rounded-md px-1.5 py-0.5 font-bold whitespace-nowrap">בית {m.group}</span>
+                  <span className="tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{time}</span>
                 </div>
               </div>
               <div className="space-y-1">

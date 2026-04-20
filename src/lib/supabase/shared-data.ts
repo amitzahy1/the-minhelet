@@ -68,6 +68,17 @@ export interface ScoringEntry {
 
 // --- Loaders ---
 
+/** Read the locally-hidden user id list (same source UserManagement writes to). */
+function getHiddenUserIds(): Set<string> {
+  if (typeof window === "undefined") return new Set();
+  try {
+    const raw = localStorage.getItem("wc2026-hidden-users") || "[]";
+    return new Set(JSON.parse(raw) as string[]);
+  } catch {
+    return new Set();
+  }
+}
+
 // Dynamically resolve the first available league UUID (cached after first call)
 let _leagueIdCache: string | null = null;
 async function getLeagueId(): Promise<string> {
@@ -95,12 +106,10 @@ export async function loadAllProfiles(): Promise<BettorProfile[]> {
   }
 
   // Filter hidden users
-  const hiddenUsers = typeof window !== "undefined"
-    ? JSON.parse(localStorage.getItem("wc2026-hidden-users") || "[]")
-    : [];
+  const hidden = getHiddenUserIds();
 
   return (data || [])
-    .filter((p) => !hiddenUsers.includes(p.id))
+    .filter((p) => !hidden.has(p.id))
     .map((p) => ({
       id: p.id,
       displayName: p.display_name,
@@ -123,14 +132,17 @@ export async function loadAllBrackets(): Promise<BettorBracket[]> {
     return [];
   }
 
-  return (data || []).map((d) => ({
-    userId: d.user_id,
-    displayName: (d.profiles as unknown as { display_name: string })?.display_name || "",
-    groupPredictions: d.group_predictions || {},
-    knockoutTree: d.knockout_tree || {},
-    champion: d.champion,
-    lockedAt: d.locked_at,
-  }));
+  const hidden = getHiddenUserIds();
+  return (data || [])
+    .filter((d) => !hidden.has(d.user_id))
+    .map((d) => ({
+      userId: d.user_id,
+      displayName: (d.profiles as unknown as { display_name: string })?.display_name || "",
+      groupPredictions: d.group_predictions || {},
+      knockoutTree: d.knockout_tree || {},
+      champion: d.champion,
+      lockedAt: d.locked_at,
+    }));
 }
 
 /**
@@ -148,7 +160,10 @@ export async function loadAllSpecialBets(): Promise<BettorSpecialBets[]> {
     return [];
   }
 
-  return (data || []).map((d) => ({
+  const hidden = getHiddenUserIds();
+  return (data || [])
+    .filter((d) => !hidden.has(d.user_id))
+    .map((d) => ({
     userId: d.user_id,
     displayName: (d.profiles as unknown as { display_name: string })?.display_name || "",
     topScorerTeam: (d as Record<string, unknown>).top_scorer_team as string ?? null,
@@ -179,15 +194,18 @@ export async function loadAllAdvancements(): Promise<BettorAdvancement[]> {
     return [];
   }
 
-  return (data || []).map((d) => ({
-    userId: d.user_id,
-    displayName: (d.profiles as unknown as { display_name: string })?.display_name || "",
-    groupQualifiers: d.group_qualifiers || {},
-    advanceToQF: d.advance_to_qf || [],
-    advanceToSF: d.advance_to_sf || [],
-    advanceToFinal: d.advance_to_final || [],
-    winner: d.winner || "",
-  }));
+  const hidden = getHiddenUserIds();
+  return (data || [])
+    .filter((d) => !hidden.has(d.user_id))
+    .map((d) => ({
+      userId: d.user_id,
+      displayName: (d.profiles as unknown as { display_name: string })?.display_name || "",
+      groupQualifiers: d.group_qualifiers || {},
+      advanceToQF: d.advance_to_qf || [],
+      advanceToSF: d.advance_to_sf || [],
+      advanceToFinal: d.advance_to_final || [],
+      winner: d.winner || "",
+    }));
 }
 
 /**
@@ -231,14 +249,17 @@ export async function loadAllMatchPredictions(): Promise<MatchPrediction[]> {
     return [];
   }
 
-  return (data || []).map((d) => ({
-    userId: d.user_id,
-    displayName: (d.profiles as unknown as { display_name: string })?.display_name || "",
-    matchId: d.match_id,
-    predictedHomeGoals: d.predicted_home_goals,
-    predictedAwayGoals: d.predicted_away_goals,
-    pointsEarned: d.points_earned,
-  }));
+  const hidden = getHiddenUserIds();
+  return (data || [])
+    .filter((d) => !hidden.has(d.user_id))
+    .map((d) => ({
+      userId: d.user_id,
+      displayName: (d.profiles as unknown as { display_name: string })?.display_name || "",
+      matchId: d.match_id,
+      predictedHomeGoals: d.predicted_home_goals,
+      predictedAwayGoals: d.predicted_away_goals,
+      pointsEarned: d.points_earned,
+    }));
 }
 
 /**
@@ -297,39 +318,46 @@ export async function loadAllBetsViaServer(): Promise<{
     if (!res.ok) return null;
     const json = await res.json();
 
-    const brackets: BettorBracket[] = (json.brackets || []).map((d: Record<string, unknown>) => ({
-      userId: d.user_id,
-      displayName: ((d.profiles as { display_name: string } | null)?.display_name) || "",
-      groupPredictions: d.group_predictions || {},
-      knockoutTree: d.knockout_tree || {},
-      champion: d.champion,
-      lockedAt: d.locked_at,
-    }));
+    const hidden = getHiddenUserIds();
+    const brackets: BettorBracket[] = (json.brackets || [])
+      .filter((d: Record<string, unknown>) => !hidden.has(d.user_id as string))
+      .map((d: Record<string, unknown>) => ({
+        userId: d.user_id,
+        displayName: ((d.profiles as { display_name: string } | null)?.display_name) || "",
+        groupPredictions: d.group_predictions || {},
+        knockoutTree: d.knockout_tree || {},
+        champion: d.champion,
+        lockedAt: d.locked_at,
+      }));
 
-    const specialBets: BettorSpecialBets[] = (json.specialBets || []).map((d: Record<string, unknown>) => ({
-      userId: d.user_id,
-      displayName: ((d.profiles as { display_name: string } | null)?.display_name) || "",
-      topScorerTeam: d.top_scorer_team ?? null,
-      topScorerPlayer: d.top_scorer_player,
-      topAssistsTeam: d.top_assists_team ?? null,
-      topAssistsPlayer: d.top_assists_player,
-      bestAttackTeam: d.best_attack_team,
-      prolificGroup: d.most_prolific_group,
-      driestGroup: d.driest_group,
-      dirtiestTeam: d.dirtiest_team,
-      matchupPick: d.matchup_pick,
-      penaltiesOverUnder: d.penalties_over_under,
-    }));
+    const specialBets: BettorSpecialBets[] = (json.specialBets || [])
+      .filter((d: Record<string, unknown>) => !hidden.has(d.user_id as string))
+      .map((d: Record<string, unknown>) => ({
+        userId: d.user_id,
+        displayName: ((d.profiles as { display_name: string } | null)?.display_name) || "",
+        topScorerTeam: d.top_scorer_team ?? null,
+        topScorerPlayer: d.top_scorer_player,
+        topAssistsTeam: d.top_assists_team ?? null,
+        topAssistsPlayer: d.top_assists_player,
+        bestAttackTeam: d.best_attack_team,
+        prolificGroup: d.most_prolific_group,
+        driestGroup: d.driest_group,
+        dirtiestTeam: d.dirtiest_team,
+        matchupPick: d.matchup_pick,
+        penaltiesOverUnder: d.penalties_over_under,
+      }));
 
-    const advancements: BettorAdvancement[] = (json.advancements || []).map((d: Record<string, unknown>) => ({
-      userId: d.user_id,
-      displayName: ((d.profiles as { display_name: string } | null)?.display_name) || "",
-      groupQualifiers: d.group_qualifiers || {},
-      advanceToQF: d.advance_to_qf || [],
-      advanceToSF: d.advance_to_sf || [],
-      advanceToFinal: d.advance_to_final || [],
-      winner: d.winner || "",
-    }));
+    const advancements: BettorAdvancement[] = (json.advancements || [])
+      .filter((d: Record<string, unknown>) => !hidden.has(d.user_id as string))
+      .map((d: Record<string, unknown>) => ({
+        userId: d.user_id,
+        displayName: ((d.profiles as { display_name: string } | null)?.display_name) || "",
+        groupQualifiers: d.group_qualifiers || {},
+        advanceToQF: d.advance_to_qf || [],
+        advanceToSF: d.advance_to_sf || [],
+        advanceToFinal: d.advance_to_final || [],
+        winner: d.winner || "",
+      }));
 
     return {
       currentUserId: json.currentUserId,

@@ -383,7 +383,24 @@ export const useBettingStore = create<BettingState & BettingActions>()(
             }
             state.knockout = data.knockout || {};
             if (data.specialBets) {
-              state.specialBets = { ...initialSpecialBets, ...data.specialBets };
+              // The save pipeline strips empty strings via filter(Boolean),
+              // so the DB can return shorter arrays than the UI expects
+              // (e.g. semifinalists=["TUR"] instead of ["TUR","","",""]).
+              // Pad to the canonical lengths so each position still has an
+              // input rendered.
+              const pad = (arr: unknown, len: number): string[] => {
+                const a = Array.isArray(arr) ? arr.map((v) => (typeof v === "string" ? v : "")) : [];
+                while (a.length < len) a.push("");
+                return a.slice(0, len);
+              };
+              const sb = data.specialBets;
+              state.specialBets = {
+                ...initialSpecialBets,
+                ...sb,
+                semifinalists: pad(sb.semifinalists, 4),
+                quarterfinalists: pad(sb.quarterfinalists, 8),
+                matchups: pad(sb.matchups, 3),
+              };
             } else {
               state.specialBets = initialSpecialBets;
             }

@@ -538,10 +538,21 @@ async function performSave(state: BettingState) {
 // still providing a safety-net save at the end of each stage.
 let lastCounts = { groups: 0, knockout: 0, specials: 0, allDone: false };
 let lastGroupFilled: Record<string, number> = {};
+let lastBetSig = "";
 let hasHydrated = false;
 
 function countGroupFilled(state: BettingState, letter: string): number {
   return (state.groups[letter]?.scores || []).filter((s) => s.home !== null && s.away !== null).length;
+}
+
+/** A cheap, stable fingerprint of just the *persisted-to-DB* bet fields.
+ *  Ignores UI-only state (currentGroupIndex, bracketLocked). Used by the
+ *  subscribe callback to ignore non-bet changes (navigation, hydration
+ *  writing the same data back, etc.) — those must not flip the "pending"
+ *  indicator or trigger a save.
+ */
+function betSig(state: BettingState): string {
+  return JSON.stringify({ g: state.groups, k: state.knockout, s: state.specialBets });
 }
 
 // Hydrate initial counts on first load so we don't spuriously save on rehydrate.
@@ -555,6 +566,7 @@ function snapshotCounts() {
   };
   lastGroupFilled = {};
   for (const letter of GROUP_LETTERS) lastGroupFilled[letter] = countGroupFilled(s, letter);
+  lastBetSig = betSig(s);
 }
 
 if (typeof window !== "undefined") {
@@ -562,6 +574,13 @@ if (typeof window !== "undefined") {
     // Don't treat hydration as a user change — it would flash the "pending"
     // toast on every page load and trigger a phantom save cycle.
     if (!hasHydrated) return;
+
+    // Ignore non-bet mutations (currentGroupIndex, hydrate-from-DB writing
+    // the same data back, etc.) so the save toast doesn't flash when the
+    // user just navigates or logs in.
+    const sig = betSig(state);
+    if (sig === lastBetSig) return;
+    lastBetSig = sig;
 
     hasPendingChanges = true;
 

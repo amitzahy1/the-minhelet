@@ -392,11 +392,30 @@ export const useBettingStore = create<BettingState & BettingActions>()(
     })),
     {
       name: "wc2026-bets",
+      // v2 (2026-04-20): coincides with the switch to milestone-only saves
+      // and a server-side reset. Any localStorage written by v1 is discarded
+      // so every user starts from a blank slate without the ghost counts.
+      version: 2,
+      migrate: () => ({
+        groups: createInitialGroups(),
+        knockout: {},
+        specialBets: initialSpecialBets,
+        currentGroupIndex: 0,
+        bracketLocked: false,
+        lastUpdated: null,
+      }),
       skipHydration: true,
       onRehydrateStorage: () => {
         return (state) => {
           if (state && typeof window !== "undefined") {
-            // Auto-save daily snapshot to localStorage
+            // Mark hydration as done, reset save-status so no ghost toast fires
+            setTimeout(() => {
+              hasHydrated = true;
+              snapshotCounts();
+              import("./save-status-store").then((m) => m.useSaveStatus.getState().reset());
+            }, 0);
+
+            // Daily snapshot to localStorage (backup only)
             try {
               const today = new Date().toISOString().split("T")[0];
               const key = `wc2026-backup-${today}`;
@@ -409,22 +428,6 @@ export const useBettingStore = create<BettingState & BettingActions>()(
                 }));
               }
             } catch { /* ignore */ }
-
-            // Auto-sync to Supabase on page load (catches data that was never synced)
-            setTimeout(async () => {
-              try {
-                const { saveBetsToSupabase } = await import("@/lib/supabase/sync");
-                const currentState = useBettingStore.getState();
-                const hasData = Object.values(currentState.groups).some(g =>
-                  g.scores.some(s => s.home !== null)
-                );
-                if (hasData) {
-                  const result = await saveBetsToSupabase(currentState);
-                  if (result.success) console.log("Auto-synced to Supabase on load");
-                  else console.warn("Auto-sync failed:", result.error);
-                }
-              } catch { /* silent */ }
-            }, 3000);
           }
         };
       },
@@ -483,6 +486,7 @@ async function performSave(state: BettingState) {
 // This stops us from hammering Supabase with every single keystroke while
 // still providing a safety-net save at the end of each stage.
 let lastCounts = { groups: 0, knockout: 0, specials: 0, allDone: false };
+let hasHydrated = false;
 
 // Hydrate initial counts on first load so we don't spuriously save on rehydrate.
 function snapshotCounts() {
@@ -496,10 +500,11 @@ function snapshotCounts() {
 }
 
 if (typeof window !== "undefined") {
-  // Initial snapshot once the store is ready
-  setTimeout(snapshotCounts, 100);
-
   useBettingStore.subscribe((state) => {
+    // Don't treat hydration as a user change — it would flash the "pending"
+    // toast on every page load and trigger a phantom save cycle.
+    if (!hasHydrated) return;
+
     hasPendingChanges = true;
 
     // Always update the save-status indicator to "pending" so the user sees

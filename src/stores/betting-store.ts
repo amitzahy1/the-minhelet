@@ -379,6 +379,11 @@ let saveTimeout: ReturnType<typeof setTimeout> | null = null;
 let hasPendingChanges = false;
 
 async function performSave(state: BettingState) {
+  const saveStatus = typeof window !== "undefined"
+    ? (await import("./save-status-store")).useSaveStatus.getState()
+    : null;
+  saveStatus?.markSaving();
+
   // 1. Save to localStorage backup
   try {
     const today = new Date().toISOString().split("T")[0];
@@ -392,15 +397,24 @@ async function performSave(state: BettingState) {
   } catch { /* localStorage full or unavailable */ }
 
   // 2. Save to Supabase (if logged in)
+  let ok = true;
+  let errorMsg = "";
   try {
     const { saveBetsToSupabase } = await import("@/lib/supabase/sync");
     const result = await saveBetsToSupabase(state);
     if (!result.success) {
+      ok = false;
+      errorMsg = result.error || "שמירה נכשלה";
       console.error("Supabase save failed:", result.error);
     }
   } catch (e) {
+    ok = false;
+    errorMsg = String(e);
     console.error("Failed to save to Supabase:", e);
   }
+
+  if (ok) saveStatus?.markSaved();
+  else saveStatus?.markError(errorMsg);
 
   hasPendingChanges = false;
 }
@@ -408,6 +422,8 @@ async function performSave(state: BettingState) {
 if (typeof window !== "undefined") {
   useBettingStore.subscribe((state) => {
     hasPendingChanges = true;
+    // Lazy-import to avoid circular module loading on first render
+    import("./save-status-store").then((m) => m.useSaveStatus.getState().markPending());
     if (saveTimeout) clearTimeout(saveTimeout);
     saveTimeout = setTimeout(() => performSave(state), 5000);
   });

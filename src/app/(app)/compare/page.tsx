@@ -350,11 +350,50 @@ export default function ComparePage() {
                 label: `${mu.flag1} ${mu.p1Short} vs ${mu.p2Short} ${mu.flag2}`,
                 render: (b: Bettor) => {
                   const pick = [b.matchup1, b.matchup2, b.matchup3][i] || "";
-                  const picked = pick === "1" ? mu.p1Short : pick === "2" ? mu.p2Short : pick === "X" ? "שווה" : "";
-                  return { val: pick, node: <span className="text-gray-700">{picked}</span> };
+                  if (pick === "X") {
+                    return {
+                      val: pick,
+                      node: (
+                        <span className="inline-flex items-center gap-1 text-gray-600 text-[11px] font-bold">
+                          <span>🤝</span>
+                          <span>שווה</span>
+                        </span>
+                      ),
+                    };
+                  }
+                  const flag = pick === "1" ? mu.flag1 : pick === "2" ? mu.flag2 : "";
+                  const name = pick === "1" ? mu.p1Short : pick === "2" ? mu.p2Short : "";
+                  return {
+                    val: pick,
+                    node: (
+                      <span className="inline-flex items-center gap-1 text-gray-700 text-[11px] font-bold">
+                        {flag && <span className="text-sm">{flag}</span>}
+                        <span>{name || "—"}</span>
+                      </span>
+                    ),
+                  };
                 },
               })),
-              { label: "פנדלים (מעל/מתחת 18.5)", render: (b) => ({ val: b.penalties, node: <span className="text-gray-700">{b.penalties === "OVER" ? "מעל" : b.penalties === "UNDER" ? "מתחת" : b.penalties}</span> }) },
+              {
+                label: "פנדלים (מעל/מתחת 18.5)",
+                render: (b) => ({
+                  val: b.penalties,
+                  node:
+                    b.penalties === "OVER" ? (
+                      <span className="inline-flex items-center gap-1 text-emerald-700 text-[11px] font-bold">
+                        <span>⬆</span>
+                        <span>מעל 18.5</span>
+                      </span>
+                    ) : b.penalties === "UNDER" ? (
+                      <span className="inline-flex items-center gap-1 text-blue-700 text-[11px] font-bold">
+                        <span>⬇</span>
+                        <span>מתחת 18.5</span>
+                      </span>
+                    ) : (
+                      <span className="text-gray-400">—</span>
+                    ),
+                }),
+              },
             ]}
           />
         </div>
@@ -618,7 +657,7 @@ function TransposedBetTable({
             >
               <th
                 scope="row"
-                className={`py-2.5 px-3 text-start font-bold text-xs sticky start-0 z-10 border-e border-gray-100 whitespace-nowrap ${
+                className={`py-1.5 px-3 text-start font-bold text-[11px] sticky start-0 z-10 border-e border-gray-100 whitespace-nowrap ${
                   row.highlight ? "bg-amber-50/90 text-amber-900" : "bg-white text-gray-700"
                 }`}
               >
@@ -629,7 +668,7 @@ function TransposedBetTable({
                 return (
                   <td
                     key={b.name}
-                    className={`py-2 px-2 text-center text-xs border-e border-gray-100 last:border-e-0 ${getValueColor(val, colorMap)} ${
+                    className={`py-1.5 px-2 text-center text-xs border-e border-gray-100 last:border-e-0 ${getValueColor(val, colorMap)} ${
                       b.isYou ? "ring-1 ring-inset ring-blue-200" : ""
                     }`}
                   >
@@ -706,7 +745,10 @@ function DayTable({
   }, [allBettors, matches, matchHits]);
 
   const perMatchCounts = matchHits.map(({ hits }) => hitCounts(hits));
-  const dayTop = rows[0];
+  // Tie-aware day leader: only crown when a single bettor tops the day.
+  const topPoints = rows.length > 0 ? rows[0].points : 0;
+  const tiedAtTop = topPoints > 0 ? rows.filter((r) => r.points === topPoints) : [];
+  const hasSoloLeader = tiedAtTop.length === 1;
   const totalBols = rows.reduce((s, r) => s + r.exacts, 0);
   const totalTotos = rows.reduce((s, r) => s + r.totos, 0);
 
@@ -734,11 +776,15 @@ function DayTable({
                 ✓ {totalTotos} טוטו
               </span>
             )}
-            {dayTop && dayTop.points > 0 && (
+            {tiedAtTop.length === 1 ? (
               <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-2.5 py-0.5 font-bold shadow-sm">
-                👑 {dayTop.name} · {dayTop.points} נק׳
+                👑 {tiedAtTop[0].name} · {tiedAtTop[0].points} נק׳
               </span>
-            )}
+            ) : tiedAtTop.length > 1 ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-2.5 py-0.5 font-bold shadow-sm">
+                🤝 תיקו · {tiedAtTop.slice(0, 3).map((r) => r.name).join(" · ")}{tiedAtTop.length > 3 ? ` +${tiedAtTop.length - 3}` : ""} · {topPoints} נק׳
+              </span>
+            ) : null}
           </div>
         </div>
       </div>
@@ -750,23 +796,28 @@ function DayTable({
           const time = new Date(m.date).toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
           return (
             <div key={m.id} className="px-4 py-3">
-              <div className="flex items-center justify-between gap-2 mb-2">
-                <div className="flex items-center gap-1.5 text-[10px] text-gray-500 font-medium">
-                  <span className="bg-gray-100 rounded-md px-1.5 py-0.5 font-bold">בית {m.group}</span>
-                  <span style={{ fontFamily: "var(--font-inter)" }}>{time}</span>
-                </div>
-                <div className="flex items-center gap-2" dir="ltr">
-                  <span className="text-2xl">{getFlag(m.homeTla)}</span>
-                  <span className="text-base font-black tabular-nums bg-white rounded-lg border-2 border-gray-200 px-2 py-0.5" style={{ fontFamily: "var(--font-inter)" }}>
-                    {m.homeGoals}-{m.awayGoals}
-                  </span>
-                  <span className="text-2xl">{getFlag(m.awayTla)}</span>
-                </div>
+              {/* Meta row: group + time */}
+              <div className="flex items-center justify-end gap-1.5 text-[10px] text-gray-500 font-medium mb-2">
+                <span className="bg-gray-100 rounded-md px-1.5 py-0.5 font-bold">בית {m.group}</span>
+                <span style={{ fontFamily: "var(--font-inter)" }}>{time}</span>
               </div>
-              <div className="flex items-center justify-between text-[11px] text-gray-500 mb-2">
-                <span className="font-bold text-gray-700">{getTeamNameHe(m.homeTla)}</span>
-                <span className="text-gray-300 text-xs">vs</span>
-                <span className="font-bold text-gray-700">{getTeamNameHe(m.awayTla)}</span>
+              {/* Match row: team1 name + flag — score pill — flag + team2 name (RTL natural) */}
+              <div className="flex items-center gap-2 mb-2">
+                <div className="flex items-center gap-1.5 flex-1 min-w-0 justify-end text-end">
+                  <span className="text-sm font-bold text-gray-900 truncate" style={{ fontFamily: "var(--font-secular)" }}>
+                    {getTeamNameHe(m.homeTla)}
+                  </span>
+                  <span className="text-2xl shrink-0">{getFlag(m.homeTla)}</span>
+                </div>
+                <span className="text-base font-black tabular-nums bg-white rounded-lg border-2 border-gray-200 px-2.5 py-0.5 shrink-0" style={{ fontFamily: "var(--font-inter)" }}>
+                  {m.homeGoals}-{m.awayGoals}
+                </span>
+                <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                  <span className="text-2xl shrink-0">{getFlag(m.awayTla)}</span>
+                  <span className="text-sm font-bold text-gray-900 truncate" style={{ fontFamily: "var(--font-secular)" }}>
+                    {getTeamNameHe(m.awayTla)}
+                  </span>
+                </div>
               </div>
               <div className="space-y-1">
                 {mHits.map((h) => {
@@ -822,17 +873,26 @@ function DayTable({
         })}
         {/* Mobile day totals */}
         <div className="px-4 py-3 bg-gradient-to-l from-blue-50/50 to-indigo-50/30">
-          <p className="text-xs font-bold text-gray-700 mb-1.5">סה״כ היום</p>
+          <p className="text-xs font-bold text-gray-700 mb-1.5">
+            סה״כ היום
+            {tiedAtTop.length > 1 && (
+              <span className="ms-1 text-[10px] font-normal text-blue-700">· 🤝 תיקו בראש</span>
+            )}
+          </p>
           <div className="flex flex-wrap gap-1.5">
-            {rows.filter(r => r.points > 0).map((r, i) => {
+            {rows.filter(r => r.points > 0).map((r) => {
               const isYou = r.userId === currentUserId;
+              const isTopTied = r.points === topPoints;
+              const isSoloLeader = hasSoloLeader && isTopTied;
               return (
                 <span key={r.userId} className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold ${
-                  i === 0 ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white" :
+                  isSoloLeader ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white" :
+                  isTopTied ? "bg-gradient-to-r from-blue-500/90 to-indigo-500/90 text-white" :
                   isYou ? "bg-blue-100 text-blue-700 border border-blue-200" :
                   "bg-white text-gray-700 border border-gray-200"
                 }`}>
-                  {i === 0 && <span>👑</span>}
+                  {isSoloLeader && <span>👑</span>}
+                  {!isSoloLeader && isTopTied && <span>🤝</span>}
                   <span style={{ fontFamily: "var(--font-secular)" }}>{r.name}</span>
                   <span className="tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>· {r.points}</span>
                 </span>
@@ -911,7 +971,8 @@ function DayTable({
           <tbody>
             {rows.map((row, rowIdx) => {
               const isYou = row.userId === currentUserId;
-              const isLead = rowIdx === 0 && row.points > 0;
+              // Crown only when there's a single outright leader for the day.
+              const isLead = rowIdx === 0 && hasSoloLeader && row.points > 0;
               return (
                 <tr
                   key={row.userId}

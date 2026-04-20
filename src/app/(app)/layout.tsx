@@ -9,6 +9,7 @@ import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { DeadlineCountdown } from "@/components/shared/DeadlineCountdown";
 import { DemoBanner } from "@/components/shared/DemoBanner";
 import { SplashScreen } from "@/components/shared/SplashScreen";
+import { SaveIndicator } from "@/components/shared/SaveIndicator";
 import { useSharedData } from "@/hooks/useSharedData";
 
 const Icons = {
@@ -109,6 +110,88 @@ function OnboardingWizard({ onDismiss, onStart }: { onDismiss: () => void; onSta
               הבא ←
             </button>
           )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// Betting sub-nav — shows each stage as green once fully completed
+// ============================================================================
+function BettingSubNav({ pathname }: { pathname: string }) {
+  const groupsFilled = useBettingStore((s) => s.getCompletedGroupsCount());
+  const knockoutFilled = useBettingStore((s) => Object.keys(s.knockout).filter((k) => s.knockout[k]?.winner).length);
+  const specialsFilled = useBettingStore((s) => {
+    const sb = s.specialBets;
+    let count = 0;
+    if (sb.winner) count++;
+    if (sb.finalist1) count++;
+    if (sb.finalist2) count++;
+    count += sb.quarterfinalists.filter(Boolean).length;
+    count += sb.semifinalists.filter(Boolean).length;
+    if (sb.topScorerPlayer) count++;
+    if (sb.topAssistsPlayer) count++;
+    if (sb.bestAttack) count++;
+    if (sb.dirtiestTeam) count++;
+    if (sb.prolificGroup) count++;
+    if (sb.driestGroup) count++;
+    count += sb.matchups.filter(Boolean).length;
+    if (sb.penaltiesOverUnder) count++;
+    return count;
+  });
+
+  const completion: Record<string, boolean> = {
+    "/groups": groupsFilled >= 12,
+    "/knockout": knockoutFilled >= 31,
+    "/special-bets": specialsFilled >= 25,
+  };
+
+  return (
+    <div className="bg-white border-b border-gray-200">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2 flex items-center gap-3">
+        <div className="flex items-center gap-0 sm:gap-1 flex-1">
+          {BETTING_PAGES.map((p, i) => {
+            const isActive = pathname === p.href;
+            const isComplete = completion[p.href];
+            // Priority: complete → green; active → blue; else → gray.
+            let wrapClass: string;
+            let circleClass: string;
+            let innerText: string;
+            if (isComplete) {
+              wrapClass = isActive
+                ? "bg-green-100 text-green-800 border border-green-400 shadow-sm"
+                : "bg-green-50 text-green-700 border border-green-200 hover:bg-green-100";
+              circleClass = "bg-green-500 text-white";
+              innerText = "✓";
+            } else if (isActive) {
+              wrapClass = "bg-blue-50 text-blue-700 border border-blue-200";
+              circleClass = "bg-blue-600 text-white";
+              innerText = String(p.step);
+            } else {
+              wrapClass = "text-gray-400 hover:bg-gray-50 border border-transparent";
+              circleClass = "bg-gray-300 text-white";
+              innerText = String(p.step);
+            }
+            return (
+              <div key={p.href} className="flex items-center flex-1">
+                <Link
+                  href={p.href}
+                  className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-bold w-full justify-center transition-all ${wrapClass}`}
+                >
+                  <span className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-black shrink-0 ${circleClass}`}>
+                    {innerText}
+                  </span>
+                  <span className="truncate">{p.label}</span>
+                </Link>
+                {i < BETTING_PAGES.length - 1 && (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-300 shrink-0 mx-0.5 hidden sm:block">
+                    <path d="M9 18l6-6-6-6" />
+                  </svg>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
@@ -377,41 +460,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       {/* ════════════════════════════════════════════ */}
       {/* BETTING SUB-NAV (only on betting pages)     */}
       {/* ════════════════════════════════════════════ */}
-      {isBettingPage && (
-        <div className="bg-white border-b border-gray-200">
-          <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2 flex items-center gap-3">
-            <div className="flex items-center gap-0 sm:gap-1 flex-1">
-              {BETTING_PAGES.map((p, i) => {
-                const isActive = pathname === p.href;
-                const currentIdx = BETTING_PAGES.findIndex(bp => bp.href === pathname);
-                const isPast = i < currentIdx;
-                return (
-                  <div key={p.href} className="flex items-center flex-1">
-                    <Link href={p.href}
-                      className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-bold w-full justify-center transition-all ${
-                        isActive
-                          ? "bg-blue-50 text-blue-700 border border-blue-200"
-                          : isPast
-                          ? "text-green-600 hover:bg-green-50"
-                          : "text-gray-400 hover:bg-gray-50"
-                      }`}>
-                      <span className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-black shrink-0 ${
-                        isActive ? "bg-blue-600 text-white" :
-                        isPast ? "bg-green-500 text-white" :
-                        "bg-gray-300 text-white"
-                      }`}>{isPast ? "✓" : p.step}</span>
-                      <span className="truncate">{p.label}</span>
-                    </Link>
-                    {i < BETTING_PAGES.length - 1 && (
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-300 shrink-0 mx-0.5 hidden sm:block"><path d="M9 18l6-6-6-6"/></svg>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
+      {isBettingPage && <BettingSubNav pathname={pathname} />}
 
       {/* ════════════════════════════════════════════ */}
       {/* BREADCRUMB on tracking pages                */}
@@ -425,6 +474,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       )}
 
       <main><ErrorBoundary>{children}</ErrorBoundary></main>
+
+      {/* Pre-lock: floating save-status indicator (hidden by isLocked inside component) */}
+      <SaveIndicator />
 
       {/* Floating help */}
       <button

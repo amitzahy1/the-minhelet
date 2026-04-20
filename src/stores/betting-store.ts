@@ -84,6 +84,11 @@ export interface BettingActions {
   // Manual save — user-initiated save that bypasses the "only save on milestone" rule.
   saveNow: () => Promise<{ success: boolean; error?: string }>;
 
+  // Hydrate from Supabase — server is source of truth. Overwrites the local
+  // store with whatever the DB has for the logged-in user. If the DB is
+  // empty (e.g. after an admin reset), this resets the local state to blank.
+  hydrateFromSupabase: () => Promise<void>;
+
   // Computed
   getGroupFilledCount: (groupId: string) => number;
   getTotalFilledGroups: () => number;
@@ -314,6 +319,52 @@ export const useBettingStore = create<BettingState & BettingActions>()(
           state.bracketLocked = false;
           state.lastUpdated = null;
         }),
+
+      // --- Hydrate from Supabase (server is source of truth) ---
+      hydrateFromSupabase: async () => {
+        try {
+          const { loadBetsFromSupabase } = await import("@/lib/supabase/sync");
+          const { data } = await loadBetsFromSupabase();
+          set((state) => {
+            if (!data) {
+              // DB has nothing for this user → reset local state so ghost
+              // counts from localStorage don't stick around.
+              state.groups = createInitialGroups();
+              state.knockout = {};
+              state.specialBets = initialSpecialBets;
+              state.lastUpdated = null;
+              return;
+            }
+            // Overwrite with server data, merging group score shape defensively.
+            if (data.groups && Object.keys(data.groups).length > 0) {
+              const merged = createInitialGroups();
+              for (const [g, v] of Object.entries(data.groups)) {
+                if (v && typeof v === "object") {
+                  merged[g] = {
+                    order: v.order ?? [0, 1, 2, 3],
+                    scores: v.scores ?? merged[g].scores,
+                  };
+                }
+              }
+              state.groups = merged;
+            } else {
+              state.groups = createInitialGroups();
+            }
+            state.knockout = data.knockout || {};
+            if (data.specialBets) {
+              state.specialBets = { ...initialSpecialBets, ...data.specialBets };
+            } else {
+              state.specialBets = initialSpecialBets;
+            }
+            state.lastUpdated = new Date().toISOString();
+          });
+          // Re-snapshot the milestone counts so the next edit is compared
+          // against the freshly-loaded server state, not the pre-hydration one.
+          snapshotCounts();
+        } catch (e) {
+          console.warn("hydrateFromSupabase failed:", e);
+        }
+      },
 
       // --- Manual save (explicit user action) ---
       saveNow: async () => {

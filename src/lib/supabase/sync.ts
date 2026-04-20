@@ -9,9 +9,8 @@ import { calculateStandings } from "@/lib/tournament/standings";
 import type { BettingState } from "@/stores/betting-store";
 import type { GroupMatchPrediction } from "@/types";
 
-// DEMO MODE: April 18, 2026 20:00 Israel time (17:00 UTC)
-// Real deadline (on main): 2026-06-10T14:00:00Z
-const LOCK_DEADLINE = new Date("2026-04-18T17:00:00Z");
+// Production deadline: June 10, 2026 17:00 Israel time (14:00 UTC)
+const LOCK_DEADLINE = new Date("2026-06-10T14:00:00Z");
 
 /**
  * Derive third place teams from group predictions.
@@ -41,7 +40,7 @@ export async function saveBetsToSupabase(
 ): Promise<{ success: boolean; error?: string }> {
   // Server-side deadline enforcement
   if (new Date() > LOCK_DEADLINE) {
-    return { success: false, error: "ההימורים ננעלו — לא ניתן לשנות אחרי 18.04.2026 20:00 (דמו)" };
+    return { success: false, error: "ההימורים ננעלו — לא ניתן לשנות אחרי 10.06.2026, 17:00" };
   }
 
   const supabase = createClient();

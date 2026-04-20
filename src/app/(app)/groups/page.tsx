@@ -262,7 +262,7 @@ export default function GroupsPage() {
       {/* Lock */}
       <div className="mb-5 flex items-center gap-3 rounded-xl bg-gradient-to-l from-blue-50 to-white border border-blue-200 px-4 py-3">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-500 shrink-0"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        <p className="text-sm font-medium text-gray-700">ננעל ב-18.04.2026, 20:00 (שעון ישראל · דמו) · ניתן לשנות עד אז</p>
+        <p className="text-sm font-medium text-gray-700">ננעל ב-10.06.2026, 17:00 (שעון ישראל) · ניתן לשנות עד אז</p>
       </div>
 
       {/* Carousel header */}

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { headers } from "next/headers";
 
-const LOCK_DEADLINE = new Date("2026-04-18T17:00:00Z");
+const LOCK_DEADLINE = new Date("2026-06-10T14:00:00Z");
 
 /**
  * Returns all bets data (brackets, special bets, advancements) after lock.

@@ -7,7 +7,6 @@ import { useBettingStore } from "@/stores/betting-store";
 import { createClient } from "@/lib/supabase/client";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { DeadlineCountdown } from "@/components/shared/DeadlineCountdown";
-import { DemoBanner } from "@/components/shared/DemoBanner";
 import { SplashScreen } from "@/components/shared/SplashScreen";
 import { SaveIndicator } from "@/components/shared/SaveIndicator";
 import { useSharedData } from "@/hooks/useSharedData";
@@ -324,9 +323,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen pb-20 sm:pb-0 bg-[#F8F9FB]" style={{ fontFamily: "var(--font-assistant), sans-serif" }} dir="rtl">
-
-      {/* DEMO MODE banner — sits on the demo branch only */}
-      <DemoBanner />
 
       {showOnboarding && <OnboardingWizard onDismiss={dismissOnboarding} onStart={() => { dismissOnboarding(); router.push("/groups"); }} />}
 

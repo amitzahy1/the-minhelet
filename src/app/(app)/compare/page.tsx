@@ -232,8 +232,7 @@ export default function ComparePage() {
   }, [BETTORS]);
 
   // Lock check — hide ALL predictions until deadline. No exceptions.
-  // DEMO MODE: using demo date. Real deadline (main): 2026-06-10T14:00:00Z
-  const LOCK_DEADLINE = new Date("2026-04-18T17:00:00Z");
+  const LOCK_DEADLINE = new Date("2026-06-10T14:00:00Z");
   const isLocked = new Date() >= LOCK_DEADLINE;
 
   return (
@@ -241,7 +240,7 @@ export default function ComparePage() {
       <div className="mb-5">
         <h1 className="text-3xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>השוואת הימורים</h1>
         <p className="text-base text-gray-600 mt-1">
-          {isLocked ? "ראו מה כל מהמר בחר — השוואה מלאה" : "ההימורים ייחשפו אחרי הנעילה ב-18.04.2026 (דמו)"}
+          {isLocked ? "ראו מה כל מהמר בחר — השוואה מלאה" : "ההימורים ייחשפו אחרי הנעילה ב-10.06.2026"}
         </p>
       </div>
 

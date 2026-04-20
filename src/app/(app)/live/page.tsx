@@ -9,6 +9,7 @@ import { MatchReactions, MOCK_REACTIONS } from "@/components/shared/MatchReactio
 import WhosAlive from "@/components/shared/WhosAlive";
 import { useSharedData } from "@/hooks/useSharedData";
 import { isLocked } from "@/lib/constants";
+import { LiveGroupsAndBracket } from "@/components/shared/LiveGroupsAndBracket";
 import type { MatchPrediction, BettorBracket, BettorAdvancement } from "@/lib/supabase/shared-data";
 
 // Live page — shows matches from last 24h and next 12h
@@ -81,16 +82,25 @@ export default function LivePage() {
     }
   }, [fireConfetti]);
 
-  // Focused page — only live/upcoming/finished matches. The other tabs
-  // ("מה אם", "מי חי", "סימולציה") moved into the compare page as
-  // additional tabs, so this page is a single-purpose live ticker.
+  // Live page now has TWO sections — the ticker (live/upcoming/finished matches)
+  // and the live groups+bracket view (derived from real results). Other tabs
+  // ("מה אם", "מי חי", "סימולציה") live in the compare page now.
   return (
-    <div className="max-w-3xl mx-auto px-4 py-6 pb-24">
+    <div className="max-w-5xl mx-auto px-4 py-6 pb-24">
       <div className="mb-6 flex items-center gap-2">
         <span className="w-3 h-3 rounded-full bg-red-500 animate-pulse"></span>
         <h1 className="text-3xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>לייב</h1>
       </div>
-      <LiveTab predictions={predictions} />
+
+      <LiveGroupsAndBracket />
+
+      <div className="mt-8">
+        <h2 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+          משחקים חיים
+        </h2>
+        <LiveTab predictions={predictions} />
+      </div>
     </div>
   );
 }

@@ -5,7 +5,7 @@ import { LOCK_DEADLINE } from "@/lib/constants";
 
 const TOURNAMENT_START = new Date("2026-06-11T00:00:00Z");
 
-// Format: "18.04.2026 20:00"
+// Format: "10.06.2026 17:00"
 function formatDate(d: Date): string {
   const day = String(d.getDate()).padStart(2, "0");
   const month = String(d.getMonth() + 1).padStart(2, "0");
@@ -60,10 +60,10 @@ export function DemoBanner() {
   if (!info) return null;
 
   return (
-    <div className="bg-amber-400 text-amber-950 text-center text-xs sm:text-sm font-bold py-1.5 px-4">
-      <span>⚠️ מצב דמו — {info.stage}</span>
+    <div className="bg-gradient-to-l from-blue-500 to-indigo-600 text-white text-center text-xs sm:text-sm font-bold py-1.5 px-4">
+      <span>⚽ {info.stage}</span>
       <span className="hidden sm:inline"> · {info.details}</span>
-      <span className="sm:hidden block text-[10px] font-medium mt-0.5 opacity-80">{info.details}</span>
+      <span className="sm:hidden block text-[10px] font-medium mt-0.5 opacity-90">{info.details}</span>
     </div>
   );
 }

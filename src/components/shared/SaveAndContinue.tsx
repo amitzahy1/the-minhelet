@@ -66,7 +66,11 @@ export function SaveAndContinue({ label, nextHref, nextLabel, completion }: Prop
         {state === "idle" && "💾 שמור"}
       </button>
 
-      {state === "saved" && nextHref && (
+      {/* Show "continue to next stage" when either (a) the user has just
+          saved successfully, or (b) the stage is 100% complete (so the
+          CTA is visible even before they press save — the auto-save will
+          catch their last edit anyway). */}
+      {(state === "saved" || (isFull && state !== "saving")) && nextHref && (
         <Link
           href={nextHref}
           className="shrink-0 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold shadow-sm transition-all"

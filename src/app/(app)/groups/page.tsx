@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useBettingStore } from "@/stores/betting-store";
 import { GROUPS as GROUPS_RAW } from "@/lib/tournament/groups";
 import { calculateStandings } from "@/lib/tournament/standings";
@@ -38,6 +38,7 @@ function GroupView({ groupId }: { groupId: string }) {
   const teams = GROUPS_RAW[groupId];
   const groupState = useBettingStore((s) => s.groups[groupId]);
   const setGroupScore = useBettingStore((s) => s.setGroupScore);
+  const setGroupOrder = useBettingStore((s) => s.setGroupOrder);
 
   const codes = teams.map(t => t.code);
   const matchups = useMemo(() => generateMatchups(codes), [codes.join(",")]);
@@ -58,6 +59,23 @@ function GroupView({ groupId }: { groupId: string }) {
       predictions
     );
   }, [groupState.scores, matchups, teams]);
+
+  // CRITICAL: write the computed standings back into `group.order` so the
+  // bracket page (which reads order[0..2] for winner/runner-up/3rd) shows
+  // the teams the user actually predicted to advance, not the default
+  // [0,1,2,3] index order. Without this, entering group scores does not
+  // flow through to the R32 matchups at all.
+  useEffect(() => {
+    if (!standings) return;
+    const teamIdxByCode: Record<string, number> = {};
+    teams.forEach((t, i) => { teamIdxByCode[t.code] = i; });
+    const newOrder = standings
+      .map(row => teamIdxByCode[row.team_code])
+      .filter(i => i !== undefined);
+    if (newOrder.length !== 4) return;
+    const sameAsCurrent = newOrder.every((v, i) => v === groupState.order[i]);
+    if (!sameAsCurrent) setGroupOrder(groupId, newOrder);
+  }, [standings, groupId, groupState.order, setGroupOrder, teams]);
 
   const filledCount = groupState.scores.filter(s => s.home !== null && s.away !== null).length;
   const isComplete = filledCount === 6;

@@ -8,29 +8,46 @@ import { getFlag } from "@/lib/flags";
 import { PageTransition } from "@/components/shared/PageTransition";
 import { SaveAndContinue } from "@/components/shared/SaveAndContinue";
 
-// R32 matchups based on FIFA WC2026 regulations
-// Left half: groups A-H, Right half: groups I-L + cross-group
-// Fixed matchups (W=winner, RU=runner-up from each group)
-// 3rd-place matches use "best available" slot — resolved at group stage end
+// R32 matchups — map to FIFA's official WC2026 schedule M73-M88.
+//
+// W/RU pairings (8 of 16) are exactly as FIFA publishes. Example:
+//   M73 = 2A v 2B     → r32l_0 ✓
+//   M75 = 1F v 2C     → r32l_2 ✓
+//   M83 = 2K v 2L     → r32r_2 ✓
+//
+// 3rd-place slots (8 of 16) are FIFA's "best-of" buckets (e.g. M74 pulls
+// its 3rd from the set {A,B,C,D,F} via the 495-row Annex C permutation
+// table). For a friends' betting pool we collapse each bucket to a single
+// representative group — user predicts that group's 3rd to be among the
+// best 8, and the bracket uses it directly. Not strictly FIFA-compliant,
+// but the standard simplification for casual pools and much easier to
+// reason about when placing bets.
+//
+// If we ever want full Annex C compliance:
+//   1. Compute a virtual 3rd-place standings table from group.scores
+//   2. Take the top-8 qualifying groups
+//   3. Look up the permutation key in Annex C → returns which group's 3rd
+//      goes into each of the 8 slots
+// Leaving that for post-demo.
 const R32_MATCHUPS = [
   // Left half (M73-M80)
-  { key: "r32l_0", h: "A2", a: "B2" }, // RU vs RU
-  { key: "r32l_1", h: "E1", a: "D3" }, // W vs 3rd (placeholder — depends on Annex C)
-  { key: "r32l_2", h: "F1", a: "C2" }, // W vs RU
-  { key: "r32l_3", h: "C1", a: "F2" }, // W vs RU
-  { key: "r32l_4", h: "A1", a: "C3" }, // W vs 3rd (placeholder)
-  { key: "r32l_5", h: "H1", a: "J2" }, // W vs RU
-  { key: "r32l_6", h: "B1", a: "E3" }, // W vs 3rd (placeholder)
-  { key: "r32l_7", h: "D2", a: "G2" }, // RU vs RU
+  { key: "r32l_0", h: "A2", a: "B2" }, // M73: 2A v 2B
+  { key: "r32l_1", h: "E1", a: "D3" }, // M74: 1E v 3{A,B,C,D,F} — using D3
+  { key: "r32l_2", h: "F1", a: "C2" }, // M75: 1F v 2C
+  { key: "r32l_3", h: "C1", a: "F2" }, // M76: 1C v 2F
+  { key: "r32l_4", h: "A1", a: "C3" }, // M79: 1A v 3{C,E,F,H,I} — using C3
+  { key: "r32l_5", h: "H1", a: "J2" }, // M84: 1H v 2J
+  { key: "r32l_6", h: "B1", a: "E3" }, // M85: 1B v 3{E,F,G,I,J} — using E3
+  { key: "r32l_7", h: "D2", a: "G2" }, // M88: 2D v 2G
   // Right half (M81-M88)
-  { key: "r32r_0", h: "I1", a: "F3" }, // W vs 3rd (placeholder)
-  { key: "r32r_1", h: "G1", a: "H3" }, // W vs 3rd (placeholder)
-  { key: "r32r_2", h: "K2", a: "L2" }, // RU vs RU
-  { key: "r32r_3", h: "J1", a: "H2" }, // W vs RU
-  { key: "r32r_4", h: "D1", a: "B3" }, // W vs 3rd (placeholder)
-  { key: "r32r_5", h: "L1", a: "I3" }, // W vs 3rd (placeholder)
-  { key: "r32r_6", h: "E2", a: "I2" }, // RU vs RU
-  { key: "r32r_7", h: "K1", a: "J3" }, // W vs 3rd (placeholder)
+  { key: "r32r_0", h: "I1", a: "F3" }, // M77: 1I v 3{C,D,F,G,H} — using F3
+  { key: "r32r_1", h: "G1", a: "H3" }, // M82: 1G v 3{A,E,H,I,J} — using H3
+  { key: "r32r_2", h: "K2", a: "L2" }, // M83: 2K v 2L
+  { key: "r32r_3", h: "J1", a: "H2" }, // M86: 1J v 2H
+  { key: "r32r_4", h: "D1", a: "B3" }, // M81: 1D v 3{B,E,F,I,J} — using B3
+  { key: "r32r_5", h: "L1", a: "I3" }, // M80: 1L v 3{E,H,I,J,K} — using I3
+  { key: "r32r_6", h: "E2", a: "I2" }, // M78: 2E v 2I
+  { key: "r32r_7", h: "K1", a: "J3" }, // M87: 1K v 3{D,E,I,J,L} — using J3
 ];
 
 // Resolve "A1" to actual team code from group standings

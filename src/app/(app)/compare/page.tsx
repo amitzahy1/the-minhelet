@@ -8,6 +8,9 @@ import { MATCHUPS } from "@/lib/matchups";
 import { computeGroupHits, hitCounts, normalizeGroupLetter, type BettorHit, type FinishedMatch } from "@/lib/results-hits";
 import { getFlag, getTeamNameHe } from "@/lib/flags";
 import { SpecialTrackerView } from "./SpecialTrackerView";
+import WhosAlive from "@/components/shared/WhosAlive";
+import type { BettorAdvancement } from "@/lib/supabase/shared-data";
+import Link from "next/link";
 
 // Color coding: each unique value gets a FIXED color — same pick = same color everywhere
 const VALUE_COLORS = [
@@ -382,30 +385,47 @@ export default function ComparePage() {
         </div>
       )}
 
-      {/* === WHATIF === placeholder (was on /live, moved here) === */}
+      {/* === WHATIF === placeholder with link to /live for the full widget === */}
       {view === "whatif" && (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-8 text-center">
           <span className="text-4xl mb-3 block">🔮</span>
           <h3 className="text-lg font-bold text-gray-900 mb-2">מה אם...?</h3>
-          <p className="text-sm text-gray-500">זמין ברגע שהטורניר יתחיל — תוכלו לבדוק איך תוצאות משפיעות על הניקוד.</p>
+          <p className="text-sm text-gray-500 mb-4">
+            תציבו תוצאה לכל משחק ותראו איזה מהמר מקבל הכי הרבה נקודות מהתרחיש הזה.
+            הווידג׳ט המלא יהיה זמין כשהטורניר יתחיל — בינתיים אפשר לעקוב אחרי עץ
+            הגביע הלייב.
+          </p>
+          <Link href="/live" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-bold hover:bg-blue-700 transition-colors">
+            🌳 צפו בעץ הגביע הלייב ←
+          </Link>
         </div>
       )}
 
-      {/* === ALIVE === placeholder (was on /live, moved here) === */}
+      {/* === ALIVE === "Who is still alive" — derived from bettors' advancement picks === */}
       {view === "alive" && (
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-8 text-center">
-          <span className="text-4xl mb-3 block">🌳</span>
-          <h3 className="text-lg font-bold text-gray-900 mb-2">מי חי?</h3>
-          <p className="text-sm text-gray-500">עץ ההדחה של כל מהמר — זמין כשהטורניר יתחיל.</p>
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
+          <div className="px-5 py-3 bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/40 border-b border-blue-100/50">
+            <h3 className="text-lg font-bold text-gray-900">מי עוד חי אצל כל מהמר?</h3>
+            <p className="text-xs text-gray-500 mt-0.5">הנבחרות שכל מהמר ניחש שיעלו — כמה עדיין בטורניר וכמה יצאו</p>
+          </div>
+          <div className="p-4">
+            <WhosAliveFromAdvancements advancements={advancements} />
+          </div>
         </div>
       )}
 
-      {/* === SIM === placeholder (was on /live, moved here) === */}
+      {/* === SIM === placeholder with link to /live === */}
       {view === "sim" && (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-8 text-center">
           <span className="text-4xl mb-3 block">🎮</span>
           <h3 className="text-lg font-bold text-gray-900 mb-2">סימולציה</h3>
-          <p className="text-sm text-gray-500">תוכלו לסמלץ תוצאות ולראות מי מנצח — זמין כשהטורניר יתחיל.</p>
+          <p className="text-sm text-gray-500 mb-4">
+            סמלצו תוצאות של המשחקים הקרובים וראו את תזוזת הטבלה לפי המהמרים. הכלי
+            יופיע ברגע שהטורניר יתחיל והיו נתוני משחקים זמינים.
+          </p>
+          <Link href="/live" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-bold hover:bg-blue-700 transition-colors">
+            ⚽ צפו במשחקים הקרובים ←
+          </Link>
         </div>
       )}
 
@@ -492,6 +512,46 @@ function ResultsView({ matches, brackets, currentUserId, loading }: ResultsViewP
       ))}
     </div>
   );
+}
+
+// ---------------------------------------------------------------------------
+// WhosAliveFromAdvancements
+// Wraps the existing WhosAlive component, building its props from each
+// bettor's advancement picks. Replaces the previous /live tab of the same
+// name. Until real tournament results are available we treat every pick
+// as "alive"; once we wire to live results we'll diff against eliminated
+// teams.
+// ---------------------------------------------------------------------------
+
+function WhosAliveFromAdvancements({ advancements }: { advancements: BettorAdvancement[] }) {
+  const bettors = useMemo(() => {
+    if (advancements.length === 0) return [];
+    return advancements.map((a) => {
+      const allPicked = [
+        ...a.advanceToQF,
+        ...a.advanceToSF,
+        ...a.advanceToFinal,
+        ...(a.winner ? [a.winner] : []),
+      ];
+      return {
+        name: a.displayName || "ללא שם",
+        champion: a.winner,
+        semifinalists: a.advanceToSF,
+        quarterfinalists: a.advanceToQF,
+        alive: allPicked,
+        dead: [] as string[],
+      };
+    });
+  }, [advancements]);
+
+  if (bettors.length === 0) {
+    return (
+      <p className="text-sm text-gray-400 py-6 text-center">
+        אין עדיין מהמרים עם הימורי עולות. ההימורים ייחשפו אחרי הנעילה.
+      </p>
+    );
+  }
+  return <WhosAlive bettors={bettors} />;
 }
 
 // ---------------------------------------------------------------------------

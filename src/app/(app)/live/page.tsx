@@ -92,15 +92,17 @@ export default function LivePage() {
         <h1 className="text-3xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>לייב</h1>
       </div>
 
-      <LiveGroupsAndBracket />
-
-      <div className="mt-8">
+      {/* Live matches first — what users come here for */}
+      <div className="mb-8">
         <h2 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
           משחקים חיים
         </h2>
         <LiveTab predictions={predictions} />
       </div>
+
+      {/* Live tournament state (group tables + bracket) below */}
+      <LiveGroupsAndBracket />
     </div>
   );
 }

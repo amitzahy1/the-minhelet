@@ -133,11 +133,8 @@ function LeaderList({
               <p className="text-xs font-bold text-gray-800 truncate">{it.label}</p>
               {it.sub && <p className="text-[10px] text-gray-400 truncate">{it.sub}</p>}
             </div>
-            <span className="text-sm font-black text-gray-900 tabular-nums shrink-0" style={{ fontFamily: "var(--font-inter)" }}>
-              {it.value}
-            </span>
             {bettors.length > 0 && (
-              <div className="flex items-center flex-wrap gap-1 shrink-0 ms-1 pe-1 border-s border-gray-300 ps-2">
+              <div className="flex items-center flex-wrap gap-1 shrink-0 border-s border-gray-300 ps-2 me-1">
                 <span className="text-[9px] text-gray-500 font-bold">הימרו:</span>
                 {bettors.map((b) => (
                   <span
@@ -154,6 +151,9 @@ function LeaderList({
                 ))}
               </div>
             )}
+            <span className="text-sm font-black text-gray-900 tabular-nums shrink-0" style={{ fontFamily: "var(--font-inter)" }}>
+              {it.value}
+            </span>
           </div>
         );
       })}

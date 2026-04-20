@@ -6,6 +6,7 @@ import { useBettingStore } from "@/stores/betting-store";
 import { GROUPS } from "@/lib/tournament/groups";
 import { getFlag } from "@/lib/flags";
 import { PageTransition } from "@/components/shared/PageTransition";
+import { SaveAndContinue } from "@/components/shared/SaveAndContinue";
 
 // R32 matchups based on FIFA WC2026 regulations
 // Left half: groups A-H, Right half: groups I-L + cross-group
@@ -357,6 +358,13 @@ export default function KnockoutPage() {
           </RoundCol>
         </div>
       </div>
+
+      <SaveAndContinue
+        label={filledKnockout === 31 ? "💾 שמור והמשך להימורים מיוחדים" : "💾 שמור הימורים עד כה"}
+        nextHref="/special-bets"
+        nextLabel="המשך להימורים מיוחדים →"
+        completion={Math.round((filledKnockout / 31) * 100)}
+      />
     </div>
     </PageTransition>
   );

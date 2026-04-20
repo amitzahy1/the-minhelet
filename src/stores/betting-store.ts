@@ -81,11 +81,17 @@ export interface BettingActions {
   // Reset
   resetAll: () => void;
 
+  // Manual save — user-initiated save that bypasses the "only save on milestone" rule.
+  saveNow: () => Promise<{ success: boolean; error?: string }>;
+
   // Computed
   getGroupFilledCount: (groupId: string) => number;
   getTotalFilledGroups: () => number;
   getTotalFilledMatches: () => number;
   getCompletedGroupsCount: () => number;
+  getKnockoutFilledCount: () => number;
+  getSpecialsFilledCount: () => number;
+  areAllBetsFilled: () => boolean;
 }
 
 // --- Initial State ---
@@ -309,6 +315,29 @@ export const useBettingStore = create<BettingState & BettingActions>()(
           state.lastUpdated = null;
         }),
 
+      // --- Manual save (explicit user action) ---
+      saveNow: async () => {
+        const state = get();
+        const saveStatus = typeof window !== "undefined"
+          ? (await import("./save-status-store")).useSaveStatus.getState()
+          : null;
+        saveStatus?.markSaving();
+        try {
+          const { saveBetsToSupabase } = await import("@/lib/supabase/sync");
+          const result = await saveBetsToSupabase(state);
+          if (result.success) {
+            saveStatus?.markSaved();
+            return { success: true };
+          }
+          saveStatus?.markError(result.error);
+          return { success: false, error: result.error };
+        } catch (e) {
+          const msg = String(e);
+          saveStatus?.markError(msg);
+          return { success: false, error: msg };
+        }
+      },
+
       // --- Computed ---
       getGroupFilledCount: (groupId) => {
         const group = get().groups[groupId];
@@ -330,6 +359,35 @@ export const useBettingStore = create<BettingState & BettingActions>()(
 
       getCompletedGroupsCount: () => {
         return GROUP_LETTERS.filter((letter) => get().getGroupFilledCount(letter) === 6).length;
+      },
+
+      getKnockoutFilledCount: () => {
+        return Object.values(get().knockout).filter((m) => m.winner).length;
+      },
+
+      getSpecialsFilledCount: () => {
+        const sb = get().specialBets;
+        let count = 0;
+        if (sb.winner) count++;
+        if (sb.finalist1) count++;
+        if (sb.finalist2) count++;
+        count += sb.quarterfinalists.filter(Boolean).length;
+        count += sb.semifinalists.filter(Boolean).length;
+        if (sb.topScorerPlayer) count++;
+        if (sb.topAssistsPlayer) count++;
+        if (sb.bestAttack) count++;
+        if (sb.dirtiestTeam) count++;
+        if (sb.prolificGroup) count++;
+        if (sb.driestGroup) count++;
+        count += sb.matchups.filter(Boolean).length;
+        if (sb.penaltiesOverUnder) count++;
+        return count;
+      },
+
+      areAllBetsFilled: () => {
+        return get().getCompletedGroupsCount() === 12
+          && get().getKnockoutFilledCount() === 31
+          && get().getSpecialsFilledCount() === 25;
       },
     })),
     {
@@ -419,13 +477,71 @@ async function performSave(state: BettingState) {
   hasPendingChanges = false;
 }
 
+// Milestone tracking — we only auto-save when a stage transitions from
+// "partial" → "complete" (or when the user edits a bet while already at 100%).
+// Before that, the user must click the explicit "Save" button on each page.
+// This stops us from hammering Supabase with every single keystroke while
+// still providing a safety-net save at the end of each stage.
+let lastCounts = { groups: 0, knockout: 0, specials: 0, allDone: false };
+
+// Hydrate initial counts on first load so we don't spuriously save on rehydrate.
+function snapshotCounts() {
+  const s = useBettingStore.getState();
+  lastCounts = {
+    groups: s.getCompletedGroupsCount(),
+    knockout: s.getKnockoutFilledCount(),
+    specials: s.getSpecialsFilledCount(),
+    allDone: s.areAllBetsFilled(),
+  };
+}
+
 if (typeof window !== "undefined") {
+  // Initial snapshot once the store is ready
+  setTimeout(snapshotCounts, 100);
+
   useBettingStore.subscribe((state) => {
     hasPendingChanges = true;
-    // Lazy-import to avoid circular module loading on first render
+
+    // Always update the save-status indicator to "pending" so the user sees
+    // "שינויים לא נשמרו — לחץ שמור" right away.
     import("./save-status-store").then((m) => m.useSaveStatus.getState().markPending());
-    if (saveTimeout) clearTimeout(saveTimeout);
-    saveTimeout = setTimeout(() => performSave(state), 5000);
+
+    // Compute fresh completion counts
+    const groups = GROUP_LETTERS.filter((l) => (state.groups[l]?.scores || []).filter((s) => s.home !== null && s.away !== null).length === 6).length;
+    const knockout = Object.values(state.knockout).filter((m) => m.winner).length;
+    const sb = state.specialBets;
+    let specials = 0;
+    if (sb.winner) specials++;
+    if (sb.finalist1) specials++;
+    if (sb.finalist2) specials++;
+    specials += sb.quarterfinalists.filter(Boolean).length;
+    specials += sb.semifinalists.filter(Boolean).length;
+    if (sb.topScorerPlayer) specials++;
+    if (sb.topAssistsPlayer) specials++;
+    if (sb.bestAttack) specials++;
+    if (sb.dirtiestTeam) specials++;
+    if (sb.prolificGroup) specials++;
+    if (sb.driestGroup) specials++;
+    specials += sb.matchups.filter(Boolean).length;
+    if (sb.penaltiesOverUnder) specials++;
+
+    const allDone = groups === 12 && knockout === 31 && specials === 25;
+
+    // Milestone detection: auto-save when a stage transitions incomplete → complete.
+    const groupsJustCompleted = lastCounts.groups < 12 && groups === 12;
+    const knockoutJustCompleted = lastCounts.knockout < 31 && knockout === 31;
+    const specialsJustCompleted = lastCounts.specials < 25 && specials === 25;
+
+    // Once fully complete, EVERY edit auto-saves (debounced 5s).
+    const shouldAutoSave = allDone || groupsJustCompleted || knockoutJustCompleted || specialsJustCompleted;
+
+    lastCounts = { groups, knockout, specials, allDone };
+
+    if (shouldAutoSave) {
+      if (saveTimeout) clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(() => performSave(state), allDone ? 3000 : 1000);
+    }
+    // else: don't save — user must click the manual "Save" button on the page.
   });
 
   // Force-save on page unload to prevent data loss

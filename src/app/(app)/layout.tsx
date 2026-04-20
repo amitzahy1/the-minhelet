@@ -290,12 +290,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     useBettingStore.persist.rehydrate();
     document.documentElement.classList.remove("dark");
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (user) {
         setUserName(user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split("@")[0] || "");
         setUserEmail(user.email || "");
         const seen = localStorage.getItem("wc2026-onboarding-seen");
         if (!seen) setShowOnboarding(true);
+        // Server is source of truth — pull latest DB state and overwrite
+        // whatever was restored from localStorage so admin resets /
+        // cross-device edits are reflected immediately.
+        await useBettingStore.getState().hydrateFromSupabase();
       }
       setAuthReady(true);
     });

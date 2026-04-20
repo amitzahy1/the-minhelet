@@ -37,7 +37,7 @@ export function SplashScreen() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#F8F9FB] via-white to-[#EEF2FF] flex items-center justify-center overflow-hidden" dir="rtl">
+    <div className="min-h-screen w-full max-w-full bg-gradient-to-b from-[#F8F9FB] via-white to-[#EEF2FF] flex items-center justify-center overflow-hidden" dir="rtl">
       {/* Animated background orbs */}
       <motion.div
         className="absolute w-[500px] h-[500px] rounded-full bg-blue-400/5"
@@ -58,7 +58,7 @@ export function SplashScreen() {
         backgroundSize: "40px 40px",
       }} />
 
-      <div className="relative flex flex-col items-center px-6">
+      <div className="relative flex flex-col items-center px-4 sm:px-6 w-full max-w-full">
 
         {/* Logo with layered animations */}
         <motion.div
@@ -132,15 +132,15 @@ export function SplashScreen() {
           <motion.img
             src="/logo.png"
             alt="The Minhelet"
-            className="relative w-56 h-56 sm:w-72 sm:h-72 rounded-full object-cover shadow-2xl ring-4 ring-white/80"
+            className="relative w-40 h-40 sm:w-56 sm:h-56 md:w-72 md:h-72 rounded-full object-cover shadow-2xl ring-4 ring-white/80"
             animate={{ y: [0, -8, 0] }}
             transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
           />
         </motion.div>
 
         {/* Title — letter by letter reveal with 3D flip */}
-        <div className="mb-2 overflow-hidden" dir="ltr" style={{ perspective: "600px" }}>
-          <h1 className="text-5xl sm:text-7xl font-black text-gray-900 tracking-tight flex justify-center" style={{ fontFamily: "var(--font-secular)" }}>
+        <div className="mb-2 overflow-hidden w-full max-w-full" dir="ltr" style={{ perspective: "600px" }}>
+          <h1 className="text-[2rem] xs:text-4xl sm:text-6xl md:text-7xl font-black text-gray-900 tracking-tight flex justify-center flex-wrap" style={{ fontFamily: "var(--font-secular)" }}>
             {titleText.split("").map((char, i) => (
               <motion.span
                 key={i}

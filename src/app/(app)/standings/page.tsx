@@ -176,6 +176,37 @@ function PlayerTooltip({ player, visible, onClose }: { player: typeof MOCK_PLAYE
 }
 
 type SortKey = "total" | "matchPts" | "advPts" | "specPts";
+
+function SortableHeader({
+  label,
+  sortKey,
+  activeTab,
+  setActiveTab,
+  width,
+}: {
+  label: string;
+  sortKey: SortKey;
+  activeTab: SortKey;
+  setActiveTab: (k: SortKey) => void;
+  width: string;
+}) {
+  const isActive = activeTab === sortKey;
+  return (
+    <button
+      type="button"
+      onClick={() => setActiveTab(sortKey)}
+      className={`${width} text-center font-semibold transition-colors ${
+        isActive ? "text-blue-600" : "text-gray-500 hover:text-gray-800"
+      }`}
+      title="לחצו למיון"
+    >
+      <span className="inline-flex items-center gap-0.5">
+        {label}
+        {isActive && <span className="text-[9px]">▼</span>}
+      </span>
+    </button>
+  );
+}
 const TABS: { label: string; key: SortKey }[] = [
   { label: "כללי", key: "total" },
   { label: "משחקים", key: "matchPts" },
@@ -360,8 +391,7 @@ export default function StandingsPage() {
 
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>מי מוביל?</h1>
-          <p className="text-base text-gray-600 mt-1">מונדיאל 2026 — The Minhelet · עקבו אחרי המירוץ</p>
+          <h1 className="text-3xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>טבלה</h1>
         </div>
         <div className="flex gap-2">
           <button onClick={() => {
@@ -381,46 +411,32 @@ export default function StandingsPage() {
 
       {/* Main leaderboard — FIRST and most prominent */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-visible hover:shadow-lg transition-all mb-6">
-        <div className="px-5 py-3 bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/40 border-b border-blue-100/50 flex items-center justify-between">
-          <div>
-            <h2 className="text-base font-bold text-gray-800">טבלת דירוג</h2>
-            <p className="text-xs text-gray-400 mt-0.5">לחצו לסידור לפי קטגוריה</p>
-          </div>
-          <div className="flex gap-1 text-sm">
-            {TABS.map((tab) => (
-              <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-                className={`px-4 py-2 rounded-full font-bold transition-all ${
-                  activeTab === tab.key
-                    ? "bg-gray-900 text-white shadow-md"
-                    : "text-gray-500 hover:bg-gray-200"
-                }`}>
-                {tab.label}
-              </button>
-            ))}
-          </div>
+        <div className="px-5 py-3 bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/40 border-b border-blue-100/50">
+          <h2 className="text-base font-bold text-gray-800">טבלת דירוג</h2>
+          <p className="text-xs text-gray-400 mt-0.5">לחצו על כותרת עמודה כדי למיין לפיה</p>
         </div>
 
-        {/* Table header — mobile */}
+        {/* Table header — mobile (clickable) */}
         <div className="flex sm:hidden items-center px-4 py-2 text-xs text-gray-500 bg-gray-50 border-b border-gray-200 font-semibold" style={{ fontFamily: "var(--font-inter)" }}>
           <span className="w-8 text-center">#</span>
           <span className="w-9 me-2"></span>
           <span className="me-3 flex-1 text-start">שחקן</span>
-          <span className="w-12 text-center text-blue-600">{TABS.find(t => t.key === activeTab)?.label || ""}</span>
+          <SortableHeader label={TABS.find(t => t.key === activeTab)?.label || ""} sortKey={activeTab} activeTab={activeTab} setActiveTab={setActiveTab} width="w-12" />
           <span className="w-12 text-center">היום</span>
-          <span className="w-16 text-center">סה״כ</span>
+          <SortableHeader label="סה״כ" sortKey="total" activeTab={activeTab} setActiveTab={setActiveTab} width="w-16" />
           <span className="w-8 text-center">שינוי</span>
         </div>
-        {/* Table header — desktop */}
+        {/* Table header — desktop (clickable) */}
         <div className="hidden sm:flex items-center px-4 py-2 text-xs text-gray-500 bg-gray-50 border-b border-gray-200 font-semibold" style={{ fontFamily: "var(--font-inter)" }}>
           <span className="w-8 text-center">#</span>
           <span className="w-10 me-2"></span>
           <span className="me-3 flex-1 text-start">שחקן</span>
-          <span className="w-14 text-center">משחקים</span>
-          <span className="w-14 text-center">עולות</span>
-          <span className="w-14 text-center">מיוחדים</span>
+          <SortableHeader label="משחקים" sortKey="matchPts" activeTab={activeTab} setActiveTab={setActiveTab} width="w-14" />
+          <SortableHeader label="עולות" sortKey="advPts" activeTab={activeTab} setActiveTab={setActiveTab} width="w-14" />
+          <SortableHeader label="מיוחדים" sortKey="specPts" activeTab={activeTab} setActiveTab={setActiveTab} width="w-14" />
           <span className="w-20 text-center">מגמה</span>
           <span className="w-12 text-center">היום</span>
-          <span className="w-16 text-center">סה״כ</span>
+          <SortableHeader label="סה״כ" sortKey="total" activeTab={activeTab} setActiveTab={setActiveTab} width="w-16" />
           <span className="w-8 text-center">שינוי</span>
         </div>
 

@@ -43,7 +43,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="he" dir="rtl" className={`${inter.variable} ${assistant.variable} ${secularOne.variable} h-full`}>
-      <body className="min-h-full bg-gray-50 font-sans text-gray-900 antialiased" style={{ fontFamily: "var(--font-assistant), sans-serif" }}>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
+        {/* Hide Vercel preview toolbar on deployments */}
+        <meta name="vercel-toolbar" content="false" />
+      </head>
+      <body className="min-h-full w-full max-w-full overflow-x-hidden bg-gray-50 font-sans text-gray-900 antialiased" style={{ fontFamily: "var(--font-assistant), sans-serif" }}>
         <TooltipProvider>{children}</TooltipProvider>
       </body>
     </html>

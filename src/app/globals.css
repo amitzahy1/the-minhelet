@@ -148,4 +148,21 @@
   @media (min-width: 1920px) {
     html { font-size: 16px; }
   }
+
+  /* Global horizontal-overflow guard — mobile pages with wide inline content
+     (big splash title, long match cards) should never trigger page-level
+     horizontal scroll. Cards that genuinely need to scroll (compare tables)
+     keep their own overflow-x-auto. */
+  html, body {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+}
+
+/* Hide the Vercel preview toolbar for logged-in Vercel team viewers. */
+#vercel-toolbar,
+[data-vercel-toolbar],
+vercel-live-feedback,
+iframe[src*="vercel.live"] {
+  display: none !important;
 }

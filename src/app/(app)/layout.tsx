@@ -493,18 +493,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* ════════════════════════════════════════════ */}
       {/* MOBILE BOTTOM NAV — 6 tabs                  */}
+      {/* JSX order = RTL visual: first item = RIGHT. */}
+      {/* User wants "הימורים" on the LEFT edge → put it LAST. */}
       {/* ════════════════════════════════════════════ */}
       <nav className="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-gray-200 z-50 sm:hidden shadow-[0_-2px_8px_rgba(0,0,0,0.06)]" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
         <div className="flex justify-around items-center h-16">
-          <Link href="/groups"
-            className={`flex flex-col items-center gap-0.5 py-1 ${isBettingPage ? "text-blue-600" : "text-gray-400"}`}>
-            {Icons.bets(isBettingPage)}
-            <span className="text-[8px] font-bold">הימורים</span>
-          </Link>
           <Link href="/standings"
             className={`flex flex-col items-center gap-0.5 py-1 ${pathname === "/standings" ? "text-gray-900" : "text-gray-400"}`}>
             {Icons.leaderboard(pathname === "/standings")}
-            <span className="text-[8px] font-bold">דירוג</span>
+            <span className="text-[8px] font-bold">טבלה</span>
           </Link>
           <Link href="/compare"
             className={`flex flex-col items-center gap-0.5 py-1 ${pathname === "/compare" ? "text-gray-900" : "text-gray-400"}`}>
@@ -525,6 +522,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             className={`flex flex-col items-center gap-0.5 py-1 ${pathname === "/schedule" ? "text-gray-900" : "text-gray-400"}`}>
             {Icons.schedule(pathname === "/schedule")}
             <span className="text-[8px] font-bold">לו״ז</span>
+          </Link>
+          <Link href="/groups"
+            className={`flex flex-col items-center gap-0.5 py-1 ${isBettingPage ? "text-blue-600" : "text-gray-400"}`}>
+            {Icons.bets(isBettingPage)}
+            <span className="text-[8px] font-bold">הימורים</span>
           </Link>
         </div>
       </nav>

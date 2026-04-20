@@ -12,10 +12,11 @@ import { Separator } from "@/components/ui/separator";
 
 import { SystemStatus } from "./components/SystemStatus";
 import { MatchResultsEntry } from "./components/MatchResultsEntry";
+import { SpecialResultsEntry } from "./components/SpecialResultsEntry";
 import { UserManagement } from "./components/UserManagement";
 import { AdminsList } from "./components/AdminsList";
 import { AdminGuide } from "./components/AdminGuide";
-import { CompletionMatrix } from "./components/CompletionMatrix";
+// CompletionMatrix moved into UserBetsEditor tab — no longer a separate admin tab.
 import { UserBetsEditor } from "./components/UserBetsEditor";
 import { BotGenerator } from "./components/BotGenerator";
 
@@ -117,13 +118,17 @@ export default function AdminPage() {
             <TabsTrigger value="guide">מדריך למנהל</TabsTrigger>
             <TabsTrigger value="users">משתמשים</TabsTrigger>
             <TabsTrigger value="admins">מנהלים</TabsTrigger>
-            <TabsTrigger value="completion">סטטוס מילוי</TabsTrigger>
             <TabsTrigger value="edit-bets">עריכת הימורים</TabsTrigger>
             <TabsTrigger value="bot">🤖 בוט</TabsTrigger>
           </TabsList>
 
           <TabsContent value="status"><SystemStatus /></TabsContent>
-          <TabsContent value="results"><MatchResultsEntry /></TabsContent>
+          <TabsContent value="results">
+            <div className="space-y-4">
+              <MatchResultsEntry />
+              <SpecialResultsEntry />
+            </div>
+          </TabsContent>
 
           <TabsContent value="scoring">
             {scoringConfig && (
@@ -217,7 +222,6 @@ export default function AdminPage() {
           <TabsContent value="users"><UserManagement /></TabsContent>
           <TabsContent value="admins"><AdminsList /></TabsContent>
           <TabsContent value="guide"><AdminGuide /></TabsContent>
-          <TabsContent value="completion"><CompletionMatrix /></TabsContent>
           <TabsContent value="edit-bets"><UserBetsEditor /></TabsContent>
           <TabsContent value="bot"><BotGenerator /></TabsContent>
         </Tabs>

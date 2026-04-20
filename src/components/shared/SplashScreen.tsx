@@ -20,9 +20,11 @@ export function SplashScreen() {
   useEffect(() => {
     const interval = setInterval(() => {
       setProgress((p) => {
-        if (p >= 90) return 90;
-        const increment = Math.max(0.5, (90 - p) * 0.08);
-        return Math.min(90, p + increment);
+        if (p >= 99) return 99;
+        // Three-phase curve: zips 0→60 fast, slows 60→90, crawls 90→99.
+        if (p < 60) return Math.min(60, p + 2.5);
+        if (p < 90) return Math.min(90, p + Math.max(0.3, (90 - p) * 0.06));
+        return Math.min(99, p + 0.15);
       });
     }, 50);
 
@@ -37,7 +39,7 @@ export function SplashScreen() {
   }, []);
 
   return (
-    <div className="min-h-screen w-full max-w-full bg-gradient-to-b from-[#F8F9FB] via-white to-[#EEF2FF] flex items-center justify-center overflow-hidden" dir="rtl">
+    <div className="relative min-h-screen w-full max-w-[100vw] bg-gradient-to-b from-[#F8F9FB] via-white to-[#EEF2FF] flex items-center justify-center overflow-hidden" dir="rtl">
       {/* Animated background orbs */}
       <motion.div
         className="absolute w-[500px] h-[500px] rounded-full bg-blue-400/5"
@@ -139,8 +141,8 @@ export function SplashScreen() {
         </motion.div>
 
         {/* Title — letter by letter reveal with 3D flip */}
-        <div className="mb-2 overflow-hidden w-full max-w-full" dir="ltr" style={{ perspective: "600px" }}>
-          <h1 className="text-[2rem] xs:text-4xl sm:text-6xl md:text-7xl font-black text-gray-900 tracking-tight flex justify-center flex-wrap" style={{ fontFamily: "var(--font-secular)" }}>
+        <div className="mb-2 overflow-hidden w-full max-w-[90vw] sm:max-w-full" dir="ltr" style={{ perspective: "600px" }}>
+          <h1 className="text-3xl sm:text-5xl md:text-7xl font-black text-gray-900 tracking-tight flex justify-center flex-wrap" style={{ fontFamily: "var(--font-secular)" }}>
             {titleText.split("").map((char, i) => (
               <motion.span
                 key={i}

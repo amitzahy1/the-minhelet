@@ -52,11 +52,20 @@ const R32_MATCHUPS = [
 
 // Resolve "A1" to actual team code from group standings
 // Supports: "A1" (winner), "A2" (runner-up), "A3" (3rd place)
-function resolveSlot(slot: string, groups: Record<string, { order: number[] }>): string | null {
+// Returns null until the user has entered at least one score in the group —
+// otherwise we'd render the default [0,1,2,3] ordering as if the user had
+// already "predicted" these teams to advance.
+type GroupForResolve = {
+  order: number[];
+  scores: { home: number | null; away: number | null }[];
+};
+function resolveSlot(slot: string, groups: Record<string, GroupForResolve>): string | null {
   const groupLetter = slot[0];
   const position = parseInt(slot[1]) - 1; // "A1" → position 0, "A2" → 1, "A3" → 2
   const group = groups[groupLetter];
   if (!group) return null;
+  const hasAnyScore = group.scores?.some(s => s.home !== null || s.away !== null);
+  if (!hasAnyScore) return null;
   const teamIndex = group.order[position];
   const groupTeams = GROUPS[groupLetter];
   if (!groupTeams || teamIndex === undefined) return null;

@@ -146,45 +146,59 @@ function getStageFromKey(matchKey: string): string {
   return "final";
 }
 
-/** Recursively clear downstream matches whose winner is the removed team */
+/** Recursively clear downstream matches whose winner is the removed team.
+ *  Returns the number of downstream matches that were cleared so the UI can
+ *  surface this as a toast (cascade-clear is otherwise silent).
+ */
 function cascadeClear(
   knockout: Record<string, KnockoutMatchState>,
   matchKey: string,
   oldWinner: string
-) {
+): number {
   const nextKey = NEXT_MATCH[matchKey];
-  if (!nextKey) return;
+  if (!nextKey) return 0;
   const nextMatch = knockout[nextKey];
   if (nextMatch?.winner === oldWinner) {
     knockout[nextKey] = { score1: null, score2: null, winner: null };
-    cascadeClear(knockout, nextKey, oldWinner);
+    return 1 + cascadeClear(knockout, nextKey, oldWinner);
   }
+  return 0;
 }
 
-/** Clear eliminated team from special bets at the appropriate levels */
+/** Clear eliminated team from special bets at the appropriate levels.
+ *  Returns the number of special-bet slots that were cleared.
+ */
 function clearTeamFromSpecialBets(
   sb: SpecialBetsState,
   teamCode: string,
   fromStage: string
-) {
+): number {
   const STAGES = ["r32", "r16", "qf", "sf", "final"];
   const idx = STAGES.indexOf(fromStage);
+  let cleared = 0;
 
   // R32 or R16 change → team can't reach QF
   if (idx <= 1) {
-    sb.quarterfinalists = sb.quarterfinalists.map(s => (s === teamCode ? "" : s));
+    sb.quarterfinalists = sb.quarterfinalists.map(s => {
+      if (s === teamCode) { cleared++; return ""; }
+      return s;
+    });
   }
   // R32, R16, or QF change → team can't reach SF
   if (idx <= 2) {
-    sb.semifinalists = sb.semifinalists.map(s => (s === teamCode ? "" : s));
+    sb.semifinalists = sb.semifinalists.map(s => {
+      if (s === teamCode) { cleared++; return ""; }
+      return s;
+    });
   }
   // R32–SF change → team can't reach final
   if (idx <= 3) {
-    if (sb.finalist1 === teamCode) sb.finalist1 = "";
-    if (sb.finalist2 === teamCode) sb.finalist2 = "";
+    if (sb.finalist1 === teamCode) { sb.finalist1 = ""; cleared++; }
+    if (sb.finalist2 === teamCode) { sb.finalist2 = ""; cleared++; }
   }
   // Any change → team can't be winner
-  if (sb.winner === teamCode) sb.winner = "";
+  if (sb.winner === teamCode) { sb.winner = ""; cleared++; }
+  return cleared;
 }
 
 /** Sync advancement picks from knockout tree (bracket is source of truth) */
@@ -286,8 +300,20 @@ export const useBettingStore = create<BettingState & BettingActions>()(
 
           // Cascade-clear downstream matches + special bets when winner changes
           if (oldWinner && oldWinner !== newWinner) {
-            cascadeClear(state.knockout, matchKey, oldWinner);
-            clearTeamFromSpecialBets(state.specialBets, oldWinner, getStageFromKey(matchKey));
+            const downstream = cascadeClear(state.knockout, matchKey, oldWinner);
+            const specialsCleared = clearTeamFromSpecialBets(state.specialBets, oldWinner, getStageFromKey(matchKey));
+            const total = downstream + specialsCleared;
+            if (total > 0 && typeof window !== "undefined") {
+              // Fire a transient toast so the user notices the cascade.
+              // Dynamic import keeps the store tree-shakeable on the server.
+              import("./toast-store").then((m) => {
+                m.useToastStore.getState().push(
+                  `עדכנת מנצחת — ניקינו ${total} הימורים שהסתמכו על ${oldWinner}`,
+                  "warning",
+                  5000
+                );
+              });
+            }
           }
 
           // Always keep advancement picks in sync with the bracket
@@ -378,6 +404,9 @@ export const useBettingStore = create<BettingState & BettingActions>()(
           const result = await saveBetsToSupabase(state);
           if (result.success) {
             saveStatus?.markSaved();
+            // Keep batch baselines in sync after a manual save too.
+            lastSavedKnockoutCount = state.getKnockoutFilledCount();
+            lastSavedSpecialsCount = state.getSpecialsFilledCount();
             return { success: true };
           }
           saveStatus?.markError(result.error);
@@ -490,6 +519,14 @@ export const useBettingStore = create<BettingState & BettingActions>()(
 let saveTimeout: ReturnType<typeof setTimeout> | null = null;
 let hasPendingChanges = false;
 
+// Batch-save baselines: after a successful save we snapshot the current
+// knockout / specials counts here. The subscribe callback compares against
+// these to fire another auto-save every BATCH_EVERY net edits — so the user
+// never has more than a handful of unsaved picks in either stage.
+let lastSavedKnockoutCount = 0;
+let lastSavedSpecialsCount = 0;
+const BATCH_EVERY = 5;
+
 async function performSave(state: BettingState) {
   const saveStatus = typeof window !== "undefined"
     ? (await import("./save-status-store")).useSaveStatus.getState()
@@ -525,8 +562,29 @@ async function performSave(state: BettingState) {
     console.error("Failed to save to Supabase:", e);
   }
 
-  if (ok) saveStatus?.markSaved();
-  else saveStatus?.markError(errorMsg);
+  if (ok) {
+    saveStatus?.markSaved();
+    // Reset batch baselines so the next 5 edits are counted from here.
+    lastSavedKnockoutCount = Object.values(state.knockout).filter((m) => m.winner).length;
+    const sb = state.specialBets;
+    let sc = 0;
+    if (sb.winner) sc++;
+    if (sb.finalist1) sc++;
+    if (sb.finalist2) sc++;
+    sc += sb.quarterfinalists.filter(Boolean).length;
+    sc += sb.semifinalists.filter(Boolean).length;
+    if (sb.topScorerPlayer) sc++;
+    if (sb.topAssistsPlayer) sc++;
+    if (sb.bestAttack) sc++;
+    if (sb.dirtiestTeam) sc++;
+    if (sb.prolificGroup) sc++;
+    if (sb.driestGroup) sc++;
+    sc += sb.matchups.filter(Boolean).length;
+    if (sb.penaltiesOverUnder) sc++;
+    lastSavedSpecialsCount = sc;
+  } else {
+    saveStatus?.markError(errorMsg);
+  }
 
   hasPendingChanges = false;
 }
@@ -567,6 +625,11 @@ function snapshotCounts() {
   lastGroupFilled = {};
   for (const letter of GROUP_LETTERS) lastGroupFilled[letter] = countGroupFilled(s, letter);
   lastBetSig = betSig(s);
+  // Align batch baselines with the just-hydrated DB state so the first 5
+  // edits after login are the ones that trip the batch save, not counted
+  // from zero.
+  lastSavedKnockoutCount = lastCounts.knockout;
+  lastSavedSpecialsCount = lastCounts.specials;
 }
 
 if (typeof window !== "undefined") {
@@ -625,14 +688,23 @@ if (typeof window !== "undefined") {
     const knockoutJustCompleted = lastCounts.knockout < 31 && knockout === 31;
     const specialsJustCompleted = lastCounts.specials < 25 && specials === 25;
 
-    // Once fully complete, EVERY edit auto-saves (debounced 5s). Any single
-    // group finishing also triggers a save so the user never has >1 group
-    // of unsaved progress.
+    // Batch detection: every N net edits within knockout or specials trips a
+    // safety-net save so the user never has >N unsaved picks in either stage.
+    // Math.abs handles both inserts and deletes (cascade-clear decreases the
+    // count, which is still a write-worthy event).
+    const knockoutBatchHit = Math.abs(knockout - lastSavedKnockoutCount) >= BATCH_EVERY;
+    const specialsBatchHit = Math.abs(specials - lastSavedSpecialsCount) >= BATCH_EVERY;
+
+    // Once fully complete, EVERY edit auto-saves (debounced 3s). Any single
+    // group finishing, any stage completing, and every 5 knockout/specials
+    // edits also fire a save — so no user loses more than a handful of picks.
     const shouldAutoSave = allDone
       || anyGroupJustCompleted
       || groupsJustCompleted
       || knockoutJustCompleted
-      || specialsJustCompleted;
+      || specialsJustCompleted
+      || knockoutBatchHit
+      || specialsBatchHit;
 
     lastCounts = { groups, knockout, specials, allDone };
 

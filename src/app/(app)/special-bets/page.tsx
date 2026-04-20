@@ -9,6 +9,7 @@ import { getSquad } from "@/lib/tournament/squads-data";
 import { getFlag } from "@/lib/flags";
 import { PageTransition } from "@/components/shared/PageTransition";
 import { SaveAndContinue } from "@/components/shared/SaveAndContinue";
+import { formatLockDeadline } from "@/lib/constants";
 import { useConfetti } from "@/hooks/useConfetti";
 import { MATCHUPS } from "@/lib/matchups";
 
@@ -70,6 +71,12 @@ function PlayerSelect({ team, value, onChange, label }: { team: string; value: s
   const players = team ? getSquadPlayers(team) : [];
   const hasSquad = players.length > 0;
   const listId = `players-${team}`;
+  // Only flag an invalid pick when (a) we actually have a squad, (b) the
+  // user has typed something, and (c) it's not an exact match (datalist
+  // lookup is case-sensitive — normalize lightly to catch accidents).
+  const normalize = (s: string) => s.trim().toLowerCase();
+  const invalid = hasSquad && value.trim().length > 0
+    && !players.some(p => normalize(p) === normalize(value));
   return (
     <div className="space-y-1.5">
       <label className="text-sm font-semibold text-gray-700">{label}</label>
@@ -84,12 +91,19 @@ function PlayerSelect({ team, value, onChange, label }: { team: string; value: s
             list={hasSquad ? listId : undefined}
             placeholder={hasSquad ? "בחרו או הקלידו שם שחקן..." : "הקלידו שם שחקן..."}
             dir="ltr"
-            className="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={`w-full px-3 py-2.5 rounded-lg border bg-white text-sm font-medium focus:outline-none focus:ring-2 ${
+              invalid
+                ? "border-amber-400 focus:ring-amber-500"
+                : "border-gray-200 focus:ring-blue-500"
+            }`}
           />
           {hasSquad && (
             <datalist id={listId}>
               {players.map(p => <option key={p} value={p} />)}
             </datalist>
+          )}
+          {invalid && (
+            <p className="text-[11px] text-amber-700 font-medium">⚠ השם שהוזן לא ברשימת הסגל — ודאו שכתבתם נכון</p>
           )}
           {!hasSquad && (
             <p className="text-[11px] text-gray-400">הסגל לנבחרת הזו עוד לא עודכן — הקלידו שם שחקן ידנית</p>
@@ -196,7 +210,7 @@ export default function SpecialBetsPage() {
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-500 shrink-0"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         <div className="flex-1">
           <p className="text-base font-semibold text-gray-800">ננעל יום לפני הטורניר</p>
-          <p className="text-sm text-gray-500">10.06.2026, 17:00 (שעון ישראל)</p>
+          <p className="text-sm text-gray-500">{formatLockDeadline()} (שעון ישראל)</p>
         </div>
         <div className="text-center bg-white rounded-lg border border-gray-200 px-3 py-1.5 shadow-sm">
           <span className="text-lg font-black text-blue-600" style={{ fontFamily: "var(--font-inter)" }}>{filledCount}</span>
@@ -249,11 +263,11 @@ export default function SpecialBetsPage() {
                 </div>
                 <div className="flex gap-2">
                   <Link
-                    href="/"
-                    className="flex-1 py-3 rounded-xl bg-gradient-to-l from-blue-600 to-indigo-600 text-white font-bold text-sm shadow-lg hover:shadow-xl transition-shadow"
+                    href="/standings"
+                    className="flex-1 py-3 rounded-xl bg-gradient-to-l from-blue-600 to-indigo-600 text-white font-bold text-sm shadow-lg hover:shadow-xl transition-shadow text-center"
                     onClick={() => setShowCelebration(false)}
                   >
-                    לדף הראשי
+                    לטבלה →
                   </Link>
                   <button
                     onClick={() => setShowCelebration(false)}

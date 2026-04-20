@@ -42,7 +42,7 @@ export function SaveAndContinue({ label, nextHref, nextLabel, completion }: Prop
   const hint = label.replace("💾 ", "").replace(" ✓", "");
 
   return (
-    <div className="mt-6 rounded-xl border border-gray-200 bg-white shadow-sm px-4 py-3 flex items-center gap-3">
+    <div className="mt-6 mb-24 sm:mb-4 rounded-xl border border-gray-200 bg-white shadow-sm px-4 py-3 flex items-center gap-3">
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-1 gap-2">
           <span className="text-xs font-bold text-gray-700 shrink-0" style={{ fontFamily: "var(--font-inter)" }}>

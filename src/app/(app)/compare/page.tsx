@@ -78,7 +78,7 @@ const F: Record<string,string> = {
   KSA:"🇸🇦",DEN:"🇩🇰",
 };
 
-type View = "results" | "advancement" | "specials" | "groups" | "similarity" | "heatmap";
+type View = "results" | "advancement" | "specials" | "groups" | "whatif" | "alive" | "sim" | "heatmap";
 
 interface MatchApi {
   id: number;
@@ -270,7 +270,9 @@ export default function ComparePage() {
           { key: "advancement" as View, label: "עולות + זוכה" },
           { key: "specials" as View, label: "הימורים מיוחדים" },
           { key: "groups" as View, label: "עולות מהבתים" },
-          { key: "similarity" as View, label: "דמיון בין מהמרים" },
+          { key: "whatif" as View, label: "מה אם...?" },
+          { key: "alive" as View, label: "מי חי?" },
+          { key: "sim" as View, label: "סימולציה" },
           { key: "heatmap" as View, label: "מפת חום" },
         ].map(tab => (
           <button key={tab.key} onClick={() => setView(tab.key)}
@@ -434,81 +436,30 @@ export default function ComparePage() {
         </div>
       )}
 
-      {/* === SIMILARITY VIEW === */}
-      {view === "similarity" && (
-        <div className="space-y-4">
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
-            <div className="px-5 py-4 bg-gradient-to-l from-white via-purple-50/30 to-indigo-50/40 border-b border-purple-100/50">
-              <h3 className="text-lg font-bold text-gray-900">דמיון בין מהמרים</h3>
-              <p className="text-sm text-gray-500">כמה אחוז מהפיקים שלכם זהים? מי ה"תאום" ומי ה"נמסיס"?</p>
-            </div>
-            <div className="p-5">
-              {/* Similarity matrix for "אמית" (you) vs everyone */}
-              {(() => {
-                const you = BETTORS.find(b => b.isYou);
-                if (!you) return null;
-                const similarities = BETTORS.filter(b => !b.isYou).map(b => {
-                  // Simple similarity: count matching picks
-                  let matches = 0, total = 0;
-                  // Winner
-                  total += 3; if (b.winner === you.winner) matches += 3;
-                  // Finalists
-                  total += 2; if ([b.finalist1,b.finalist2].includes(you.finalist1)) matches += 1;
-                  if ([b.finalist1,b.finalist2].includes(you.finalist2)) matches += 1;
-                  // SF
-                  for (const t of you.sf) { total += 1; if (b.sf.includes(t)) matches += 1; }
-                  // QF
-                  for (const t of you.qf) { total += 0.5; if (b.qf.includes(t)) matches += 0.5; }
-                  // Groups
-                  for (const [g, picks] of Object.entries(you.groups)) {
-                    const bp = b.groups[g as keyof typeof b.groups];
-                    if (bp) { total += 2; if (picks[0] === bp[0]) matches += 1; if (picks[1] === bp[1]) matches += 1; }
-                  }
-                  const pct = Math.round((matches / total) * 100);
-                  return { name: b.name, pct };
-                }).sort((a, b) => b.pct - a.pct);
+      {/* === WHATIF === placeholder (was on /live, moved here) === */}
+      {view === "whatif" && (
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-8 text-center">
+          <span className="text-4xl mb-3 block">🔮</span>
+          <h3 className="text-lg font-bold text-gray-900 mb-2">מה אם...?</h3>
+          <p className="text-sm text-gray-500">זמין ברגע שהטורניר יתחיל — תוכלו לבדוק איך תוצאות משפיעות על הניקוד.</p>
+        </div>
+      )}
 
-                const twin = similarities[0];
-                const nemesis = similarities[similarities.length - 1];
+      {/* === ALIVE === placeholder (was on /live, moved here) === */}
+      {view === "alive" && (
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-8 text-center">
+          <span className="text-4xl mb-3 block">🌳</span>
+          <h3 className="text-lg font-bold text-gray-900 mb-2">מי חי?</h3>
+          <p className="text-sm text-gray-500">עץ ההדחה של כל מהמר — זמין כשהטורניר יתחיל.</p>
+        </div>
+      )}
 
-                return (
-                  <div className="space-y-4">
-                    {/* Twin & Nemesis cards */}
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
-                        <p className="text-xs text-green-600 font-bold mb-1">התאום שלך</p>
-                        <p className="text-lg font-black text-green-800">{twin.name}</p>
-                        <p className="text-2xl font-black text-green-600" style={{ fontFamily: "var(--font-inter)" }}>{twin.pct}%</p>
-                        <p className="text-xs text-green-600">פיקים דומים</p>
-                      </div>
-                      <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
-                        <p className="text-xs text-red-600 font-bold mb-1">הנמסיס שלך</p>
-                        <p className="text-lg font-black text-red-800">{nemesis.name}</p>
-                        <p className="text-2xl font-black text-red-600" style={{ fontFamily: "var(--font-inter)" }}>{nemesis.pct}%</p>
-                        <p className="text-xs text-red-600">פיקים דומים</p>
-                      </div>
-                    </div>
-
-                    {/* Full similarity list */}
-                    <div className="space-y-2">
-                      {similarities.map(s => (
-                        <div key={s.name} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50">
-                          <span className="font-bold text-sm text-gray-900 w-20">{s.name}</span>
-                          <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden">
-                            <div
-                              className={`h-full rounded-full transition-all ${s.pct >= 70 ? "bg-green-500" : s.pct >= 50 ? "bg-blue-500" : s.pct >= 30 ? "bg-amber-500" : "bg-red-500"}`}
-                              style={{ width: `${s.pct}%` }}
-                            ></div>
-                          </div>
-                          <span className="font-black text-base w-12 text-end" style={{ fontFamily: "var(--font-inter)" }}>{s.pct}%</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })()}
-            </div>
-          </div>
+      {/* === SIM === placeholder (was on /live, moved here) === */}
+      {view === "sim" && (
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-8 text-center">
+          <span className="text-4xl mb-3 block">🎮</span>
+          <h3 className="text-lg font-bold text-gray-900 mb-2">סימולציה</h3>
+          <p className="text-sm text-gray-500">תוכלו לסמלץ תוצאות ולראות מי מנצח — זמין כשהטורניר יתחיל.</p>
         </div>
       )}
 

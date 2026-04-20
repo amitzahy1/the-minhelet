@@ -559,8 +559,11 @@ export default function StandingsPage() {
         </div>
       </div>
 
-      {/* Post-lock completion summary — visible to all users */}
-      {isLocked() && profiles.length > 0 && (
+      {/* Post-lock completion summary moved to admin only, per product decision.
+          Kept this block wrapped in `false` so it can be revived without having
+          to rewrite the computation. Admin sees the same info in
+          /admin → "סטטוס מילוי" tab. */}
+      {false && isLocked() && profiles.length > 0 && (
         <div className="mt-8 bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
           <div className="px-5 py-4 bg-gradient-to-l from-white via-amber-50/30 to-orange-50/40 border-b border-amber-100/50">
             <h3 className="text-lg font-bold text-gray-900">סטטוס מילוי הימורים</h3>

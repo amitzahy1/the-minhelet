@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +11,44 @@ export function UserManagement() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [loading, setLoading] = useState(true);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string; email: string } | null>(null);
+  const [deleteStep, setDeleteStep] = useState<1 | 2>(1);
+  const [confirmText, setConfirmText] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [deleteMsg, setDeleteMsg] = useState<string | null>(null);
+
+  // Reset modal state each time a new target is picked
+  useEffect(() => {
+    setDeleteStep(1);
+    setConfirmText("");
+    setDeleteMsg(null);
+  }, [deleteTarget]);
+
+  async function performDelete() {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    setDeleteMsg(null);
+    try {
+      const res = await fetch("/api/admin/users/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: deleteTarget.id, confirmText }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setDeleteMsg(`שגיאה: ${data.errors?.join(" | ") || data.error || res.statusText}`);
+      } else {
+        setDeleteMsg(`המשתמש ${data.deletedUser} נמחק לצמיתות ✓`);
+        setTimeout(() => {
+          setDeleteTarget(null);
+          loadUsers();
+        }, 1500);
+      }
+    } catch (e) {
+      setDeleteMsg("שגיאת רשת: " + String(e));
+    }
+    setDeleting(false);
+  }
 
   useEffect(() => {
     loadUsers();
@@ -139,15 +178,117 @@ export function UserManagement() {
                       <span className={`absolute top-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform ${u.visible ? "start-0.5" : "start-5.5"}`}></span>
                     </button>
                   </div>
+                  <div className="w-16 flex justify-center">
+                    <button
+                      onClick={() => setDeleteTarget({ id: u.id, name: u.name, email: u.email })}
+                      className="text-red-500 hover:bg-red-50 rounded-md p-1 transition-colors"
+                      title="מחק משתמש"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               ))}
               <p className="text-xs text-gray-400 mt-2">
                 משתמשים מוסתרים לא יוצגו בדירוג, בהשוואה ובדף הלייב. ההגדרה נשמרת מקומית.
+                כפתור המחיקה מסיר את המשתמש לצמיתות מהמסד + ממערכת האימות.
               </p>
             </div>
           )}
         </CardContent>
       </Card>
+
+      {deleteTarget && typeof window !== "undefined" && createPortal(
+        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => !deleting && setDeleteTarget(null)}>
+          <div
+            className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-6 pt-5 pb-3 bg-red-50 border-b border-red-200">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-red-600">
+                    <path d="M12 9v4M12 17h.01"/>
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-red-900">מחיקת משתמש לצמיתות</h3>
+                  <p className="text-xs text-red-700">פעולה לא הפיכה</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="px-6 py-5 space-y-4">
+              {/* Step 1: warn */}
+              {deleteStep === 1 && (
+                <>
+                  <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+                    <p className="text-sm font-bold text-red-800 mb-1">{deleteTarget.name}</p>
+                    <p className="text-xs text-red-700" dir="ltr">{deleteTarget.email}</p>
+                  </div>
+                  <ul className="text-sm text-gray-700 space-y-1.5 list-disc pr-5">
+                    <li>כל ההימורים של המשתמש יימחקו (בתים, נוקאאוט, עולות, מיוחדים).</li>
+                    <li>החשבון שלו במערכת האימות יימחק — לא יוכל להתחבר.</li>
+                    <li>ה-snapshot של ההימורים יישמר ב-<code>admin_audit_log</code> במקרה של שחזור.</li>
+                  </ul>
+                  <div className="flex justify-between gap-2 pt-1">
+                    <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={deleting}>
+                      ביטול
+                    </Button>
+                    <Button
+                      className="bg-red-600 hover:bg-red-700 text-white"
+                      onClick={() => setDeleteStep(2)}
+                      disabled={deleting}
+                    >
+                      הבנתי — המשך למחיקה ←
+                    </Button>
+                  </div>
+                </>
+              )}
+
+              {/* Step 2: type-to-confirm */}
+              {deleteStep === 2 && (
+                <>
+                  <p className="text-sm text-gray-700">
+                    כדי לאשר, הקלד/י את השם המדויק של המשתמש:{" "}
+                    <code className="bg-gray-100 px-1.5 py-0.5 rounded font-bold">{deleteTarget.name}</code>
+                  </p>
+                  <Input
+                    value={confirmText}
+                    onChange={(e) => setConfirmText(e.target.value)}
+                    placeholder={deleteTarget.name}
+                    autoFocus
+                    className="text-center font-bold"
+                    disabled={deleting}
+                  />
+                  {deleteMsg && (
+                    <p className={`text-sm text-center font-bold ${deleteMsg.includes("שגיאה") ? "text-red-600" : "text-green-600"}`}>
+                      {deleteMsg}
+                    </p>
+                  )}
+                  <div className="flex justify-between gap-2 pt-1">
+                    <Button variant="outline" onClick={() => setDeleteStep(1)} disabled={deleting}>
+                      → חזור
+                    </Button>
+                    <Button
+                      className="bg-red-600 hover:bg-red-700 text-white disabled:bg-red-300"
+                      onClick={performDelete}
+                      disabled={deleting || confirmText.trim() !== deleteTarget.name.trim()}
+                    >
+                      {deleting ? "מוחק..." : "מחק לצמיתות 🗑️"}
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 }

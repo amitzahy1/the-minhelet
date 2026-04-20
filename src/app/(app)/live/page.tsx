@@ -71,8 +71,7 @@ const MOCK_BETTOR_SCORE_PREDS: Record<string, Record<number, { home: number; awa
 
 export default function LivePage() {
   const fireConfetti = useConfetti();
-  const [activeTab, setActiveTab] = useState<"live" | "whatif" | "alive" | "sim">("live");
-  const { predictions, brackets, advancements, profiles } = useSharedData();
+  const { predictions } = useSharedData();
 
   useEffect(() => {
     const hasExact = MOCK_LIVE_MATCHES.some(m => m.yourStatus === "exact");
@@ -82,47 +81,16 @@ export default function LivePage() {
     }
   }, [fireConfetti]);
 
+  // Focused page — only live/upcoming/finished matches. The other tabs
+  // ("מה אם", "מי חי", "סימולציה") moved into the compare page as
+  // additional tabs, so this page is a single-purpose live ticker.
   return (
     <div className="max-w-3xl mx-auto px-4 py-6 pb-24">
-      {/* Page header + tabs */}
-      <div className="mb-6">
-        <div className="flex items-center gap-2 mb-3">
-          <span className="w-3 h-3 rounded-full bg-red-500 animate-pulse"></span>
-          <h1 className="text-3xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>לייב</h1>
-        </div>
-        <div className="flex gap-2 flex-wrap">
-          {([
-            { key: "live" as const, label: "משחקים חיים" },
-            { key: "whatif" as const, label: "מה אם...?" },
-            { key: "alive" as const, label: "מי חי?" },
-            { key: "sim" as const, label: "סימולציה" },
-          ]).map(tab => (
-            <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-              className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all ${
-                activeTab === tab.key ? "bg-gray-900 text-white shadow-md" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
-              }`}>
-              {tab.label}
-            </button>
-          ))}
-        </div>
+      <div className="mb-6 flex items-center gap-2">
+        <span className="w-3 h-3 rounded-full bg-red-500 animate-pulse"></span>
+        <h1 className="text-3xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>לייב</h1>
       </div>
-
-      {activeTab === "live" && <LiveTab predictions={predictions} />}
-      {activeTab === "whatif" && (
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-8 text-center">
-          <span className="text-4xl mb-3 block">🔮</span>
-          <h3 className="text-lg font-bold text-gray-900 mb-2">מה אם...?</h3>
-          <p className="text-sm text-gray-500">הטאב יהיה זמין כשהטורניר יתחיל — תוכלו לבדוק איך תוצאות משפיעות על הניקוד</p>
-        </div>
-      )}
-      {activeTab === "alive" && <WhosAliveTab advancements={advancements} />}
-      {activeTab === "sim" && (
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-8 text-center">
-          <span className="text-4xl mb-3 block">🎮</span>
-          <h3 className="text-lg font-bold text-gray-900 mb-2">סימולציה</h3>
-          <p className="text-sm text-gray-500">הסימולציה תהיה זמינה כשהטורניר יתחיל — תוכלו לסמלץ תוצאות ולראות מי מנצח</p>
-        </div>
-      )}
+      <LiveTab predictions={predictions} />
     </div>
   );
 }

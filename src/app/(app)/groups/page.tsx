@@ -86,8 +86,8 @@ function GroupView({ groupId }: { groupId: string }) {
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
             <div className="px-5 py-3 bg-gray-800 flex items-center justify-between">
               <div>
-                <p className="text-base font-bold text-white">טבלה מחושבת</p>
-                <p className="text-sm text-gray-300">מתעדכנת אוטומטית לפי חוקי FIFA</p>
+                <p className="text-base font-bold text-white">הטבלה החזויה שלך</p>
+                <p className="text-sm text-gray-300">מחושבת מההימורים שלך (לא מתוצאות אמת)</p>
               </div>
               {isComplete && <span className="text-sm text-green-300 font-medium bg-green-900/40 px-3 py-1 rounded-full border border-green-600/30">סופי</span>}
             </div>

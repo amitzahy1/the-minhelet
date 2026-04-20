@@ -231,6 +231,15 @@ function isFilledScore(s: GroupMatchScore | undefined): boolean {
 // Component
 // ---------------------------------------------------------------------------
 
+interface CompletionRow {
+  name: string;
+  email: string;
+  groups: number;
+  knockout: number;
+  specials: number;
+  totalPct: number;
+}
+
 export function UserBetsEditor() {
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string>("");
@@ -238,6 +247,8 @@ export function UserBetsEditor() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [note, setNote] = useState<string>("");
+  const [overview, setOverview] = useState<CompletionRow[]>([]);
+  const [overviewLoading, setOverviewLoading] = useState(true);
 
   // Snapshot of what's LOCKED (what the DB had when we loaded)
   const [lockedBracket, setLockedBracket] = useState<BracketRow>(emptyBracket());
@@ -259,7 +270,20 @@ export function UserBetsEditor() {
 
   useEffect(() => {
     loadUsers();
+    loadOverview();
   }, []);
+
+  async function loadOverview() {
+    setOverviewLoading(true);
+    try {
+      const res = await fetch("/api/admin/completion");
+      const data = await res.json();
+      setOverview((data.users as CompletionRow[]) || []);
+    } catch {
+      setOverview([]);
+    }
+    setOverviewLoading(false);
+  }
 
   async function loadUsers() {
     try {
@@ -574,6 +598,75 @@ export function UserBetsEditor() {
   // ---------------------------------------------------------------------
   return (
     <div className="space-y-4">
+      {/* Users overview — click a row to select that user for editing below */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <CardTitle className="text-base">מהמרים רשומים</CardTitle>
+            <Button variant="outline" size="sm" onClick={() => { loadOverview(); loadUsers(); }}>
+              רענן
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="px-0 pb-0">
+          {overviewLoading ? (
+            <p className="text-gray-400 text-center py-4 text-sm">טוען...</p>
+          ) : overview.length === 0 ? (
+            <p className="text-gray-400 text-center py-4 text-sm">אין מהמרים רשומים</p>
+          ) : (
+            <div className="divide-y divide-gray-100">
+              {overview.map((row) => {
+                const matchingUser = users.find((u) => u.name === row.name || u.email === row.email);
+                const userId = matchingUser?.id;
+                const isSelected = userId && userId === selectedUserId;
+                return (
+                  <button
+                    key={row.name + row.email}
+                    type="button"
+                    onClick={() => {
+                      if (!userId) return;
+                      setSelectedUserId(userId);
+                      loadUserBets(userId);
+                    }}
+                    disabled={!userId}
+                    className={`w-full text-start px-4 py-2.5 flex items-center gap-3 transition-colors ${
+                      isSelected ? "bg-blue-50" : "hover:bg-gray-50"
+                    } ${!userId ? "opacity-50 cursor-not-allowed" : ""}`}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-sm text-gray-900 truncate">{row.name}</p>
+                      {row.email && <p className="text-[11px] text-gray-400 truncate" dir="ltr">{row.email}</p>}
+                    </div>
+                    <div className="flex items-center gap-1 text-[11px]">
+                      <span className={`rounded px-1.5 py-0.5 font-bold ${row.groups === 12 ? "bg-green-50 text-green-700" : "bg-amber-50 text-amber-700"}`}>
+                        {row.groups}/12
+                      </span>
+                      <span className={`rounded px-1.5 py-0.5 font-bold ${row.knockout === 31 ? "bg-green-50 text-green-700" : "bg-amber-50 text-amber-700"}`}>
+                        {row.knockout}/31
+                      </span>
+                      <span className={`rounded px-1.5 py-0.5 font-bold ${row.specials >= 25 ? "bg-green-50 text-green-700" : "bg-amber-50 text-amber-700"}`}>
+                        {row.specials}/25
+                      </span>
+                    </div>
+                    <div className={`w-12 text-end font-black text-sm ${row.totalPct === 100 ? "text-green-700" : row.totalPct >= 50 ? "text-amber-700" : "text-red-600"}`} style={{ fontFamily: "var(--font-inter)" }}>
+                      {row.totalPct}%
+                    </div>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={isSelected ? "text-blue-500" : "text-gray-300"}>
+                      <path d="M15 18l-6-6 6-6"/>
+                    </svg>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+          {selectedUserId && (
+            <div className="px-4 py-2 bg-blue-50/40 border-t border-blue-100 text-xs text-blue-700">
+              נבחר: <b>{users.find((u) => u.id === selectedUserId)?.name}</b>. גלול למטה לטופס העריכה.
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle className="text-base">עריכת הימורי משתמש (מילוי שדות חסרים)</CardTitle>

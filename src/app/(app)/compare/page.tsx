@@ -816,17 +816,17 @@ function DayTable({
                 const time = new Date(m.date).toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
                 const c = perMatchCounts[i];
                 return (
-                  <th key={m.id} className="py-3 px-3 text-center min-w-[15rem] border-e border-gray-100 last:border-e-0">
-                    <div className="flex flex-col items-center gap-2">
-                      <div className="flex items-center gap-2 text-[11px] text-gray-500 font-medium">
-                        <span className="bg-gray-100 rounded-md px-2 py-0.5 font-bold">בית {m.group}</span>
+                  <th key={m.id} className="py-2 px-2 text-center min-w-[12rem] border-e border-gray-100 last:border-e-0">
+                    <div className="flex flex-col items-center gap-1.5">
+                      <div className="flex items-center gap-1.5 text-[10px] text-gray-500 font-medium">
+                        <span className="bg-gray-100 rounded-md px-1.5 py-0.5 font-bold">בית {m.group}</span>
                         <span style={{ fontFamily: "var(--font-inter)" }}>{time}</span>
                       </div>
-                      <div className="flex items-center gap-3 my-1" dir="ltr">
-                        <div className="flex flex-col items-center gap-1 w-16">
-                          <span className="text-4xl leading-none">{getFlag(m.homeTla)}</span>
+                      <div className="flex items-center gap-2" dir="ltr">
+                        <div className="flex flex-col items-center gap-0.5 w-12">
+                          <span className="text-3xl leading-none">{getFlag(m.homeTla)}</span>
                           <span
-                            className="text-xs font-bold text-gray-800 text-center leading-tight"
+                            className="text-[11px] font-bold text-gray-800 text-center leading-tight"
                             style={{ fontFamily: "var(--font-secular)" }}
                             title={getTeamNameHe(m.homeTla) || m.homeTla}
                           >
@@ -834,15 +834,15 @@ function DayTable({
                           </span>
                         </div>
                         <span
-                          className="text-xl font-black tabular-nums text-gray-900 bg-white rounded-xl border-2 border-gray-200 px-3 py-1 shadow-sm"
+                          className="text-base font-black tabular-nums text-gray-900 bg-white rounded-lg border border-gray-200 px-2 py-0.5 shadow-sm"
                           style={{ fontFamily: "var(--font-inter)" }}
                         >
                           {m.homeGoals} - {m.awayGoals}
                         </span>
-                        <div className="flex flex-col items-center gap-1 w-16">
-                          <span className="text-4xl leading-none">{getFlag(m.awayTla)}</span>
+                        <div className="flex flex-col items-center gap-0.5 w-12">
+                          <span className="text-3xl leading-none">{getFlag(m.awayTla)}</span>
                           <span
-                            className="text-xs font-bold text-gray-800 text-center leading-tight"
+                            className="text-[11px] font-bold text-gray-800 text-center leading-tight"
                             style={{ fontFamily: "var(--font-secular)" }}
                             title={getTeamNameHe(m.awayTla) || m.awayTla}
                           >
@@ -851,9 +851,9 @@ function DayTable({
                         </div>
                       </div>
                       {(c.exact + c.toto > 0) && (
-                        <div className="flex items-center gap-2 text-[11px] font-bold">
-                          {c.exact > 0 && <span className="text-green-700 bg-green-50 rounded-full px-2 py-0.5 border border-green-200">🎯 {c.exact}</span>}
-                          {c.toto > 0 && <span className="text-amber-700 bg-amber-50 rounded-full px-2 py-0.5 border border-amber-200">✓ {c.toto}</span>}
+                        <div className="flex items-center gap-1.5 text-[10px] font-bold">
+                          {c.exact > 0 && <span className="text-green-700 bg-green-50 rounded-full px-1.5 py-0.5 border border-green-200">🎯 {c.exact}</span>}
+                          {c.toto > 0 && <span className="text-amber-700 bg-amber-50 rounded-full px-1.5 py-0.5 border border-amber-200">✓ {c.toto}</span>}
                         </div>
                       )}
                     </div>
@@ -880,17 +880,17 @@ function DayTable({
                   }`}
                 >
                   <td
-                    className={`py-3 px-3 font-bold sticky start-0 z-10 border-e border-gray-100 whitespace-nowrap ${
+                    className={`py-2 px-2 font-bold sticky start-0 z-10 border-e border-gray-100 whitespace-nowrap ${
                       isYou ? "bg-blue-50/80" : "bg-white"
                     }`}
                   >
-                    <div className="flex items-center gap-2">
-                      {isLead && <span className="text-base" title="מוביל יומי">👑</span>}
-                      <span className="text-sm text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>
+                    <div className="flex items-center gap-1.5">
+                      {isLead && <span className="text-sm" title="מוביל יומי">👑</span>}
+                      <span className="text-xs text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>
                         {row.name}
                       </span>
                       {isYou && (
-                        <span className="text-[10px] font-bold bg-blue-100 text-blue-700 rounded-full px-2 py-0.5">
+                        <span className="text-[9px] font-bold bg-blue-100 text-blue-700 rounded-full px-1.5 py-0.5">
                           אתה
                         </span>
                       )}
@@ -920,16 +920,16 @@ function DayTable({
                     return (
                       <td
                         key={i}
-                        className={`py-2 px-2 text-center border-e border-gray-100 last:border-e-0 ${bg}`}
+                        className={`py-1.5 px-1.5 text-center border-e border-gray-100 last:border-e-0 ${bg}`}
                       >
                         {cell.hit === "empty" ? (
-                          <span className="text-gray-300 text-xs">לא הימר/ה</span>
+                          <span className="text-gray-300 text-[11px]">לא הימר/ה</span>
                         ) : (
-                          <div className="inline-flex items-center gap-1.5">
-                            <span className={`font-black tabular-nums text-sm ${text}`} style={{ fontFamily: "var(--font-inter)" }}>
+                          <div className="inline-flex items-center gap-1">
+                            <span className={`font-black tabular-nums text-xs ${text}`} style={{ fontFamily: "var(--font-inter)" }}>
                               {cell.pred.home}-{cell.pred.away}
                             </span>
-                            <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold ${badgeBg}`}>
+                            <span className={`inline-flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-bold ${badgeBg}`}>
                               {badge}
                             </span>
                           </div>
@@ -937,10 +937,10 @@ function DayTable({
                       </td>
                     );
                   })}
-                  <td className="py-2 px-3 text-center bg-gradient-to-l from-blue-50/60 to-indigo-50/30 border-s border-blue-100">
+                  <td className="py-1.5 px-2 text-center bg-gradient-to-l from-blue-50/60 to-indigo-50/30 border-s border-blue-100">
                     <div className="inline-flex flex-col items-center">
                       <span
-                        className={`text-xl font-black tabular-nums ${row.points > 0 ? "text-blue-700" : "text-gray-300"}`}
+                        className={`text-base font-black tabular-nums ${row.points > 0 ? "text-blue-700" : "text-gray-300"}`}
                         style={{ fontFamily: "var(--font-inter)" }}
                       >
                         {row.points}

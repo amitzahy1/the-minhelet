@@ -72,18 +72,18 @@ function CategoryCard({
 }) {
   return (
     <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
-      <div className="px-4 py-3 bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/40 border-b border-blue-100/50 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 min-w-0">
-          <span className="text-xl shrink-0">{icon}</span>
+      <div className="px-4 py-3.5 bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/40 border-b border-blue-100/50 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <span className="text-2xl shrink-0">{icon}</span>
           <div className="min-w-0">
-            <h3 className="text-sm font-black text-gray-900 truncate" style={{ fontFamily: "var(--font-secular)" }}>
+            <h3 className="text-base sm:text-lg font-black text-gray-900 leading-tight" style={{ fontFamily: "var(--font-secular)" }}>
               {title}
             </h3>
-            {subtitle && <p className="text-[11px] text-gray-500 truncate">{subtitle}</p>}
+            {subtitle && <p className="text-xs text-gray-500 truncate mt-0.5">{subtitle}</p>}
           </div>
         </div>
         {typeof hitCount === "number" && hitCount > 0 && (
-          <span className="shrink-0 text-[10px] font-bold bg-green-100 text-green-800 rounded-full px-2 py-0.5 border border-green-300">
+          <span className="shrink-0 text-[11px] font-bold bg-green-100 text-green-800 rounded-full px-2.5 py-1 border border-green-300">
             {hitCount} תפסו
           </span>
         )}
@@ -93,12 +93,22 @@ function CategoryCard({
   );
 }
 
-// ---- Leader list (top 3-5 actual leaders of a category) ----
+// ---- Leader list row with optional bettor-picked-this column ----
+interface LeaderItem {
+  label: string;
+  sub?: string;
+  value: string | number;
+  flag?: string;
+  /** Bettors who picked this entry. Rendered as chips to the LEFT of the value
+   *  (visually left in RTL = end direction). Undefined / empty → no chip column. */
+  bettorsPicked?: Array<{ name: string; isYou: boolean }>;
+}
+
 function LeaderList({
   items,
   emptyText = "עדיין אין נתונים",
 }: {
-  items: Array<{ label: string; sub?: string; value: string | number; flag?: string }>;
+  items: LeaderItem[];
   emptyText?: string;
 }) {
   if (items.length === 0) {
@@ -106,28 +116,47 @@ function LeaderList({
   }
   return (
     <div className="space-y-1">
-      {items.map((it, i) => (
-        <div
-          key={i}
-          className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg border ${
-            i === 0 ? "bg-amber-50 border-amber-300" : "bg-gray-50 border-gray-200"
-          }`}
-        >
-          <div className="flex items-center gap-2 min-w-0">
-            <span className={`text-[10px] font-black w-5 text-center ${i === 0 ? "text-amber-700" : "text-gray-500"}`} style={{ fontFamily: "var(--font-inter)" }}>
+      {items.map((it, i) => {
+        const bettors = it.bettorsPicked || [];
+        return (
+          <div
+            key={i}
+            className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg border ${
+              i === 0 ? "bg-amber-50 border-amber-300" : "bg-gray-50 border-gray-200"
+            }`}
+          >
+            <span className={`text-[10px] font-black w-5 text-center shrink-0 ${i === 0 ? "text-amber-700" : "text-gray-500"}`} style={{ fontFamily: "var(--font-inter)" }}>
               {i + 1}
             </span>
             {it.flag && <span className="text-base shrink-0">{it.flag}</span>}
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <p className="text-xs font-bold text-gray-800 truncate">{it.label}</p>
               {it.sub && <p className="text-[10px] text-gray-400 truncate">{it.sub}</p>}
             </div>
+            <span className="text-sm font-black text-gray-900 tabular-nums shrink-0" style={{ fontFamily: "var(--font-inter)" }}>
+              {it.value}
+            </span>
+            {bettors.length > 0 && (
+              <div className="flex items-center flex-wrap gap-1 shrink-0 ms-1 pe-1 border-s border-gray-300 ps-2">
+                <span className="text-[9px] text-gray-500 font-bold">הימרו:</span>
+                {bettors.map((b) => (
+                  <span
+                    key={b.name}
+                    className={`text-[10px] font-bold rounded-full px-1.5 py-0.5 border whitespace-nowrap ${
+                      b.isYou
+                        ? "bg-blue-100 text-blue-700 border-blue-300"
+                        : "bg-white text-gray-700 border-gray-200"
+                    }`}
+                    style={{ fontFamily: "var(--font-secular)" }}
+                  >
+                    {b.name}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
-          <span className="text-sm font-black text-gray-900 tabular-nums shrink-0" style={{ fontFamily: "var(--font-inter)" }}>
-            {it.value}
-          </span>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -301,11 +330,26 @@ export function SpecialTrackerView({ specialBets, advancements, currentUserId }:
     };
   });
   const topScorerHits = topScorerRows.filter((r) => r.status === "hit" || r.status === "leading").length;
-  const topScorerLeaders = stats.scorers.slice(0, 5).map((s) => ({
-    label: s.name,
-    sub: `${getFlag(s.team)} ${getTeamNameHe(s.team) || s.team}`,
-    value: `${s.goals} שערים`,
-  }));
+  const topScorerLeaders = stats.scorers.slice(0, 5).map((s) => {
+    const namePicked = s.name.toLowerCase();
+    const bettorsPicked = bettors
+      .map((b) => {
+        const sb = specialBets.find((x) => x.userId === b.userId);
+        const pick = (sb?.topScorerPlayer || "").trim().toLowerCase();
+        if (!pick) return null;
+        if (namePicked.includes(pick) || pick.includes(namePicked)) {
+          return { name: b.name, isYou: b.isYou };
+        }
+        return null;
+      })
+      .filter(Boolean) as Array<{ name: string; isYou: boolean }>;
+    return {
+      label: s.name,
+      sub: `${getFlag(s.team)} ${getTeamNameHe(s.team) || s.team}`,
+      value: `${s.goals} שערים`,
+      bettorsPicked,
+    };
+  });
 
   // ---- CATEGORY: Top assists ----
   const topAssistsRows: BetRow[] = bettors.map((b) => {
@@ -321,11 +365,26 @@ export function SpecialTrackerView({ specialBets, advancements, currentUserId }:
     };
   });
   const topAssistsHits = topAssistsRows.filter((r) => r.status === "hit" || r.status === "leading").length;
-  const topAssistsLeaders = stats.assistsLeaders.slice(0, 5).map((s) => ({
-    label: s.name,
-    sub: `${getFlag(s.team)} ${getTeamNameHe(s.team) || s.team}`,
-    value: `${s.assists} בישולים`,
-  }));
+  const topAssistsLeaders = stats.assistsLeaders.slice(0, 5).map((s) => {
+    const namePicked = s.name.toLowerCase();
+    const bettorsPicked = bettors
+      .map((b) => {
+        const sb = specialBets.find((x) => x.userId === b.userId);
+        const pick = (sb?.topAssistsPlayer || "").trim().toLowerCase();
+        if (!pick) return null;
+        if (namePicked.includes(pick) || pick.includes(namePicked)) {
+          return { name: b.name, isYou: b.isYou };
+        }
+        return null;
+      })
+      .filter(Boolean) as Array<{ name: string; isYou: boolean }>;
+    return {
+      label: s.name,
+      sub: `${getFlag(s.team)} ${getTeamNameHe(s.team) || s.team}`,
+      value: `${s.assists} בישולים`,
+      bettorsPicked,
+    };
+  });
 
   // ---- CATEGORY: Best attack (team most goals scored) ----
   const teamsByGoals: TeamGoalStats[] = stats.teamStats;
@@ -345,10 +404,17 @@ export function SpecialTrackerView({ specialBets, advancements, currentUserId }:
   const bestAttackHits = bestAttackRows.filter((r) => r.status === "hit" || r.status === "leading").length;
   const bestAttackLeaders = teamsByGoals.slice(0, 5).map((t) => {
     const team = getTeamByCode(t.code);
+    const bettorsPicked = bettors
+      .map((b) => {
+        const sb = specialBets.find((x) => x.userId === b.userId);
+        return sb?.bestAttackTeam === t.code ? { name: b.name, isYou: b.isYou } : null;
+      })
+      .filter(Boolean) as Array<{ name: string; isYou: boolean }>;
     return {
       label: team ? team.name_he : t.code,
       value: `${t.goalsFor} שערים`,
       flag: getFlag(t.code),
+      bettorsPicked,
     };
   });
 
@@ -379,6 +445,12 @@ export function SpecialTrackerView({ specialBets, advancements, currentUserId }:
         label: getTeamByCode(dirtiestActual)?.name_he || dirtiestActual,
         value: stats.actuals?.dirtiest_team_cards ? `${stats.actuals.dirtiest_team_cards} כרטיסים` : "סומן ע״י מנהל",
         flag: getFlag(dirtiestActual),
+        bettorsPicked: bettors
+          .map((b) => {
+            const sb = specialBets.find((x) => x.userId === b.userId);
+            return sb?.dirtiestTeam === dirtiestActual ? { name: b.name, isYou: b.isYou } : null;
+          })
+          .filter(Boolean) as Array<{ name: string; isYou: boolean }>,
       }]
     : [];
 
@@ -396,10 +468,19 @@ export function SpecialTrackerView({ specialBets, advancements, currentUserId }:
     };
   });
   const prolificHits = prolificRows.filter((r) => r.status === "hit" || r.status === "leading").length;
-  const prolificLeaders = stats.groupStats.slice(0, 4).map((g) => ({
-    label: `בית ${g.letter}`,
-    value: `${g.goals} שערים (${g.matches} משחקים)`,
-  }));
+  const prolificLeaders = stats.groupStats.slice(0, 4).map((g) => {
+    const bettorsPicked = bettors
+      .map((b) => {
+        const sb = specialBets.find((x) => x.userId === b.userId);
+        return sb?.prolificGroup === g.letter ? { name: b.name, isYou: b.isYou } : null;
+      })
+      .filter(Boolean) as Array<{ name: string; isYou: boolean }>;
+    return {
+      label: `בית ${g.letter}`,
+      value: `${g.goals} שערים (${g.matches} משחקים)`,
+      bettorsPicked,
+    };
+  });
 
   // ---- CATEGORY: Driest group ----
   const driestRows: BetRow[] = bettors.map((b) => {
@@ -426,10 +507,19 @@ export function SpecialTrackerView({ specialBets, advancements, currentUserId }:
     };
   });
   const driestHits = driestRows.filter((r) => r.status === "hit" || r.status === "leading").length;
-  const driestLeaders = [...stats.groupStats].reverse().slice(0, 4).map((g) => ({
-    label: `בית ${g.letter}`,
-    value: `${g.goals} שערים (${g.matches} משחקים)`,
-  }));
+  const driestLeaders = [...stats.groupStats].reverse().slice(0, 4).map((g) => {
+    const bettorsPicked = bettors
+      .map((b) => {
+        const sb = specialBets.find((x) => x.userId === b.userId);
+        return sb?.driestGroup === g.letter ? { name: b.name, isYou: b.isYou } : null;
+      })
+      .filter(Boolean) as Array<{ name: string; isYou: boolean }>;
+    return {
+      label: `בית ${g.letter}`,
+      value: `${g.goals} שערים (${g.matches} משחקים)`,
+      bettorsPicked,
+    };
+  });
 
   // ---- CATEGORY: Penalties over/under ----
   const penaltiesRows: BetRow[] = bettors.map((b) => {

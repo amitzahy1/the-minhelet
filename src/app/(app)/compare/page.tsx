@@ -7,6 +7,7 @@ import { GROUPS } from "@/lib/tournament/groups";
 import { MATCHUPS } from "@/lib/matchups";
 import { computeGroupHits, hitCounts, normalizeGroupLetter, type BettorHit, type FinishedMatch } from "@/lib/results-hits";
 import { getFlag, getTeamNameHe } from "@/lib/flags";
+import { SpecialTrackerView } from "./SpecialTrackerView";
 
 // Color coding: each unique value gets a FIXED color — same pick = same color everywhere
 const VALUE_COLORS = [
@@ -335,71 +336,16 @@ export default function ComparePage() {
         </div>
       )}
 
-      {/* === SPECIALS VIEW === transposed: bettors as columns, bet rows */}
+      {/* === SPECIALS VIEW === Live tracker (new) — card-per-category with real
+          actual leaders from /api/tournament-stats + per-bettor on-track badges */}
       {view === "specials" && (
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
-          <TransposedBetTable
-            bettors={BETTORS}
-            colorMap={specColors}
-            rows={[
-              { label: "מלך שערים", render: (b) => ({ val: b.topScorer, node: <span className="font-medium text-gray-700">{b.topScorer}</span> }) },
-              { label: "מלך בישולים", render: (b) => ({ val: b.topAssists, node: <span className="font-medium text-gray-700">{b.topAssists}</span> }) },
-              { label: "התקפה טובה ביותר", render: (b) => ({ val: b.bestAttack, node: <span className="text-gray-700">{F[b.bestAttack]} {b.bestAttack}</span> }) },
-              { label: "כסחנית", render: (b) => ({ val: b.dirtiestTeam, node: <span className="text-gray-700">{F[b.dirtiestTeam]} {b.dirtiestTeam}</span> }) },
-              { label: "בית פורה", render: (b) => ({ val: b.prolificGroup, node: <span className="text-gray-700">בית {b.prolificGroup}</span> }) },
-              { label: "בית יבש", render: (b) => ({ val: b.driestGroup, node: <span className="text-gray-700">בית {b.driestGroup}</span> }) },
-              ...MATCHUPS.map((mu, i) => ({
-                label: `${mu.flag1} ${mu.p1Short} vs ${mu.p2Short} ${mu.flag2}`,
-                render: (b: Bettor) => {
-                  const pick = [b.matchup1, b.matchup2, b.matchup3][i] || "";
-                  if (pick === "X") {
-                    return {
-                      val: pick,
-                      node: (
-                        <span className="inline-flex items-center gap-1 text-gray-600 text-[11px] font-bold">
-                          <span>🤝</span>
-                          <span>שווה</span>
-                        </span>
-                      ),
-                    };
-                  }
-                  const flag = pick === "1" ? mu.flag1 : pick === "2" ? mu.flag2 : "";
-                  const name = pick === "1" ? mu.p1Short : pick === "2" ? mu.p2Short : "";
-                  return {
-                    val: pick,
-                    node: (
-                      <span className="inline-flex items-center gap-1 text-gray-700 text-[11px] font-bold">
-                        {flag && <span className="text-sm">{flag}</span>}
-                        <span>{name || "—"}</span>
-                      </span>
-                    ),
-                  };
-                },
-              })),
-              {
-                label: "פנדלים (מעל/מתחת 18.5)",
-                render: (b) => ({
-                  val: b.penalties,
-                  node:
-                    b.penalties === "OVER" ? (
-                      <span className="inline-flex items-center gap-1 text-emerald-700 text-[11px] font-bold">
-                        <span>⬆</span>
-                        <span>מעל 18.5</span>
-                      </span>
-                    ) : b.penalties === "UNDER" ? (
-                      <span className="inline-flex items-center gap-1 text-blue-700 text-[11px] font-bold">
-                        <span>⬇</span>
-                        <span>מתחת 18.5</span>
-                      </span>
-                    ) : (
-                      <span className="text-gray-400">—</span>
-                    ),
-                }),
-              },
-            ]}
-          />
-        </div>
+        <SpecialTrackerView
+          specialBets={specialBets}
+          advancements={advancements}
+          currentUserId={currentUserId}
+        />
       )}
+
 
       {/* === GROUPS VIEW === */}
       {view === "groups" && (

@@ -119,6 +119,16 @@ export default function SpecialBetsPage() {
   const set = useBettingStore((s) => s.setSpecialBet);
   const knockout = useBettingStore((s) => s.knockout);
 
+  // Defensive pad: saves .filter(Boolean) the arrays, so the store or DB
+  // may return shorter lists. Always render the canonical 4 / 8 / 3 slots.
+  const pad = (arr: string[] | undefined, n: number): string[] => {
+    const a = Array.isArray(arr) ? [...arr] : [];
+    while (a.length < n) a.push("");
+    return a.slice(0, n);
+  };
+  const paddedSemis = pad(sb.semifinalists, 4);
+  const paddedQuarters = pad(sb.quarterfinalists, 8);
+
   // Derive expected advances from the user's knockout tree
   const expected = useMemo(() => ({
     winner: knockout.final?.winner || "",
@@ -301,18 +311,18 @@ export default function SpecialBetsPage() {
 
         <SectionCard title="עולות לחצי גמר" subtitle="4 נבחרות" points="6 נק׳ כ״א" warning={sfMismatch}>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {sb.semifinalists.map((v, i) => (
-              <TeamSelect key={i} value={v} onChange={(val) => { const n = [...sb.semifinalists]; n[i] = val; set("semifinalists", n); }}
-                label={`חצי ${i+1}`} excludeCodes={sb.semifinalists.filter((s, j) => j !== i && s)} />
+            {paddedSemis.map((v, i) => (
+              <TeamSelect key={i} value={v} onChange={(val) => { const n = [...paddedSemis]; n[i] = val; set("semifinalists", n); }}
+                label={`חצי ${i+1}`} excludeCodes={paddedSemis.filter((s, j) => j !== i && s)} />
             ))}
           </div>
         </SectionCard>
 
         <SectionCard title="עולות לרבע גמר" subtitle="8 נבחרות" points="4 נק׳ כ״א" warning={qfMismatch}>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {sb.quarterfinalists.map((v, i) => (
-              <TeamSelect key={i} value={v} onChange={(val) => { const n = [...sb.quarterfinalists]; n[i] = val; set("quarterfinalists", n); }}
-                label={`רבע ${i+1}`} excludeCodes={sb.quarterfinalists.filter((s, j) => j !== i && s)} />
+            {paddedQuarters.map((v, i) => (
+              <TeamSelect key={i} value={v} onChange={(val) => { const n = [...paddedQuarters]; n[i] = val; set("quarterfinalists", n); }}
+                label={`רבע ${i+1}`} excludeCodes={paddedQuarters.filter((s, j) => j !== i && s)} />
             ))}
           </div>
         </SectionCard>

@@ -201,8 +201,13 @@ export async function loadBetsFromSupabase(
         winner: advancement?.winner || "",
         finalist1: advancement?.advance_to_final?.[0] || "",
         finalist2: advancement?.advance_to_final?.[1] || "",
-        semifinalists: advancement?.advance_to_sf || ["", "", "", ""],
-        quarterfinalists: advancement?.advance_to_qf || ["", "", "", "", "", "", "", ""],
+        // Always pad back to the expected slot count. We save with
+        // .filter(Boolean) which collapses the array (so a 2-of-4 pick is
+        // stored as a 2-element list). Without this guard, .map() in
+        // special-bets/page.tsx renders fewer TeamSelects than expected and
+        // the "עולות לחצי גמר" / "עולות לרבע גמר" cards appear empty.
+        semifinalists: Array.from({ length: 4 }, (_, i) => advancement?.advance_to_sf?.[i] ?? ""),
+        quarterfinalists: Array.from({ length: 8 }, (_, i) => advancement?.advance_to_qf?.[i] ?? ""),
         topScorerTeam: special?.top_scorer_team || "",
         topScorerPlayer: special?.top_scorer_player || "",
         topAssistsTeam: special?.top_assists_team || "",

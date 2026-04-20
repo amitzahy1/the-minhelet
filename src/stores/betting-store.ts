@@ -351,6 +351,11 @@ export const useBettingStore = create<BettingState & BettingActions>()(
         try {
           const { loadBetsFromSupabase } = await import("@/lib/supabase/sync");
           const { data } = await loadBetsFromSupabase();
+          // Gate the subscribe so the DB-overwrite isn't treated as a user
+          // edit — otherwise the "pending" toast flashes on every login
+          // whenever the server state differs from localStorage (e.g. after
+          // an admin DB reset).
+          isHydrating = true;
           set((state) => {
             if (!data) {
               // DB has nothing for this user → reset local state so ghost
@@ -389,6 +394,9 @@ export const useBettingStore = create<BettingState & BettingActions>()(
           snapshotCounts();
         } catch (e) {
           console.warn("hydrateFromSupabase failed:", e);
+        } finally {
+          // Re-open the subscribe gate so real user edits are captured.
+          isHydrating = false;
         }
       },
 
@@ -598,6 +606,9 @@ let lastCounts = { groups: 0, knockout: 0, specials: 0, allDone: false };
 let lastGroupFilled: Record<string, number> = {};
 let lastBetSig = "";
 let hasHydrated = false;
+// True while hydrateFromSupabase is overwriting local state with DB content.
+// The subscribe callback must ignore these writes — they're not user edits.
+let isHydrating = false;
 
 function countGroupFilled(state: BettingState, letter: string): number {
   return (state.groups[letter]?.scores || []).filter((s) => s.home !== null && s.away !== null).length;
@@ -634,13 +645,18 @@ function snapshotCounts() {
 
 if (typeof window !== "undefined") {
   useBettingStore.subscribe((state) => {
-    // Don't treat hydration as a user change — it would flash the "pending"
-    // toast on every page load and trigger a phantom save cycle.
+    // Don't treat initial localStorage hydration as a user change.
     if (!hasHydrated) return;
+    // Don't treat DB→local hydration as a user change either — when the
+    // server state differs from localStorage (e.g. after an admin reset),
+    // this write will change the sig but must not flash "pending".
+    if (isHydrating) {
+      lastBetSig = betSig(state);
+      return;
+    }
 
-    // Ignore non-bet mutations (currentGroupIndex, hydrate-from-DB writing
-    // the same data back, etc.) so the save toast doesn't flash when the
-    // user just navigates or logs in.
+    // Ignore non-bet mutations (currentGroupIndex etc.) so the save toast
+    // doesn't flash when the user just navigates around.
     const sig = betSig(state);
     if (sig === lastBetSig) return;
     lastBetSig = sig;

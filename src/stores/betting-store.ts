@@ -537,7 +537,12 @@ async function performSave(state: BettingState) {
 // This stops us from hammering Supabase with every single keystroke while
 // still providing a safety-net save at the end of each stage.
 let lastCounts = { groups: 0, knockout: 0, specials: 0, allDone: false };
+let lastGroupFilled: Record<string, number> = {};
 let hasHydrated = false;
+
+function countGroupFilled(state: BettingState, letter: string): number {
+  return (state.groups[letter]?.scores || []).filter((s) => s.home !== null && s.away !== null).length;
+}
 
 // Hydrate initial counts on first load so we don't spuriously save on rehydrate.
 function snapshotCounts() {
@@ -548,6 +553,8 @@ function snapshotCounts() {
     specials: s.getSpecialsFilledCount(),
     allDone: s.areAllBetsFilled(),
   };
+  lastGroupFilled = {};
+  for (const letter of GROUP_LETTERS) lastGroupFilled[letter] = countGroupFilled(s, letter);
 }
 
 if (typeof window !== "undefined") {
@@ -583,13 +590,30 @@ if (typeof window !== "undefined") {
 
     const allDone = groups === 12 && knockout === 31 && specials === 25;
 
+    // Per-group completion detection — fires when the user enters the LAST
+    // match score of any single group, independent of the overall stage
+    // rollup. Gives each completed group its own safety-net save.
+    const currentGroupFilled: Record<string, number> = {};
+    for (const letter of GROUP_LETTERS) currentGroupFilled[letter] = countGroupFilled(state, letter);
+    const anyGroupJustCompleted = GROUP_LETTERS.some((letter) => {
+      const prev = lastGroupFilled[letter] ?? 0;
+      return prev < 6 && currentGroupFilled[letter] === 6;
+    });
+    lastGroupFilled = currentGroupFilled;
+
     // Milestone detection: auto-save when a stage transitions incomplete → complete.
     const groupsJustCompleted = lastCounts.groups < 12 && groups === 12;
     const knockoutJustCompleted = lastCounts.knockout < 31 && knockout === 31;
     const specialsJustCompleted = lastCounts.specials < 25 && specials === 25;
 
-    // Once fully complete, EVERY edit auto-saves (debounced 5s).
-    const shouldAutoSave = allDone || groupsJustCompleted || knockoutJustCompleted || specialsJustCompleted;
+    // Once fully complete, EVERY edit auto-saves (debounced 5s). Any single
+    // group finishing also triggers a save so the user never has >1 group
+    // of unsaved progress.
+    const shouldAutoSave = allDone
+      || anyGroupJustCompleted
+      || groupsJustCompleted
+      || knockoutJustCompleted
+      || specialsJustCompleted;
 
     lastCounts = { groups, knockout, specials, allDone };
 

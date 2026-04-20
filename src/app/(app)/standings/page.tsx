@@ -69,9 +69,6 @@ function MissingBetsBanner() {
   const nextPage = groups < 12 ? "/groups" : knockoutFilled < 31 ? "/knockout" : "/special-bets";
   const nextLabel = groups < 12 ? "שלב הבתים" : knockoutFilled < 31 ? "עץ הטורניר" : "הימורים מיוחדים";
 
-  const hasBets = groups > 0 || knockoutFilled > 0 || specialsFilled > 0;
-  if (!hasBets) return null;
-
   return (
     <div className="mb-5">
       {!allDone && (

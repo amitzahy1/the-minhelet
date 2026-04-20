@@ -5,20 +5,15 @@ import Link from "next/link";
 import { useBettingStore } from "@/stores/betting-store";
 
 /**
- * Explicit save button anchored at the bottom of each betting page.
- * Before the user finishes all bets, the auto-save is disabled — so this
- * button is their only way to persist partial progress. After they save we
- * show a subtle "נשמר" confirmation and (if they're not on the last stage)
- * offer a link to the next stage.
+ * Slim inline save bar — sits at the bottom of each betting page as a
+ * quiet footer with a progress bar, a compact save button, and (after a
+ * successful save) a link to the next stage. Intentionally understated so
+ * it doesn't dominate the layout.
  */
 type Props = {
-  /** ILabel on the button itself — e.g. "💾 שמור והמשך לעץ הטורניר" */
   label: string;
-  /** Optional href to navigate to after successful save */
   nextHref?: string;
-  /** Label shown when save completes and a nextHref exists */
   nextLabel?: string;
-  /** Completion percentage for this stage (0–100) — tints the button */
   completion: number;
 };
 
@@ -39,50 +34,51 @@ export function SaveAndContinue({ label, nextHref, nextLabel, completion }: Prop
   };
 
   const isFull = completion === 100;
-  const btnClass = isFull
-    ? "bg-gradient-to-l from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
-    : "bg-gradient-to-l from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600";
+  const barColor = isFull ? "bg-green-500" : completion > 0 ? "bg-blue-500" : "bg-gray-200";
+  const btnColor = isFull
+    ? "bg-green-600 hover:bg-green-700"
+    : "bg-gray-900 hover:bg-gray-800";
+
+  const hint = label.replace("💾 ", "").replace(" ✓", "");
 
   return (
-    <div className="mt-8 mb-4 rounded-2xl border-2 border-blue-200 bg-gradient-to-l from-blue-50 via-white to-indigo-50 p-4 sm:p-6 shadow-md">
-      <div className="flex items-center justify-between mb-3">
-        <div>
-          <h3 className="text-base sm:text-lg font-bold text-gray-900">שמירת הימורים</h3>
-          <p className="text-xs sm:text-sm text-gray-600 mt-1">
-            {isFull
-              ? "מילאת את כל ההימורים בשלב הזה 🎉 לחץ שמור כדי לשמור את ההתקדמות."
-              : `מילאת ${completion}% מההימורים. לחץ שמור כדי שלא לאבד את ההתקדמות.`}
-          </p>
+    <div className="mt-6 rounded-xl border border-gray-200 bg-white shadow-sm px-4 py-3 flex items-center gap-3">
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between mb-1 gap-2">
+          <span className="text-xs font-bold text-gray-700 shrink-0" style={{ fontFamily: "var(--font-inter)" }}>
+            {completion}%
+          </span>
+          <span className="text-[11px] text-gray-400 font-medium truncate text-end">{hint}</span>
         </div>
-        <div className="text-3xl sm:text-4xl font-bold text-blue-600 tabular-nums" style={{ fontFamily: "Inter" }}>
-          {completion}%
+        <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+          <div className={`h-full rounded-full transition-all ${barColor}`} style={{ width: `${completion}%` }} />
         </div>
       </div>
 
       <button
         onClick={handleSave}
         disabled={state === "saving"}
-        className={`w-full rounded-xl px-4 py-3 text-white font-bold text-base sm:text-lg shadow-md transition-all disabled:opacity-60 ${btnClass}`}
+        className={`shrink-0 px-4 py-2 rounded-lg text-white text-sm font-bold shadow-sm transition-all disabled:opacity-60 ${btnColor}`}
       >
-        {state === "saving" && "⏳ שומר..."}
-        {state === "saved" && "✓ נשמר בהצלחה"}
-        {state === "error" && `⚠ ${errorMsg || "שמירה נכשלה"} — לחץ שוב`}
-        {state === "idle" && label}
+        {state === "saving" && "שומר…"}
+        {state === "saved" && "✓ נשמר"}
+        {state === "error" && "⚠ נסה שוב"}
+        {state === "idle" && "💾 שמור"}
       </button>
 
       {state === "saved" && nextHref && (
         <Link
           href={nextHref}
-          className="mt-3 w-full flex items-center justify-center rounded-xl px-4 py-3 bg-white border-2 border-blue-300 text-blue-700 font-bold text-base hover:bg-blue-50 transition-all"
+          className="shrink-0 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold shadow-sm transition-all"
         >
-          {nextLabel || "המשך →"}
+          {nextLabel || "המשך"} ←
         </Link>
       )}
 
-      {!isFull && (
-        <p className="mt-3 text-xs text-gray-500 text-center">
-          ℹ️ טיפ: ההימורים לא יישמרו אוטומטית עד שתסיים את כל השלב. לחץ על כפתור השמירה בעת שעזבת את הדף.
-        </p>
+      {state === "error" && errorMsg && (
+        <span className="shrink-0 text-[11px] text-red-600 max-w-[140px] truncate" title={errorMsg}>
+          {errorMsg}
+        </span>
       )}
     </div>
   );

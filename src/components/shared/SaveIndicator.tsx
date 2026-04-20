@@ -27,7 +27,7 @@ export function SaveIndicator() {
   if (!visible || status === "idle") return null;
 
   const styles: Record<Exclude<typeof status, "idle">, { bg: string; border: string; text: string; icon: string; label: string }> = {
-    pending: { bg: "bg-amber-50", border: "border-amber-200", text: "text-amber-800", icon: "⋯", label: "שינוי ממתין לשמירה" },
+    pending: { bg: "bg-amber-50", border: "border-amber-300", text: "text-amber-800", icon: "⚠", label: "שינויים לא נשמרו — לחץ שמור" },
     saving:  { bg: "bg-blue-50", border: "border-blue-200", text: "text-blue-700", icon: "💾", label: "שומר..." },
     saved:   { bg: "bg-green-50", border: "border-green-300", text: "text-green-800", icon: "✓", label: "נשמר" },
     error:   { bg: "bg-red-50", border: "border-red-300", text: "text-red-700", icon: "⚠", label: lastError ? `שגיאה: ${lastError}` : "שגיאה בשמירה" },

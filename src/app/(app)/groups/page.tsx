@@ -8,6 +8,7 @@ import { calculateStandings } from "@/lib/tournament/standings";
 import { FLAGS as __FLAGS } from "@/lib/flags";
 import { SwipeableGroups } from "@/components/shared/SwipeableGroups";
 import { SlotMachineScore } from "@/components/shared/SlotMachineScore";
+import { SaveAndContinue } from "@/components/shared/SaveAndContinue";
 import type { GroupMatchPrediction } from "@/types";
 
 // Groups data from tournament config
@@ -299,16 +300,13 @@ export default function GroupsPage() {
         </div>
       )}
 
-      {/* Last-group → next stage CTA */}
-      {currentGroupIndex === 11 && completedGroups === 12 && (
-        <div className="mt-6 text-center">
-          <Link href="/knockout"
-            className="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-gradient-to-l from-green-500 to-emerald-600 text-white font-bold text-base shadow-lg shadow-green-500/25 hover:shadow-green-500/35 hover:scale-[1.02] transition-all">
-            <span>עבור לעץ הטורניר</span>
-            <span className="text-xl">←</span>
-          </Link>
-        </div>
-      )}
+      {/* Explicit save button — always visible so partial progress persists */}
+      <SaveAndContinue
+        label={completedGroups === 12 ? "💾 שמור והמשך לעץ הטורניר" : "💾 שמור הימורים עד כה"}
+        nextHref="/knockout"
+        nextLabel="המשך לעץ הטורניר →"
+        completion={Math.round((totalFilled / 72) * 100)}
+      />
     </div>
   );
 }

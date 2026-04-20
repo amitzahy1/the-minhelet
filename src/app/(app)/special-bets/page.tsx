@@ -8,6 +8,7 @@ import { ALL_TEAMS, GROUPS as GROUP_DATA } from "@/lib/tournament/groups";
 import { getSquad } from "@/lib/tournament/squads-data";
 import { getFlag } from "@/lib/flags";
 import { PageTransition } from "@/components/shared/PageTransition";
+import { SaveAndContinue } from "@/components/shared/SaveAndContinue";
 import { useConfetti } from "@/hooks/useConfetti";
 import { MATCHUPS } from "@/lib/matchups";
 
@@ -370,6 +371,11 @@ export default function SpecialBetsPage() {
             ))}
           </div>
         </SectionCard>
+
+        <SaveAndContinue
+          label={filledCount === 25 ? "💾 שמור הכל ✓" : "💾 שמור הימורים עד כה"}
+          completion={Math.round((filledCount / 25) * 100)}
+        />
       </div>
     </div>
     </PageTransition>

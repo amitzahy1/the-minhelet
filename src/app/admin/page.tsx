@@ -113,8 +113,7 @@ export default function AdminPage() {
         <Tabs defaultValue="status" dir="rtl">
           <TabsList className="mb-4 flex-wrap">
             <TabsTrigger value="status">סטטוס מערכת</TabsTrigger>
-            <TabsTrigger value="results">תוצאות משחקים</TabsTrigger>
-            <TabsTrigger value="best-thirds">🥉 8 שלישיים</TabsTrigger>
+            <TabsTrigger value="results">הזנת תוצאות</TabsTrigger>
             <TabsTrigger value="scoring">ניקוד</TabsTrigger>
             <TabsTrigger value="tournaments">טורנירים</TabsTrigger>
             <TabsTrigger value="guide">מדריך למנהל</TabsTrigger>
@@ -129,10 +128,9 @@ export default function AdminPage() {
             <div className="space-y-4">
               <MatchResultsEntry />
               <SpecialResultsEntry />
+              <BestThirdsOverride />
             </div>
           </TabsContent>
-
-          <TabsContent value="best-thirds"><BestThirdsOverride /></TabsContent>
 
           <TabsContent value="scoring">
             {scoringConfig && (

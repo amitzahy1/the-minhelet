@@ -125,7 +125,7 @@ export function BestThirdsOverride() {
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center justify-between flex-wrap gap-2">
-            <span>עקיפה ידנית — 8 עולות מהמקום השלישי</span>
+            <span>דירוג מקומות שלישיים — עקיפה ידנית</span>
             <Badge
               variant="outline"
               className={savedOverride ? "bg-purple-50 text-purple-700" : "bg-emerald-50 text-emerald-700"}

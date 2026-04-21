@@ -107,10 +107,10 @@ export function BestThirdsPanel({ matches, overrideGroups }: Props) {
       <div className="px-4 py-3 bg-gradient-to-l from-white via-emerald-50/30 to-green-50/40 border-b border-emerald-100/50 flex items-center justify-between flex-wrap gap-2">
         <div>
           <h3 className="text-base font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>
-            8 עולות מהמקום השלישי
+            דירוג מקומות שלישיים
           </h3>
           <p className="text-[11px] text-gray-500 mt-0.5">
-            דירוג חי של 12 המקומות השלישיים — 8 הטובות עולות לשמינית הגמר
+            12 המקומות השלישיים מדורגים חי — 8 הטובות עולות לשמינית הגמר
           </p>
         </div>
         <div className="flex items-center gap-2">

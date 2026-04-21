@@ -270,7 +270,7 @@ function TeamRow({
 export function LiveGroupsAndBracket() {
   const [matches, setMatches] = useState<MatchApi[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"groups" | "thirds" | "bracket">("groups");
+  const [tab, setTab] = useState<"groups" | "bracket">("groups");
   const [thirdsOverride, setThirdsOverride] = useState<string[] | null>(null);
 
   useEffect(() => {
@@ -349,14 +349,6 @@ export function LiveGroupsAndBracket() {
           🏟️ טבלאות בתים
         </button>
         <button
-          onClick={() => setTab("thirds")}
-          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
-            tab === "thirds" ? "bg-gray-900 text-white shadow-md" : "text-gray-500 hover:bg-gray-200 border border-gray-200"
-          }`}
-        >
-          🥉 8 שלישיים
-        </button>
-        <button
           onClick={() => setTab("bracket")}
           className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
             tab === "bracket" ? "bg-gray-900 text-white shadow-md" : "text-gray-500 hover:bg-gray-200 border border-gray-200"
@@ -367,15 +359,14 @@ export function LiveGroupsAndBracket() {
       </div>
 
       {tab === "groups" && (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {GROUP_LETTERS.map((l) => (
-            <GroupCard key={l} letter={l} matches={matches} />
-          ))}
+        <div className="space-y-4">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {GROUP_LETTERS.map((l) => (
+              <GroupCard key={l} letter={l} matches={matches} />
+            ))}
+          </div>
+          <BestThirdsPanel matches={matches} overrideGroups={thirdsOverride} />
         </div>
-      )}
-
-      {tab === "thirds" && (
-        <BestThirdsPanel matches={matches} overrideGroups={thirdsOverride} />
       )}
 
       {tab === "bracket" && (

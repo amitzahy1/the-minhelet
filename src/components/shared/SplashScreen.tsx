@@ -39,28 +39,32 @@ export function SplashScreen() {
   }, []);
 
   return (
-    <div className="relative min-h-screen w-full max-w-[100vw] bg-gradient-to-b from-[#F8F9FB] via-white to-[#EEF2FF] flex items-center justify-center overflow-hidden" dir="rtl">
-      {/* Animated background orbs */}
+    <div
+      className="fixed inset-0 w-full h-full bg-gradient-to-b from-[#F8F9FB] via-white to-[#EEF2FF] flex items-center justify-center"
+      style={{ overflow: "hidden" }}
+      dir="rtl"
+    >
+      {/* Decorative orbs — sm+ only so they can't trigger horizontal scroll on mobile */}
       <motion.div
-        className="absolute w-[500px] h-[500px] rounded-full bg-blue-400/5"
+        className="hidden sm:block absolute w-[500px] h-[500px] rounded-full bg-blue-400/5 pointer-events-none"
         animate={{ x: [0, 40, -20, 0], y: [0, -30, 20, 0], scale: [1, 1.15, 0.95, 1] }}
         transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
         style={{ top: "5%", right: "-10%" }}
       />
       <motion.div
-        className="absolute w-[400px] h-[400px] rounded-full bg-indigo-400/5"
+        className="hidden sm:block absolute w-[400px] h-[400px] rounded-full bg-indigo-400/5 pointer-events-none"
         animate={{ x: [0, -30, 25, 0], y: [0, 25, -20, 0], scale: [1, 0.9, 1.1, 1] }}
         transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
         style={{ bottom: "0%", left: "-5%" }}
       />
 
       {/* Dot pattern */}
-      <div className="absolute inset-0 opacity-[0.03]" style={{
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{
         backgroundImage: "radial-gradient(circle at 1px 1px, #6366f1 1px, transparent 0)",
         backgroundSize: "40px 40px",
       }} />
 
-      <div className="relative flex flex-col items-center px-4 sm:px-6 w-full max-w-full">
+      <div className="relative flex flex-col items-center px-4 sm:px-6 w-full max-w-[100vw] text-center">
 
         {/* Logo with layered animations */}
         <motion.div

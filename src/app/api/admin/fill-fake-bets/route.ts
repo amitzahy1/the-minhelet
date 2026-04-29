@@ -59,13 +59,25 @@ export async function POST(request: Request) {
     .eq("league_id", leagueId);
   const existingUserIds = new Set((brackets || []).map((b) => b.user_id));
 
-  // Exclude the bot — it has its own generator + button
+  // Exclude the bot (has its own generator) AND the current admin (so their
+  // real bets aren't clobbered when the filler runs).
   const { data: authData } = await supabase.auth.admin.listUsers();
-  const botId = (authData?.users || []).find((u) => u.email === BOT_EMAIL)?.id;
+  const allAuthUsers = authData?.users || [];
+  const botId = allAuthUsers.find((u) => u.email === BOT_EMAIL)?.id;
+  const callerId = allAuthUsers.find((u) => u.email === adminEmail)?.id;
+
+  // Any other admin account in the admins table is also excluded by default.
+  const { data: allAdmins } = await supabase.from("admins").select("email");
+  const adminEmails = new Set((allAdmins || []).map((a) => a.email));
+  const adminIds = new Set(
+    allAuthUsers.filter((u) => u.email && adminEmails.has(u.email)).map((u) => u.id)
+  );
 
   const candidates = (profiles || []).filter((p) => {
     if (!p.id) return false;
     if (p.id === botId) return false;
+    if (p.id === callerId) return false;
+    if (adminIds.has(p.id)) return false;
     if (!overwrite && existingUserIds.has(p.id)) return false;
     return true;
   });

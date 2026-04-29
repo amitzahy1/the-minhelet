@@ -19,6 +19,7 @@ import { AdminGuide } from "./components/AdminGuide";
 // CompletionMatrix moved into UserBetsEditor tab — no longer a separate admin tab.
 import { UserBetsEditor } from "./components/UserBetsEditor";
 import { BotGenerator } from "./components/BotGenerator";
+import { BestThirdsOverride } from "./components/BestThirdsOverride";
 
 interface ScoringConfig {
   toto_group: number; toto_r32: number; toto_r16: number;
@@ -112,7 +113,7 @@ export default function AdminPage() {
         <Tabs defaultValue="status" dir="rtl">
           <TabsList className="mb-4 flex-wrap">
             <TabsTrigger value="status">סטטוס מערכת</TabsTrigger>
-            <TabsTrigger value="results">תוצאות משחקים</TabsTrigger>
+            <TabsTrigger value="results">הזנת תוצאות</TabsTrigger>
             <TabsTrigger value="scoring">ניקוד</TabsTrigger>
             <TabsTrigger value="tournaments">טורנירים</TabsTrigger>
             <TabsTrigger value="guide">מדריך למנהל</TabsTrigger>
@@ -127,6 +128,7 @@ export default function AdminPage() {
             <div className="space-y-4">
               <MatchResultsEntry />
               <SpecialResultsEntry />
+              <BestThirdsOverride />
             </div>
           </TabsContent>
 

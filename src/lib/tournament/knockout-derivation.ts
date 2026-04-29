@@ -5,6 +5,7 @@
 // ============================================================================
 
 import { GROUPS } from "./groups";
+import { DEFAULT_ASSIGNMENT, type ThirdsAssignment } from "./annex-c";
 
 export interface GroupStateMinimal {
   order: number[];
@@ -16,26 +17,40 @@ export interface KOStateMinimal {
   winner: string | null;
 }
 
-// FIFA-prescribed R32 matchups. h/a use slot notation:
-//   A1 = winner of group A, A2 = runner-up, A3 = 3rd (Annex C resolved externally).
-export const R32_MATCHUPS: Record<string, { h: string; a: string }> = {
-  r32l_0: { h: "A2", a: "B2" },
-  r32l_1: { h: "E1", a: "D3" },
-  r32l_2: { h: "F1", a: "C2" },
-  r32l_3: { h: "C1", a: "F2" },
-  r32l_4: { h: "A1", a: "C3" },
-  r32l_5: { h: "H1", a: "J2" },
-  r32l_6: { h: "B1", a: "E3" },
-  r32l_7: { h: "D2", a: "G2" },
-  r32r_0: { h: "I1", a: "F3" },
-  r32r_1: { h: "G1", a: "H3" },
-  r32r_2: { h: "K2", a: "L2" },
-  r32r_3: { h: "J1", a: "H2" },
-  r32r_4: { h: "D1", a: "B3" },
-  r32r_5: { h: "L1", a: "I3" },
-  r32r_6: { h: "E2", a: "I2" },
-  r32r_7: { h: "K1", a: "J3" },
-};
+/**
+ * The 16 R32 matchups, keyed by bracket slot. `h` and `a` use slot notation:
+ *   A1 = winner of group A, A2 = runner-up, A3 = 3rd-placed team.
+ *
+ * The 8 "3rd" assignments depend on which 8 of 12 groups produced the
+ * qualifying 3rd-placed teams (FIFA Annex C). Use `buildR32Matchups` with a
+ * computed assignment for the real bracket. The exported constant is the
+ * legacy default (qualifying groups: B,C,D,E,F,H,I,J).
+ */
+export function buildR32Matchups(
+  thirds: ThirdsAssignment = DEFAULT_ASSIGNMENT,
+): Record<string, { h: string; a: string }> {
+  return {
+    r32l_0: { h: "A2", a: "B2" },
+    r32l_1: { h: "E1", a: `${thirds.E}3` },
+    r32l_2: { h: "F1", a: "C2" },
+    r32l_3: { h: "C1", a: "F2" },
+    r32l_4: { h: "A1", a: `${thirds.A}3` },
+    r32l_5: { h: "H1", a: "J2" },
+    r32l_6: { h: "B1", a: `${thirds.B}3` },
+    r32l_7: { h: "D2", a: "G2" },
+    r32r_0: { h: "I1", a: `${thirds.I}3` },
+    r32r_1: { h: "G1", a: `${thirds.G}3` },
+    r32r_2: { h: "K2", a: "L2" },
+    r32r_3: { h: "J1", a: "H2" },
+    r32r_4: { h: "D1", a: `${thirds.D}3` },
+    r32r_5: { h: "L1", a: `${thirds.L}3` },
+    r32r_6: { h: "E2", a: "I2" },
+    r32r_7: { h: "K1", a: `${thirds.K}3` },
+  };
+}
+
+/** Legacy default (Annex C scenario where groups B,C,D,E,F,H,I,J qualify). */
+export const R32_MATCHUPS: Record<string, { h: string; a: string }> = buildR32Matchups();
 
 // For later rounds, each match is fed by two previous-round matches.
 export const LATER_FEEDERS: Record<string, [string, string]> = {
@@ -84,10 +99,11 @@ export function resolveGroupSlot(
 export function deriveMatchTeams(
   matchKey: string,
   groups: Record<string, GroupStateMinimal>,
-  knockout: Record<string, KOStateMinimal>
+  knockout: Record<string, KOStateMinimal>,
+  matchups: Record<string, { h: string; a: string }> = R32_MATCHUPS,
 ): { team1: string | null; team2: string | null } {
-  if (matchKey in R32_MATCHUPS) {
-    const { h, a } = R32_MATCHUPS[matchKey];
+  if (matchKey in matchups) {
+    const { h, a } = matchups[matchKey];
     return { team1: resolveGroupSlot(h, groups), team2: resolveGroupSlot(a, groups) };
   }
   const feeders = LATER_FEEDERS[matchKey];

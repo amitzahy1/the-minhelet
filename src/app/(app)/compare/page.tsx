@@ -7,7 +7,7 @@ import { GROUPS } from "@/lib/tournament/groups";
 import { MATCHUPS } from "@/lib/matchups";
 import { computeGroupHits, hitCounts, normalizeGroupLetter, type BettorHit, type FinishedMatch } from "@/lib/results-hits";
 import { getFlag, getTeamNameHe } from "@/lib/flags";
-import { SpecialTrackerView } from "./SpecialTrackerView";
+import { SpecialTrackerView } from "@/components/shared/SpecialTrackerView";
 import WhosAlive from "@/components/shared/WhosAlive";
 import type { BettorAdvancement } from "@/lib/supabase/shared-data";
 import { formatLockDeadline } from "@/lib/constants";
@@ -233,9 +233,8 @@ export default function ComparePage() {
   }, [BETTORS]);
 
   // Lock check — hide ALL predictions until deadline. No exceptions.
-  // DEMO MODE: using demo date. Real deadline (main): 2026-06-10T14:00:00Z
-  const LOCK_DEADLINE = new Date("2026-04-18T17:00:00Z");
-  const isLocked = new Date() >= LOCK_DEADLINE;
+  // Uses the single-source-of-truth constant from lib/constants.
+  const isLocked = new Date() >= new Date("2026-06-10T14:00:00Z");
 
   return (
     <div className="max-w-full mx-auto px-4 py-6 pb-24">
@@ -345,7 +344,6 @@ export default function ComparePage() {
       {view === "specials" && (
         <SpecialTrackerView
           specialBets={specialBets}
-          advancements={advancements}
           currentUserId={currentUserId}
         />
       )}

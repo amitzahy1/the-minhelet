@@ -350,7 +350,34 @@ export const useBettingStore = create<BettingState & BettingActions>()(
       hydrateFromSupabase: async () => {
         try {
           const { loadBetsFromSupabase } = await import("@/lib/supabase/sync");
-          const { data } = await loadBetsFromSupabase();
+          const { data, serverUpdatedAt } = await loadBetsFromSupabase();
+
+          // Conflict check: if Supabase has a newer timestamp than local state,
+          // ask the user which version to keep instead of silently overwriting.
+          if (serverUpdatedAt && get().lastUpdated) {
+            const serverTs = new Date(serverUpdatedAt).getTime();
+            const localTs = new Date(get().lastUpdated!).getTime();
+            if (serverTs > localTs + 60000 && typeof window !== "undefined") {
+              // Server is more than 60s newer → emit conflict event for the modal
+              window.dispatchEvent(new CustomEvent("wc:hydration-conflict", {
+                detail: {
+                  serverUpdatedAt,
+                  localUpdatedAt: get().lastUpdated,
+                  serverData: data,
+                },
+              }));
+              // Register a one-time listener for when the user picks "use cloud"
+              const applyHandler = (e: Event) => {
+                const ce = e as CustomEvent;
+                window.removeEventListener("wc:apply-server-data", applyHandler);
+                // Re-run hydration with the accepted server data
+                useBettingStore.getState().hydrateFromSupabase();
+              };
+              window.addEventListener("wc:apply-server-data", applyHandler, { once: true });
+              return; // Don't auto-apply
+            }
+          }
+
           // Gate the subscribe so the DB-overwrite isn't treated as a user
           // edit — otherwise the "pending" toast flashes on every login
           // whenever the server state differs from localStorage (e.g. after
@@ -411,6 +438,21 @@ export const useBettingStore = create<BettingState & BettingActions>()(
           snapshotCounts();
         } catch (e) {
           console.warn("hydrateFromSupabase failed:", e);
+          // Offline fallback: restore from IndexedDB if available
+          try {
+            const { readBetsFromIDB } = await import("@/lib/idb-cache");
+            const cached = await readBetsFromIDB();
+            if (cached) {
+              isHydrating = true;
+              set((state) => {
+                if (cached.groups) state.groups = cached.groups as typeof state.groups;
+                if (cached.knockout) state.knockout = cached.knockout as typeof state.knockout;
+                if (cached.specialBets) state.specialBets = cached.specialBets as typeof state.specialBets;
+                state.lastUpdated = new Date().toISOString();
+              });
+              isHydrating = false;
+            }
+          } catch { /* IDB also unavailable */ }
         } finally {
           // Re-open the subscribe gate so real user edits are captured.
           isHydrating = false;
@@ -494,6 +536,7 @@ export const useBettingStore = create<BettingState & BettingActions>()(
           && get().getKnockoutFilledCount() === 31
           && get().getSpecialsFilledCount() === 25;
       },
+
     })),
     {
       name: "wc2026-bets",
@@ -558,7 +601,19 @@ async function performSave(state: BettingState) {
     : null;
   saveStatus?.markSaving();
 
-  // 1. Save to localStorage backup
+  // Snapshot for optimistic rollback
+  const snapshot = {
+    groups: JSON.parse(JSON.stringify(state.groups)),
+    knockout: JSON.parse(JSON.stringify(state.knockout)),
+    specialBets: JSON.parse(JSON.stringify(state.specialBets)),
+  };
+
+  // 1. Save to IndexedDB (offline cache — fire and forget)
+  import("@/lib/idb-cache").then(({ writeBetsToIDB }) =>
+    writeBetsToIDB({ groups: state.groups, knockout: state.knockout, specialBets: state.specialBets })
+  );
+
+  // 2. Save to localStorage backup
   try {
     const today = new Date().toISOString().split("T")[0];
     const key = `wc2026-backup-${today}`;
@@ -570,7 +625,7 @@ async function performSave(state: BettingState) {
     }));
   } catch { /* localStorage full or unavailable */ }
 
-  // 2. Save to Supabase (if logged in)
+  // 3. Save to Supabase (if logged in)
   let ok = true;
   let errorMsg = "";
   try {
@@ -589,6 +644,8 @@ async function performSave(state: BettingState) {
 
   if (ok) {
     saveStatus?.markSaved();
+    // Subtle haptic pulse on mobile to confirm save
+    if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(50);
     // Reset batch baselines so the next 5 edits are counted from here.
     lastSavedKnockoutCount = Object.values(state.knockout).filter((m) => m.winner).length;
     const sb = state.specialBets;
@@ -609,6 +666,12 @@ async function performSave(state: BettingState) {
     lastSavedSpecialsCount = sc;
   } else {
     saveStatus?.markError(errorMsg);
+    // Optimistic rollback: restore pre-save snapshot so UI state stays consistent
+    useBettingStore.setState((s) => {
+      s.groups = snapshot.groups;
+      s.knockout = snapshot.knockout;
+      s.specialBets = snapshot.specialBets;
+    });
   }
 
   hasPendingChanges = false;

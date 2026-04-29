@@ -34,6 +34,13 @@ function ScoreStepper({ value, onChange }: { value: number | null; onChange: (v:
   );
 }
 
+function tiebreakerLabel(curr: { goal_difference: number; goals_for: number; points: number; team_code: string }, prev: { goal_difference: number; goals_for: number; points: number; team_code: string }): string | null {
+  if (curr.points !== prev.points) return null;
+  if (curr.goal_difference !== prev.goal_difference) return "הפרש שערים";
+  if (curr.goals_for !== prev.goals_for) return "שערי בית";
+  return "מפגש ישיר";
+}
+
 function GroupView({ groupId }: { groupId: string }) {
   const teams = GROUPS_RAW[groupId];
   const groupState = useBettingStore((s) => s.groups[groupId]);
@@ -129,9 +136,17 @@ function GroupView({ groupId }: { groupId: string }) {
                 {(standings || teams.map(t => ({
                   team_code: t.code, position: 0, played: 0, won: 0, drawn: 0, lost: 0,
                   goals_for: 0, goals_against: 0, goal_difference: 0, points: 0, team_id: t.id, fair_play_score: 0,
-                }))).map((row, i) => (
+                }))).map((row, i, arr) => {
+                  const prev = i > 0 ? arr[i - 1] : null;
+                  const tbLabel = prev && standings ? tiebreakerLabel(row, prev) : null;
+                  return (
                   <tr key={row.team_code} className={`border-t border-gray-100 ${standings && i < 2 ? "bg-green-50/40" : standings && i === 2 ? "bg-amber-50/30" : ""}`}>
-                    <td className="py-3 ps-4 font-bold text-gray-300 text-base">{i + 1}</td>
+                    <td className="py-3 ps-4 font-bold text-gray-300 text-base">
+                      <span>{i + 1}</span>
+                      {tbLabel && (
+                        <span className="block text-[9px] font-bold text-amber-600 bg-amber-100 rounded px-1 mt-0.5 leading-tight">{tbLabel}</span>
+                      )}
+                    </td>
                     <td className="py-3">
                       <span className="flex items-center gap-2">
                         <span className="text-lg">{getFlag(row.team_code)}</span>
@@ -146,7 +161,8 @@ function GroupView({ groupId }: { groupId: string }) {
                     <td className="text-center text-gray-600 font-semibold" style={{ fontFamily: "var(--font-inter)" }}>{row.goal_difference > 0 ? `+${row.goal_difference}` : row.goal_difference}</td>
                     <td className="pe-4 text-center font-black text-gray-900 text-base" style={{ fontFamily: "var(--font-inter)" }}>{row.points}</td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -222,6 +238,29 @@ export default function GroupsPage() {
         <h1 className="text-3xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>שלב הבתים</h1>
         <p className="text-base text-gray-600 mt-1">סדרו את הקבוצות, הזינו תוצאות — הטבלה מתעדכנת אוטומטית לפי חוקי FIFA</p>
       </div>
+
+      {/* Advancement scoring rule (Model B — lenient) */}
+      <details className="mb-4 rounded-xl border border-blue-200 bg-blue-50/60 px-4 py-3 text-sm">
+        <summary className="cursor-pointer font-bold text-blue-900 flex items-center gap-2 list-none">
+          <span>ℹ️ איך נספרות עולות מהבית?</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="transition-transform">
+            <path d="M6 9l6 6 6-6"/>
+          </svg>
+        </summary>
+        <div className="mt-2 space-y-1.5 text-blue-900 text-[13px] leading-relaxed">
+          <p>
+            מונדיאל 2026 — 48 נבחרות, 12 בתים של 4. לשלב שמינית הגמר עולות 32 נבחרות:
+            1-2 מכל בית (24 נבחרות) + 8 המקומות השלישיים הטובים ביותר (מתוך 12).
+          </p>
+          <p className="font-bold">
+            ✓ כל נבחרת שהיגיעה לשמינית הגמר נחשבת "עולה" — גם אם עלתה ממקום שלישי.
+          </p>
+          <p className="text-blue-800/90">
+            אם הימרת שקבוצה X תעלה מהבית והיא באמת הגיעה לשמינית (בכל מסלול), תקבל/י ניקוד:
+            שתי הנבחרות שהימרת עליהן עלו → <b>עולה מדויקת</b>, אחת מהן עלתה → <b>חלקי</b>.
+          </p>
+        </div>
+      </details>
 
       {/* Peer pressure — who hasn't finished? */}
       {completedGroups < 12 && (

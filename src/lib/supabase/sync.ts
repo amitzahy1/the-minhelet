@@ -40,7 +40,7 @@ export async function saveBetsToSupabase(
 ): Promise<{ success: boolean; error?: string }> {
   // Server-side deadline enforcement
   if (new Date() > LOCK_DEADLINE) {
-    return { success: false, error: "ההימורים ננעלו — לא ניתן לשנות אחרי 10.06.2026, 17:00" };
+    return { success: false, error: "ההימורים ננעלו — לא ניתן לשנות אחרי 10.06.2026 17:00" };
   }
 
   const supabase = createClient();
@@ -148,7 +148,7 @@ export async function saveBetsToSupabase(
  */
 export async function loadBetsFromSupabase(
   leagueId?: string
-): Promise<{ data: Partial<BettingState> | null; error?: string }> {
+): Promise<{ data: Partial<BettingState> | null; error?: string; serverUpdatedAt?: string }> {
   const supabase = createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
@@ -193,6 +193,7 @@ export async function loadBetsFromSupabase(
   }
 
   return {
+    serverUpdatedAt: bracket?.updated_at ?? undefined,
     data: {
       groups: bracket?.group_predictions || {},
       knockout: bracket?.knockout_tree || {},
@@ -200,8 +201,13 @@ export async function loadBetsFromSupabase(
         winner: advancement?.winner || "",
         finalist1: advancement?.advance_to_final?.[0] || "",
         finalist2: advancement?.advance_to_final?.[1] || "",
-        semifinalists: advancement?.advance_to_sf || ["", "", "", ""],
-        quarterfinalists: advancement?.advance_to_qf || ["", "", "", "", "", "", "", ""],
+        // Always pad back to the expected slot count. We save with
+        // .filter(Boolean) which collapses the array (so a 2-of-4 pick is
+        // stored as a 2-element list). Without this guard, .map() in
+        // special-bets/page.tsx renders fewer TeamSelects than expected and
+        // the "עולות לחצי גמר" / "עולות לרבע גמר" cards appear empty.
+        semifinalists: Array.from({ length: 4 }, (_, i) => advancement?.advance_to_sf?.[i] ?? ""),
+        quarterfinalists: Array.from({ length: 8 }, (_, i) => advancement?.advance_to_qf?.[i] ?? ""),
         topScorerTeam: special?.top_scorer_team || "",
         topScorerPlayer: special?.top_scorer_player || "",
         topAssistsTeam: special?.top_assists_team || "",

@@ -164,3 +164,15 @@ export function computePlayerHistories(
   }
   return cumulative;
 }
+
+// Max pts per knockout bracket key prefix
+export const KO_STAGE_MAX_PTS: Record<string, number> = {
+  r32:   KO_TOTO_PTS + KO_EXACT_BONUS_PTS,        // 4
+  r16l:  KO_TOTO_PTS + KO_EXACT_BONUS_PTS,         // 4
+  r16r:  KO_TOTO_PTS + KO_EXACT_BONUS_PTS,         // 4
+  qfl:   KO_TOTO_PTS + KO_EXACT_BONUS_PTS,         // 4
+  qfr:   KO_TOTO_PTS + KO_EXACT_BONUS_PTS,         // 4
+  sfl:   SF_TOTO_PTS + SF_EXACT_BONUS_PTS,          // 5
+  sfr:   SF_TOTO_PTS + SF_EXACT_BONUS_PTS,          // 5
+  final: FINAL_TOTO_PTS + FINAL_EXACT_BONUS_PTS,   // 6
+};

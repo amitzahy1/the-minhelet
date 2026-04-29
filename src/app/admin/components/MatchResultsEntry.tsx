@@ -278,10 +278,10 @@ export function MatchResultsEntry() {
     setSyncing(true);
     setMessage(null);
     try {
-      const res = await fetch("/api/sync");
+      const res = await fetch("/api/admin/results/sync-from-api", { method: "POST" });
       const data = await res.json();
       if (data.success) {
-        setMessage(`סונכרנו ${data.matchesCount} משחקים מ-Football-Data.org`);
+        setMessage(`סונכרנו ${data.synced} תוצאות מ-Football-Data.org (${data.total} משחקים נסרקו) ✓`);
         await loadAll();
       } else {
         setMessage("שגיאה: " + (data.error || "Sync failed"));

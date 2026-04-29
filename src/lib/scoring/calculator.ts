@@ -81,7 +81,7 @@ export function calculateMatchScore(
  * Calculate advancement pick points for a single team.
  */
 export function calculateAdvancementScore(
-  pickType: "group_exact" | "group_partial" | "qf" | "sf" | "final" | "winner",
+  pickType: "group_exact" | "group_partial" | "group_as_3rd" | "qf" | "sf" | "final" | "winner",
   isCorrect: boolean
 ): number {
   if (!isCorrect) return 0;
@@ -90,37 +90,53 @@ export function calculateAdvancementScore(
 
 /**
  * Calculate group advancement score.
- * @param predictedFirst - The team code predicted to finish 1st
- * @param predictedSecond - The team code predicted to finish 2nd
- * @param actualFirst - The team that actually finished 1st
- * @param actualSecond - The team that actually finished 2nd
+ *
+ * Scoring ladder per predicted slot (1st or 2nd):
+ *   - Team in correct position       → group_exact     (5)
+ *   - Team in the other top-2 slot   → group_partial   (3, "1st↔2nd swap")
+ *   - Team finished 3rd *and* is one of the 8 best-3rd qualifiers that
+ *     advanced to R32                → group_as_3rd    (2)
+ *   - Anything else                  → 0
+ *
+ * `actualThird` + `thirdQualified` are optional so callers that don't yet
+ * know the best-3rds result simply skip the 3rd-place credit.
  */
 export function calculateGroupAdvancementScore(
   predictedFirst: string,
   predictedSecond: string,
   actualFirst: string,
-  actualSecond: string
+  actualSecond: string,
+  actualThird?: string | null,
+  thirdQualified?: boolean,
 ): { points: number; reasons: { reason: ScoreReason; points: number }[] } {
   const reasons: { reason: ScoreReason; points: number }[] = [];
   let points = 0;
 
-  // Check first place
-  if (predictedFirst === actualFirst) {
-    points += SCORING.advancement.group_exact;
-    reasons.push({ reason: "GROUP_ADVANCE_EXACT", points: SCORING.advancement.group_exact });
-  } else if (predictedFirst === actualSecond) {
-    points += SCORING.advancement.group_partial;
-    reasons.push({ reason: "GROUP_ADVANCE_PARTIAL", points: SCORING.advancement.group_partial });
-  }
+  const thirdAdvanced = !!actualThird && !!thirdQualified;
 
-  // Check second place
-  if (predictedSecond === actualSecond) {
-    points += SCORING.advancement.group_exact;
-    reasons.push({ reason: "GROUP_ADVANCE_EXACT", points: SCORING.advancement.group_exact });
-  } else if (predictedSecond === actualFirst) {
-    points += SCORING.advancement.group_partial;
-    reasons.push({ reason: "GROUP_ADVANCE_PARTIAL", points: SCORING.advancement.group_partial });
-  }
+  const scoreSlot = (predicted: string) => {
+    if (predicted === actualFirst || predicted === actualSecond) {
+      const exact =
+        (predicted === actualFirst && predicted === predictedFirst) ||
+        (predicted === actualSecond && predicted === predictedSecond);
+      if (exact) {
+        points += SCORING.advancement.group_exact;
+        reasons.push({ reason: "GROUP_ADVANCE_EXACT", points: SCORING.advancement.group_exact });
+      } else {
+        points += SCORING.advancement.group_partial;
+        reasons.push({ reason: "GROUP_ADVANCE_PARTIAL", points: SCORING.advancement.group_partial });
+      }
+    } else if (thirdAdvanced && predicted === actualThird) {
+      points += SCORING.advancement.group_as_3rd;
+      reasons.push({ reason: "GROUP_ADVANCE_AS_3RD", points: SCORING.advancement.group_as_3rd });
+    }
+  };
+
+  // Score each predicted slot independently so a bettor who put both
+  // predictions on the same team doesn't double-dip: we call scoreSlot for
+  // the first pick, then only for the second pick if it's a different team.
+  scoreSlot(predictedFirst);
+  if (predictedSecond !== predictedFirst) scoreSlot(predictedSecond);
 
   return { points, reasons };
 }

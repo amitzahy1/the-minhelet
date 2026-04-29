@@ -11,11 +11,14 @@ import { useEffect, useMemo, useState } from "react";
 import { GROUPS, GROUP_LETTERS, getTeamByCode } from "@/lib/tournament/groups";
 import { getFlag } from "@/lib/flags";
 import {
-  R32_MATCHUPS,
+  buildR32Matchups,
   LATER_FEEDERS,
   resolveGroupSlot,
 } from "@/lib/tournament/knockout-derivation";
+import { getThirdsAssignment, DEFAULT_ASSIGNMENT } from "@/lib/tournament/annex-c";
 import { normalizeGroupLetter } from "@/lib/results-hits";
+import { BestThirdsPanel, extractThirdsFromMatches } from "./BestThirdsPanel";
+import { rankBestThirds } from "@/lib/tournament/thirds-ranker";
 
 interface MatchApi {
   id: number;
@@ -179,12 +182,13 @@ function deriveKoMatch(
   key: string,
   groups: Record<string, number[]>,
   knockoutWinners: Record<string, string | null>,
-  matches: MatchApi[]
+  matches: MatchApi[],
+  matchups: Record<string, { h: string; a: string }>,
 ): KOKnown {
   let team1: string | null = null;
   let team2: string | null = null;
-  if (key in R32_MATCHUPS) {
-    const { h, a } = R32_MATCHUPS[key];
+  if (key in matchups) {
+    const { h, a } = matchups[key];
     const groupState = asGroupState(groups);
     team1 = resolveGroupSlot(h, groupState);
     team2 = resolveGroupSlot(a, groupState);
@@ -267,14 +271,20 @@ export function LiveGroupsAndBracket() {
   const [matches, setMatches] = useState<MatchApi[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"groups" | "bracket">("groups");
+  const [thirdsOverride, setThirdsOverride] = useState<string[] | null>(null);
 
   useEffect(() => {
     let alive = true;
     (async () => {
       try {
-        const res = await fetch("/api/matches");
-        const data = await res.json();
-        if (alive) setMatches((data.matches as MatchApi[]) || []);
+        const [matchesRes, thirdsRes] = await Promise.all([
+          fetch("/api/matches").then((r) => r.json()).catch(() => ({ matches: [] })),
+          fetch("/api/best-thirds").then((r) => r.json()).catch(() => ({ override: null })),
+        ]);
+        if (!alive) return;
+        setMatches((matchesRes.matches as MatchApi[]) || []);
+        const override = thirdsRes?.override;
+        setThirdsOverride(Array.isArray(override) && override.length === 8 ? override : null);
       } catch {
         /* keep empty */
       }
@@ -285,21 +295,37 @@ export function LiveGroupsAndBracket() {
 
   const groupOrders = useMemo(() => computeGroupOrdersFromStandings(matches), [matches]);
 
+  // Resolve the Annex C 3rd-place assignment from the live ranking + admin
+  // override. Falls back to the hardcoded default when no scenario is known.
+  const r32Matchups = useMemo(() => {
+    const thirds = extractThirdsFromMatches(matches);
+    const ranking = rankBestThirds(thirds);
+    const qualifiers =
+      thirdsOverride && thirdsOverride.length === 8
+        ? thirdsOverride
+        : ranking.qualifiedGroups.length === 8
+        ? ranking.qualifiedGroups
+        : null;
+    if (!qualifiers) return buildR32Matchups(DEFAULT_ASSIGNMENT);
+    const { assignment } = getThirdsAssignment(qualifiers);
+    return buildR32Matchups(assignment ?? DEFAULT_ASSIGNMENT);
+  }, [matches, thirdsOverride]);
+
   // Compute KO progression: R32 first, then later rounds depend on previous winners.
   const knockoutWinners: Record<string, string | null> = useMemo(() => {
     const winners: Record<string, string | null> = {};
     const resolve = (key: string) => {
-      const m = deriveKoMatch(key, groupOrders, winners, matches);
+      const m = deriveKoMatch(key, groupOrders, winners, matches, r32Matchups);
       winners[key] = m.winner;
     };
     // Resolve R32 first
-    Object.keys(R32_MATCHUPS).forEach(resolve);
+    Object.keys(r32Matchups).forEach(resolve);
     // Then later rounds in order
     ["r16l_0","r16l_1","r16l_2","r16l_3","r16r_0","r16r_1","r16r_2","r16r_3",
      "qfl_0","qfl_1","qfr_0","qfr_1",
      "sfl_0","sfr_0","final"].forEach(resolve);
     return winners;
-  }, [groupOrders, matches]);
+  }, [groupOrders, matches, r32Matchups]);
 
   if (loading) {
     return (
@@ -333,10 +359,13 @@ export function LiveGroupsAndBracket() {
       </div>
 
       {tab === "groups" && (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {GROUP_LETTERS.map((l) => (
-            <GroupCard key={l} letter={l} matches={matches} />
-          ))}
+        <div className="space-y-4">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {GROUP_LETTERS.map((l) => (
+              <GroupCard key={l} letter={l} matches={matches} />
+            ))}
+          </div>
+          <BestThirdsPanel matches={matches} overrideGroups={thirdsOverride} />
         </div>
       )}
 
@@ -360,7 +389,7 @@ export function LiveGroupsAndBracket() {
                 }`}
               >
                 {round.keys.map((k) => {
-                  const m = deriveKoMatch(k, groupOrders, knockoutWinners, matches);
+                  const m = deriveKoMatch(k, groupOrders, knockoutWinners, matches, r32Matchups);
                   return <BracketSlotCard key={k} match={m} compact={round.keys.length >= 8} />;
                 })}
               </div>

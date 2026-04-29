@@ -64,6 +64,7 @@ export function SpecialResultsEntry() {
   const [baseline, setBaseline] = useState<Actuals>(EMPTY);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [syncingScorer, setSyncingScorer] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -117,6 +118,25 @@ export function SpecialResultsEntry() {
     setTimeout(() => setMessage(null), 4000);
   }
 
+  async function syncTopScorer() {
+    setSyncingScorer(true);
+    setMessage(null);
+    try {
+      const res = await fetch("/api/admin/special-results/sync-topscorer", { method: "POST" });
+      const data = await res.json();
+      if (data.success) {
+        setMessage(`מלך שערים: ${data.topScorer.player} (${data.topScorer.team}) — ${data.topScorer.goals} שערים ✓`);
+        await load();
+      } else {
+        setMessage("שגיאה: " + (data.error || "Sync failed"));
+      }
+    } catch {
+      setMessage("שגיאת רשת בסנכרון מלך שערים");
+    }
+    setSyncingScorer(false);
+    setTimeout(() => setMessage(null), 5000);
+  }
+
   const isDirty = JSON.stringify(actuals) !== JSON.stringify(baseline);
 
   function set<K extends keyof Actuals>(k: K, v: Actuals[K]) {
@@ -136,7 +156,10 @@ export function SpecialResultsEntry() {
       <CardHeader>
         <div className="flex items-center justify-between flex-wrap gap-2">
           <CardTitle className="text-base">🏆 תוצאות ההימורים המיוחדים</CardTitle>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button variant="outline" size="sm" onClick={syncTopScorer} disabled={syncingScorer} className="text-xs">
+              {syncingScorer ? "מסנכרן..." : "🔄 Auto מלך שערים"}
+            </Button>
             {isDirty && (
               <Badge variant="outline" className="text-amber-700 border-amber-300 bg-amber-50">
                 {Object.keys(actuals).filter((k) => actuals[k as keyof Actuals] !== baseline[k as keyof Actuals]).length} שינויים

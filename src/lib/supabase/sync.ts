@@ -148,7 +148,7 @@ export async function saveBetsToSupabase(
  */
 export async function loadBetsFromSupabase(
   leagueId?: string
-): Promise<{ data: Partial<BettingState> | null; error?: string }> {
+): Promise<{ data: Partial<BettingState> | null; error?: string; serverUpdatedAt?: string }> {
   const supabase = createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
@@ -193,6 +193,7 @@ export async function loadBetsFromSupabase(
   }
 
   return {
+    serverUpdatedAt: bracket?.updated_at ?? undefined,
     data: {
       groups: bracket?.group_predictions || {},
       knockout: bracket?.knockout_tree || {},

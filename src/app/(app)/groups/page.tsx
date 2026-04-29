@@ -34,6 +34,13 @@ function ScoreStepper({ value, onChange }: { value: number | null; onChange: (v:
   );
 }
 
+function tiebreakerLabel(curr: { goal_difference: number; goals_for: number; points: number; team_code: string }, prev: { goal_difference: number; goals_for: number; points: number; team_code: string }): string | null {
+  if (curr.points !== prev.points) return null;
+  if (curr.goal_difference !== prev.goal_difference) return "הפרש שערים";
+  if (curr.goals_for !== prev.goals_for) return "שערי בית";
+  return "מפגש ישיר";
+}
+
 function GroupView({ groupId }: { groupId: string }) {
   const teams = GROUPS_RAW[groupId];
   const groupState = useBettingStore((s) => s.groups[groupId]);
@@ -129,9 +136,17 @@ function GroupView({ groupId }: { groupId: string }) {
                 {(standings || teams.map(t => ({
                   team_code: t.code, position: 0, played: 0, won: 0, drawn: 0, lost: 0,
                   goals_for: 0, goals_against: 0, goal_difference: 0, points: 0, team_id: t.id, fair_play_score: 0,
-                }))).map((row, i) => (
+                }))).map((row, i, arr) => {
+                  const prev = i > 0 ? arr[i - 1] : null;
+                  const tbLabel = prev && standings ? tiebreakerLabel(row, prev) : null;
+                  return (
                   <tr key={row.team_code} className={`border-t border-gray-100 ${standings && i < 2 ? "bg-green-50/40" : standings && i === 2 ? "bg-amber-50/30" : ""}`}>
-                    <td className="py-3 ps-4 font-bold text-gray-300 text-base">{i + 1}</td>
+                    <td className="py-3 ps-4 font-bold text-gray-300 text-base">
+                      <span>{i + 1}</span>
+                      {tbLabel && (
+                        <span className="block text-[9px] font-bold text-amber-600 bg-amber-100 rounded px-1 mt-0.5 leading-tight">{tbLabel}</span>
+                      )}
+                    </td>
                     <td className="py-3">
                       <span className="flex items-center gap-2">
                         <span className="text-lg">{getFlag(row.team_code)}</span>
@@ -146,7 +161,8 @@ function GroupView({ groupId }: { groupId: string }) {
                     <td className="text-center text-gray-600 font-semibold" style={{ fontFamily: "var(--font-inter)" }}>{row.goal_difference > 0 ? `+${row.goal_difference}` : row.goal_difference}</td>
                     <td className="pe-4 text-center font-black text-gray-900 text-base" style={{ fontFamily: "var(--font-inter)" }}>{row.points}</td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>

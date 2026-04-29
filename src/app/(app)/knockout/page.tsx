@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useCallback, memo } from "react";
+import { useState, useCallback, memo, useMemo } from "react";
 import { useBettingStore } from "@/stores/betting-store";
 import { GROUPS } from "@/lib/tournament/groups";
 import { getFlag } from "@/lib/flags";
@@ -237,6 +237,23 @@ export default function KnockoutPage() {
   const knockout = useBettingStore((s) => s.knockout);
   const filledKnockout = Object.values(knockout).filter(m => m.winner).length;
 
+  // Conflict detection: find teams predicted to finish 4th in groups but appearing in knockout
+  const conflictingTeams = useMemo(() => {
+    const eliminated = new Set<string>();
+    for (const [groupId, group] of Object.entries(groups)) {
+      if (group.order && group.order.length === 4) {
+        const teams = GROUPS[groupId];
+        if (teams && teams[group.order[3]]) {
+          eliminated.add(teams[group.order[3]].code);
+        }
+      }
+    }
+    const koWinners = new Set(
+      Object.values(knockout).map((m) => m.winner).filter(Boolean) as string[]
+    );
+    return [...eliminated].filter((code) => koWinners.has(code));
+  }, [groups, knockout]);
+
   // Resolve R32 teams from group standings
   const getR32Team = (slot: string) => resolveSlot(slot, groups);
 
@@ -261,6 +278,19 @@ export default function KnockoutPage() {
         </div>
         <p className="text-sm text-gray-500">המנצחת עוברת אוטומטית לשלב הבא</p>
       </div>
+
+      {/* Conflict indicator: team predicted to exit groups but in knockout */}
+      {conflictingTeams.length > 0 && (
+        <div className="mb-4 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-start gap-3">
+          <span className="text-lg mt-0.5">⚠️</span>
+          <div>
+            <p className="text-sm font-bold text-amber-800">סתירה בהימורים</p>
+            <p className="text-xs text-amber-700 mt-0.5">
+              {conflictingTeams.join(", ")} — הימרת שהנבחרת תצא בשלב הבתים אך היא מופיעה בעץ הנוק-אאוט.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* All-bracket-complete CTA → special bets */}
       {filledKnockout === 31 && (

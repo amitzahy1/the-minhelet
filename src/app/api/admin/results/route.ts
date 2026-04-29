@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { verifyAdmin } from "../verify-admin";
+import { logAdminAction } from "@/lib/audit";
 
 /**
  * /api/admin/results
@@ -111,6 +112,7 @@ export async function POST(request: Request) {
     .select();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  await logAdminAction(adminEmail, "upsert_match_results", { count: data?.length ?? 0 });
   return NextResponse.json({ success: true, upserted: data?.length ?? 0, results: data });
 }
 

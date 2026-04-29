@@ -11,8 +11,9 @@ import { DemoBanner } from "@/components/shared/DemoBanner";
 import { SplashScreen } from "@/components/shared/SplashScreen";
 import { SaveIndicator } from "@/components/shared/SaveIndicator";
 import { ToastHost } from "@/components/shared/ToastHost";
+import { ConflictResolutionModal } from "@/components/shared/ConflictResolutionModal";
 import { useSharedData } from "@/hooks/useSharedData";
-import { formatLockDeadline } from "@/lib/constants";
+import { formatLockDeadline, isLocked } from "@/lib/constants";
 
 const Icons = {
   bets: (a: boolean) => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={a ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6M9 15l3 3 3-3"/></svg>,
@@ -180,6 +181,62 @@ function OnboardingWizard({ onDismiss, onStart }: { onDismiss: () => void; onSta
 }
 
 // ============================================================================
+// Circular SVG progress ring
+// ============================================================================
+function ProgressRing({ pct, size = 22, stroke = 2.5, color = "currentColor" }: {
+  pct: number; size?: number; stroke?: number; color?: string;
+}) {
+  const r = (size - stroke * 2) / 2;
+  const circ = 2 * Math.PI * r;
+  const offset = circ * (1 - Math.min(pct, 100) / 100);
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ transform: "rotate(-90deg)" }}>
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth={stroke} opacity={0.2} />
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth={stroke}
+        strokeDasharray={circ} strokeDashoffset={offset} strokeLinecap="round"
+        style={{ transition: "stroke-dashoffset 0.4s ease" }} />
+    </svg>
+  );
+}
+
+// ============================================================================
+// Locked celebration modal — shown once when the deadline passes
+// ============================================================================
+function LockedCelebrationModal({ onClose, groupsFilled, knockoutFilled, specialsFilled }: {
+  onClose: () => void; groupsFilled: number; knockoutFilled: number; specialsFilled: number;
+}) {
+  return (
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4" dir="rtl">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full text-center p-8 animate-[popIn_0.4s_ease-out]"
+        style={{ animation: "popIn 0.4s cubic-bezier(0.34,1.56,0.64,1)" }}
+      >
+        <div className="text-6xl mb-3">🔒</div>
+        <h2 className="text-2xl font-black text-gray-900 mb-1" style={{ fontFamily: "var(--font-secular)" }}>הפנקס נחתם!</h2>
+        <p className="text-gray-500 text-sm mb-5">ההימורים ננעלו — עכשיו רק נצפה</p>
+        <div className="grid grid-cols-3 gap-2 mb-6">
+          {[
+            { label: "בתים", val: groupsFilled, total: 12 },
+            { label: "נוק-אאוט", val: knockoutFilled, total: 31 },
+            { label: "מיוחדים", val: specialsFilled, total: 25 },
+          ].map(({ label, val, total }) => (
+            <div key={label} className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+              <p className={`text-lg font-black ${val === total ? "text-green-600" : "text-gray-800"}`} style={{ fontFamily: "var(--font-inter)" }}>
+                {val}/{total}
+              </p>
+              <p className="text-[10px] text-gray-500 font-bold">{label}</p>
+            </div>
+          ))}
+        </div>
+        <button onClick={onClose}
+          className="w-full py-3 rounded-xl bg-gray-900 text-white font-bold text-sm hover:bg-gray-800 transition-colors">
+          לצפייה בטבלה ←
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
 // Betting sub-nav — shows each stage as green once fully completed
 // ============================================================================
 function BettingSubNav({ pathname }: { pathname: string }) {
@@ -204,6 +261,11 @@ function BettingSubNav({ pathname }: { pathname: string }) {
     return count;
   });
 
+  const pcts: Record<string, number> = {
+    "/groups": Math.round(groupsFilled / 12 * 100),
+    "/knockout": Math.round(knockoutFilled / 31 * 100),
+    "/special-bets": Math.round(specialsFilled / 25 * 100),
+  };
   const completion: Record<string, boolean> = {
     "/groups": groupsFilled >= 12,
     "/knockout": knockoutFilled >= 31,
@@ -217,24 +279,24 @@ function BettingSubNav({ pathname }: { pathname: string }) {
           {BETTING_PAGES.map((p, i) => {
             const isActive = pathname === p.href;
             const isComplete = completion[p.href];
-            // Priority: complete → green; active → blue; else → gray.
+            const pct = pcts[p.href];
             let wrapClass: string;
-            let circleClass: string;
-            let innerText: string;
+            let ringColor: string;
+            let labelText: string;
             if (isComplete) {
               wrapClass = isActive
                 ? "bg-green-100 text-green-800 border border-green-400 shadow-sm"
                 : "bg-green-50 text-green-700 border border-green-200 hover:bg-green-100";
-              circleClass = "bg-green-500 text-white";
-              innerText = "✓";
+              ringColor = "#22c55e";
+              labelText = "✓";
             } else if (isActive) {
               wrapClass = "bg-blue-50 text-blue-700 border border-blue-200";
-              circleClass = "bg-blue-600 text-white";
-              innerText = String(p.step);
+              ringColor = "#2563eb";
+              labelText = String(p.step);
             } else {
               wrapClass = "text-gray-400 hover:bg-gray-50 border border-transparent";
-              circleClass = "bg-gray-300 text-white";
-              innerText = String(p.step);
+              ringColor = "#9ca3af";
+              labelText = String(p.step);
             }
             return (
               <div key={p.href} className="flex items-center flex-1">
@@ -242,8 +304,11 @@ function BettingSubNav({ pathname }: { pathname: string }) {
                   href={p.href}
                   className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-bold w-full justify-center transition-all ${wrapClass}`}
                 >
-                  <span className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-black shrink-0 ${circleClass}`}>
-                    {innerText}
+                  <span className="relative shrink-0 w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center">
+                    <span className="absolute inset-0 flex items-center justify-center">
+                      <ProgressRing pct={pct} size={22} stroke={2.5} color={ringColor} />
+                    </span>
+                    <span className="text-[10px] sm:text-xs font-black relative z-10">{labelText}</span>
                   </span>
                   <span className="truncate">{p.label}</span>
                 </Link>
@@ -346,11 +411,23 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [showBetsMenu, setShowBetsMenu] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [authReady, setAuthReady] = useState(false);
+  const [wasRecentVisit, setWasRecentVisit] = useState(false);
+  const [showLockedCelebration, setShowLockedCelebration] = useState(false);
   const { loading: dataLoading } = useSharedData();
+
+  const groupsFilled = useBettingStore((s) => s.getCompletedGroupsCount());
+  const knockoutFilled = useBettingStore((s) => Object.keys(s.knockout).filter((k) => s.knockout[k]?.winner).length);
+  const specialsFilled = useBettingStore((s) => s.getSpecialsFilledCount());
+  const bettingOverallPct = Math.round((groupsFilled / 12 + knockoutFilled / 31 + specialsFilled / 25) / 3 * 100);
 
   const appReady = authReady && !dataLoading;
 
   useEffect(() => {
+    try {
+      const last = localStorage.getItem("wc_last_visited");
+      if (last && Date.now() - Number(last) < 86400000) setWasRecentVisit(true);
+      localStorage.setItem("wc_last_visited", String(Date.now()));
+    } catch { /* ignore */ }
     useBettingStore.persist.rehydrate();
     document.documentElement.classList.remove("dark");
     const supabase = createClient();
@@ -369,6 +446,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  // Show locked celebration once when deadline passes
+  useEffect(() => {
+    if (!appReady) return;
+    if (!isLocked()) return;
+    try {
+      if (!localStorage.getItem("wc_lock_celebrated")) {
+        setShowLockedCelebration(true);
+        localStorage.setItem("wc_lock_celebrated", "true");
+      }
+    } catch { /* ignore */ }
+  }, [appReady]);
+
   const dismissOnboarding = () => {
     setShowOnboarding(false);
     localStorage.setItem("wc2026-onboarding-seen", "true");
@@ -384,8 +473,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const isBettingPage = BETTING_PAGES.some(p => pathname === p.href);
   const isTrackingPage = TRACKING_ITEMS.some(p => pathname === p.href);
 
-  // Splash screen while loading
+  // Skip splash for returning users who visited within last 24h
   if (!appReady) {
+    if (wasRecentVisit) {
+      return (
+        <div className="fixed inset-0 bg-[#F8F9FB] flex items-center justify-center">
+          <div className="w-6 h-6 border-2 border-blue-400/30 border-t-blue-500 rounded-full animate-spin" />
+        </div>
+      );
+    }
     return <SplashScreen />;
   }
 
@@ -396,6 +492,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <DemoBanner />
 
       {showOnboarding && <OnboardingWizard onDismiss={dismissOnboarding} onStart={() => { dismissOnboarding(); router.push("/groups"); }} />}
+
+      {showLockedCelebration && (
+        <LockedCelebrationModal
+          onClose={() => { setShowLockedCelebration(false); router.push("/standings"); }}
+          groupsFilled={groupsFilled}
+          knockoutFilled={knockoutFilled}
+          specialsFilled={specialsFilled}
+        />
+      )}
 
       {/* ════════════════════════════════════════════ */}
       {/* DESKTOP HEADER                              */}
@@ -545,6 +650,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       {/* Pre-lock: floating save-status indicator (hidden by isLocked inside component) */}
       <SaveIndicator />
       <ToastHost />
+      <ConflictResolutionModal />
 
       {/* Floating help */}
       <button
@@ -593,7 +699,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </Link>
           <Link href="/groups"
             className={`flex flex-col items-center gap-0.5 py-1 ${isBettingPage ? "text-blue-600" : "text-gray-400"}`}>
-            {Icons.bets(isBettingPage)}
+            <span className="relative w-5 h-5 flex items-center justify-center">
+              <span className="absolute -inset-1">
+                <ProgressRing pct={bettingOverallPct} size={28} stroke={2} color={isBettingPage ? "#2563eb" : "#9ca3af"} />
+              </span>
+              {Icons.bets(isBettingPage)}
+            </span>
             <span className="text-[8px] font-bold">הימורים</span>
           </Link>
         </div>

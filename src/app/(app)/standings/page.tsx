@@ -13,8 +13,8 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { isLocked } from "@/lib/constants";
 import { GROUPS } from "@/lib/tournament/groups";
 import { TodayMatches } from "@/components/shared/TodayMatches";
-import { computeLiveScores, computeTodayScores, computePlayerHistories } from "@/lib/scoring/live-scorer";
-import { normalizeGroupLetter, type FinishedMatch } from "@/lib/results-hits";
+import { computeLiveScores, computeTodayScores, computePlayerHistories, KO_STAGE_MAX_PTS, GROUP_TOTO_PTS, GROUP_EXACT_BONUS_PTS } from "@/lib/scoring/live-scorer";
+import { normalizeGroupLetter, type FinishedMatch, GROUP_MATCH_PAIRS } from "@/lib/results-hits";
 
 // Mock completion data — in production this comes from Supabase
 const MOCK_COMPLETION_DATA: PlayerCompletion[] = [
@@ -26,27 +26,27 @@ const MOCK_COMPLETION_DATA: PlayerCompletion[] = [
 
 // Mock leaderboard data — in production this comes from Supabase scoring_log
 const MOCK_PLAYERS = [
-  { id: "bot", name: "הבוט 🤖", matchPts: 80, advPts: 48, specPts: 14, total: 142, today: "+8", delta: 0, toto: "57%", exact: 10, streak: 3, bestDay: "+16",
+  { id: "bot", name: "הבוט 🤖", matchPts: 80, advPts: 48, specPts: 14, total: 142, maxPossible: 142, today: "+8", delta: 0, toto: "57%", exact: 10, streak: 3, bestDay: "+16",
     breakdown: { totoGroup: 30, exactGroup: 8, totoKnockout: 28, exactKnockout: 14, groupAdvExact: 28, groupAdvPartial: 6, advQF: 8, advSF: 6, advFinal: 0, winner: 0, topScorer: 0, topAssists: 0, bestAttack: 6, specials: 8 } },
-  { id: "1", name: "דני", matchPts: 95, advPts: 52, specPts: 21, total: 168, today: "+12", delta: 3, toto: "65%", exact: 16, streak: 8, bestDay: "+18",
+  { id: "1", name: "דני", matchPts: 95, advPts: 52, specPts: 21, total: 168, maxPossible: 168, today: "+12", delta: 3, toto: "65%", exact: 16, streak: 8, bestDay: "+18",
     breakdown: { totoGroup: 36, exactGroup: 12, totoKnockout: 30, exactKnockout: 17, groupAdvExact: 30, groupAdvPartial: 9, advQF: 16, advSF: 12, advFinal: 0, winner: 0, topScorer: 0, topAssists: 0, bestAttack: 0, specials: 6 } },
-  { id: "2", name: "יוני", matchPts: 88, advPts: 55, specPts: 18, total: 161, today: "+8", delta: 1, toto: "62%", exact: 14, streak: 6, bestDay: "+16",
+  { id: "2", name: "יוני", matchPts: 88, advPts: 55, specPts: 18, total: 161, maxPossible: 161, today: "+8", delta: 1, toto: "62%", exact: 14, streak: 6, bestDay: "+16",
     breakdown: { totoGroup: 34, exactGroup: 10, totoKnockout: 28, exactKnockout: 16, groupAdvExact: 35, groupAdvPartial: 6, advQF: 12, advSF: 12, advFinal: 0, winner: 0, topScorer: 5, topAssists: 0, bestAttack: 6, specials: 7 } },
-  { id: "3", name: "דור דסא", matchPts: 82, advPts: 60, specPts: 15, total: 157, today: "+15", delta: 2, toto: "60%", exact: 13, streak: 5, bestDay: "+20",
+  { id: "3", name: "דור דסא", matchPts: 82, advPts: 60, specPts: 15, total: 157, maxPossible: 157, today: "+15", delta: 2, toto: "60%", exact: 13, streak: 5, bestDay: "+20",
     breakdown: { totoGroup: 32, exactGroup: 11, totoKnockout: 24, exactKnockout: 15, groupAdvExact: 40, groupAdvPartial: 6, advQF: 8, advSF: 6, advFinal: 0, winner: 0, topScorer: 0, topAssists: 4, bestAttack: 0, specials: 11 } },
-  { id: "4", name: "אמית", matchPts: 90, advPts: 45, specPts: 19, total: 154, today: "+6", delta: 0, toto: "62%", exact: 14, streak: 7, bestDay: "+23", isYou: true,
+  { id: "4", name: "אמית", matchPts: 90, advPts: 45, specPts: 19, total: 154, maxPossible: 154, today: "+6", delta: 0, toto: "62%", exact: 14, streak: 7, bestDay: "+23", isYou: true,
     breakdown: { totoGroup: 38, exactGroup: 14, totoKnockout: 24, exactKnockout: 14, groupAdvExact: 25, groupAdvPartial: 6, advQF: 8, advSF: 6, advFinal: 0, winner: 0, topScorer: 9, topAssists: 0, bestAttack: 0, specials: 10 } },
-  { id: "5", name: "רון ב", matchPts: 78, advPts: 50, specPts: 16, total: 144, today: "+10", delta: -1, toto: "58%", exact: 11, streak: 4, bestDay: "+15",
+  { id: "5", name: "רון ב", matchPts: 78, advPts: 50, specPts: 16, total: 144, maxPossible: 144, today: "+10", delta: -1, toto: "58%", exact: 11, streak: 4, bestDay: "+15",
     breakdown: { totoGroup: 30, exactGroup: 8, totoKnockout: 26, exactKnockout: 14, groupAdvExact: 30, groupAdvPartial: 9, advQF: 8, advSF: 0, advFinal: 0, winner: 0, topScorer: 0, topAssists: 4, bestAttack: 6, specials: 6 } },
-  { id: "6", name: "רון ג", matchPts: 75, advPts: 42, specPts: 20, total: 137, today: "+4", delta: -2, toto: "55%", exact: 10, streak: 3, bestDay: "+14",
+  { id: "6", name: "רון ג", matchPts: 75, advPts: 42, specPts: 20, total: 137, maxPossible: 137, today: "+4", delta: -2, toto: "55%", exact: 10, streak: 3, bestDay: "+14",
     breakdown: { totoGroup: 28, exactGroup: 9, totoKnockout: 24, exactKnockout: 14, groupAdvExact: 25, groupAdvPartial: 6, advQF: 8, advSF: 0, advFinal: 0, winner: 0, topScorer: 5, topAssists: 4, bestAttack: 0, specials: 11 } },
-  { id: "7", name: "רועי", matchPts: 72, advPts: 48, specPts: 14, total: 134, today: "+7", delta: 1, toto: "56%", exact: 12, streak: 5, bestDay: "+16",
+  { id: "7", name: "רועי", matchPts: 72, advPts: 48, specPts: 14, total: 134, maxPossible: 134, today: "+7", delta: 1, toto: "56%", exact: 12, streak: 5, bestDay: "+16",
     breakdown: { totoGroup: 26, exactGroup: 10, totoKnockout: 22, exactKnockout: 14, groupAdvExact: 30, groupAdvPartial: 6, advQF: 12, advSF: 0, advFinal: 0, winner: 0, topScorer: 0, topAssists: 0, bestAttack: 6, specials: 8 } },
-  { id: "8", name: "עידן", matchPts: 68, advPts: 44, specPts: 17, total: 129, today: "+5", delta: 0, toto: "54%", exact: 9, streak: 4, bestDay: "+13",
+  { id: "8", name: "עידן", matchPts: 68, advPts: 44, specPts: 17, total: 129, maxPossible: 129, today: "+5", delta: 0, toto: "54%", exact: 9, streak: 4, bestDay: "+13",
     breakdown: { totoGroup: 24, exactGroup: 8, totoKnockout: 22, exactKnockout: 14, groupAdvExact: 25, groupAdvPartial: 9, advQF: 8, advSF: 0, advFinal: 0, winner: 0, topScorer: 0, topAssists: 0, bestAttack: 6, specials: 11 } },
-  { id: "9", name: "אוהד", matchPts: 65, advPts: 38, specPts: 22, total: 125, today: "+9", delta: 2, toto: "52%", exact: 8, streak: 3, bestDay: "+17",
+  { id: "9", name: "אוהד", matchPts: 65, advPts: 38, specPts: 22, total: 125, maxPossible: 125, today: "+9", delta: 2, toto: "52%", exact: 8, streak: 3, bestDay: "+17",
     breakdown: { totoGroup: 22, exactGroup: 7, totoKnockout: 22, exactKnockout: 14, groupAdvExact: 20, groupAdvPartial: 6, advQF: 8, advSF: 0, advFinal: 0, winner: 0, topScorer: 9, topAssists: 7, bestAttack: 6, specials: 0 } },
-  { id: "10", name: "אורי", matchPts: 60, advPts: 40, specPts: 13, total: 113, today: "+3", delta: -1, toto: "48%", exact: 7, streak: 2, bestDay: "+12",
+  { id: "10", name: "אורי", matchPts: 60, advPts: 40, specPts: 13, total: 113, maxPossible: 113, today: "+3", delta: -1, toto: "48%", exact: 7, streak: 2, bestDay: "+12",
     breakdown: { totoGroup: 20, exactGroup: 6, totoKnockout: 20, exactKnockout: 14, groupAdvExact: 25, groupAdvPartial: 3, advQF: 8, advSF: 0, advFinal: 0, winner: 0, topScorer: 0, topAssists: 0, bestAttack: 6, specials: 7 } },
 ];
 
@@ -279,6 +279,7 @@ export default function StandingsPage() {
 
   // Load finished matches for live scoring
   const [finishedMatches, setFinishedMatches] = useState<FinishedMatch[]>([]);
+  const [allMatches, setAllMatches] = useState<MatchApi[]>([]);
   useEffect(() => {
     let alive = true;
     (async () => {
@@ -286,6 +287,7 @@ export default function StandingsPage() {
         const res = await fetch("/api/matches");
         const data = await res.json();
         const all: MatchApi[] = data.matches || [];
+        if (alive) setAllMatches(all);
         const finished = all
           .filter(
             (m) =>
@@ -310,6 +312,47 @@ export default function StandingsPage() {
     })();
     return () => { alive = false; };
   }, []);
+
+  // Max possible scores: for each user, how many more points can they earn?
+  const maxPossibleScores = useMemo(() => {
+    const finishedIds = new Set(finishedMatches.map((m) => m.id));
+    const out: Record<string, number> = {};
+    for (const b of brackets) {
+      let max = 0;
+      // Unfinished group matches the user predicted
+      for (const unfinished of allMatches) {
+        if (unfinished.status === "FINISHED" || !unfinished.group) continue;
+        const groupLetter = normalizeGroupLetter(unfinished.group);
+        const teams = GROUPS[groupLetter];
+        if (!teams) continue;
+        const homeTla = unfinished.homeTla?.toUpperCase() || "";
+        const awayTla = unfinished.awayTla?.toUpperCase() || "";
+        const homeIdx = teams.findIndex((t) => t.code === homeTla || t.code === homeTla);
+        const awayIdx = teams.findIndex((t) => t.code === awayTla);
+        if (homeIdx < 0 || awayIdx < 0) continue;
+        let pairIdx = -1;
+        for (let i = 0; i < GROUP_MATCH_PAIRS.length; i++) {
+          const [a, p] = GROUP_MATCH_PAIRS[i];
+          if ((a === homeIdx && p === awayIdx) || (a === awayIdx && p === homeIdx)) { pairIdx = i; break; }
+        }
+        if (pairIdx < 0) continue;
+        const pred = b.groupPredictions?.[groupLetter]?.scores?.[pairIdx];
+        if (pred && (pred.home !== null || pred.away !== null)) {
+          max += GROUP_TOTO_PTS + GROUP_EXACT_BONUS_PTS;
+        }
+      }
+      // Knockout matches the user has filled in (all are unplayed until live)
+      if (finishedIds.size === 0 || true) {
+        for (const [key, match] of Object.entries(b.knockoutTree || {})) {
+          if (!match || match.winner === null) continue;
+          const prefix = key.replace(/_\d+$/, "");
+          max += KO_STAGE_MAX_PTS[prefix] ?? 4;
+        }
+      }
+      out[b.userId] = max;
+    }
+    return out;
+  }, [brackets, allMatches, finishedMatches]);
 
   // Live-computed scores (from finished matches + brackets, fills the gap
   // left by an empty scoring_log table in the demo).
@@ -377,6 +420,7 @@ export default function StandingsPage() {
         advPts,
         specPts,
         total,
+        maxPossible: total + (maxPossibleScores[profile.id] ?? 0),
         today: todayPts > 0 ? `+${todayPts}` : "0",
         delta: 0,
         toto: `${totoPct}%`,
@@ -387,7 +431,7 @@ export default function StandingsPage() {
         breakdown,
       };
     }).filter(Boolean) as typeof MOCK_PLAYERS;
-  }, [profiles, scoringLog, liveScores, todayScores, currentUserId]);
+  }, [profiles, scoringLog, liveScores, todayScores, currentUserId, maxPossibleScores]);
 
   // Always use real data — never fall back to mock (prevents flash of fake names)
   const PLAYERS = realPlayers;
@@ -497,7 +541,12 @@ export default function StandingsPage() {
                 <Sparkline data={history} highlight={!!p.isYou} />
               </div>
               <span className="w-12 text-center text-sm text-green-600 font-bold" style={{ fontFamily: "var(--font-inter)" }}>{p.today}</span>
-              <span className="w-16 text-center font-black text-lg text-gray-900 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{p.total}</span>
+              <span className="w-16 text-center font-black text-lg text-gray-900 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>
+                {p.total}
+                {p.maxPossible > p.total && (
+                  <span className="block text-[10px] font-normal text-gray-400 leading-none">מקס {p.maxPossible}</span>
+                )}
+              </span>
               <span className={`w-8 text-center text-sm font-bold ${p.delta > 0 ? "text-green-500" : p.delta < 0 ? "text-red-400" : "text-gray-400"}`}>
                 {p.delta > 0 ? `▲${p.delta}` : p.delta < 0 ? `▼${Math.abs(p.delta)}` : "—"}
               </span>

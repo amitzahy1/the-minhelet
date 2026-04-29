@@ -10,6 +10,8 @@ import { getFlag } from "@/lib/flags";
 import { PageTransition } from "@/components/shared/PageTransition";
 import { SaveAndContinue } from "@/components/shared/SaveAndContinue";
 import { formatLockDeadline } from "@/lib/constants";
+import { AgreementBadge } from "@/components/shared/AgreementBadge";
+import { StillAliveBadge } from "@/components/shared/StillAliveBadge";
 import { useConfetti } from "@/hooks/useConfetti";
 import { MATCHUPS } from "@/lib/matchups";
 
@@ -299,7 +301,18 @@ export default function SpecialBetsPage() {
         </div>
 
         <SectionCard title="זוכה הטורניר" subtitle="מי לוקח את הגביע?" points="12 נק׳" warning={winnerMismatch}>
-          <div className="max-w-xs"><TeamSelect value={sb.winner} onChange={(v) => set("winner", v)} label="הנבחרת הזוכה" /></div>
+          <div className="max-w-xs flex flex-col gap-2">
+            <TeamSelect value={sb.winner} onChange={(v) => set("winner", v)} label="הנבחרת הזוכה" />
+            {sb.winner && (
+              <div className="flex items-center gap-2 flex-wrap">
+                <AgreementBadge
+                  value={sb.winner}
+                  extract={(adv) => (adv as { winner?: string })?.winner}
+                />
+                <StillAliveBadge teamCode={sb.winner} pickType="champion" />
+              </div>
+            )}
+          </div>
         </SectionCard>
 
         <SectionCard title="עולות לגמר" subtitle="2 נבחרות" points="8 נק׳ כ״א" warning={finalsMismatch}>

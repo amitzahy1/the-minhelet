@@ -250,20 +250,27 @@ function OnboardingWizard({ onDismiss, onStart }: { onDismiss: () => void; onSta
                   <span className="mt-1.5 w-2 h-2 rounded-full bg-blue-500 shrink-0"></span>
                   <div>
                     <p className="text-sm font-bold text-gray-900">עד הנעילה</p>
-                    <p className="text-[12px] text-gray-600 leading-snug">שמירה אוטומטית. אפשר לערוך הימורים בכל זמן.</p>
+                    <p className="text-[12px] text-gray-600 leading-snug">שמירה אוטומטית. אפשר לערוך כל הימור בכל זמן.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3 px-3 py-2.5 rounded-lg border border-gray-100">
                   <span className="mt-1.5 w-2 h-2 rounded-full bg-red-500 shrink-0"></span>
                   <div>
                     <p className="text-sm font-bold text-gray-900">ברגע הנעילה</p>
-                    <p className="text-[12px] text-gray-600 leading-snug">סוגרים את הפנקס. כל ההימורים מוקפאים והניקוד מתחיל להיספר.</p>
+                    <p className="text-[12px] text-gray-600 leading-snug">תוצאות שלב הבתים, בחירת העולות בעץ הגביע וההימורים המיוחדים — מוקפאים.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 px-3 py-2.5 rounded-lg border border-gray-100">
+                  <span className="mt-1.5 w-2 h-2 rounded-full bg-amber-500 shrink-0"></span>
+                  <div>
+                    <p className="text-sm font-bold text-gray-900">תוצאות נוקאאוט נשארות פתוחות</p>
+                    <p className="text-[12px] text-gray-600 leading-snug">תוצאה מדויקת לכל משחק נוקאאוט (משמינית הגמר ומעלה) ניתנת לעדכון עד לפני שריקת הפתיחה של אותו משחק.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3 px-3 py-2.5 rounded-lg border border-gray-100">
                   <span className="mt-1.5 w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
                   <div>
-                    <p className="text-sm font-bold text-gray-900">אחרי הנעילה</p>
+                    <p className="text-sm font-bold text-gray-900">במהלך הטורניר</p>
                     <p className="text-[12px] text-gray-600 leading-snug">דירוג חי, השוואות בין מהמרים, מי עוד "חי" בעץ ותוצאות בזמן אמת.</p>
                   </div>
                 </div>

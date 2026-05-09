@@ -108,8 +108,8 @@ function GroupView({ groupId }: { groupId: string }) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {/* RIGHT — Table */}
-        <div>
+        {/* RIGHT — Table (mobile: appears below the bets) */}
+        <div className="order-2 lg:order-1">
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
             <div className="px-5 py-3 bg-gray-800 flex items-center justify-between">
               <div>
@@ -169,8 +169,8 @@ function GroupView({ groupId }: { groupId: string }) {
 
         </div>
 
-        {/* LEFT — Match bets */}
-        <div>
+        {/* LEFT — Match bets (mobile: appears above the predicted table) */}
+        <div className="order-1 lg:order-2">
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden lg:sticky lg:top-24">
             <div className="px-5 py-3 bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/40 border-b border-blue-100/50 flex items-center justify-between">
               <div>
@@ -218,6 +218,17 @@ function GroupView({ groupId }: { groupId: string }) {
 export default function GroupsPage() {
   const currentGroupIndex = useBettingStore((s) => s.currentGroupIndex);
   const setCurrentGroupIndex = useBettingStore((s) => s.setCurrentGroupIndex);
+
+  // First-ever visit to /groups → land on group A. Returning visitors keep their place.
+  useEffect(() => {
+    try {
+      if (!localStorage.getItem("wc_groups_visited")) {
+        setCurrentGroupIndex(0);
+        localStorage.setItem("wc_groups_visited", "1");
+      }
+    } catch { /* ignore */ }
+  }, [setCurrentGroupIndex]);
+
   const completedGroups = useBettingStore((s) =>
     GROUP_LETTERS.filter((l) =>
       s.groups[l].scores.filter((sc) => sc.home !== null && sc.away !== null).length === 6
@@ -291,21 +302,24 @@ export default function GroupsPage() {
         </Link>
       )}
 
-      {/* Compact progress */}
-      <div className="mb-4 flex items-center gap-3 flex-wrap">
-        <div className="flex items-center gap-2 bg-white rounded-lg border border-gray-200 px-3 py-2 shadow-sm shrink-0">
-          <div className="w-16 h-2 bg-gray-100 rounded-full overflow-hidden">
-            <div className={`h-full rounded-full ${completedGroups === 12 ? "bg-green-500" : "bg-blue-500"}`} style={{ width: `${(totalFilled / 72) * 100}%` }}></div>
+      {/* Groups navigator */}
+      <div className="mb-4">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-sm font-black text-gray-700 tracking-wide" style={{ fontFamily: "var(--font-secular)" }}>בתים</h2>
+          <div className="flex items-center gap-2 bg-white rounded-lg border border-gray-200 px-2.5 py-1 shadow-sm shrink-0">
+            <div className="w-14 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+              <div className={`h-full rounded-full ${completedGroups === 12 ? "bg-green-500" : "bg-blue-500"}`} style={{ width: `${(totalFilled / 72) * 100}%` }}></div>
+            </div>
+            <span className="text-xs font-bold text-gray-500" style={{ fontFamily: "var(--font-inter)" }}>{completedGroups}/12</span>
           </div>
-          <span className="text-xs font-bold text-gray-500" style={{ fontFamily: "var(--font-inter)" }}>{completedGroups}/12</span>
         </div>
-        <div className="flex gap-1 sm:gap-1.5 flex-wrap">
+        <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-1 -mx-1 px-1 sm:flex-wrap">
           {GROUP_LETTERS.map((letter, i) => {
             const filled = useBettingStore.getState().getGroupFilledCount(letter);
             const done = filled === 6;
             return (
               <button key={letter} onClick={() => setCurrentGroupIndex(i)}
-                className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg text-[11px] sm:text-xs font-bold transition-all ${
+                className={`shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-lg text-base sm:text-lg font-black transition-all ${
                   i === currentGroupIndex ? "bg-gray-900 text-white shadow-md scale-110" :
                   done ? "bg-green-100 text-green-700 border border-green-200" :
                   filled > 0 ? "bg-blue-50 text-blue-600 border border-blue-200" :

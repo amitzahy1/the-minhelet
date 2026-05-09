@@ -7,7 +7,6 @@ import { useBettingStore } from "@/stores/betting-store";
 import { createClient } from "@/lib/supabase/client";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { DeadlineCountdown } from "@/components/shared/DeadlineCountdown";
-import { SplashScreen } from "@/components/shared/SplashScreen";
 import { SaveIndicator } from "@/components/shared/SaveIndicator";
 import { ToastHost } from "@/components/shared/ToastHost";
 import { ConflictResolutionModal } from "@/components/shared/ConflictResolutionModal";
@@ -46,7 +45,7 @@ const TRACKING_ITEMS = [
 // ============================================================================
 function OnboardingWizard({ onDismiss, onStart }: { onDismiss: () => void; onStart: () => void }) {
   const [page, setPage] = useState(0);
-  const isLast = page === 2;
+  const isLast = page === 3;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
@@ -62,7 +61,7 @@ function OnboardingWizard({ onDismiss, onStart }: { onDismiss: () => void; onSta
             </div>
             <button onClick={onDismiss} className="text-xs text-gray-400 hover:text-gray-600">דלג</button>
           </div>
-          <div className="flex gap-1 mb-4">{[0,1,2].map(i => <div key={i} className={`h-1 flex-1 rounded-full ${i <= page ? "bg-blue-500" : "bg-gray-200"}`}></div>)}</div>
+          <div className="flex gap-1 mb-4">{[0,1,2,3].map(i => <div key={i} className={`h-1 flex-1 rounded-full ${i <= page ? "bg-blue-500" : "bg-gray-200"}`}></div>)}</div>
         </div>
         <div className="px-6 pb-6 overflow-y-auto flex-1">
           {page === 0 && (
@@ -135,26 +134,69 @@ function OnboardingWizard({ onDismiss, onStart }: { onDismiss: () => void; onSta
           )}
           {page === 2 && (
             <div className="space-y-4">
-              <h3 className="text-2xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>שמירה, נעילה ומעקב</h3>
-              <div className="bg-blue-50 rounded-xl p-4 border border-blue-200 flex items-start gap-3">
-                <span className="text-2xl">💾</span>
-                <div>
-                  <p className="font-bold text-blue-900">שמירה אוטומטית כל 5 הימורים</p>
-                  <p className="text-sm text-blue-700 mt-0.5">בנוסף — כפתור "שמור" בתחתית כל דף לשליטה ידנית. לא יעלמו לך הימורים.</p>
+              <h3 className="text-2xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>סיור באתר</h3>
+              <p className="text-sm text-gray-600">חוץ מההימורים, יש לך גם את הדפים האלה — כולם זמינים מהתפריט בתחתית המסך:</p>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+                  <div className="flex items-center gap-1.5 text-gray-700 mb-1">{Icons.leaderboard(true)}<span className="font-bold text-sm">טבלה</span></div>
+                  <p className="text-[11px] text-gray-500 leading-snug">דירוג חי + טרנדים</p>
+                </div>
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+                  <div className="flex items-center gap-1.5 text-gray-700 mb-1">{Icons.compare(true)}<span className="font-bold text-sm">השוואה</span></div>
+                  <p className="text-[11px] text-gray-500 leading-snug">מי הימר על מה — heatmap</p>
+                </div>
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+                  <div className="flex items-center gap-1.5 text-gray-700 mb-1">{Icons.live(true)}<span className="font-bold text-sm">לייב</span></div>
+                  <p className="text-[11px] text-gray-500 leading-snug">תוצאות אמת + עץ חי</p>
+                </div>
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+                  <div className="flex items-center gap-1.5 text-gray-700 mb-1">{Icons.squads(true)}<span className="font-bold text-sm">נבחרות</span></div>
+                  <p className="text-[11px] text-gray-500 leading-snug">סגלים ושחקנים</p>
+                </div>
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+                  <div className="flex items-center gap-1.5 text-gray-700 mb-1">{Icons.schedule(true)}<span className="font-bold text-sm">לו״ז</span></div>
+                  <p className="text-[11px] text-gray-500 leading-snug">לוח משחקים מלא</p>
+                </div>
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+                  <div className="flex items-center gap-1.5 text-gray-700 mb-1">{Icons.rules(true)}<span className="font-bold text-sm">חוקים</span></div>
+                  <p className="text-[11px] text-gray-500 leading-snug">איך הניקוד עובד</p>
                 </div>
               </div>
-              <div className="bg-red-50 rounded-xl p-4 border border-red-200 flex items-start gap-3">
-                <span className="text-2xl">🔒</span>
-                <div>
-                  <p className="font-bold text-red-900">הנעילה: {formatLockDeadline()}</p>
-                  <p className="text-sm text-red-700 mt-0.5">אחרי הנעילה — אי אפשר לשנות הימורים.</p>
+              <p className="text-xs text-gray-500 text-center bg-gray-50 rounded-lg py-2 border border-gray-100">תוכלו תמיד לחזור לכאן בלחיצה על ❓ בפינה</p>
+            </div>
+          )}
+          {page === 3 && (
+            <div className="space-y-4">
+              <h3 className="text-2xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>אחרי הנעילה</h3>
+              <p className="text-sm text-gray-600">ב-{formatLockDeadline()} ההימורים ננעלים — ומכאן והלאה האתר מתעורר לחיים:</p>
+              <div className="space-y-2.5">
+                <div className="bg-green-50 rounded-xl p-3.5 border border-green-200 flex items-start gap-3">
+                  <span className="text-xl shrink-0">🟢</span>
+                  <div>
+                    <p className="font-bold text-green-900 text-sm">טבלת דירוג חיה</p>
+                    <p className="text-xs text-green-700 mt-0.5">מתעדכנת אחרי כל משחק עם נקודות חיות</p>
+                  </div>
                 </div>
-              </div>
-              <div className="bg-green-50 rounded-xl p-4 border border-green-200 flex items-start gap-3">
-                <span className="text-2xl">🏆</span>
-                <div>
-                  <p className="font-bold text-green-900">אחרי הנעילה</p>
-                  <p className="text-sm text-green-700 mt-0.5">טבלה חיה, מעקב בזמן אמת והשוואה בין מהמרים.</p>
+                <div className="bg-amber-50 rounded-xl p-3.5 border border-amber-200 flex items-start gap-3">
+                  <span className="text-xl shrink-0">🔥</span>
+                  <div>
+                    <p className="font-bold text-amber-900 text-sm">מי חי?</p>
+                    <p className="text-xs text-amber-700 mt-0.5">מי עוד תקוע עם הימורים שלא נפסלו</p>
+                  </div>
+                </div>
+                <div className="bg-blue-50 rounded-xl p-3.5 border border-blue-200 flex items-start gap-3">
+                  <span className="text-xl shrink-0">🎯</span>
+                  <div>
+                    <p className="font-bold text-blue-900 text-sm">השוואת הימורים</p>
+                    <p className="text-xs text-blue-700 mt-0.5">heatmap של כל המהמרים על כל בחירה</p>
+                  </div>
+                </div>
+                <div className="bg-purple-50 rounded-xl p-3.5 border border-purple-200 flex items-start gap-3">
+                  <span className="text-xl shrink-0">🏆</span>
+                  <div>
+                    <p className="font-bold text-purple-900 text-sm">הימורים מיוחדים חיים</p>
+                    <p className="text-xs text-purple-700 mt-0.5">מלך שערים, בית פורה ועוד — לפי תוצאות אמת</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -182,14 +224,14 @@ function OnboardingWizard({ onDismiss, onStart }: { onDismiss: () => void; onSta
 // ============================================================================
 // Circular SVG progress ring
 // ============================================================================
-function ProgressRing({ pct, size = 22, stroke = 2.5, color = "currentColor" }: {
-  pct: number; size?: number; stroke?: number; color?: string;
+function ProgressRing({ pct, size = 22, stroke = 2.5, color = "currentColor", className }: {
+  pct: number; size?: number; stroke?: number; color?: string; className?: string;
 }) {
   const r = (size - stroke * 2) / 2;
   const circ = 2 * Math.PI * r;
   const offset = circ * (1 - Math.min(pct, 100) / 100);
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ transform: "rotate(-90deg)" }}>
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ transform: "rotate(-90deg)" }} className={className}>
       <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth={stroke} opacity={0.2} />
       <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth={stroke}
         strokeDasharray={circ} strokeDashoffset={offset} strokeLinecap="round"
@@ -272,42 +314,47 @@ function BettingSubNav({ pathname }: { pathname: string }) {
   };
 
   return (
-    <div className="bg-white border-b border-gray-200">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2 flex items-center gap-3">
-        <div className="flex items-center gap-0 sm:gap-1 flex-1">
+    <div className="bg-gradient-to-l from-blue-600 to-indigo-600 sm:bg-white sm:bg-none border-y-2 border-blue-700/40 sm:border-y sm:border-x-0 sm:border-gray-200 shadow-md sm:shadow-none">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2.5 sm:py-2 flex items-center gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-1 flex-1">
           {BETTING_PAGES.map((p, i) => {
             const isActive = pathname === p.href;
             const isComplete = completion[p.href];
             const pct = pcts[p.href];
-            let wrapClass: string;
-            let ringColor: string;
+            // Mobile (default) classes — prominent on dark blue background
+            // Desktop (sm:) classes — preserve existing subtle appearance
+            // ProgressRing uses currentColor, so it inherits the text color of the active state.
+            let mobileClass: string;
+            let desktopClass: string;
             let labelText: string;
             if (isComplete) {
-              wrapClass = isActive
-                ? "bg-green-100 text-green-800 border border-green-400 shadow-sm"
-                : "bg-green-50 text-green-700 border border-green-200 hover:bg-green-100";
-              ringColor = "#22c55e";
+              mobileClass = isActive
+                ? "bg-white text-green-700 ring-2 ring-white shadow-lg"
+                : "bg-green-400/30 text-white border border-green-200/40 hover:bg-green-400/40";
+              desktopClass = isActive
+                ? "sm:bg-green-100 sm:text-green-800 sm:border sm:border-green-400 sm:shadow-sm sm:ring-0"
+                : "sm:bg-green-50 sm:text-green-700 sm:border sm:border-green-200 sm:hover:bg-green-100";
               labelText = "✓";
             } else if (isActive) {
-              wrapClass = "bg-blue-50 text-blue-700 border border-blue-200";
-              ringColor = "#2563eb";
+              mobileClass = "bg-white text-blue-700 shadow-lg";
+              desktopClass = "sm:bg-blue-50 sm:text-blue-700 sm:border sm:border-blue-200 sm:shadow-none";
               labelText = String(p.step);
             } else {
-              wrapClass = "text-gray-400 hover:bg-gray-50 border border-transparent";
-              ringColor = "#9ca3af";
+              mobileClass = "bg-white/15 text-white/90 hover:bg-white/25 border border-white/20";
+              desktopClass = "sm:bg-transparent sm:text-gray-400 sm:hover:bg-gray-50 sm:border sm:border-transparent";
               labelText = String(p.step);
             }
             return (
               <div key={p.href} className="flex items-center flex-1">
                 <Link
                   href={p.href}
-                  className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-bold w-full justify-center transition-all ${wrapClass}`}
+                  className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg text-sm sm:text-sm font-bold w-full justify-center transition-all ${mobileClass} ${desktopClass}`}
                 >
                   <span className="relative shrink-0 w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center">
                     <span className="absolute inset-0 flex items-center justify-center">
-                      <ProgressRing pct={pct} size={22} stroke={2.5} color={ringColor} />
+                      <ProgressRing pct={pct} size={22} stroke={2.5} color="currentColor" />
                     </span>
-                    <span className="text-[10px] sm:text-xs font-black relative z-10">{labelText}</span>
+                    <span className="text-[11px] sm:text-xs font-black relative z-10">{labelText}</span>
                   </span>
                   <span className="truncate">{p.label}</span>
                 </Link>
@@ -410,7 +457,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [showBetsMenu, setShowBetsMenu] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [authReady, setAuthReady] = useState(false);
-  const [wasRecentVisit, setWasRecentVisit] = useState(false);
   const [showLockedCelebration, setShowLockedCelebration] = useState(false);
   const { loading: dataLoading } = useSharedData();
 
@@ -424,7 +470,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     try {
       const last = localStorage.getItem("wc_last_visited");
-      if (last && Date.now() - Number(last) < 86400000) setWasRecentVisit(true);
       localStorage.setItem("wc_last_visited", String(Date.now()));
     } catch { /* ignore */ }
     useBettingStore.persist.rehydrate();
@@ -474,14 +519,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   // Skip splash for returning users who visited within last 24h
   if (!appReady) {
-    if (wasRecentVisit) {
-      return (
-        <div className="fixed inset-0 bg-[#F8F9FB] flex items-center justify-center">
-          <div className="w-6 h-6 border-2 border-blue-400/30 border-t-blue-500 rounded-full animate-spin" />
-        </div>
-      );
-    }
-    return <SplashScreen />;
+    return (
+      <div className="fixed inset-0 bg-[#F8F9FB] flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-blue-400/30 border-t-blue-500 rounded-full animate-spin" />
+      </div>
+    );
   }
 
   return (
@@ -550,11 +592,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               const isActive = pathname === item.href;
               return (
                 <Link key={item.href} href={item.href}
-                  className={`flex items-center gap-1.5 px-2.5 lg:px-4 py-2 lg:py-2.5 rounded-xl text-xs lg:text-sm font-bold transition-all ${
+                  className={`flex items-center gap-1.5 px-2 sm:px-2.5 lg:px-4 py-2 lg:py-2.5 rounded-xl text-xs lg:text-sm font-bold transition-all ${
                     isActive ? "bg-gray-900 text-white shadow-md" : "text-gray-500 hover:bg-gray-100"
                   }`}>
                   {Icons[item.iconKey](isActive)}
-                  <span className="hidden lg:inline">{item.label}</span>
+                  <span>{item.label}</span>
                 </Link>
               );
             })}
@@ -692,6 +734,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             className={`flex flex-col items-center gap-0.5 py-1 ${pathname === "/schedule" ? "text-gray-900" : "text-gray-400"}`}>
             {Icons.schedule(pathname === "/schedule")}
             <span className="text-[8px] font-bold">לו״ז</span>
+          </Link>
+          <Link href="/rules"
+            className={`flex flex-col items-center gap-0.5 py-1 ${pathname === "/rules" ? "text-gray-900" : "text-gray-400"}`}>
+            {Icons.rules(pathname === "/rules")}
+            <span className="text-[8px] font-bold">חוקים</span>
           </Link>
           <Link href="/groups"
             className={`flex flex-col items-center gap-0.5 py-1 ${isBettingPage ? "text-blue-600" : "text-gray-400"}`}>

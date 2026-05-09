@@ -19,6 +19,7 @@ import { getThirdsAssignment, DEFAULT_ASSIGNMENT } from "@/lib/tournament/annex-
 import { normalizeGroupLetter } from "@/lib/results-hits";
 import { BestThirdsPanel, extractThirdsFromMatches } from "./BestThirdsPanel";
 import { rankBestThirds } from "@/lib/tournament/thirds-ranker";
+import { SpecialBetsLive } from "./SpecialBetsLive";
 
 interface MatchApi {
   id: number;
@@ -270,7 +271,7 @@ function TeamRow({
 export function LiveGroupsAndBracket() {
   const [matches, setMatches] = useState<MatchApi[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"groups" | "bracket">("groups");
+  const [tab, setTab] = useState<"groups" | "bracket" | "specials">("groups");
   const [thirdsOverride, setThirdsOverride] = useState<string[] | null>(null);
 
   useEffect(() => {
@@ -338,6 +339,7 @@ export function LiveGroupsAndBracket() {
 
   return (
     <div className="space-y-4">
+      <p className="text-[11px] text-gray-400 -mb-2">מקור: תוצאות אמת של הטורניר · עדכון אחת ל-5 דקות</p>
       {/* Sub-tabs */}
       <div className="flex gap-2 flex-wrap">
         <button
@@ -346,7 +348,7 @@ export function LiveGroupsAndBracket() {
             tab === "groups" ? "bg-gray-900 text-white shadow-md" : "text-gray-500 hover:bg-gray-200 border border-gray-200"
           }`}
         >
-          🏟️ טבלאות בתים
+          טבלאות בתים
         </button>
         <button
           onClick={() => setTab("bracket")}
@@ -354,7 +356,15 @@ export function LiveGroupsAndBracket() {
             tab === "bracket" ? "bg-gray-900 text-white shadow-md" : "text-gray-500 hover:bg-gray-200 border border-gray-200"
           }`}
         >
-          🌳 עץ הגביע
+          עץ הגביע
+        </button>
+        <button
+          onClick={() => setTab("specials")}
+          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+            tab === "specials" ? "bg-gray-900 text-white shadow-md" : "text-gray-500 hover:bg-gray-200 border border-gray-200"
+          }`}
+        >
+          הימורים מיוחדים
         </button>
       </div>
 
@@ -397,6 +407,8 @@ export function LiveGroupsAndBracket() {
           ))}
         </div>
       )}
+
+      {tab === "specials" && <SpecialBetsLive matches={matches} />}
     </div>
   );
 }

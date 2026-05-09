@@ -20,6 +20,7 @@ import { AdminGuide } from "./components/AdminGuide";
 import { UserBetsEditor } from "./components/UserBetsEditor";
 import { BotGenerator } from "./components/BotGenerator";
 import { BestThirdsOverride } from "./components/BestThirdsOverride";
+import { BackupExport } from "./components/BackupExport";
 
 interface ScoringConfig {
   toto_group: number; toto_r32: number; toto_r16: number;
@@ -113,6 +114,7 @@ export default function AdminPage() {
         <Tabs defaultValue="status" dir="rtl">
           <TabsList className="mb-4 flex-wrap">
             <TabsTrigger value="status">סטטוס מערכת</TabsTrigger>
+            <TabsTrigger value="backup">גיבוי וייצוא</TabsTrigger>
             <TabsTrigger value="results">הזנת תוצאות</TabsTrigger>
             <TabsTrigger value="scoring">ניקוד</TabsTrigger>
             <TabsTrigger value="tournaments">טורנירים</TabsTrigger>
@@ -124,6 +126,7 @@ export default function AdminPage() {
           </TabsList>
 
           <TabsContent value="status"><SystemStatus /></TabsContent>
+          <TabsContent value="backup"><BackupExport /></TabsContent>
           <TabsContent value="results">
             <div className="space-y-4">
               <MatchResultsEntry />

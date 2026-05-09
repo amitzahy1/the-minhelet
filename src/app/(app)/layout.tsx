@@ -49,153 +49,222 @@ function OnboardingWizard({ onDismiss, onStart }: { onDismiss: () => void; onSta
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden max-h-[85vh] flex flex-col">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden max-h-[88vh] flex flex-col">
         <div className="px-6 pt-5 pb-3 shrink-0">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <img src="/logo.png" alt="" className="w-10 h-10 rounded-full object-cover" />
               <div>
                 <h2 className="text-lg font-bold text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>The Minhelet</h2>
-                <p className="text-xs text-gray-400">מונדיאל 2026 — הימורי חברים</p>
+                <p className="text-xs text-gray-400">מונדיאל 2026 · הימורי חברים</p>
               </div>
             </div>
             <button onClick={onDismiss} className="text-xs text-gray-400 hover:text-gray-600">דלג</button>
           </div>
-          <div className="flex gap-1 mb-4">{[0,1,2,3].map(i => <div key={i} className={`h-1 flex-1 rounded-full ${i <= page ? "bg-blue-500" : "bg-gray-200"}`}></div>)}</div>
+          <div className="flex gap-1 mb-1">{[0,1,2,3].map(i => <div key={i} className={`h-1 flex-1 rounded-full transition-colors ${i <= page ? "bg-blue-500" : "bg-gray-200"}`}></div>)}</div>
+          <p className="text-[11px] text-gray-400 font-medium mb-2">שלב {page + 1} מתוך 4</p>
         </div>
         <div className="px-6 pb-6 overflow-y-auto flex-1">
+
+          {/* ============================================================ */}
+          {/* SCREEN 1 — Welcome + 3 betting stages                         */}
+          {/* ============================================================ */}
           {page === 0 && (
             <div className="space-y-4">
-              <h3 className="text-2xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>3 שלבי הימורים</h3>
-              <p className="text-base text-gray-600">לפני תחילת המונדיאל יש להשלים את שלושת השלבים:</p>
-              <div className="space-y-3">
-                <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+              <div>
+                <h3 className="text-2xl font-black text-gray-900 leading-tight" style={{ fontFamily: "var(--font-secular)" }}>ברוכים הבאים</h3>
+                <p className="text-sm text-gray-500 mt-1">48 נבחרות · 12 בתים · 31 משחקי נוקאאוט</p>
+              </div>
+              <p className="text-sm text-gray-700 leading-relaxed">
+                להשלמת ההרשמה — שלושה שלבי הימורים. אפשר לחזור ולערוך כל הימור עד מועד הנעילה.
+              </p>
+              <div className="space-y-2.5">
+                <div className="bg-blue-50 rounded-xl p-3.5 border border-blue-100">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="inline-block w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold text-center leading-6">1</span>
-                    <strong>שלב הבתים</strong>
-                    <span className="text-xs font-bold text-blue-700 bg-blue-100 rounded-full px-2 py-0.5">72 משחקים</span>
+                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-black" style={{ fontFamily: "var(--font-inter)" }}>1</span>
+                    <strong className="text-sm">שלב הבתים</strong>
+                    <span className="ms-auto text-[11px] font-bold text-blue-700 bg-blue-100 rounded-full px-2 py-0.5" style={{ fontFamily: "var(--font-inter)" }}>72 משחקים</span>
                   </div>
-                  <p className="text-sm text-gray-600 ps-8">תוצאה מדויקת לכל משחק · סדרו את הטבלה הצפויה</p>
+                  <p className="text-[13px] text-gray-600 leading-snug ps-8">תוצאה מדויקת לכל משחק · הטבלה הצפויה מחושבת אוטומטית</p>
                 </div>
-                <div className="bg-amber-50 rounded-xl p-4 border border-amber-200">
+                <div className="bg-amber-50 rounded-xl p-3.5 border border-amber-100">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="inline-block w-6 h-6 rounded-full bg-amber-600 text-white text-xs font-bold text-center leading-6">2</span>
-                    <strong>עץ הנוק-אאוט</strong>
-                    <span className="text-xs font-bold text-amber-700 bg-amber-100 rounded-full px-2 py-0.5">31 משחקים</span>
+                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-600 text-white text-xs font-black" style={{ fontFamily: "var(--font-inter)" }}>2</span>
+                    <strong className="text-sm">עץ הנוק-אאוט</strong>
+                    <span className="ms-auto text-[11px] font-bold text-amber-700 bg-amber-100 rounded-full px-2 py-0.5" style={{ fontFamily: "var(--font-inter)" }}>31 משחקים</span>
                   </div>
-                  <p className="text-sm text-gray-600 ps-8">מי עולה מהשמינית ועד הגמר</p>
+                  <p className="text-[13px] text-gray-600 leading-snug ps-8">משמינית הגמר ועד הגמר · בחירת מנצח ותוצאה</p>
                 </div>
-                <div className="bg-purple-50 rounded-xl p-4 border border-purple-200">
+                <div className="bg-purple-50 rounded-xl p-3.5 border border-purple-100">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="inline-block w-6 h-6 rounded-full bg-purple-600 text-white text-xs font-bold text-center leading-6">3</span>
-                    <strong>הימורים מיוחדים</strong>
-                    <span className="text-xs font-bold text-purple-700 bg-purple-100 rounded-full px-2 py-0.5">25 הימורים</span>
+                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-purple-600 text-white text-xs font-black" style={{ fontFamily: "var(--font-inter)" }}>3</span>
+                    <strong className="text-sm">הימורים מיוחדים</strong>
+                    <span className="ms-auto text-[11px] font-bold text-purple-700 bg-purple-100 rounded-full px-2 py-0.5" style={{ fontFamily: "var(--font-inter)" }}>25 הימורים</span>
                   </div>
-                  <p className="text-sm text-gray-600 ps-8">זוכה, גמר, מלך שערים, בית פורה ועוד</p>
+                  <p className="text-[13px] text-gray-600 leading-snug ps-8">אלוף, מלך שערים, בית פורה, מאצ׳אפים ועוד</p>
                 </div>
               </div>
-              <p className="text-xs text-gray-500 text-center bg-gray-50 rounded-lg py-2 border border-gray-100">סה״כ 128 הימורים · אפשר לחזור ולשנות עד הנעילה</p>
+              <p className="text-[11px] text-gray-500 text-center bg-gray-50 rounded-lg py-2 border border-gray-100">
+                סה״כ <strong className="text-gray-700" style={{ fontFamily: "var(--font-inter)" }}>128</strong> הימורים · שמירה אוטומטית
+              </p>
             </div>
           )}
+
+          {/* ============================================================ */}
+          {/* SCREEN 2 — Scoring                                            */}
+          {/* ============================================================ */}
           {page === 1 && (
             <div className="space-y-4">
-              <h3 className="text-2xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>ניקוד בקצרה</h3>
-              <p className="text-base text-gray-600">משחקי בתים ונוקאאוט:</p>
-              <div className="overflow-hidden rounded-xl border border-gray-200">
-                <table className="w-full text-sm">
-                  <thead className="bg-gray-50 text-gray-600 text-xs">
-                    <tr>
-                      <th className="py-2 ps-4 text-start font-semibold">שלב</th>
-                      <th className="py-2 text-center font-semibold">תוצאה מדויקת</th>
-                      <th className="py-2 pe-4 text-center font-semibold">כיוון נכון</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="border-t border-gray-100"><td className="py-2 ps-4 font-bold">בתים</td><td className="text-center font-black text-green-600" style={{ fontFamily: "var(--font-inter)" }}>3 נק׳</td><td className="py-2 pe-4 text-center font-black text-blue-600" style={{ fontFamily: "var(--font-inter)" }}>2 נק׳</td></tr>
-                    <tr className="border-t border-gray-100"><td className="py-2 ps-4 font-bold">נוקאאוט</td><td className="text-center font-black text-green-600" style={{ fontFamily: "var(--font-inter)" }}>3 נק׳</td><td className="py-2 pe-4 text-center font-black text-blue-600" style={{ fontFamily: "var(--font-inter)" }}>2 נק׳</td></tr>
-                  </tbody>
-                </table>
+              <div>
+                <h3 className="text-2xl font-black text-gray-900 leading-tight" style={{ fontFamily: "var(--font-secular)" }}>איך זוכים נקודות</h3>
+                <p className="text-sm text-gray-500 mt-1">סקירה קצרה של שיטת הניקוד</p>
               </div>
-              <p className="text-sm text-gray-600 mt-3">הימורי עולות ומיוחדים:</p>
-              <div className="grid grid-cols-2 gap-1.5 text-xs">
-                <div className="bg-purple-50 rounded-lg py-1.5 px-2 border border-purple-100 flex items-center justify-between"><span>זוכה</span><span className="font-black text-purple-700" style={{ fontFamily: "var(--font-inter)" }}>12</span></div>
-                <div className="bg-purple-50 rounded-lg py-1.5 px-2 border border-purple-100 flex items-center justify-between"><span>גמר</span><span className="font-black text-purple-700" style={{ fontFamily: "var(--font-inter)" }}>8</span></div>
-                <div className="bg-purple-50 rounded-lg py-1.5 px-2 border border-purple-100 flex items-center justify-between"><span>חצי גמר</span><span className="font-black text-purple-700" style={{ fontFamily: "var(--font-inter)" }}>6</span></div>
-                <div className="bg-purple-50 rounded-lg py-1.5 px-2 border border-purple-100 flex items-center justify-between"><span>רבע גמר</span><span className="font-black text-purple-700" style={{ fontFamily: "var(--font-inter)" }}>4</span></div>
-                <div className="bg-amber-50 rounded-lg py-1.5 px-2 border border-amber-100 flex items-center justify-between"><span>מלך שערים</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>9</span></div>
-                <div className="bg-amber-50 rounded-lg py-1.5 px-2 border border-amber-100 flex items-center justify-between"><span>מלך בישולים</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>7</span></div>
-                <div className="bg-amber-50 rounded-lg py-1.5 px-2 border border-amber-100 flex items-center justify-between"><span>התקפה הכי טובה</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>6</span></div>
-                <div className="bg-amber-50 rounded-lg py-1.5 px-2 border border-amber-100 flex items-center justify-between"><span>בית פורה / יבש</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>5</span></div>
-                <div className="bg-amber-50 rounded-lg py-1.5 px-2 border border-amber-100 flex items-center justify-between"><span>נבחרת כסחנית</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>5</span></div>
-                <div className="bg-amber-50 rounded-lg py-1.5 px-2 border border-amber-100 flex items-center justify-between"><span>מאצ׳אפ (כל אחד)</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>5</span></div>
-                <div className="bg-amber-50 rounded-lg py-1.5 px-2 border border-amber-100 flex items-center justify-between col-span-2"><span>סה״כ פנדלים (אובר/אנדר 18.5)</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>5</span></div>
+
+              {/* Match scoring */}
+              <div>
+                <p className="text-xs font-bold text-gray-700 mb-1.5">ניקוד משחקים</p>
+                <div className="overflow-hidden rounded-xl border border-gray-200">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-50 text-gray-500 text-[11px]">
+                      <tr>
+                        <th className="py-2 ps-4 text-start font-semibold">שלב</th>
+                        <th className="py-2 text-center font-semibold">תוצאה מדויקת</th>
+                        <th className="py-2 pe-4 text-center font-semibold">כיוון נכון</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="border-t border-gray-100">
+                        <td className="py-1.5 ps-4 font-bold text-[13px]">בתים</td>
+                        <td className="text-center font-black text-green-600" style={{ fontFamily: "var(--font-inter)" }}>3</td>
+                        <td className="py-1.5 pe-4 text-center font-black text-blue-600" style={{ fontFamily: "var(--font-inter)" }}>2</td>
+                      </tr>
+                      <tr className="border-t border-gray-100">
+                        <td className="py-1.5 ps-4 font-bold text-[13px]">נוקאאוט</td>
+                        <td className="text-center font-black text-green-600" style={{ fontFamily: "var(--font-inter)" }}>3</td>
+                        <td className="py-1.5 pe-4 text-center font-black text-blue-600" style={{ fontFamily: "var(--font-inter)" }}>2</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
+
+              {/* Advancement scoring */}
+              <div>
+                <p className="text-xs font-bold text-gray-700 mb-1.5">ניקוד עולות וזוכה</p>
+                <div className="grid grid-cols-2 gap-1.5 text-[12px]">
+                  <div className="bg-purple-50 rounded-lg py-1.5 px-2.5 border border-purple-100 flex items-center justify-between"><span className="text-gray-700">אלוף הטורניר</span><span className="font-black text-purple-700" style={{ fontFamily: "var(--font-inter)" }}>12</span></div>
+                  <div className="bg-purple-50 rounded-lg py-1.5 px-2.5 border border-purple-100 flex items-center justify-between"><span className="text-gray-700">עולה לגמר</span><span className="font-black text-purple-700" style={{ fontFamily: "var(--font-inter)" }}>8</span></div>
+                  <div className="bg-purple-50 rounded-lg py-1.5 px-2.5 border border-purple-100 flex items-center justify-between"><span className="text-gray-700">עולה לחצי</span><span className="font-black text-purple-700" style={{ fontFamily: "var(--font-inter)" }}>6</span></div>
+                  <div className="bg-purple-50 rounded-lg py-1.5 px-2.5 border border-purple-100 flex items-center justify-between"><span className="text-gray-700">עולה לרבע</span><span className="font-black text-purple-700" style={{ fontFamily: "var(--font-inter)" }}>4</span></div>
+                  <div className="bg-purple-50 rounded-lg py-1.5 px-2.5 border border-purple-100 flex items-center justify-between col-span-2"><span className="text-gray-700">עולה מבית · מדויק / חלקי</span><span className="font-black text-purple-700" style={{ fontFamily: "var(--font-inter)" }}>5 / 3</span></div>
+                </div>
+              </div>
+
+              {/* Specials scoring */}
+              <div>
+                <p className="text-xs font-bold text-gray-700 mb-1.5">ניקוד הימורים מיוחדים</p>
+                <div className="grid grid-cols-2 gap-1.5 text-[12px]">
+                  <div className="bg-amber-50 rounded-lg py-1.5 px-2.5 border border-amber-100 flex items-center justify-between"><span className="text-gray-700">מלך שערים</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>9</span></div>
+                  <div className="bg-amber-50 rounded-lg py-1.5 px-2.5 border border-amber-100 flex items-center justify-between"><span className="text-gray-700">מלך בישולים</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>7</span></div>
+                  <div className="bg-amber-50 rounded-lg py-1.5 px-2.5 border border-amber-100 flex items-center justify-between"><span className="text-gray-700">התקפה הכי טובה</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>6</span></div>
+                  <div className="bg-amber-50 rounded-lg py-1.5 px-2.5 border border-amber-100 flex items-center justify-between"><span className="text-gray-700">בית פורה / יבש</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>5</span></div>
+                  <div className="bg-amber-50 rounded-lg py-1.5 px-2.5 border border-amber-100 flex items-center justify-between"><span className="text-gray-700">נבחרת כסחנית</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>5</span></div>
+                  <div className="bg-amber-50 rounded-lg py-1.5 px-2.5 border border-amber-100 flex items-center justify-between"><span className="text-gray-700">מאצ׳אפ נכון</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>5</span></div>
+                  <div className="bg-amber-50 rounded-lg py-1.5 px-2.5 border border-amber-100 flex items-center justify-between col-span-2"><span className="text-gray-700">סה״כ פנדלים (אובר/אנדר 18.5)</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>5</span></div>
+                </div>
+              </div>
+              <p className="text-[11px] text-gray-500 text-center bg-gray-50 rounded-lg py-2 border border-gray-100">
+                ניתן לעקוב אחר הניקוד שלך בדף הטבלה אחרי הנעילה
+              </p>
             </div>
           )}
+
+          {/* ============================================================ */}
+          {/* SCREEN 3 — Pages tour                                         */}
+          {/* ============================================================ */}
           {page === 2 && (
             <div className="space-y-4">
-              <h3 className="text-2xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>סיור באתר</h3>
-              <p className="text-sm text-gray-600">חוץ מההימורים, יש לך גם את הדפים האלה — כולם זמינים מהתפריט בתחתית המסך:</p>
+              <div>
+                <h3 className="text-2xl font-black text-gray-900 leading-tight" style={{ fontFamily: "var(--font-secular)" }}>הדפים שתפגוש כאן</h3>
+                <p className="text-sm text-gray-500 mt-1">חוץ מההימורים — יש מה לראות</p>
+              </div>
               <div className="grid grid-cols-2 gap-2">
-                <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+                <div className="rounded-xl border border-gray-200 bg-white p-3 hover:bg-gray-50 transition-colors">
                   <div className="flex items-center gap-1.5 text-gray-700 mb-1">{Icons.leaderboard(true)}<span className="font-bold text-sm">טבלה</span></div>
-                  <p className="text-[11px] text-gray-500 leading-snug">דירוג חי + טרנדים</p>
+                  <p className="text-[11px] text-gray-500 leading-snug">דירוג חי + מעקב הניקוד שלך</p>
                 </div>
-                <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+                <div className="rounded-xl border border-gray-200 bg-white p-3 hover:bg-gray-50 transition-colors">
                   <div className="flex items-center gap-1.5 text-gray-700 mb-1">{Icons.compare(true)}<span className="font-bold text-sm">השוואה</span></div>
-                  <p className="text-[11px] text-gray-500 leading-snug">מי הימר על מה — heatmap</p>
+                  <p className="text-[11px] text-gray-500 leading-snug">heatmap בין כל המהמרים</p>
                 </div>
-                <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+                <div className="rounded-xl border border-gray-200 bg-white p-3 hover:bg-gray-50 transition-colors">
                   <div className="flex items-center gap-1.5 text-gray-700 mb-1">{Icons.live(true)}<span className="font-bold text-sm">לייב</span></div>
-                  <p className="text-[11px] text-gray-500 leading-snug">תוצאות אמת + עץ חי</p>
+                  <p className="text-[11px] text-gray-500 leading-snug">תוצאות אמת + עץ + מיוחדים</p>
                 </div>
-                <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+                <div className="rounded-xl border border-gray-200 bg-white p-3 hover:bg-gray-50 transition-colors">
                   <div className="flex items-center gap-1.5 text-gray-700 mb-1">{Icons.squads(true)}<span className="font-bold text-sm">נבחרות</span></div>
-                  <p className="text-[11px] text-gray-500 leading-snug">סגלים ושחקנים</p>
+                  <p className="text-[11px] text-gray-500 leading-snug">סגלים, שחקנים ומספרים</p>
                 </div>
-                <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+                <div className="rounded-xl border border-gray-200 bg-white p-3 hover:bg-gray-50 transition-colors">
                   <div className="flex items-center gap-1.5 text-gray-700 mb-1">{Icons.schedule(true)}<span className="font-bold text-sm">לו״ז</span></div>
-                  <p className="text-[11px] text-gray-500 leading-snug">לוח משחקים מלא</p>
+                  <p className="text-[11px] text-gray-500 leading-snug">לוח משחקים מסונן</p>
                 </div>
-                <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+                <div className="rounded-xl border border-gray-200 bg-white p-3 hover:bg-gray-50 transition-colors">
                   <div className="flex items-center gap-1.5 text-gray-700 mb-1">{Icons.rules(true)}<span className="font-bold text-sm">חוקים</span></div>
-                  <p className="text-[11px] text-gray-500 leading-snug">איך הניקוד עובד</p>
+                  <p className="text-[11px] text-gray-500 leading-snug">הסבר מלא על שיטת הניקוד</p>
                 </div>
               </div>
-              <p className="text-xs text-gray-500 text-center bg-gray-50 rounded-lg py-2 border border-gray-100">תוכלו תמיד לחזור לכאן בלחיצה על ❓ בפינה</p>
+              <p className="text-[11px] text-gray-500 text-center bg-gray-50 rounded-lg py-2 border border-gray-100">
+                במובייל — תפריט תחתון. במחשב — סרגל למעלה.
+              </p>
             </div>
           )}
+
+          {/* ============================================================ */}
+          {/* SCREEN 4 — Lock + opening + after                             */}
+          {/* ============================================================ */}
           {page === 3 && (
             <div className="space-y-4">
-              <h3 className="text-2xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>אחרי הנעילה</h3>
-              <p className="text-sm text-gray-600">ב-{formatLockDeadline()} ההימורים ננעלים — ומכאן והלאה האתר מתעורר לחיים:</p>
-              <div className="space-y-2.5">
-                <div className="bg-green-50 rounded-xl p-3.5 border border-green-200 flex items-start gap-3">
-                  <span className="text-xl shrink-0">🟢</span>
+              <div>
+                <h3 className="text-2xl font-black text-gray-900 leading-tight" style={{ fontFamily: "var(--font-secular)" }}>הנעילה ופתיחת הטורניר</h3>
+                <p className="text-sm text-gray-500 mt-1">מה צפוי בשבועות הקרובים</p>
+              </div>
+
+              {/* Two key dates */}
+              <div className="grid grid-cols-2 gap-2">
+                <div className="bg-red-50 border border-red-100 rounded-xl px-3 py-3 text-center">
+                  <p className="text-[10px] text-red-600 font-bold uppercase tracking-wider mb-0.5" style={{ fontFamily: "var(--font-inter)" }}>נעילת הימורים</p>
+                  <p className="text-base font-black text-red-900 leading-tight" style={{ fontFamily: "var(--font-inter)" }}>10.06.2026</p>
+                  <p className="text-[11px] text-red-700">17:00 שעון ישראל</p>
+                </div>
+                <div className="bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-3 text-center">
+                  <p className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider mb-0.5" style={{ fontFamily: "var(--font-inter)" }}>פתיחת הטורניר</p>
+                  <p className="text-base font-black text-emerald-900 leading-tight" style={{ fontFamily: "var(--font-inter)" }}>11.06.2026</p>
+                  <p className="text-[11px] text-emerald-700">משחק הפתיחה</p>
+                </div>
+              </div>
+
+              {/* Three-step timeline */}
+              <div className="space-y-2">
+                <div className="flex items-start gap-3 px-3 py-2.5 rounded-lg border border-gray-100">
+                  <span className="mt-1.5 w-2 h-2 rounded-full bg-blue-500 shrink-0"></span>
                   <div>
-                    <p className="font-bold text-green-900 text-sm">טבלת דירוג חיה</p>
-                    <p className="text-xs text-green-700 mt-0.5">מתעדכנת אחרי כל משחק עם נקודות חיות</p>
+                    <p className="text-sm font-bold text-gray-900">עד הנעילה</p>
+                    <p className="text-[12px] text-gray-600 leading-snug">שמירה אוטומטית. אפשר לערוך הימורים בכל זמן.</p>
                   </div>
                 </div>
-                <div className="bg-amber-50 rounded-xl p-3.5 border border-amber-200 flex items-start gap-3">
-                  <span className="text-xl shrink-0">🔥</span>
+                <div className="flex items-start gap-3 px-3 py-2.5 rounded-lg border border-gray-100">
+                  <span className="mt-1.5 w-2 h-2 rounded-full bg-red-500 shrink-0"></span>
                   <div>
-                    <p className="font-bold text-amber-900 text-sm">מי חי?</p>
-                    <p className="text-xs text-amber-700 mt-0.5">מי עוד תקוע עם הימורים שלא נפסלו</p>
+                    <p className="text-sm font-bold text-gray-900">ברגע הנעילה</p>
+                    <p className="text-[12px] text-gray-600 leading-snug">סוגרים את הפנקס. כל ההימורים מוקפאים והניקוד מתחיל להיספר.</p>
                   </div>
                 </div>
-                <div className="bg-blue-50 rounded-xl p-3.5 border border-blue-200 flex items-start gap-3">
-                  <span className="text-xl shrink-0">🎯</span>
+                <div className="flex items-start gap-3 px-3 py-2.5 rounded-lg border border-gray-100">
+                  <span className="mt-1.5 w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
                   <div>
-                    <p className="font-bold text-blue-900 text-sm">השוואת הימורים</p>
-                    <p className="text-xs text-blue-700 mt-0.5">heatmap של כל המהמרים על כל בחירה</p>
-                  </div>
-                </div>
-                <div className="bg-purple-50 rounded-xl p-3.5 border border-purple-200 flex items-start gap-3">
-                  <span className="text-xl shrink-0">🏆</span>
-                  <div>
-                    <p className="font-bold text-purple-900 text-sm">הימורים מיוחדים חיים</p>
-                    <p className="text-xs text-purple-700 mt-0.5">מלך שערים, בית פורה ועוד — לפי תוצאות אמת</p>
+                    <p className="text-sm font-bold text-gray-900">אחרי הנעילה</p>
+                    <p className="text-[12px] text-gray-600 leading-snug">דירוג חי, השוואות בין מהמרים, מי עוד "חי" בעץ ותוצאות בזמן אמת.</p>
                   </div>
                 </div>
               </div>

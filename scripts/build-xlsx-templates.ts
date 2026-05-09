@@ -71,11 +71,130 @@ interface LoadedUser {
   } | null;
 }
 
+// -----------------------------------------------------------------------------
+// Demo data — used when --demo is passed or Supabase env is missing AND the
+// script is invoked with --demo. 8 sample users with realistic Hebrew names,
+// fully-filled group bets, partially-filled knockout, and a mix of specials so
+// the produced workbooks demonstrate every column shape.
+// -----------------------------------------------------------------------------
+
+const DEMO_NAMES = [
+  { name: "דני", email: "danny@example.com", style: "favorite" as const },
+  { name: "יוני", email: "yoni@example.com", style: "favorite" as const },
+  { name: "אמית", email: "amit@example.com", style: "favorite" as const },
+  { name: "דור דסא", email: "dor@example.com", style: "balanced" as const },
+  { name: "רון ב", email: "ron.b@example.com", style: "upset" as const },
+  { name: "רון ג", email: "ron.g@example.com", style: "upset" as const },
+  { name: "רועי", email: "roi@example.com", style: "balanced" as const },
+  { name: "אורי", email: "uri@example.com", style: "underdog" as const },
+];
+
+function seededRandom(seed: number): () => number {
+  let s = seed;
+  return () => {
+    s = (s * 9301 + 49297) % 233280;
+    return s / 233280;
+  };
+}
+
+function buildDemoUsers(): LoadedUser[] {
+  return DEMO_NAMES.map((d, idx) => {
+    const rand = seededRandom(idx + 1);
+
+    // Fill all 12 groups with realistic-ish scores (0-3 goals each side)
+    const group_predictions: Record<string, { scores: { home: number | null; away: number | null }[] }> = {};
+    for (const letter of GROUP_LETTERS) {
+      const codes = (GROUPS[letter] || []).map(t => t.code);
+      const matchups = generateMatchups(codes);
+      group_predictions[letter] = {
+        scores: matchups.map(() => ({
+          home: Math.floor(rand() * 4),
+          away: Math.floor(rand() * 3),
+        })),
+      };
+    }
+
+    // Knockout: fill R32 winners using top-2 from each group, mostly the
+    // alphabetical first team (favourite-style users) or the second team
+    // (upset-style users). Score predictions are usually 1-0 or 2-1.
+    const knockout_tree: Record<string, { winner: string; score1: number; score2: number }> = {};
+    const r32WinnerForUser = (matchIdx: number): string => {
+      const groupIdx = matchIdx % 12;
+      const letter = GROUP_LETTERS[groupIdx];
+      const teams = (GROUPS[letter] || []).map(t => t.code);
+      if (d.style === "favorite") return teams[0];
+      if (d.style === "upset") return teams[1];
+      if (d.style === "underdog") return teams[Math.floor(rand() * teams.length)];
+      return teams[matchIdx % 2];
+    };
+    for (let i = 0; i < 16; i++) {
+      const winner = r32WinnerForUser(i);
+      knockout_tree[`r32_${i}`] = { winner, score1: 2, score2: 1 };
+    }
+    // Fill a few R16 picks for the favourites only — leaves blank cells in
+    // the workbook so users can see how the format treats missing data.
+    if (d.style === "favorite") {
+      for (let i = 0; i < 4; i++) {
+        knockout_tree[`r16_${i}`] = { winner: r32WinnerForUser(i * 2), score1: 1, score2: 0 };
+      }
+    }
+
+    // Champion picked from the user's R32 first winner
+    const champion = knockout_tree["r32_0"].winner;
+
+    // Special bets — vary by style
+    const topScorers = ["Mbappé", "Haaland", "Vinicius", "Lautaro", "Kane"];
+    const topAssists = ["De Bruyne", "Modric", "Bruno Fernandes", "Kimmich"];
+    const special: Record<string, string | null> = {
+      top_scorer_player: topScorers[idx % topScorers.length],
+      top_assists_player: topAssists[idx % topAssists.length],
+      best_attack_team: ["BRA", "ARG", "FRA", "ESP"][idx % 4],
+      most_prolific_group: ["A", "C", "E", "G"][idx % 4],
+      driest_group: ["B", "D", "F", "H"][idx % 4],
+      dirtiest_team: ["MEX", "URU", "POR", "GER"][idx % 4],
+      matchup_pick: `home,away,${idx % 2 === 0 ? "draw" : "home"}`,
+      penalties_over_under: idx % 2 === 0 ? "over" : "under",
+    };
+
+    // Advancement: top 2 of each group + knockout progression picks
+    const group_qualifiers: Record<string, string[]> = {};
+    for (const letter of GROUP_LETTERS) {
+      const teams = (GROUPS[letter] || []).map(t => t.code);
+      group_qualifiers[letter] = d.style === "upset" ? [teams[1], teams[2]] : [teams[0], teams[1]];
+    }
+    const allFavourites = GROUP_LETTERS.flatMap(l => {
+      const t = (GROUPS[l] || []).map(x => x.code);
+      return d.style === "upset" ? [t[1]] : [t[0]];
+    });
+    const advancement = {
+      group_qualifiers,
+      advance_to_qf: allFavourites.slice(0, 8),
+      advance_to_sf: allFavourites.slice(0, 4),
+      advance_to_final: allFavourites.slice(0, 2),
+      winner: champion,
+    };
+
+    return {
+      email: d.email,
+      display_name: d.name,
+      bracket: { group_predictions, knockout_tree, champion },
+      special,
+      advancement,
+    };
+  });
+}
+
 async function loadUsersFromSupabase(): Promise<LoadedUser[]> {
+  const useDemo = process.argv.includes("--demo");
+  if (useDemo) {
+    console.log("ℹ️  --demo flag set — producing workbooks with sample data.");
+    return buildDemoUsers();
+  }
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) {
-    console.log("ℹ️  No Supabase env vars detected — producing empty template.");
+    console.log("ℹ️  No Supabase env vars detected — producing empty template. (Pass --demo for sample data.)");
     return [];
   }
   const { createClient } = await import("@supabase/supabase-js");
@@ -343,6 +462,8 @@ async function buildBackup(users: LoadedUser[]) {
 // -----------------------------------------------------------------------------
 
 async function buildLiveops(users: LoadedUser[]) {
+  const useDemo = process.argv.includes("--demo");
+
   const wb = new ExcelJS.Workbook();
   wb.creator = "WC2026 The Minhelet";
   wb.created = new Date();
@@ -400,7 +521,14 @@ async function buildLiveops(users: LoadedUser[]) {
       resultsSheet.getCell(`C${resultRowIdx}`).value = letter;
       resultsSheet.getCell(`D${resultRowIdx}`).value = mu.h;
       resultsSheet.getCell(`E${resultRowIdx}`).value = mu.a;
-      // home_goals + away_goals left empty for admin entry
+      // home_goals + away_goals: in --demo mode, pre-fill the first 3 groups
+      // (18 matches) with sample results so the leaderboard shows real
+      // numbers on open. Otherwise leave blank for admin entry.
+      if (useDemo && GROUP_LETTERS.indexOf(letter) < 3) {
+        const r = seededRandom(GROUP_LETTERS.indexOf(letter) * 100 + i);
+        resultsSheet.getCell(`F${resultRowIdx}`).value = Math.floor(r() * 4);
+        resultsSheet.getCell(`G${resultRowIdx}`).value = Math.floor(r() * 3);
+      }
       resultRowIdx++;
     });
   }

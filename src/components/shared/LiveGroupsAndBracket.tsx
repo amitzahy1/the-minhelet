@@ -339,7 +339,6 @@ export function LiveGroupsAndBracket() {
 
   return (
     <div className="space-y-4">
-      <p className="text-[11px] text-gray-400 -mb-2">מקור: תוצאות אמת של הטורניר · עדכון אחת ל-5 דקות</p>
       {/* Sub-tabs */}
       <div className="flex gap-2 flex-wrap">
         <button
@@ -367,6 +366,8 @@ export function LiveGroupsAndBracket() {
           הימורים מיוחדים
         </button>
       </div>
+
+      <p className="text-[10px] text-gray-400 font-medium">מקור: תוצאות אמת · עדכון כל 5 דק׳</p>
 
       {tab === "groups" && (
         <div className="space-y-4">

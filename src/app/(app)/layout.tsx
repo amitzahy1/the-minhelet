@@ -742,12 +742,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </Link>
           <Link href="/groups"
             className={`flex flex-col items-center gap-0.5 py-1 ${isBettingPage ? "text-blue-600" : "text-gray-400"}`}>
-            <span className="relative w-5 h-5 flex items-center justify-center">
-              <span className="absolute -inset-1">
-                <ProgressRing pct={bettingOverallPct} size={28} stroke={2} color={isBettingPage ? "#2563eb" : "#9ca3af"} />
-              </span>
-              {Icons.bets(isBettingPage)}
-            </span>
+            {Icons.bets(isBettingPage)}
             <span className="text-[8px] font-bold">הימורים</span>
           </Link>
         </div>

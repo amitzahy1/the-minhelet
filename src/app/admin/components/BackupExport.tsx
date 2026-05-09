@@ -10,12 +10,15 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { isLocked, formatLockDeadline } from "@/lib/constants";
 
+// Per-category CSVs — each opens cleanly in Excel. Keep these separate
+// rather than offering an "all-in-one" multi-section CSV: Excel doesn't
+// render section headers mid-sheet correctly and the column counts differ
+// per category.
 const CSV_OPTIONS: { type: string; label: string; description: string }[] = [
   { type: "groups", label: "CSV — שלב הבתים", description: "144 משחקים, פורמט רחב — שורה לכל משתמש, עמודה לכל משחק" },
   { type: "knockout", label: "CSV — נוקאאוט", description: "31 משחקי נוקאאוט עם מנצח + תוצאה לכל משתמש" },
   { type: "special", label: "CSV — הימורים מיוחדים", description: "מלך שערים, בישולים, התקפה, מאצ'אפים, פנדלים" },
   { type: "advancement", label: "CSV — עולות", description: "עולות מבית, רבע, חצי, גמר, אלוף" },
-  { type: "all", label: "CSV — הכל באחד", description: "כל הקטגוריות מאוחות בקובץ אחד עם כותרות-קטע (## GROUPS, ## KNOCKOUT...)" },
 ];
 
 export function BackupExport() {

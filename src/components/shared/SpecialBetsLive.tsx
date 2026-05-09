@@ -44,8 +44,12 @@ interface ApiPayload {
 function Card({ title, children, source, updatedAt }: {
   title: string; children: React.ReactNode; source?: "api" | "manual" | "computed"; updatedAt?: string | null;
 }) {
+  // The updatedAt timestamp comes from tournament_actuals.updated_at, which
+  // bumps any time *any* field on the row changes — not just the field shown
+  // here. We surface it as a generic "last-touched" hint rather than a
+  // per-field freshness signal.
   const sourceLabel = source === "api" ? "מקור: Football-Data.org"
-    : source === "manual" ? "מקור: עדכון ידני"
+    : source === "manual" ? "מקור: עדכון ידני של מנהל"
     : source === "computed" ? "מחושב מתוצאות אמת"
     : null;
   return (
@@ -55,7 +59,7 @@ function Card({ title, children, source, updatedAt }: {
         {sourceLabel && (
           <span className="text-[10px] text-gray-400 font-medium">
             {sourceLabel}
-            {updatedAt && ` · ${new Date(updatedAt).toLocaleDateString("he-IL")}`}
+            {source === "manual" && updatedAt && ` · עודכן לאחרונה ${new Date(updatedAt).toLocaleDateString("he-IL")}`}
           </span>
         )}
       </div>

@@ -546,8 +546,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm hidden sm:block">
         <div className="max-w-7xl mx-auto flex items-center justify-between h-14 lg:h-16 px-4 lg:px-6">
           <Link href="/standings" className="flex items-center gap-2 shrink-0">
-            <img src="/logo.png" alt="The Minhelet" className="w-12 h-12 lg:w-14 lg:h-14 rounded-full object-cover shadow-lg" />
-            <div className="flex flex-col">
+            <img src="/logo.png" alt="The Minhelet" className="w-10 h-10 lg:w-14 lg:h-14 rounded-full object-cover shadow-lg" />
+            <div className="hidden lg:flex flex-col">
               <span className="font-bold text-sm lg:text-lg text-gray-900 leading-tight" style={{ fontFamily: "var(--font-secular)" }}>THE MINHELET</span>
               <span className="text-[9px] lg:text-xs text-gray-400 font-medium" style={{ fontFamily: "var(--font-inter)" }}>WORLD CUP 2026</span>
             </div>

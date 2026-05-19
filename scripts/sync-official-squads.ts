@@ -100,6 +100,78 @@ interface SyncedStatus {
   source: string;
 }
 
+interface ScrapedPlayer {
+  nameEn: string;
+  pos: "GK" | "DEF" | "MID" | "FW";
+  club: string;
+}
+
+function decodeEntities(s: string): string {
+  return s
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, "\"")
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, " ");
+}
+
+function stripHtml(s: string): string {
+  return decodeEntities(s.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim());
+}
+
+const POS_MAP: Record<string, ScrapedPlayer["pos"]> = {
+  GK: "GK",
+  DF: "DEF",
+  MF: "MID",
+  FW: "FW",
+};
+
+function parsePlayerRows(section: string): ScrapedPlayer[] {
+  const tableMatch = section.match(/<table[^>]*class="[^"]*wikitable[^"]*"[^>]*>([\s\S]*?)<\/table>/i);
+  if (!tableMatch) return [];
+  const rows = tableMatch[1].split(/<tr class="nat-fs-player">/).slice(1);
+  const players: ScrapedPlayer[] = [];
+  for (const row of rows) {
+    const posMatch = row.match(/<span style="display:none">\d+<\/span><a[^>]*>(GK|DF|MF|FW)<\/a>/);
+    if (!posMatch) continue;
+    const pos = POS_MAP[posMatch[1]];
+    // Name lives in <th ... scope="row">…</th>. Strip any link, then "(captain)" annotation.
+    const thMatch = row.match(/<th[^>]*scope="row"[^>]*>([\s\S]*?)<\/th>/);
+    if (!thMatch) continue;
+    let rawName = thMatch[1];
+    // Remove the "(captain)" italic small-tag suffix entirely
+    rawName = rawName.replace(/<small>[\s\S]*?<\/small>/g, "");
+    const nameEn = stripHtml(rawName);
+    if (!nameEn) continue;
+    // Club is the last <td style="text-align:left">: it always contains a flag span + a club link.
+    // Grab the last <a>…</a> inside that td.
+    const clubTdMatch = row.match(/<td style="text-align:left"[^>]*>([\s\S]*?)<\/td>\s*(?:<\/tr>|$)/);
+    let club = "";
+    if (clubTdMatch) {
+      const links = [...clubTdMatch[1].matchAll(/<a[^>]*>([^<]+)<\/a>/g)];
+      if (links.length) club = stripHtml(links[links.length - 1][1]);
+    }
+    players.push({ nameEn, pos, club });
+  }
+  return players;
+}
+
+function pickDefaultStarterNames(players: ScrapedPlayer[]): Set<string> {
+  const target: Record<ScrapedPlayer["pos"], number> = { GK: 1, DEF: 4, MID: 3, FW: 3 };
+  const picked = new Set<string>();
+  for (const pos of ["GK", "DEF", "MID", "FW"] as const) {
+    let count = 0;
+    for (const p of players) {
+      if (p.pos === pos && count < target[pos]) {
+        picked.add(p.nameEn);
+        count++;
+      }
+    }
+  }
+  return picked;
+}
+
 async function main(): Promise<void> {
   console.log(`Fetching ${WIKI_URL} ...`);
   const res = await fetch(WIKI_URL, { headers: { "User-Agent": "wc2026-app/1.0 (amitz@tailormed.co) sync-official-squads" } });
@@ -114,7 +186,9 @@ async function main(): Promise<void> {
   }
 
   const synced: Record<string, SyncedStatus> = {};
+  const rosters: Record<string, ScrapedPlayer[]> = {};
   const skipped: string[] = [];
+  const rosterWarnings: string[] = [];
 
   for (const [wikiId, code] of Object.entries(WIKI_TO_CODE)) {
     const section = extractSection(html, wikiId);
@@ -129,6 +203,13 @@ async function main(): Promise<void> {
       announcedAt,
       source: `${WIKI_URL}#${wikiId}`,
     };
+    const players = parsePlayerRows(section);
+    if (players.length < 23) {
+      rosterWarnings.push(`${code}: only ${players.length} players parsed (expected 23–26)`);
+    }
+    if (players.length) {
+      rosters[code] = players;
+    }
   }
 
   const fifaDate = detectFifaConfirmation(html);
@@ -142,6 +223,10 @@ async function main(): Promise<void> {
   if (skipped.length) {
     console.warn(`\nSkipped sections (${skipped.length}):`);
     for (const s of skipped) console.warn(`  - ${s}`);
+  }
+  if (rosterWarnings.length) {
+    console.warn(`\nRoster size warnings (${rosterWarnings.length}):`);
+    for (const w of rosterWarnings) console.warn(`  - ${w}`);
   }
 
   const entries = Object.entries(synced).sort(([a], [b]) => a.localeCompare(b));
@@ -162,25 +247,71 @@ async function main(): Promise<void> {
 `export const OFFICIAL_SQUADS: Record<string, OfficialStatus> = {${entries.length ? "\n" + generatedBody + "\n" : ""}};
 export const LAST_SYNC: string | null = ${JSON.stringify(lastSync)};`;
 
-  const targetPath = path.resolve(__dirname, "..", "src", "lib", "tournament", "official-squads.ts");
-  const existing = fs.readFileSync(targetPath, "utf8");
+  const statusPath = path.resolve(__dirname, "..", "src", "lib", "tournament", "official-squads.ts");
+  const existing = fs.readFileSync(statusPath, "utf8");
   const startMarker = "// <generated-start>";
   const endMarker = "// <generated-end>";
   const startIdx = existing.indexOf(startMarker);
   const endIdx = existing.indexOf(endMarker);
   if (startIdx === -1 || endIdx === -1 || endIdx <= startIdx) {
-    console.error(`Could not find generated sentinels in ${targetPath} — refusing to overwrite`);
+    console.error(`Could not find generated sentinels in ${statusPath} — refusing to overwrite`);
     process.exit(2);
   }
   const before = existing.slice(0, startIdx + startMarker.length);
   const after = existing.slice(endIdx);
   const next = `${before} — do not edit between these sentinels; regenerated by the scraper.\n${block}\n${after}`;
-  fs.writeFileSync(targetPath, next, "utf8");
+  fs.writeFileSync(statusPath, next, "utf8");
+
+  // Write the per-team full rosters scraped from Wikipedia.
+  const rosterEntries = Object.entries(rosters).sort(([a], [b]) => a.localeCompare(b));
+  const rosterLines: string[] = [];
+  for (const [code, players] of rosterEntries) {
+    const starters = pickDefaultStarterNames(players);
+    rosterLines.push(`  ${code}: [`);
+    for (const p of players) {
+      const isStarter = starters.has(p.nameEn);
+      const parts = [
+        `nameEn: ${JSON.stringify(p.nameEn)}`,
+        `pos: ${JSON.stringify(p.pos)}`,
+        `club: ${JSON.stringify(p.club)}`,
+      ];
+      if (isStarter) parts.push(`starter: true`);
+      rosterLines.push(`    { ${parts.join(", ")} },`);
+    }
+    rosterLines.push(`  ],`);
+  }
+  const rosterBody = rosterLines.join("\n");
+  const rosterFile =
+`// ============================================================================
+// WC2026 — Full 26-man rosters for federations that have announced their squads.
+// Auto-generated by scripts/sync-official-squads.ts — DO NOT EDIT BY HAND.
+// Source: ${WIKI_URL}
+// Last sync: ${lastSync}
+//
+// Consumed by getSquad() in ./squads-data.ts, which prefers these rosters over
+// the hand-curated estimates whenever a team appears here.
+// ============================================================================
+
+export interface OfficialRosterPlayer {
+  nameEn: string;
+  pos: "GK" | "DEF" | "MID" | "FW";
+  club: string;
+  starter?: boolean;
+}
+
+export const OFFICIAL_ROSTERS: Record<string, OfficialRosterPlayer[]> = {${rosterEntries.length ? "\n" + rosterBody + "\n" : ""}};
+`;
+  const rostersPath = path.resolve(__dirname, "..", "src", "lib", "tournament", "official-rosters.ts");
+  fs.writeFileSync(rostersPath, rosterFile, "utf8");
 
   const announced = entries.filter(([, s]) => s.state === "announced").length;
   const confirmed = entries.filter(([, s]) => s.state === "fifa_confirmed").length;
+  const rosterCount = rosterEntries.length;
+  const totalPlayers = rosterEntries.reduce((sum, [, ps]) => sum + ps.length, 0);
   console.log(`\n✓ Synced ${announced} announced, ${confirmed} FIFA-confirmed (${lastSync})`);
-  console.log(`  Wrote ${targetPath}`);
+  console.log(`✓ Rostered ${totalPlayers} players across ${rosterCount} teams`);
+  console.log(`  Wrote ${statusPath}`);
+  console.log(`  Wrote ${rostersPath}`);
 }
 
 main().catch((err) => {

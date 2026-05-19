@@ -275,6 +275,9 @@ import { getMarketValue } from "./market-values";
 import apiSquads from "./squads-api.json";
 const API_DATA = apiSquads as Record<string, { players: { nameEn: string; num: number; pos: "GK"|"DEF"|"MID"|"FW"; photo: string; age: number; club?: string }[]; logo?: string }>;
 
+// --- Wikipedia-scraped official 26-man rosters (announced teams only) ---
+import { OFFICIAL_ROSTERS } from "./official-rosters";
+
 /**
  * Pick starters for a default 4-3-3 formation from a list of players.
  * Selects: 1 GK, 4 DEF, 3 MID, 3 FW (by position, in order).
@@ -294,10 +297,55 @@ function pickDefaultStarters(players: { nameEn: string; pos: string }[]): string
   return picked;
 }
 
-// Get squad for a team — merges manual data with API data
+// Get squad for a team — merges manual data with API data, preferring the
+// federation-announced 26-man roster from Wikipedia when present.
 export function getSquad(code: string): SquadData | null {
   const manual = SQUADS_DATA[code];
   const api = API_DATA[code];
+  const official = OFFICIAL_ROSTERS[code];
+
+  if (official && official.length >= 23) {
+    // Official roster present — use it for `players[]`, enrich with photos /
+    // market values where the player name matches API data.
+    const apiPlayers = api?.players ?? [];
+    const apiExact = new Map(apiPlayers.map(p => [p.nameEn, p]));
+    const players: PlayerData[] = official.map((p, idx) => {
+      let apiMatch = apiExact.get(p.nameEn);
+      if (!apiMatch) {
+        const last = p.nameEn.split(/\s+/).pop() || "";
+        if (last.length >= 3) {
+          apiMatch = apiPlayers.find(ap => ap.nameEn === last
+            || ap.nameEn.endsWith(` ${last}`)
+            || ap.nameEn.endsWith(`. ${last}`));
+        }
+      }
+      const mv = getMarketValue(p.nameEn);
+      return {
+        name: p.nameEn,
+        nameEn: p.nameEn,
+        num: idx + 1, // Wikipedia doesn't list shirt numbers; use stable ordinal
+        club: p.club || apiMatch?.club || "",
+        pos: p.pos,
+        starter: p.starter,
+        photo: apiMatch?.photo,
+        ...(mv !== null ? { marketValue: mv } : {}),
+      };
+    });
+    const starterNames = players.filter(p => p.starter).map(p => p.nameEn);
+    if (manual) {
+      // Keep manual coach/formation/sources for the predicted-XI tabs, but
+      // override the player list. If a manual `source.starters` list doesn't
+      // match the new names, the squads page falls back to `p.starter === true`.
+      return { ...manual, players };
+    }
+    return {
+      coach: "",
+      coachEn: "",
+      formation: "4-3-3",
+      sources: [{ name: "Official squad", formation: "4-3-3", starters: starterNames }],
+      players,
+    };
+  }
 
   if (manual && api) {
     // Merge: use manual structure but add photos + clubs + market values from API
@@ -352,7 +400,11 @@ export function getSquad(code: string): SquadData | null {
   return manual || null;
 }
 
-// Get all teams that have squad data (manual + API)
+// Get all teams that have squad data (manual + API + Wikipedia-official)
 export function getAvailableSquads(): string[] {
-  return [...new Set([...Object.keys(SQUADS_DATA), ...Object.keys(API_DATA)])];
+  return [...new Set([
+    ...Object.keys(SQUADS_DATA),
+    ...Object.keys(API_DATA),
+    ...Object.keys(OFFICIAL_ROSTERS),
+  ])];
 }

@@ -103,7 +103,7 @@ export const OFFICIAL_SQUADS: Record<string, OfficialStatus> = {
     source: "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads#Tunisia",
   },
 };
-export const LAST_SYNC: string | null = "2026-05-19T12:11:46.268Z";
+export const LAST_SYNC: string | null = "2026-05-19T12:32:40.556Z";
 // <generated-end>
 
 export function getOfficialStatus(code: string): OfficialStatus | null {

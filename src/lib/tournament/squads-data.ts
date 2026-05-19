@@ -1,7 +1,12 @@
 // ============================================================================
 // WC2026 — Estimated Squads for all 48 teams
 // Sources: Recent call-ups, FotMob, SofaScore, Transfermarkt, WhoScored
-// Will be updated when official 26-man squads are announced (~May 2026)
+//
+// Official-squad announcement window is open (May 11 – June 1, 2026).
+// Whether a team's federation/FIFA has published the final 26 is tracked
+// separately in src/lib/tournament/official-squads.ts (auto-synced by
+// scripts/sync-official-squads.ts). This file remains hand-curated for
+// analyst-estimated lineups (sources, formation, etc).
 // ============================================================================
 
 export interface PlayerData {

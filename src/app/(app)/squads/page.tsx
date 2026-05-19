@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { BadgeCheckIcon, ShieldCheckIcon } from "lucide-react";
 import { ALL_TEAMS } from "@/lib/tournament/groups";
 import { SQUADS_DATA, getSquad, getAvailableSquads } from "@/lib/tournament/squads-data";
+import { getOfficialStatus, isFifaConfirmed, isOfficiallyAnnounced } from "@/lib/tournament/official-squads";
 import { getTeamColor } from "@/lib/team-colors";
 import { formatMarketValue } from "@/lib/tournament/market-values";
 import { getFlag } from "@/lib/flags";
@@ -84,11 +86,16 @@ export default function SquadsPage() {
       <div className="mb-4">
         <select value={selected} onChange={e => { setSelected(e.target.value); setSourceIdx(0); }}
           className="w-full sm:w-auto px-4 py-3 rounded-xl border border-gray-200 bg-white text-base font-bold shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-          {ALL_TEAMS.map(t => (
-            <option key={t.code} value={t.code}>
-              {getFlag(t.code)} {t.name_he} ({t.code})
-            </option>
-          ))}
+          {ALL_TEAMS.map(t => {
+            const marker = isFifaConfirmed(t.code) ? " 🛡️"
+                         : isOfficiallyAnnounced(t.code) ? " ✅"
+                         : "";
+            return (
+              <option key={t.code} value={t.code}>
+                {getFlag(t.code)} {t.name_he} ({t.code}){marker}
+              </option>
+            );
+          })}
         </select>
       </div>
 
@@ -99,8 +106,33 @@ export default function SquadsPage() {
           <div className="p-5 flex items-center gap-4">
             <span className="text-6xl">{getFlag(selected)}</span>
             <div>
-              <h2 className="text-2xl font-black text-gray-900 dark:text-white">{team.name_he}</h2>
+              <h2 className="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-2 flex-wrap">
+                <span>{team.name_he}</span>
+                {isFifaConfirmed(selected) ? (
+                  <span title="סגל מאושר על-ידי FIFA" className="inline-flex items-center gap-1 text-amber-600 dark:text-amber-400">
+                    <ShieldCheckIcon className="w-5 h-5" />
+                    <span className="text-xs font-bold">FIFA</span>
+                  </span>
+                ) : isOfficiallyAnnounced(selected) ? (
+                  <span title="סגל רשמי שפורסם על-ידי ההתאחדות" className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+                    <BadgeCheckIcon className="w-5 h-5" />
+                    <span className="text-xs font-bold">סגל רשמי</span>
+                  </span>
+                ) : null}
+              </h2>
               <p className="text-base text-gray-500">{team.name}</p>
+              {(() => {
+                const s = getOfficialStatus(selected);
+                if (!s) return null;
+                return (
+                  <p className="text-xs text-gray-400 mt-1">
+                    פורסם {s.announcedAt}
+                    {s.confirmedAt && <span> · אושר על-ידי FIFA {s.confirmedAt}</span>}
+                    {" · "}
+                    <a href={s.source} target="_blank" rel="noreferrer" className="underline hover:text-gray-600">מקור</a>
+                  </p>
+                );
+              })()}
               <div className="flex items-center gap-4 mt-2 text-sm text-gray-500 flex-wrap">
                 <span>בית {team.group_id}</span>
                 <span>FIFA #{team.fifa_ranking}</span>

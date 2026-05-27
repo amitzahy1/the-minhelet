@@ -9,6 +9,7 @@ import type { BettorProfile, BettorSpecialBets, BettorAdvancement, MatchPredicti
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toIsraelTimeShort, toIsraelDate } from "@/lib/timezone";
+import { HeadToHeadCard } from "@/components/shared/HeadToHeadCard";
 
 // Mock bettor predictions — in production from Supabase
 const MOCK_PREDICTIONS: Record<string, Record<string, string>> = {
@@ -186,6 +187,8 @@ function MatchBetsPanel({ match, profiles, specialBets, advancements, prediction
             <p className="text-xs font-bold text-amber-700">הניחושים ייחשפו אחרי נעילת ההימורים ({formatLockDeadline()})</p>
           </div>
         )}
+        {/* Head-to-head history between the two teams (Football-Data feed) */}
+        {match.id > 0 && <HeadToHeadCard matchId={match.id} homeTla={home} awayTla={away} />}
         {/* Score predictions — only after lock */}
         {locked && <div>
           <p className="text-xs font-bold text-gray-500 mb-2">ניחושי תוצאה</p>

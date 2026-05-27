@@ -10,6 +10,7 @@ import { formatMarketValue } from "@/lib/tournament/market-values";
 import { getFlag } from "@/lib/flags";
 import { PageTransition } from "@/components/shared/PageTransition";
 import { SquadComparisonTable } from "./SquadComparisonTable";
+import { TeamLogo } from "@/components/shared/TeamLogo";
 
 const SOURCES = ["SofaScore", "FotMob", "Transfermarkt", "WhoScored"];
 
@@ -115,7 +116,7 @@ export default function SquadsPage() {
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-6">
           <div className="h-2" style={{ background: teamColors.primary }}></div>
           <div className="p-5 flex items-center gap-4">
-            <span className="text-6xl">{getFlag(selected)}</span>
+            <TeamLogo code={selected} size="xl" />
             <div>
               <h2 className="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-2 flex-wrap">
                 <span>{team.name_he}</span>

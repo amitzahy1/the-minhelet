@@ -10,6 +10,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toIsraelTimeShort, toIsraelDate } from "@/lib/timezone";
 import { HeadToHeadCard } from "@/components/shared/HeadToHeadCard";
+import { TeamLogo } from "@/components/shared/TeamLogo";
 
 // Mock bettor predictions — in production from Supabase
 const MOCK_PREDICTIONS: Record<string, Record<string, string>> = {
@@ -347,14 +348,14 @@ export default function SchedulePage() {
                       >
                         <div className="flex items-center gap-2 justify-end">
                           <span className="font-bold text-sm text-end">{getTeamNameHe(m.homeTla) || m.homeTeam}</span>
-                          <span className="text-lg shrink-0">{getFlag(m.homeTla)}</span>
+                          <TeamLogo code={m.homeTla} size="sm" />
                         </div>
                         <div className="text-center">
                           <p className="text-base font-black text-gray-900 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{toIsraelTimeShort(m.date)}</p>
                           <p className="text-[10px] text-gray-400">{m.group?.replace("GROUP_", "בית ") || m.stage}</p>
                         </div>
                         <div className="flex items-center gap-2 justify-start">
-                          <span className="text-lg shrink-0">{getFlag(m.awayTla)}</span>
+                          <TeamLogo code={m.awayTla} size="sm" />
                           <span className="font-bold text-sm">{getTeamNameHe(m.awayTla) || m.awayTeam}</span>
                         </div>
                       </div>

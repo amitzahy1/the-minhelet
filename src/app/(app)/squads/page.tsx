@@ -11,6 +11,7 @@ import { getFlag } from "@/lib/flags";
 import { PageTransition } from "@/components/shared/PageTransition";
 import { SquadComparisonTable } from "./SquadComparisonTable";
 import { TeamLogo } from "@/components/shared/TeamLogo";
+import { TeamPicker } from "./TeamPicker";
 
 const SOURCES = ["SofaScore", "FotMob", "Transfermarkt", "WhoScored"];
 
@@ -94,21 +95,14 @@ export default function SquadsPage() {
         <p className="text-base text-gray-600 dark:text-gray-300 mt-1">הרכבי פתיחה משוערים לפי 4 מקורות מובילים</p>
       </div>
 
-      {/* Team selector */}
+      {/* Team selector — custom dropdown so the official-squad badge stays
+          subtle (lucide icon, not a giant emoji). */}
       <div className="mb-4">
-        <select value={selected} onChange={e => { setSelected(e.target.value); setSourceIdx(0); }}
-          className="w-full sm:w-auto px-4 py-3 rounded-xl border border-gray-200 bg-white text-base font-bold shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-          {ALL_TEAMS.map(t => {
-            const marker = isFifaConfirmed(t.code) ? " 🛡️"
-                         : isOfficiallyAnnounced(t.code) ? " ✅"
-                         : "";
-            return (
-              <option key={t.code} value={t.code}>
-                {getFlag(t.code)} {t.name_he} ({t.code}){marker}
-              </option>
-            );
-          })}
-        </select>
+        <TeamPicker
+          selected={selected}
+          teams={ALL_TEAMS}
+          onSelect={(code) => { setSelected(code); setSourceIdx(0); }}
+        />
       </div>
 
       {/* Team header with team color accent */}

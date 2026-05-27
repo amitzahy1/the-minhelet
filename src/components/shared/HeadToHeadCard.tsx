@@ -50,10 +50,31 @@ export function HeadToHeadCard({ matchId, homeTla, awayTla }: { matchId: number;
       </div>
     );
   }
+  // Aggregates-only fallback — FD's free tier sometimes returns aggregate
+  // counts (numberOfMatches > 0) but the matches[] array is empty. Show the
+  // summary so the card still has value, instead of "no history available".
+  if (data && data.total > 0 && data.matches.length === 0) {
+    return (
+      <div className="rounded-lg border border-gray-200 bg-white overflow-hidden" dir="rtl">
+        <div className="px-4 py-2 bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/30 border-b border-blue-100/40">
+          <h4 className="text-xs font-bold text-gray-700">📈 היסטוריית מפגשים</h4>
+        </div>
+        <div className="px-4 py-3 text-xs text-gray-600 leading-relaxed">
+          הנבחרות נפגשו <b>{data.total}</b> פעמים בעבר.{" "}
+          {data.home && (
+            <span>
+              <b className="text-blue-700">{homeTla}</b>: {data.home.wins}W · {data.home.draws}D · {data.home.losses}L.
+            </span>
+          )}
+          {" "}פירוט המשחקים לא זמין במנוי החינמי של Football-Data.
+        </div>
+      </div>
+    );
+  }
   if (!data || data.matches.length === 0 || data.error) {
     return (
       <div className="rounded-lg border border-gray-200 bg-gray-50/50 px-4 py-3 text-xs text-gray-500">
-        אין היסטוריית מפגשים זמינה בין הנבחרות.
+        זהו מפגש ראשון בין הנבחרות (לפי Football-Data).
       </div>
     );
   }

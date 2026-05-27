@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getFlag, getTeamNameHe } from "@/lib/flags";
+import { TeamLogo } from "@/components/shared/TeamLogo";
 import { toIsraelTimeShort, toIsraelDate, toIsraelDateKey, getTodayIsrael } from "@/lib/timezone";
 import { useSharedData } from "@/hooks/useSharedData";
 import { isLocked } from "@/lib/constants";
@@ -183,7 +184,7 @@ export function TodayMatches() {
                 {/* Teams */}
                 <div className="flex items-center justify-between gap-1">
                   <div className="flex flex-col items-center gap-0.5 flex-1 min-w-0">
-                    <span className="text-xl">{getFlag(m.homeTla)}</span>
+                    <TeamLogo code={m.homeTla} size="md" />
                     <span className="text-[11px] font-bold text-gray-800 truncate max-w-full">
                       {getTeamNameHe(m.homeTla) || m.homeTla}
                     </span>
@@ -198,7 +199,7 @@ export function TodayMatches() {
                     )}
                   </div>
                   <div className="flex flex-col items-center gap-0.5 flex-1 min-w-0">
-                    <span className="text-xl">{getFlag(m.awayTla)}</span>
+                    <TeamLogo code={m.awayTla} size="md" />
                     <span className="text-[11px] font-bold text-gray-800 truncate max-w-full">
                       {getTeamNameHe(m.awayTla) || m.awayTla}
                     </span>

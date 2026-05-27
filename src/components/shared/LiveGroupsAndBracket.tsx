@@ -165,6 +165,11 @@ function computeGroupOrdersFromStandings(matches: MatchApi[]): Record<string, nu
   const groupOrders: Record<string, number[]> = {};
   for (const letter of GROUP_LETTERS) {
     const standings = computeGroupStandings(letter, matches);
+    // Skip groups that haven't finished all 6 matches (each team plays 3).
+    // Without final standings the slot positions (1st/2nd/3rd) are unknown,
+    // so the bracket should render "ממתין..." rather than seeded-order teams.
+    const isComplete = standings.length === 4 && standings.every((r) => r.played === 3);
+    if (!isComplete) continue;
     const teamIdxByCode: Record<string, number> = {};
     GROUPS[letter].forEach((t, i) => (teamIdxByCode[t.code] = i));
     groupOrders[letter] = standings.map((r) => teamIdxByCode[r.code]);
@@ -307,7 +312,15 @@ export function LiveGroupsAndBracket() {
         : ranking.qualifiedGroups.length === 8
         ? ranking.qualifiedGroups
         : null;
-    if (!qualifiers) return buildR32Matchups(DEFAULT_ASSIGNMENT);
+    if (!qualifiers) {
+      // No best-thirds resolution yet → mark all 3rd-place slots with an
+      // unknown group letter so resolveGroupSlot returns null and the card
+      // renders "ממתין...". Group-winner/runner-up slots still resolve once
+      // their group is fully decided.
+      return buildR32Matchups({
+        A: "?", B: "?", D: "?", E: "?", G: "?", I: "?", K: "?", L: "?",
+      });
+    }
     const { assignment } = getThirdsAssignment(qualifiers);
     return buildR32Matchups(assignment ?? DEFAULT_ASSIGNMENT);
   }, [matches, thirdsOverride]);

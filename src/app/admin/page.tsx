@@ -21,6 +21,7 @@ import { UserBetsEditor } from "./components/UserBetsEditor";
 import { BotGenerator } from "./components/BotGenerator";
 import { BestThirdsOverride } from "./components/BestThirdsOverride";
 import { BackupExport } from "./components/BackupExport";
+import { OperationsPanel } from "./components/OperationsPanel";
 
 interface ScoringConfig {
   toto_group: number; toto_r32: number; toto_r16: number;
@@ -122,6 +123,7 @@ export default function AdminPage() {
             <TabsTrigger value="users">משתמשים</TabsTrigger>
             <TabsTrigger value="admins">מנהלים</TabsTrigger>
             <TabsTrigger value="edit-bets">עריכת הימורים</TabsTrigger>
+            <TabsTrigger value="ops">⚙️ פעולות חירום</TabsTrigger>
             <TabsTrigger value="bot">🤖 בוט</TabsTrigger>
           </TabsList>
 
@@ -228,6 +230,7 @@ export default function AdminPage() {
           <TabsContent value="admins"><AdminsList /></TabsContent>
           <TabsContent value="guide"><AdminGuide /></TabsContent>
           <TabsContent value="edit-bets"><UserBetsEditor /></TabsContent>
+          <TabsContent value="ops"><OperationsPanel /></TabsContent>
           <TabsContent value="bot"><BotGenerator /></TabsContent>
         </Tabs>
       </div>

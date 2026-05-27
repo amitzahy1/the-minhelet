@@ -63,51 +63,6 @@ export async function saveBetsToSupabase(
   // Derive third place qualifiers from group predictions
   const thirdPlaceTeams = deriveThirdPlaceTeams(state);
 
-  // Save to user_brackets
-  const bracketData = {
-    user_id: user.id,
-    league_id: resolvedLeagueId,
-    group_predictions: state.groups,
-    third_place_qualifiers: thirdPlaceTeams,
-    knockout_tree: state.knockout,
-    champion: state.specialBets.winner || null,
-    updated_at: new Date().toISOString(),
-  };
-
-  const { error: bracketError } = await supabase
-    .from("user_brackets")
-    .upsert(bracketData, { onConflict: "user_id,league_id" });
-
-  if (bracketError) {
-    console.error("Failed to save bracket:", bracketError);
-    return { success: false, error: bracketError.message };
-  }
-
-  // Save special bets
-  const specialData = {
-    user_id: user.id,
-    league_id: resolvedLeagueId,
-    top_scorer_player: state.specialBets.topScorerPlayer || null,
-    top_scorer_team: state.specialBets.topScorerTeam || null,
-    top_assists_player: state.specialBets.topAssistsPlayer || null,
-    top_assists_team: state.specialBets.topAssistsTeam || null,
-    best_attack_team: state.specialBets.bestAttack || null,
-    most_prolific_group: state.specialBets.prolificGroup || null,
-    driest_group: state.specialBets.driestGroup || null,
-    dirtiest_team: state.specialBets.dirtiestTeam || null,
-    matchup_pick: state.specialBets.matchups.filter(Boolean).join(",") || null,
-    penalties_over_under: state.specialBets.penaltiesOverUnder || null,
-  };
-
-  const { error: specialError } = await supabase
-    .from("special_bets")
-    .upsert(specialData, { onConflict: "user_id,league_id" });
-
-  if (specialError) {
-    console.error("Failed to save special bets:", specialError);
-    return { success: false, error: specialError.message };
-  }
-
   // Derive group qualifiers from group predictions (top 2 per group)
   const groupQualifiers: Record<string, string[]> = {};
   for (const [groupId, group] of Object.entries(state.groups)) {
@@ -120,10 +75,25 @@ export async function saveBetsToSupabase(
     }
   }
 
-  // Save advancement picks
-  const advData = {
-    user_id: user.id,
-    league_id: resolvedLeagueId,
+  const bracketsPayload = {
+    group_predictions: state.groups,
+    third_place_qualifiers: thirdPlaceTeams,
+    knockout_tree: state.knockout,
+    champion: state.specialBets.winner || null,
+  };
+  const specialPayload = {
+    top_scorer_player: state.specialBets.topScorerPlayer || null,
+    top_scorer_team: state.specialBets.topScorerTeam || null,
+    top_assists_player: state.specialBets.topAssistsPlayer || null,
+    top_assists_team: state.specialBets.topAssistsTeam || null,
+    best_attack_team: state.specialBets.bestAttack || null,
+    most_prolific_group: state.specialBets.prolificGroup || null,
+    driest_group: state.specialBets.driestGroup || null,
+    dirtiest_team: state.specialBets.dirtiestTeam || null,
+    matchup_pick: state.specialBets.matchups.filter(Boolean).join(",") || null,
+    penalties_over_under: state.specialBets.penaltiesOverUnder || null,
+  };
+  const advancementPayload = {
     group_qualifiers: groupQualifiers,
     advance_to_qf: state.specialBets.quarterfinalists.filter(Boolean),
     advance_to_sf: state.specialBets.semifinalists.filter(Boolean),
@@ -131,13 +101,49 @@ export async function saveBetsToSupabase(
     winner: state.specialBets.winner || "",
   };
 
-  const { error: advError } = await supabase
-    .from("advancement_picks")
-    .upsert(advData, { onConflict: "user_id,league_id" });
+  // Atomic save via the save_user_predictions RPC (migration 010). Wraps all
+  // three table writes in a single transaction so a network hiccup can never
+  // leave the user with a half-saved state (e.g. brackets stored but special
+  // bets stale). Falls back to three independent upserts if the RPC isn't
+  // available (e.g. against a Supabase instance where migration 010 hasn't
+  // been applied yet — useful for local dev).
+  const { error: rpcError } = await supabase.rpc("save_user_predictions", {
+    p_user_id: user.id,
+    p_league_id: resolvedLeagueId,
+    p_brackets: bracketsPayload,
+    p_special: specialPayload,
+    p_advancement: advancementPayload,
+    p_lock_deadline: LOCK_DEADLINE.toISOString(),
+  });
 
-  if (advError) {
-    console.error("Failed to save advancement picks:", advError);
-    return { success: false, error: advError.message };
+  if (rpcError && !/function .* does not exist/i.test(rpcError.message || "")) {
+    if (/LOCKED/.test(rpcError.message || "")) {
+      return { success: false, error: "ההימורים ננעלו — לא ניתן לשנות אחרי 10.06.2026 17:00" };
+    }
+    console.error("Failed atomic save:", rpcError);
+    return { success: false, error: rpcError.message };
+  }
+
+  if (rpcError) {
+    // Migration not applied yet — degrade to legacy 3-upsert path so dev
+    // environments without the RPC keep working.
+    const { error: bracketError } = await supabase
+      .from("user_brackets")
+      .upsert(
+        { user_id: user.id, league_id: resolvedLeagueId, ...bracketsPayload, updated_at: new Date().toISOString() },
+        { onConflict: "user_id,league_id" },
+      );
+    if (bracketError) return { success: false, error: bracketError.message };
+
+    const { error: specialError } = await supabase
+      .from("special_bets")
+      .upsert({ user_id: user.id, league_id: resolvedLeagueId, ...specialPayload }, { onConflict: "user_id,league_id" });
+    if (specialError) return { success: false, error: specialError.message };
+
+    const { error: advError } = await supabase
+      .from("advancement_picks")
+      .upsert({ user_id: user.id, league_id: resolvedLeagueId, ...advancementPayload }, { onConflict: "user_id,league_id" });
+    if (advError) return { success: false, error: advError.message };
   }
 
   return { success: true };

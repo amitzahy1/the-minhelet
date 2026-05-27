@@ -10,6 +10,8 @@ import { DeadlineCountdown } from "@/components/shared/DeadlineCountdown";
 import { SaveIndicator } from "@/components/shared/SaveIndicator";
 import { ToastHost } from "@/components/shared/ToastHost";
 import { ConflictResolutionModal } from "@/components/shared/ConflictResolutionModal";
+import { NavProgressBar } from "@/components/shared/NavProgressBar";
+import { Suspense } from "react";
 import { useSharedData } from "@/hooks/useSharedData";
 import { formatLockDeadline, isLocked } from "@/lib/constants";
 
@@ -615,6 +617,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           specialsFilled={specialsFilled}
         />
       )}
+
+      {/* Top progress strip — animates on every navigation so tapping a
+          nav item feels responsive even when the destination page is
+          fetching data on mount. Wrapped in Suspense because it reads
+          search params, which Next.js requires to be suspense-bounded. */}
+      <Suspense fallback={null}><NavProgressBar /></Suspense>
 
       {/* ════════════════════════════════════════════ */}
       {/* DESKTOP HEADER                              */}

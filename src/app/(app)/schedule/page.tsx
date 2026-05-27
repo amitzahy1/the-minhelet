@@ -53,11 +53,14 @@ function getMockPrediction(bettor: string, matchId: number, homeTla: string, awa
   return `${h}-${a}`;
 }
 
+interface Referee { name: string; role: string; nationality: string | null }
 interface Match {
   id: number;
   date: string;
   homeTeam: string;
   awayTeam: string;
+  venue?: string | null;
+  referees?: Referee[];
   homeTla: string;
   awayTla: string;
   group: string;
@@ -352,6 +355,25 @@ export default function SchedulePage() {
                           <span className="font-bold text-sm">{getTeamNameHe(m.awayTla) || m.awayTeam}</span>
                         </div>
                       </div>
+                      {(m.venue || (m.referees && m.referees.length > 0)) && (
+                        <div className="px-4 py-2 border-t border-gray-100 bg-gray-50/60 text-[11px] text-gray-600 flex flex-wrap gap-x-4 gap-y-1">
+                          {m.venue && (
+                            <span className="flex items-center gap-1">
+                              <span aria-hidden>🏟️</span>
+                              <span>{m.venue}</span>
+                            </span>
+                          )}
+                          {m.referees && m.referees.length > 0 && (() => {
+                            const main = m.referees.find((r) => r.role === "REFEREE" || r.role === "MAIN_REFEREE") || m.referees[0];
+                            return main ? (
+                              <span className="flex items-center gap-1">
+                                <span aria-hidden>👨‍⚖️</span>
+                                <span>שופט: {main.name}{main.nationality ? ` (${main.nationality})` : ""}</span>
+                              </span>
+                            ) : null;
+                          })()}
+                        </div>
+                      )}
                       <AnimatePresence>
                         {isExpanded && (
                           <MatchBetsPanel

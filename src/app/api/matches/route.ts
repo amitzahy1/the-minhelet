@@ -1,5 +1,17 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import fdMatchDetails from "@/lib/tournament/fd-match-details.json";
+
+interface FdDetails {
+  syncedAt?: string;
+  matches?: Record<string, {
+    venue?: string | null;
+    referees?: { name: string; role: string; nationality: string | null }[];
+    stage?: string | null;
+    status?: string | null;
+  }>;
+}
+const DETAILS = fdMatchDetails as FdDetails;
 
 const BASE_URL = "https://api.football-data.org/v4";
 
@@ -34,6 +46,9 @@ interface Match {
   /** Shootout score, only present when the match was decided on penalties. */
   homePenalties?: number | null;
   awayPenalties?: number | null;
+  /** Stadium + city for the match (populated by sync-fd-extras.ts). */
+  venue?: string | null;
+  referees?: { name: string; role: string; nationality: string | null }[];
 }
 
 interface DemoResult {
@@ -118,6 +133,8 @@ export async function GET() {
       awayGoals: demo?.away_goals ?? m.score?.fullTime?.away ?? null,
       homePenalties: demo?.home_penalties ?? m.score?.penalties?.home ?? null,
       awayPenalties: demo?.away_penalties ?? m.score?.penalties?.away ?? null,
+      venue: DETAILS.matches?.[String(m.id)]?.venue ?? null,
+      referees: DETAILS.matches?.[String(m.id)]?.referees ?? [],
     });
   }
 

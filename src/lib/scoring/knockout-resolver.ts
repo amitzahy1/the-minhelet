@@ -163,8 +163,12 @@ function stageForKey(key: string): "R32" | "R16" | "QF" | "SF" | "FINAL" {
 
 /**
  * Find a FINISHED knockout match in the list matching the slot's team pair,
- * normalizing FIFA-vs-FD code aliases. Returns the result + computed winner
- * (handles penalty shootouts when both teams provide pen scores).
+ * normalizing FIFA-vs-FD code aliases. Returns the regulation+ET goals
+ * (excluding shootout) plus the computed winner — which on a regulation
+ * draw is decided by the penalty-shootout score when present.
+ *
+ * Penalty-shootout goals are NEVER added to score1/score2 — that would
+ * inflate the top-scorer / best-attack stats. They influence only `winner`.
  */
 function findMatchForPair(
   team1: string,
@@ -182,6 +186,14 @@ function findMatchForPair(
   let winner: string | null = null;
   if (s1 > s2) winner = team1;
   else if (s2 > s1) winner = team2;
+  else {
+    // Regulation+ET draw → derive from penalty shootout if recorded.
+    const p1 = m.homeTla === team1 ? (m.homePenalties ?? null) : (m.awayPenalties ?? null);
+    const p2 = m.homeTla === team1 ? (m.awayPenalties ?? null) : (m.homePenalties ?? null);
+    if (p1 !== null && p2 !== null && p1 !== p2) {
+      winner = p1 > p2 ? team1 : team2;
+    }
+  }
   return { score1: s1, score2: s2, winner };
 }
 
@@ -293,6 +305,9 @@ export function findThirdPlaceMatch(
   let winner: string | null = null;
   if (m.homeGoals > m.awayGoals) winner = m.homeTla;
   else if (m.awayGoals > m.homeGoals) winner = m.awayTla;
+  else if (m.homePenalties != null && m.awayPenalties != null && m.homePenalties !== m.awayPenalties) {
+    winner = m.homePenalties > m.awayPenalties ? m.homeTla : m.awayTla;
+  }
   return {
     team1: m.homeTla,
     team2: m.awayTla,

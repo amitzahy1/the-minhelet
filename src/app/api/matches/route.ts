@@ -11,7 +11,12 @@ interface FdRawMatch {
   group?: string;
   stage?: string;
   status?: string;
-  score?: { fullTime?: { home?: number; away?: number } };
+  score?: {
+    fullTime?: { home?: number; away?: number };
+    extraTime?: { home?: number; away?: number };
+    penalties?: { home?: number; away?: number };
+    duration?: string;
+  };
 }
 
 interface Match {
@@ -26,12 +31,17 @@ interface Match {
   status?: string;
   homeGoals?: number | null;
   awayGoals?: number | null;
+  /** Shootout score, only present when the match was decided on penalties. */
+  homePenalties?: number | null;
+  awayPenalties?: number | null;
 }
 
 interface DemoResult {
   match_id: string;
   home_goals: number | null;
   away_goals: number | null;
+  home_penalties: number | null;
+  away_penalties: number | null;
   home_team: string | null;
   away_team: string | null;
   group_id: string | null;
@@ -67,7 +77,7 @@ export async function GET() {
           try {
             const { data } = await createClient(supabaseUrl, supabaseAnon)
               .from("demo_match_results")
-              .select("match_id, home_goals, away_goals, home_team, away_team, group_id, stage, status, scheduled_at");
+              .select("match_id, home_goals, away_goals, home_penalties, away_penalties, home_team, away_team, group_id, stage, status, scheduled_at");
             return (data as DemoResult[]) || [];
           } catch {
             return [] as DemoResult[];
@@ -100,8 +110,14 @@ export async function GET() {
       stage: m.stage,
       // Demo data wins — admin-entered scores are authoritative for the demo.
       status: demo?.status ?? m.status,
+      // Football-Data: `score.fullTime` is the end-of-match score INCLUDING
+      // extra time but EXCLUDING the shootout. Shootout goals live in
+      // `score.penalties` and are propagated separately so downstream code
+      // can derive the actual winner without contaminating goal totals.
       homeGoals: demo?.home_goals ?? m.score?.fullTime?.home ?? null,
       awayGoals: demo?.away_goals ?? m.score?.fullTime?.away ?? null,
+      homePenalties: demo?.home_penalties ?? m.score?.penalties?.home ?? null,
+      awayPenalties: demo?.away_penalties ?? m.score?.penalties?.away ?? null,
     });
   }
 
@@ -124,6 +140,8 @@ export async function GET() {
       status: r.status ?? "FINISHED",
       homeGoals: r.home_goals,
       awayGoals: r.away_goals,
+      homePenalties: r.home_penalties,
+      awayPenalties: r.away_penalties,
     });
   }
 

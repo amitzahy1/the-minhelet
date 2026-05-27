@@ -50,8 +50,12 @@ export interface FinishedMatch {
   awayTla: string;
   group: string; // letter A-L (normalized)
   stage: string;
+  /** Score at the END of the match (regulation + ET if played), excluding shootout. */
   homeGoals: number;
   awayGoals: number;
+  /** Shootout-only goals, only present when the match was decided on penalties. */
+  homePenalties?: number | null;
+  awayPenalties?: number | null;
 }
 
 export function classifyHit(

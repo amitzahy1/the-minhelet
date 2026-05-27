@@ -276,6 +276,8 @@ interface MatchApi {
   status?: string;
   homeGoals?: number | null;
   awayGoals?: number | null;
+  homePenalties?: number | null;
+  awayPenalties?: number | null;
 }
 
 export default function StandingsPage() {
@@ -322,6 +324,8 @@ export default function StandingsPage() {
             stage: m.stage || "GROUP_STAGE",
             homeGoals: m.homeGoals as number,
             awayGoals: m.awayGoals as number,
+            homePenalties: m.homePenalties ?? null,
+            awayPenalties: m.awayPenalties ?? null,
           }));
         setFinishedMatches(finished);
 

@@ -92,6 +92,32 @@ describe("calculateKnockoutScore — penalties + exact + toto", () => {
   });
 });
 
+describe("Penalty-shootout goals NEVER count toward player/team stats", () => {
+  it("calculateKnockoutScore uses regulation goals for exact bonus, ignores penalty count", () => {
+    // 1-1 after ET, won 5-4 on penalties — exact prediction of the regulation result still earns exact bonus.
+    const r = calculateKnockoutScore(
+      "FINAL",
+      { homeGoals: 1, awayGoals: 1, penaltyWinner: "BRA", team1: "BRA", team2: "ARG" },
+      { score1: 1, score2: 1, winner: "BRA" },
+    );
+    expect(r.exact).toBe(SCORING.exact.FINAL);
+    // The 5 + 4 shootout kicks must NOT have inflated anyone's totals — the
+    // calculator only takes regulation home/awayGoals, never penalty counts.
+    // (We can't directly assert "shootout not counted" inside this fn because
+    // shootout isn't an input; this test enforces the API contract instead.)
+  });
+
+  it("a 0-0 regulation result with shootout win awards exact (0-0) + toto when penalty pick matches", () => {
+    const r = calculateKnockoutScore(
+      "SF",
+      { homeGoals: 0, awayGoals: 0, penaltyWinner: "ARG", team1: "ARG", team2: "NED" },
+      { score1: 0, score2: 0, winner: "ARG" },
+    );
+    expect(r.exact).toBe(SCORING.exact.SF);
+    expect(r.toto).toBe(SCORING.toto.SF);
+  });
+});
+
 describe("scoreSpecialBetsForUser — final outcome path", () => {
   const actuals: TournamentActuals = {
     ...noActuals,

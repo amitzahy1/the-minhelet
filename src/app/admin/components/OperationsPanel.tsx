@@ -133,11 +133,22 @@ export function OperationsPanel() {
             ]}
             why="מוודא שכל ה-migrations הוחלו, ה-bucket לגיבויים קיים, ה-API חיצוני (Football-Data) זמין, וטוקנים בסביבת הריצה. אם מופיע ✗ — שאר הפעולות בעמוד לא ייעבדו עד שזה יתוקן."
           />
-          <div className="flex gap-2 mb-3">
+          <div className="flex gap-2 mb-3 flex-wrap">
             <Button onClick={runHealthCheck} disabled={healthLoading} variant="outline">
               {healthLoading ? "בודק..." : "רענן בדיקה"}
             </Button>
+            <Button
+              onClick={async () => {
+                await call("schema_refresh", "Schema reload", "/api/admin/refresh-schema", { method: "POST" });
+                void runHealthCheck();
+              }}
+              disabled={busy === "schema_refresh"}
+              variant="outline"
+            >
+              {busy === "schema_refresh" ? "מרענן..." : "🔄 רענן schema cache"}
+            </Button>
           </div>
+          <StatusLine status={status.schema_refresh} />
           {healthChecks && (
             <ul className="space-y-1.5 text-xs">
               {healthChecks.map((c) => (

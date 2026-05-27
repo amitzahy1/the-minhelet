@@ -116,17 +116,29 @@ export async function saveBetsToSupabase(
     p_lock_deadline: LOCK_DEADLINE.toISOString(),
   });
 
-  if (rpcError && !/function .* does not exist/i.test(rpcError.message || "")) {
-    if (/LOCKED/.test(rpcError.message || "")) {
-      return { success: false, error: "ההימורים ננעלו — לא ניתן לשנות אחרי 10.06.2026 17:00" };
-    }
-    console.error("Failed atomic save:", rpcError);
+  // Domain errors from the RPC should surface to the user as-is.
+  if (rpcError && /LOCKED/.test(rpcError.message || "")) {
+    return { success: false, error: "ההימורים ננעלו — לא ניתן לשנות אחרי 10.06.2026 17:00" };
+  }
+
+  // Fall through to the 3-upsert legacy path when the RPC is unavailable for
+  // ANY reason — function not installed, PostgREST schema cache stale, or
+  // the migration was rolled back. Saves should never fail for the user
+  // because of infra plumbing.
+  const rpcUnavailable =
+    rpcError &&
+    (/function .* does not exist/i.test(rpcError.message || "") ||
+      /in the schema cache/i.test(rpcError.message || "") ||
+      /could not find the function/i.test(rpcError.message || ""));
+
+  if (rpcError && !rpcUnavailable) {
+    console.error("Failed atomic save (non-recoverable):", rpcError);
     return { success: false, error: rpcError.message };
   }
 
-  if (rpcError) {
-    // Migration not applied yet — degrade to legacy 3-upsert path so dev
-    // environments without the RPC keep working.
+  if (rpcUnavailable) {
+    // Legacy 3-upsert path — also handles a stale PostgREST cache so the
+    // user never sees the "schema cache" red error.
     const { error: bracketError } = await supabase
       .from("user_brackets")
       .upsert(

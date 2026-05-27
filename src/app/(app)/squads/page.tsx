@@ -9,6 +9,7 @@ import { getTeamColor } from "@/lib/team-colors";
 import { formatMarketValue } from "@/lib/tournament/market-values";
 import { getFlag } from "@/lib/flags";
 import { PageTransition } from "@/components/shared/PageTransition";
+import { SquadComparisonTable } from "./SquadComparisonTable";
 
 const SOURCES = ["SofaScore", "FotMob", "Transfermarkt", "WhoScored"];
 
@@ -277,6 +278,9 @@ export default function SquadsPage() {
           <p className="text-sm text-gray-400 mt-1">כרגע זמינים: {availableSquads.map(c => `${getFlag(c)} ${c}`).join(", ")}</p>
         </div>
       )}
+
+      {/* Cross-team squad value comparison (all 26 announced teams) */}
+      <SquadComparisonTable />
     </div>
     </PageTransition>
   );

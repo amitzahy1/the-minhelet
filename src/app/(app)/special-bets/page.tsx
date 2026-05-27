@@ -26,12 +26,43 @@ function groupLabel(g: string): string {
 // Order: attackers first (FW → MID → DEF → GK). Top-scorer/top-assists candidates
 // usually sit at the top. Within each position, keep the squad order.
 const POS_ORDER: Record<string, number> = { FW: 0, MID: 1, DEF: 2, GK: 3 };
+
+import apiSquads from "@/lib/tournament/squads-api.json";
+import { OFFICIAL_ROSTERS } from "@/lib/tournament/official-rosters";
+
+type ApiSquads = Record<string, { players: { nameEn: string; pos: "GK" | "DEF" | "MID" | "FW" }[] }>;
+const API_SQUADS = apiSquads as ApiSquads;
+
+/**
+ * Picker source priority: pick the SINGLE most complete source rather than
+ * merging — different sources use different name formats ("L. Messi" /
+ * "Lionel Messi" / "Messi") and a merge would surface confusing duplicates.
+ *
+ *   1. OFFICIAL_ROSTERS (Wikipedia 26-man squad, full names) — when announced.
+ *   2. squads-api.json (api-football current call-up, ~25-35 names).
+ *   3. getSquad().players (hand-curated starters subset, fallback).
+ *
+ * Before the fix the picker only used (3), so Mexico's dropdown showed
+ * just 11 starters — impossible to pick a bench striker.
+ */
 function getSquadPlayers(team: string): string[] {
+  const official = OFFICIAL_ROSTERS[team] || [];
+  if (official.length >= 20) {
+    return [...official]
+      .sort((a, b) => (POS_ORDER[a.pos] ?? 99) - (POS_ORDER[b.pos] ?? 99))
+      .map((p) => p.nameEn);
+  }
+  const apiList = API_SQUADS[team]?.players || [];
+  if (apiList.length >= 15) {
+    return [...apiList]
+      .sort((a, b) => (POS_ORDER[a.pos] ?? 99) - (POS_ORDER[b.pos] ?? 99))
+      .map((p) => p.nameEn);
+  }
   const squad = getSquad(team);
   if (!squad) return [];
   return [...squad.players]
     .sort((a, b) => (POS_ORDER[a.pos] ?? 99) - (POS_ORDER[b.pos] ?? 99))
-    .map(p => p.nameEn);
+    .map((p) => p.nameEn);
 }
 
 function SectionCard({ title, subtitle, points, warning, children }: { title: string; subtitle?: string; points: string; warning?: string; children: React.ReactNode }) {
@@ -54,16 +85,27 @@ function SectionCard({ title, subtitle, points, warning, children }: { title: st
   );
 }
 
-function TeamSelect({ value, onChange, label, excludeCodes = [] }: { value: string; onChange: (v: string) => void; label: string; excludeCodes?: string[] }) {
+function TeamSelect({ value, onChange, label, excludeCodes = [], allowedCodes }: { value: string; onChange: (v: string) => void; label: string; excludeCodes?: string[]; allowedCodes?: string[] }) {
+  // When `allowedCodes` is provided (and non-empty), restrict the dropdown
+  // to that whitelist. Always include the current value so a stale pick stays
+  // visible and the user can re-select it. When the list is empty (the
+  // upstream stage hasn't been filled yet), allow all teams.
+  const filteredAllowed = (allowedCodes || []).filter(Boolean);
+  const allowSet = filteredAllowed.length > 0
+    ? new Set<string>([...filteredAllowed, value].filter(Boolean))
+    : null;
   return (
     <div className="space-y-1.5">
       <label className="text-sm font-semibold text-gray-700">{label}</label>
       <select value={value} onChange={e => onChange(e.target.value)}
         className="w-full px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500">
         <option value="">בחרו נבחרת...</option>
-        {ALL_TEAMS.filter(t => !excludeCodes.includes(t.code) || t.code === value).map(t => (
-          <option key={t.code} value={t.code}>{getFlag(t.code)} {t.name_he}</option>
-        ))}
+        {ALL_TEAMS
+          .filter(t => !excludeCodes.includes(t.code) || t.code === value)
+          .filter(t => !allowSet || allowSet.has(t.code))
+          .map(t => (
+            <option key={t.code} value={t.code}>{getFlag(t.code)} {t.name_he}</option>
+          ))}
       </select>
     </div>
   );
@@ -300,45 +342,113 @@ export default function SpecialBetsPage() {
           <div><h2 className="text-xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>הימורי עולות</h2><p className="text-sm text-gray-500">מי תעלה בכל שלב?</p></div>
         </div>
 
-        <SectionCard title="זוכה הטורניר" subtitle="מי לוקח את הגביע?" points="12 נק׳" warning={winnerMismatch}>
-          <div className="max-w-xs flex flex-col gap-2">
-            <TeamSelect value={sb.winner} onChange={(v) => set("winner", v)} label="הנבחרת הזוכה" />
-            {sb.winner && (
-              <div className="flex items-center gap-2 flex-wrap">
-                <AgreementBadge
-                  value={sb.winner}
-                  extract={(adv) => (adv as { winner?: string })?.winner}
-                />
-                <StillAliveBadge teamCode={sb.winner} pickType="champion" />
-              </div>
-            )}
-          </div>
-        </SectionCard>
+        {(() => {
+          // ----- Cascading bet validation -----
+          // Each stage's picker is constrained to the previous stage's picks.
+          //   QF (8) → SF (4) → Final (2) → Champion (1)
+          // If a stage hasn't been filled yet (empty), the downstream picker
+          // falls back to "all teams" so users can fill bottom-up too. If a
+          // downstream pick becomes invalid after editing upstream, a yellow
+          // warning shows above the section.
+          const filledQuarters = paddedQuarters.filter(Boolean);
+          const filledSemis = paddedSemis.filter(Boolean);
+          const filledFinalists = [sb.finalist1, sb.finalist2].filter(Boolean);
 
-        <SectionCard title="עולות לגמר" subtitle="2 נבחרות" points="8 נק׳ כ״א" warning={finalsMismatch}>
-          <div className="grid grid-cols-2 gap-3">
-            <TeamSelect value={sb.finalist1} onChange={(v) => set("finalist1", v)} label="עולה לגמר 1" excludeCodes={[sb.finalist2]} />
-            <TeamSelect value={sb.finalist2} onChange={(v) => set("finalist2", v)} label="עולה לגמר 2" excludeCodes={[sb.finalist1]} />
-          </div>
-        </SectionCard>
+          const semisOutOfQf = filledQuarters.length === 8
+            && filledSemis.some((s) => !filledQuarters.includes(s));
+          const finalsOutOfSemis = filledSemis.length === 4
+            && filledFinalists.some((f) => !filledSemis.includes(f));
+          const championOutOfFinals = filledFinalists.length === 2
+            && sb.winner && !filledFinalists.includes(sb.winner);
 
-        <SectionCard title="עולות לחצי גמר" subtitle="4 נבחרות" points="6 נק׳ כ״א" warning={sfMismatch}>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {paddedSemis.map((v, i) => (
-              <TeamSelect key={i} value={v} onChange={(val) => { const n = [...paddedSemis]; n[i] = val; set("semifinalists", n); }}
-                label={`חצי ${i+1}`} excludeCodes={paddedSemis.filter((s, j) => j !== i && s)} />
-            ))}
-          </div>
-        </SectionCard>
+          return (
+            <>
+              <SectionCard
+                title="זוכה הטורניר"
+                subtitle="חייב להיות אחד מהעולות לגמר"
+                points="12 נק׳"
+                warning={
+                  championOutOfFinals
+                    ? `⚠️ ${sb.winner} אינה אחת משתי העולות לגמר שבחרת — בחרו מחדש`
+                    : winnerMismatch
+                }
+              >
+                <div className="max-w-xs flex flex-col gap-2">
+                  <TeamSelect
+                    value={sb.winner}
+                    onChange={(v) => set("winner", v)}
+                    label="הנבחרת הזוכה"
+                    allowedCodes={filledFinalists}
+                  />
+                  {filledFinalists.length === 0 && (
+                    <p className="text-xs text-gray-400">בחרו קודם את העולות לגמר כדי לראות אפשרויות מצומצמות.</p>
+                  )}
+                  {sb.winner && (
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <AgreementBadge value={sb.winner} extract={(adv) => (adv as { winner?: string })?.winner} />
+                      <StillAliveBadge teamCode={sb.winner} pickType="champion" />
+                    </div>
+                  )}
+                </div>
+              </SectionCard>
 
-        <SectionCard title="עולות לרבע גמר" subtitle="8 נבחרות" points="4 נק׳ כ״א" warning={qfMismatch}>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {paddedQuarters.map((v, i) => (
-              <TeamSelect key={i} value={v} onChange={(val) => { const n = [...paddedQuarters]; n[i] = val; set("quarterfinalists", n); }}
-                label={`רבע ${i+1}`} excludeCodes={paddedQuarters.filter((s, j) => j !== i && s)} />
-            ))}
-          </div>
-        </SectionCard>
+              <SectionCard
+                title="עולות לגמר"
+                subtitle="חייבות להיות 2 מתוך 4 עולות לחצי הגמר"
+                points="8 נק׳ כ״א"
+                warning={
+                  finalsOutOfSemis
+                    ? "⚠️ אחת מהעולות לגמר אינה בחצי הגמר — תקנו את החצי גמר או את הגמר"
+                    : finalsMismatch
+                }
+              >
+                <div className="grid grid-cols-2 gap-3">
+                  <TeamSelect value={sb.finalist1} onChange={(v) => set("finalist1", v)} label="עולה לגמר 1" excludeCodes={[sb.finalist2]} allowedCodes={filledSemis} />
+                  <TeamSelect value={sb.finalist2} onChange={(v) => set("finalist2", v)} label="עולה לגמר 2" excludeCodes={[sb.finalist1]} allowedCodes={filledSemis} />
+                </div>
+                {filledSemis.length === 0 && (
+                  <p className="text-xs text-gray-400 mt-2">בחרו קודם את העולות לחצי הגמר כדי לראות אפשרויות מצומצמות.</p>
+                )}
+              </SectionCard>
+
+              <SectionCard
+                title="עולות לחצי גמר"
+                subtitle="חייבות להיות 4 מתוך 8 עולות לרבע הגמר"
+                points="6 נק׳ כ״א"
+                warning={
+                  semisOutOfQf
+                    ? "⚠️ אחת מהעולות לחצי אינה ברבע — תקנו את הרבע גמר או את החצי"
+                    : sfMismatch
+                }
+              >
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {paddedSemis.map((v, i) => (
+                    <TeamSelect
+                      key={i}
+                      value={v}
+                      onChange={(val) => { const n = [...paddedSemis]; n[i] = val; set("semifinalists", n); }}
+                      label={`חצי ${i+1}`}
+                      excludeCodes={paddedSemis.filter((s, j) => j !== i && s)}
+                      allowedCodes={filledQuarters}
+                    />
+                  ))}
+                </div>
+                {filledQuarters.length === 0 && (
+                  <p className="text-xs text-gray-400 mt-2">בחרו קודם את 8 העולות לרבע הגמר כדי לראות אפשרויות מצומצמות.</p>
+                )}
+              </SectionCard>
+
+              <SectionCard title="עולות לרבע גמר" subtitle="8 נבחרות" points="4 נק׳ כ״א" warning={qfMismatch}>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {paddedQuarters.map((v, i) => (
+                    <TeamSelect key={i} value={v} onChange={(val) => { const n = [...paddedQuarters]; n[i] = val; set("quarterfinalists", n); }}
+                      label={`רבע ${i+1}`} excludeCodes={paddedQuarters.filter((s, j) => j !== i && s)} />
+                  ))}
+                </div>
+              </SectionCard>
+            </>
+          );
+        })()}
 
         <div className="border-t-2 border-gray-200 pt-6 flex items-center gap-3 pb-3">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-purple-500"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>

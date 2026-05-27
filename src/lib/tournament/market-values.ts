@@ -650,8 +650,16 @@ export function getMarketValue(nameEn: string): number | null {
 
 /**
  * Format a market value number (in millions) to a display string.
+ *
+ * Rounds to 1 decimal place when below 100M to dodge floating-point precision
+ * artefacts (a sum of curated values like 0.3 + 0.5 + ... commonly emits
+ * 17.200000000000003 in JS). Below 1M, switch to a €K display.
  */
 export function formatMarketValue(valueM: number): string {
-  if (valueM >= 1) return `€${valueM}M`;
-  return `€${(valueM * 1000).toFixed(0)}K`;
+  if (valueM >= 100) return `€${Math.round(valueM)}M`;
+  if (valueM >= 1) {
+    const rounded = Math.round(valueM * 10) / 10;
+    return Number.isInteger(rounded) ? `€${rounded}M` : `€${rounded.toFixed(1)}M`;
+  }
+  return `€${Math.round(valueM * 1000)}K`;
 }

@@ -71,6 +71,18 @@ async function checkTableExists(supabase: ReturnType<typeof getAdminClient>, nam
       fix: `Apply supabase/migrations/${migration}`,
     };
   }
+  // PostgREST schema cache hasn't picked up a recently-applied migration yet.
+  // The table actually exists; the API just hasn't refreshed its index. The
+  // fix is a one-shot NOTIFY in the SQL editor (or a 5-10 min wait).
+  if (/schema cache/i.test(error.message)) {
+    return {
+      id: `table.${name}`,
+      label: `Table ${name}`,
+      status: "warn",
+      detail: "Table exists but PostgREST cache is stale",
+      fix: "Run in SQL editor: NOTIFY pgrst, 'reload schema';",
+    };
+  }
   return { id: `table.${name}`, label: `Table ${name}`, status: "warn", detail: error.message };
 }
 
@@ -90,6 +102,15 @@ async function checkColumnExists(
       status: "fail",
       detail: "column missing",
       fix: `Apply supabase/migrations/${migration}`,
+    };
+  }
+  if (/schema cache/i.test(error.message)) {
+    return {
+      id: `col.${table}.${column}`,
+      label: `${table}.${column}`,
+      status: "warn",
+      detail: "Column exists but PostgREST cache is stale",
+      fix: "Run in SQL editor: NOTIFY pgrst, 'reload schema';",
     };
   }
   return { id: `col.${table}.${column}`, label: `${table}.${column}`, status: "warn", detail: error.message };

@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -oE '<option[^<]{0,200}' /tmp/squads-rendered.html)",
+      "Bash(awk '/<h3[^>]*id=\"Austria\"/{flag=1} flag{print; if\\(/<h[23][^>]*id=/ && !/Austria/\\)exit}' /tmp/wc2026-squads.html)",
+      "Bash(awk '/^  [A-Z]{3}: \\\\[$/{team=$1} /nameEn:/{counts[team]++} END{for \\(t in counts\\) printf \"  %s %d\\\\n\", t, counts[t]}' /Users/amitzahy/Documents/Draft/wc2026/src/lib/tournament/official-rosters.ts)",
+      "Bash(curl -s -o /dev/null -w \"/squads HTTP %{http_code} \\(%{time_total}s\\)\\\\n\" http://localhost:3000/squads)"
+    ]
+  }
+}

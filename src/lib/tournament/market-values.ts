@@ -613,6 +613,14 @@ export const MARKET_VALUES_2026_ADDITIONS: Record<string, number> = {
   "Max Crocombe": 0.4, "Tim Payne": 0.2, "Tyler Bindon": 1.5, "Michael Boxall": 0.4,
   "Joe Bell": 2, "Matthew Garbett": 1, "Marko Stamenić": 5, "Chris Wood": 8,
   "Kosta Barbarouses": 0.3, "Ben Waine": 0.8,
+  // ---- Last-mile starters across COD/CPV/CUR/HAI/NZL/TUN (lower leagues, realistic estimates) ----
+  "Arthur Masuaku": 1.5, "Gédéon Kalulu": 4, "Joris Kayembe": 1, "Samuel Moutoussamy": 1.5,
+  "João Paulo": 0.4, "Diney": 0.5, "Deroy Duarte": 0.8, "Willy Semedo": 0.3,
+  "Godfried Roemeratoe": 0.3,
+  "Ricardo Adé": 0.8, "Carlens Arcus": 0.3, "Martin Expérience": 0.2, "Jean-Kévin Duverne": 0.5,
+  "Leverton Pierre": 0.3, "Danley Jean Jacques": 0.4, "Carl Sainté": 0.3,
+  "Francis de Vries": 0.3,
+  "Firas Chaouat": 0.6, "Hazem Mastouri": 0.5,
 };
 
 // <generated-start>

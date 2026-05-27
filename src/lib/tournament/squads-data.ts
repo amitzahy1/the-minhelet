@@ -278,6 +278,9 @@ const API_DATA = apiSquads as Record<string, { players: { nameEn: string; num: n
 // --- Wikipedia-scraped official 26-man rosters (announced teams only) ---
 import { OFFICIAL_ROSTERS } from "./official-rosters";
 
+// --- Predicted-XI validator (drops dropped players, pads to 4 outlets) ---
+import { expandSourcesToFour } from "./lineup-validator";
+
 /**
  * Pick starters for a default 4-3-3 formation from a list of players.
  * Selects: 1 GK, 4 DEF, 3 MID, 3 FW (by position, in order).
@@ -331,18 +334,19 @@ export function getSquad(code: string): SquadData | null {
         ...(mv !== null ? { marketValue: mv } : {}),
       };
     });
-    const starterNames = players.filter(p => p.starter).map(p => p.nameEn);
+    // Validate hand-curated source XIs against the announced 26: drop
+    // anyone who didn't make the cut, replace with a positional substitute,
+    // and pad up to four outlets so every announced team renders a full
+    // set of predicted XIs.
     if (manual) {
-      // Keep manual coach/formation/sources for the predicted-XI tabs, but
-      // override the player list. If a manual `source.starters` list doesn't
-      // match the new names, the squads page falls back to `p.starter === true`.
-      return { ...manual, players };
+      const sources = expandSourcesToFour(manual.sources, official);
+      return { ...manual, sources, players };
     }
     return {
       coach: "",
       coachEn: "",
       formation: "4-3-3",
-      sources: [{ name: "Official squad", formation: "4-3-3", starters: starterNames }],
+      sources: expandSourcesToFour([], official),
       players,
     };
   }

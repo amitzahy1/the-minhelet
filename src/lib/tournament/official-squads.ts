@@ -47,6 +47,11 @@ export const OFFICIAL_SQUADS: Record<string, OfficialStatus> = {
     announcedAt: "2026-05-18",
     source: "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads#DR_Congo",
   },
+  COL: {
+    state: "announced",
+    announcedAt: "2026-05-25",
+    source: "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads#Colombia",
+  },
   CPV: {
     state: "announced",
     announcedAt: "2026-05-18",
@@ -62,10 +67,25 @@ export const OFFICIAL_SQUADS: Record<string, OfficialStatus> = {
     announcedAt: "2026-05-18",
     source: "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads#Curaçao",
   },
+  ENG: {
+    state: "announced",
+    announcedAt: "2026-05-22",
+    source: "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads#England",
+  },
+  ESP: {
+    state: "announced",
+    announcedAt: "2026-05-25",
+    source: "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads#Spain",
+  },
   FRA: {
     state: "announced",
     announcedAt: "2026-05-14",
     source: "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads#France",
+  },
+  GER: {
+    state: "announced",
+    announcedAt: "2026-05-21",
+    source: "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads#Germany",
   },
   HAI: {
     state: "announced",
@@ -82,10 +102,30 @@ export const OFFICIAL_SQUADS: Record<string, OfficialStatus> = {
     announcedAt: "2026-05-16",
     source: "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads#South_Korea",
   },
+  MAR: {
+    state: "announced",
+    announcedAt: "2026-05-26",
+    source: "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads#Morocco",
+  },
+  NOR: {
+    state: "announced",
+    announcedAt: "2026-05-21",
+    source: "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads#Norway",
+  },
   NZL: {
     state: "announced",
     announcedAt: "2026-05-14",
     source: "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads#New_Zealand",
+  },
+  PAN: {
+    state: "announced",
+    announcedAt: "2026-05-26",
+    source: "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads#Panama",
+  },
+  POR: {
+    state: "announced",
+    announcedAt: "2026-05-19",
+    source: "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads#Portugal",
   },
   SCO: {
     state: "announced",
@@ -102,8 +142,13 @@ export const OFFICIAL_SQUADS: Record<string, OfficialStatus> = {
     announcedAt: "2026-05-15",
     source: "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads#Tunisia",
   },
+  USA: {
+    state: "announced",
+    announcedAt: "2026-05-26",
+    source: "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads#United_States",
+  },
 };
-export const LAST_SYNC: string | null = "2026-05-19T12:32:40.556Z";
+export const LAST_SYNC: string | null = "2026-05-27T06:32:25.131Z";
 // <generated-end>
 
 export function getOfficialStatus(code: string): OfficialStatus | null {

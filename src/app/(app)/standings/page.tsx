@@ -143,7 +143,7 @@ function Sparkline({ data, highlight }: { data: number[]; highlight?: boolean })
 }
 
 // Tooltip — mobile: bottom sheet with close button, desktop: hover popup
-function PlayerTooltip({ player, visible, onClose }: { player: typeof MOCK_PLAYERS[0]; visible: boolean; onClose: () => void }) {
+function PlayerTooltip({ player, visible, onClose }: { player: typeof MOCK_PLAYERS[0] & { specHasInterim?: boolean }; visible: boolean; onClose: () => void }) {
   if (!visible) return null;
   const b = player.breakdown;
   return (
@@ -178,7 +178,17 @@ function PlayerTooltip({ player, visible, onClose }: { player: typeof MOCK_PLAYE
           </div>
         </div>
         <div>
-          <p className="text-xs text-gray-400 font-bold mb-1">מיוחדים ({player.specPts})</p>
+          <p className="text-xs text-gray-400 font-bold mb-1 flex items-center gap-1.5">
+            מיוחדים ({player.specPts})
+            {player.specHasInterim && (
+              <span
+                className="text-[9px] text-amber-700 bg-amber-100 rounded-full px-1.5 py-0.5 font-bold"
+                title="ניקוד זמני — מבוסס על מי שמוביל כרגע. ישתנה כשהאלוף ייקבע סופית"
+              >
+                ⏱ זמני
+              </span>
+            )}
+          </p>
           <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
             <span className="text-gray-500">מלך שערים</span><span className="font-bold text-end text-gray-800" style={{ fontFamily: "var(--font-inter)" }}>{b.topScorer}</span>
             <span className="text-gray-500">מלך בישולים</span><span className="font-bold text-end text-gray-800" style={{ fontFamily: "var(--font-inter)" }}>{b.topAssists}</span>
@@ -279,14 +289,23 @@ export default function StandingsPage() {
   // Load finished matches for live scoring
   const [finishedMatches, setFinishedMatches] = useState<FinishedMatch[]>([]);
   const [allMatches, setAllMatches] = useState<MatchApi[]>([]);
+  // Tournament actuals (admin-entered final results) + live player stats —
+  // feeds the advancement + special-bet scoring paths.
+  const [tournamentActuals, setTournamentActuals] = useState<import("@/lib/scoring/special-bets-scorer").TournamentActuals | null>(null);
+  const [playerStats, setPlayerStats] = useState<import("@/lib/scoring/special-bets-scorer").PlayerStat[]>([]);
+  const [bestThirdsOverride, setBestThirdsOverride] = useState<string[] | null>(null);
   useEffect(() => {
     let alive = true;
     (async () => {
       try {
-        const res = await fetch("/api/matches");
-        const data = await res.json();
-        const all: MatchApi[] = data.matches || [];
-        if (alive) setAllMatches(all);
+        const [matchesRes, statsRes, thirdsRes] = await Promise.all([
+          fetch("/api/matches").then((r) => r.json()).catch(() => ({ matches: [] })),
+          fetch("/api/tournament-stats").then((r) => r.json()).catch(() => null),
+          fetch("/api/best-thirds").then((r) => r.json()).catch(() => ({ override: null })),
+        ]);
+        if (!alive) return;
+        const all: MatchApi[] = matchesRes.matches || [];
+        setAllMatches(all);
         const finished = all
           .filter(
             (m) =>
@@ -304,7 +323,37 @@ export default function StandingsPage() {
             homeGoals: m.homeGoals as number,
             awayGoals: m.awayGoals as number,
           }));
-        if (alive) setFinishedMatches(finished);
+        setFinishedMatches(finished);
+
+        // Map tournament-stats payload → scoring inputs.
+        if (statsRes?.actuals) {
+          const a = statsRes.actuals;
+          setTournamentActuals({
+            top_scorer_player: a.top_scorer_player ?? null,
+            top_assists_player: a.top_assists_player ?? null,
+            best_attack_team: a.best_attack_team ?? null,
+            most_prolific_group: a.most_prolific_group ?? null,
+            driest_group: a.driest_group ?? null,
+            dirtiest_team: a.dirtiest_team ?? null,
+            // tournament_actuals stores per-matchup result (3 fixtures); the
+            // scorer compares against a single `matchup_winner` — use the first
+            // configured result as the canonical value (legacy default).
+            matchup_winner: a.matchup_result_1 ?? null,
+            penalties_over_under: a.penalties_over_under ?? null,
+          });
+        }
+        if (Array.isArray(statsRes?.scorers)) {
+          setPlayerStats(
+            statsRes.scorers.map((s: { name: string; goals: number; assists?: number; played?: number }) => ({
+              name: s.name,
+              goals: s.goals ?? 0,
+              assists: s.assists ?? 0,
+              minutes: s.played ?? 0,
+            }))
+          );
+        }
+        const override = thirdsRes?.override;
+        setBestThirdsOverride(Array.isArray(override) && override.length === 8 ? override : null);
       } catch {
         if (alive) setFinishedMatches([]);
       }
@@ -353,11 +402,17 @@ export default function StandingsPage() {
     return out;
   }, [brackets, allMatches, finishedMatches]);
 
-  // Live-computed scores (from finished matches + brackets, fills the gap
-  // left by an empty scoring_log table in the demo).
+  // Live-computed scores (from finished matches + brackets + advancement +
+  // special-bet picks + tournament actuals). Replaces the empty scoring_log.
   const liveScores = useMemo(
-    () => computeLiveScores(brackets, finishedMatches),
-    [brackets, finishedMatches]
+    () => computeLiveScores(brackets, finishedMatches, {
+      advancements,
+      specialBets,
+      tournamentActuals,
+      playerStats,
+      bestThirdsOverride,
+    }),
+    [brackets, finishedMatches, advancements, specialBets, tournamentActuals, playerStats, bestThirdsOverride]
   );
   const todayScores = useMemo(
     () => computeTodayScores(brackets, finishedMatches),
@@ -390,20 +445,41 @@ export default function StandingsPage() {
         if (bucket) breakdown[bucket] += entry.points;
       }
 
-      // Overlay live-computed match scoring (group stage — replaces whatever was in
-      // scoring_log for match rows, since the live computation is authoritative).
+      // Overlay live-computed scoring — authoritative for both match and the
+      // pre-tournament categories (advancement + special bets) until the
+      // server-side scoring_log is populated.
       if (live) {
         breakdown.totoGroup = live.totoGroup;
         breakdown.exactGroup = live.exactGroup;
         breakdown.totoKnockout = live.totoKnockout;
         breakdown.exactKnockout = live.exactKnockout;
+        // Advancement breakdown (group exact/partial + QF/SF/Final/Winner)
+        if (live.advBreakdown) {
+          breakdown.groupAdvExact = live.advBreakdown.groupExactPts;
+          breakdown.groupAdvPartial = live.advBreakdown.groupPartialPts;
+          breakdown.advQF = live.advBreakdown.qfPts;
+          breakdown.advSF = live.advBreakdown.sfPts;
+          breakdown.advFinal = live.advBreakdown.finalPts;
+          breakdown.winner = live.advBreakdown.winnerPts;
+        }
+        // Special bets — collapse the per-reason lines into the UI buckets.
+        if (live.specBreakdown) {
+          breakdown.topScorer = 0; breakdown.topAssists = 0; breakdown.bestAttack = 0; breakdown.specials = 0;
+          for (const line of live.specBreakdown.lines) {
+            if (line.reason === "TOP_SCORER_EXACT" || line.reason === "TOP_SCORER_RELATIVE") breakdown.topScorer += line.points;
+            else if (line.reason === "TOP_ASSISTS_EXACT" || line.reason === "TOP_ASSISTS_RELATIVE") breakdown.topAssists += line.points;
+            else if (line.reason === "BEST_ATTACK") breakdown.bestAttack += line.points;
+            else breakdown.specials += line.points;
+          }
+        }
       }
 
       // Totals by bucket
       const matchPts = breakdown.totoGroup + breakdown.exactGroup + breakdown.totoKnockout + breakdown.exactKnockout;
-      const advPts = breakdown.groupAdvExact + breakdown.groupAdvPartial + breakdown.advQF + breakdown.advSF + breakdown.advFinal + breakdown.winner;
-      const specPts = breakdown.topScorer + breakdown.topAssists + breakdown.bestAttack + breakdown.specials;
+      const advPts = live?.advPts ?? (breakdown.groupAdvExact + breakdown.groupAdvPartial + breakdown.advQF + breakdown.advSF + breakdown.advFinal + breakdown.winner);
+      const specPts = live?.specPts ?? (breakdown.topScorer + breakdown.topAssists + breakdown.bestAttack + breakdown.specials);
       const total = matchPts + advPts + specPts;
+      const specHasInterim = live?.specHasInterim ?? false;
 
       // Stats
       const exactHits = live?.exactHits ?? 0;
@@ -419,6 +495,7 @@ export default function StandingsPage() {
         advPts,
         specPts,
         total,
+        specHasInterim,
         maxPossible: total + (maxPossibleScores[profile.id] ?? 0),
         today: todayPts > 0 ? `+${todayPts}` : "0",
         delta: 0,
@@ -429,7 +506,7 @@ export default function StandingsPage() {
         isYou: profile.id === currentUserId,
         breakdown,
       };
-    }).filter(Boolean) as typeof MOCK_PLAYERS;
+    }).filter(Boolean) as (typeof MOCK_PLAYERS[0] & { specHasInterim?: boolean })[];
   }, [profiles, scoringLog, liveScores, todayScores, currentUserId, maxPossibleScores]);
 
   // Always use real data — never fall back to mock (prevents flash of fake names)

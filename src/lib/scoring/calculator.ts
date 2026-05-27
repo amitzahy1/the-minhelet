@@ -18,6 +18,78 @@ interface MatchPrediction {
   predicted_penalty_winner_id?: number | null;
 }
 
+/**
+ * Score a knockout match by team code (used by the live scorer reading
+ * bracket entries). Handles penalty shootouts: when the regulation result is
+ * a draw, toto credit requires the user to have correctly named the penalty
+ * winner via their slot's `winner` field. Exact-score bonus uses the
+ * regulation goals only (penalties don't add to the bag of goals scored).
+ *
+ * Inputs use team codes (3-letter TLA) for both teams and the penalty winner
+ * — matching the `BettorBracket.knockoutTree` shape, where each slot stores
+ * `{ score1, score2, winner }` with `winner` denoting the team predicted to
+ * advance (= the penalty pick when the predicted scores are level).
+ */
+export function calculateKnockoutScore(
+  stage: MatchStage,
+  actual: {
+    homeGoals: number;
+    awayGoals: number;
+    /** Team code that won the shootout, or null when no shootout occurred. */
+    penaltyWinner: string | null;
+    team1: string;
+    team2: string;
+  },
+  prediction: {
+    score1: number | null;
+    score2: number | null;
+    /** Predicted advancer — implicitly the penalty pick when predicted scores are level. */
+    winner: string | null;
+  },
+): { toto: number; exact: number; total: number; reasons: { reason: ScoreReason; points: number }[] } {
+  const reasons: { reason: ScoreReason; points: number }[] = [];
+  let toto = 0;
+  let exact = 0;
+
+  if (prediction.score1 === null || prediction.score2 === null) {
+    return { toto: 0, exact: 0, total: 0, reasons };
+  }
+
+  const actualType =
+    actual.homeGoals > actual.awayGoals ? "1" : actual.homeGoals < actual.awayGoals ? "2" : "X";
+  const predictedType =
+    prediction.score1 > prediction.score2 ? "1" : prediction.score1 < prediction.score2 ? "2" : "X";
+
+  // Decisive (non-draw) regulation result: standard toto on result-type match.
+  if (actualType !== "X" && predictedType === actualType) {
+    toto = SCORING.toto[stage];
+    reasons.push({ reason: "TOTO", points: toto });
+  }
+  // Regulation draw on both sides → penalty pick determines toto credit.
+  else if (actualType === "X" && predictedType === "X") {
+    const predictedPenaltyWinner = prediction.winner;
+    if (
+      actual.penaltyWinner &&
+      predictedPenaltyWinner &&
+      predictedPenaltyWinner === actual.penaltyWinner
+    ) {
+      toto = SCORING.toto[stage];
+      reasons.push({ reason: "TOTO", points: toto });
+    }
+  }
+
+  // Exact bonus: regulation goals match exactly.
+  if (
+    prediction.score1 === actual.homeGoals &&
+    prediction.score2 === actual.awayGoals
+  ) {
+    exact = SCORING.exact[stage];
+    reasons.push({ reason: "EXACT_SCORE", points: exact });
+  }
+
+  return { toto, exact, total: toto + exact, reasons };
+}
+
 interface ScoreBreakdown {
   toto: number;
   exact: number;

@@ -107,6 +107,18 @@ export default function RulesPage() {
                 ))}
               </tbody>
             </table>
+            <div className="mt-5 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-xs text-amber-900 leading-relaxed">
+              <p className="font-bold mb-1">⏱ ניקוד זמני במהלך הטורניר</p>
+              <p>
+                כל עוד האלוף הסופי לא הוכרז, מלך שערים ומלך בישולים מחושבים
+                לפי המוביל הנוכחי בטורניר. אם השחקן שלך מוביל ברגע נתון —
+                אתה מקבל את הנקודות באופן זמני (מסומן ב-&quot;⏱ זמני&quot;
+                בטבלת הניקוד). הניקוד יקבע סופית כשמנהל המערכת ירשום את
+                המנצח האמיתי. שובר השוויון בין שחקנים עם אותו מספר שערים:
+                מספר בישולים גבוה יותר, ואז מספר דקות נמוך יותר —
+                בדומה לכלל FIFA Golden Boot.
+              </p>
+            </div>
           </div>
         </section>
 

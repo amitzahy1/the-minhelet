@@ -31,27 +31,37 @@ function PitchFormation({ players, formation, teamColor }: { players: { nameEn: 
         <rect x="160" y="20" width="360" height="160" stroke="white" strokeOpacity="0.25" strokeWidth="2" />
         <rect x="160" y="820" width="360" height="160" stroke="white" strokeOpacity="0.25" strokeWidth="2" />
       </svg>
-      {rows.map((row, ri) => (
-        <div key={ri} className="absolute left-0 right-0 flex justify-around items-center px-4 sm:px-6" style={{ top: row.top, transform: "translateY(-50%)" }}>
-          {row.data.map(p => (
-            <div key={p.num} className="flex flex-col items-center gap-1">
-              {p.photo ? (
-                <img src={p.photo} alt={p.nameEn} className="w-11 h-11 sm:w-12 sm:h-12 rounded-full shadow-lg border-2 border-white object-cover" />
-              ) : (
-                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full shadow-lg flex items-center justify-center text-xs sm:text-sm font-black border-2 border-white"
-                  style={{ background: teamColor, color: "white", fontFamily: "var(--font-inter)" }}>
-                  {p.num}
+      {rows.map((row, ri) => {
+        // Crowded rows (5 starters in a 3-5-2 / 5-3-2 / 5-4-1 / 4-5-1) need
+        // tighter chip widths and smaller avatars so end-chips don't clip
+        // outside the pitch container.
+        const crowded = row.data.length >= 5;
+        const avatarSize = crowded ? "w-9 h-9 sm:w-11 sm:h-11" : "w-11 h-11 sm:w-12 sm:h-12";
+        const chipMaxW = crowded ? "max-w-[58px] sm:max-w-[80px]" : "max-w-[80px] sm:max-w-[100px]";
+        const rowPx = crowded ? "px-1 sm:px-2" : "px-4 sm:px-6";
+        const nameSize = crowded ? "text-[8px] sm:text-[11px]" : "text-[9px] sm:text-xs";
+        return (
+          <div key={ri} className={`absolute left-0 right-0 flex justify-around items-center ${rowPx}`} style={{ top: row.top, transform: "translateY(-50%)" }}>
+            {row.data.map(p => (
+              <div key={p.num} className="flex flex-col items-center gap-1 min-w-0">
+                {p.photo ? (
+                  <img src={p.photo} alt={p.nameEn} className={`${avatarSize} rounded-full shadow-lg border-2 border-white object-cover`} />
+                ) : (
+                  <div className={`${avatarSize} rounded-full shadow-lg flex items-center justify-center text-xs sm:text-sm font-black border-2 border-white`}
+                    style={{ background: teamColor, color: "white", fontFamily: "var(--font-inter)" }}>
+                    {p.num}
+                  </div>
+                )}
+                <div className={`bg-black/60 backdrop-blur-sm rounded-md px-1.5 py-0.5 ${chipMaxW}`}>
+                  <span className={`${nameSize} font-bold text-white text-center block truncate`}>{p.nameEn}</span>
+                  {p.club && !crowded && <span className="text-[7px] sm:text-[9px] text-gray-300 text-center block truncate">{p.club}</span>}
+                  {p.marketValue && <span className="text-[7px] sm:text-[8px] text-emerald-300 text-center block font-bold" style={{ fontFamily: "var(--font-inter)" }}>{formatMarketValue(p.marketValue)}</span>}
                 </div>
-              )}
-              <div className="bg-black/60 backdrop-blur-sm rounded-md px-1.5 py-0.5 max-w-[80px] sm:max-w-[100px]">
-                <span className="text-[9px] sm:text-xs font-bold text-white text-center block truncate">{p.nameEn}</span>
-                {p.club && <span className="text-[7px] sm:text-[9px] text-gray-300 text-center block truncate">{p.club}</span>}
-                {p.marketValue && <span className="text-[7px] sm:text-[8px] text-emerald-300 text-center block font-bold" style={{ fontFamily: "var(--font-inter)" }}>{formatMarketValue(p.marketValue)}</span>}
               </div>
-            </div>
-          ))}
-        </div>
-      ))}
+            ))}
+          </div>
+        );
+      })}
       <div className="absolute bottom-3 right-3 bg-black/50 backdrop-blur-sm rounded-full px-2.5 py-1">
         <span className="text-xs font-bold text-white" style={{ fontFamily: "var(--font-inter)" }}>{formation}</span>
       </div>

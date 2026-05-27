@@ -6,7 +6,27 @@
 // ============================================================================
 
 import { computeGroupHits, type FinishedMatch } from "../results-hits";
-import type { BettorBracket } from "../supabase/shared-data";
+import type { BettorBracket, BettorAdvancement, BettorSpecialBets } from "../supabase/shared-data";
+import { GROUPS } from "../tournament/groups";
+import {
+  resolveKnockoutTree,
+  computeGroupOrders,
+  findThirdPlaceMatch,
+  type SlotState,
+} from "./knockout-resolver";
+import { calculateKnockoutScore } from "./calculator";
+import {
+  scoreAdvancementForUser,
+  deriveActualGroupOrders,
+  type AdvancementBreakdown,
+} from "./advancement-scorer";
+import {
+  scoreSpecialBetsForUser,
+  type SpecialBetsBreakdown,
+  type TournamentActuals,
+  type PlayerStat,
+} from "./special-bets-scorer";
+import type { MatchStage } from "@/types";
 
 // Point values — mirror scoring_config defaults
 export const GROUP_TOTO_PTS = 2;
@@ -29,9 +49,16 @@ export interface PlayerScore {
   totoKnockout: number;
   exactKnockout: number;
 
-  // Reserved for future scoring stages (computed from advancement + special_bets)
+  // Advancement + special-bet aggregates
   advPts: number;
   specPts: number;
+
+  /** Detailed advancement breakdown (per pick type), null when no advancement entry. */
+  advBreakdown: AdvancementBreakdown | null;
+  /** Detailed special-bets breakdown, null when no special bets entry. */
+  specBreakdown: SpecialBetsBreakdown | null;
+  /** True when any special-bet line in the score is interim (admin hasn't finalized). */
+  specHasInterim: boolean;
 
   total: number;
 
@@ -41,6 +68,15 @@ export interface PlayerScore {
   missHits: number;    // #matches where user predicted but was wrong
   emptyHits: number;   // #matches user didn't predict at all
   totalFinished: number; // #finished matches we have data for
+}
+
+export interface LiveScoringOptions {
+  advancements?: BettorAdvancement[];
+  specialBets?: BettorSpecialBets[];
+  tournamentActuals?: TournamentActuals | null;
+  playerStats?: PlayerStat[];
+  /** Admin override for the best-thirds qualifier set, used by the bracket resolver. */
+  bestThirdsOverride?: string[] | null;
 }
 
 function emptyScore(userId: string, displayName: string): PlayerScore {
@@ -54,6 +90,9 @@ function emptyScore(userId: string, displayName: string): PlayerScore {
     exactKnockout: 0,
     advPts: 0,
     specPts: 0,
+    advBreakdown: null,
+    specBreakdown: null,
+    specHasInterim: false,
     total: 0,
     totoHits: 0,
     exactHits: 0,
@@ -63,19 +102,44 @@ function emptyScore(userId: string, displayName: string): PlayerScore {
   };
 }
 
+/** Map a knockout-tree slot key to its scoring stage. */
+function stageForSlot(key: string): MatchStage {
+  if (key.startsWith("r32")) return "R32";
+  if (key.startsWith("r16")) return "R16";
+  if (key.startsWith("qf")) return "QF";
+  if (key.startsWith("sf")) return "SF";
+  if (key === "third_place" || key === "third") return "THIRD";
+  return "FINAL";
+}
+
+interface KnockoutPick {
+  score1: number | null;
+  score2: number | null;
+  winner: string | null;
+}
+
+function knockoutPick(bracket: BettorBracket, slotKey: string): KnockoutPick | null {
+  const tree = (bracket.knockoutTree || {}) as Record<string, KnockoutPick>;
+  const v = tree[slotKey];
+  if (!v || (v.score1 === null && v.score2 === null && v.winner === null)) return null;
+  return v;
+}
+
 /** Compute points for all bettors from the given brackets and finished matches. */
 export function computeLiveScores(
   brackets: BettorBracket[],
-  matches: FinishedMatch[]
+  matches: FinishedMatch[],
+  options: LiveScoringOptions = {},
 ): Record<string, PlayerScore> {
   const byUser: Record<string, PlayerScore> = {};
   for (const b of brackets) {
     byUser[b.userId] = emptyScore(b.userId, b.displayName || "ללא שם");
   }
 
+  // -------- Group-stage match scoring --------
   for (const match of matches) {
     const isGroup = match.stage === "GROUP_STAGE" || match.stage === "GROUP";
-    if (!isGroup) continue; // knockout scoring not yet implemented (needs FD match-id → matchKey resolver)
+    if (!isGroup) continue;
 
     const hits = computeGroupHits(match, brackets);
     for (const hit of hits) {
@@ -94,6 +158,130 @@ export function computeLiveScores(
         score.totoGroup += GROUP_TOTO_PTS;
         score.exactGroup += GROUP_EXACT_BONUS_PTS;
       }
+    }
+  }
+
+  // -------- Knockout scoring --------
+  // Resolve the real bracket state once; map each user's slot prediction to
+  // the slot's actual outcome and award toto/exact (with penalty handling).
+  const slotTree = resolveKnockoutTree(matches, options.bestThirdsOverride ?? null);
+  const thirdPlace = findThirdPlaceMatch(matches);
+
+  for (const slot of Object.values(slotTree)) {
+    if (slot.score1 === null || slot.score2 === null || !slot.team1 || !slot.team2) continue;
+    const stage = stageForSlot(slot.key);
+    const actualDraw = slot.score1 === slot.score2;
+    const penaltyWinner = actualDraw ? slot.winner : null;
+
+    for (const b of brackets) {
+      const pick = knockoutPick(b, slot.key);
+      if (!pick) continue;
+      const score = byUser[b.userId];
+      if (!score) continue;
+      score.totalFinished += 1;
+
+      const result = calculateKnockoutScore(
+        stage,
+        {
+          homeGoals: slot.score1,
+          awayGoals: slot.score2,
+          penaltyWinner,
+          team1: slot.team1,
+          team2: slot.team2,
+        },
+        pick,
+      );
+      if (result.toto > 0) score.totoHits += 1;
+      if (result.exact > 0) score.exactHits += 1;
+      else if (result.toto === 0) score.missHits += 1;
+
+      score.totoKnockout += result.toto;
+      score.exactKnockout += result.exact;
+    }
+  }
+
+  // Third-place play-off — scored separately (not part of the bracket tree).
+  if (thirdPlace) {
+    const stage: MatchStage = "THIRD";
+    const actualDraw = thirdPlace.score1 === thirdPlace.score2;
+    const penaltyWinner = actualDraw ? thirdPlace.winner : null;
+    for (const b of brackets) {
+      const pick = knockoutPick(b, "third_place");
+      if (!pick) continue;
+      const score = byUser[b.userId];
+      if (!score) continue;
+      score.totalFinished += 1;
+      const result = calculateKnockoutScore(
+        stage,
+        {
+          homeGoals: thirdPlace.score1,
+          awayGoals: thirdPlace.score2,
+          penaltyWinner,
+          team1: thirdPlace.team1,
+          team2: thirdPlace.team2,
+        },
+        pick,
+      );
+      if (result.toto > 0) score.totoHits += 1;
+      if (result.exact > 0) score.exactHits += 1;
+      else if (result.toto === 0) score.missHits += 1;
+      score.totoKnockout += result.toto;
+      score.exactKnockout += result.exact;
+    }
+  }
+
+  // -------- Advancement scoring --------
+  if (options.advancements && options.advancements.length > 0) {
+    const groupOrders = computeGroupOrders(matches);
+    const actualGroupOrders = deriveActualGroupOrders(slotTree, groupOrders, GROUPS);
+    // 3rd-place qualifiers = teams currently appearing as `?3` resolved slots
+    // (their group is among the 8 best thirds). Derive from slotTree: any
+    // team in a slot whose `h`/`a` reference was a "Xn" slot with n=3.
+    const bestThirdsCodes = new Set<string>();
+    // Compute by inspecting which 3rd-place teams from completed groups actually
+    // appear in any R32 slot.
+    const allR32Teams = new Set<string>();
+    for (const k of Object.keys(slotTree)) {
+      if (!k.startsWith("r32")) continue;
+      const slot = slotTree[k as keyof typeof slotTree];
+      if (slot.team1) allR32Teams.add(slot.team1);
+      if (slot.team2) allR32Teams.add(slot.team2);
+    }
+    for (const [letter, order] of Object.entries(groupOrders)) {
+      const thirdIdx = order[2];
+      const thirdCode = GROUPS[letter]?.[thirdIdx]?.code;
+      if (thirdCode && allR32Teams.has(thirdCode)) bestThirdsCodes.add(thirdCode);
+    }
+
+    // Champion = winner of the final slot.
+    const champion = slotTree["final"]?.winner ?? null;
+
+    for (const adv of options.advancements) {
+      const score = byUser[adv.userId];
+      if (!score) continue;
+      const breakdown = scoreAdvancementForUser(
+        adv,
+        actualGroupOrders,
+        bestThirdsCodes,
+        slotTree as Record<string, SlotState>,
+        champion,
+      );
+      score.advPts = breakdown.total;
+      score.advBreakdown = breakdown;
+    }
+  }
+
+  // -------- Special-bets scoring (final + live tentative) --------
+  if (options.specialBets && options.specialBets.length > 0) {
+    const actuals = options.tournamentActuals ?? null;
+    const stats = options.playerStats ?? [];
+    for (const bets of options.specialBets) {
+      const score = byUser[bets.userId];
+      if (!score) continue;
+      const breakdown = scoreSpecialBetsForUser(bets, actuals, stats);
+      score.specPts = breakdown.total;
+      score.specBreakdown = breakdown;
+      score.specHasInterim = breakdown.hasInterim;
     }
   }
 

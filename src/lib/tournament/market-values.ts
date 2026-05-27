@@ -533,14 +533,108 @@ export const MARKET_VALUES: Record<string, number> = {
  * Tries exact match on nameEn, then falls back to last-name match.
  * Returns value in €M or null if not found.
  */
+// Auto-generated entries from scripts/sync-player-market-values.ts are kept
+// in a separate map so a re-run of the script overwrites only that block.
+// Curated values in MARKET_VALUES above always win when both contain the
+// same key.
+// Curated additions for the 2026 announced 26-man rosters where the player's
+// full name (as printed on Wikipedia) wasn't already keyed in MARKET_VALUES.
+// Estimates in €M as of May 2026, sourced from Transfermarkt + public-press
+// composites. Kept here (outside the generated block) so a re-run of
+// scripts/sync-player-market-values.ts doesn't wipe them.
+export const MARKET_VALUES_2026_ADDITIONS: Record<string, number> = {
+  // ---- Brazil ----
+  "Vinícius Júnior": 200, "Casemiro": 18, "Bruno Guimarães": 75, "Gabriel Magalhães": 70,
+  "Danilo Luiz": 4, "Alex Sandro": 1, "Neymar": 25,
+  // ---- England ----
+  "Marc Guéhi": 55, "Reece James": 50, "Ezri Konsa": 35, "Jordan Henderson": 5, "Marcus Rashford": 50,
+  // ---- France ----
+  "Brice Samba": 18, "Malo Gusto": 35, "Lucas Digne": 7, "Manu Koné": 50,
+  // ---- Spain ----
+  "Marcos Llorente": 35, "Eric García": 18, "Mikel Merino": 50, "Fabián Ruiz": 55,
+  "Ferran Torres": 40, "Mikel Oyarzabal": 50, "Dani Olmo": 60,
+  // ---- Germany ----
+  "Waldemar Anton": 30, "Leon Goretzka": 30, "Nick Woltemade": 35, "Maximilian Beier": 28,
+  // ---- Portugal ----
+  "Nélson Semedo": 14, "Bernardo Silva": 60, "Bruno Fernandes": 65, "Rúben Neves": 32,
+  "João Félix": 35, "Rafael Leão": 80,
+  // ---- Belgium ----
+  "Thibaut Courtois": 28, "Thomas Meunier": 3, "Timothy Castagne": 18, "Zeno Debast": 30,
+  "Axel Witsel": 1, "Kevin De Bruyne": 35,
+  // ---- Netherlands (newly listed) — keep existing values working via lastname fallback.
+  // ---- Croatia ----
+  "Duje Ćaleta-Car": 6, "Josip Šutalo": 18, "Josip Stanišić": 25, "Mario Pašalić": 18,
+  "Ivan Perišić": 4, "Ante Budimir": 8,
+  // ---- Austria ----
+  "Alexander Schlager": 4, "David Affengruber": 9, "Kevin Danso": 32, "Xaver Schlager": 24,
+  "Stefan Posch": 12, "Nicolas Seiwald": 18, "David Alaba": 18, "Michael Gregoritsch": 6, "Saša Kalajdžić": 5,
+  // ---- Sweden ----
+  "Jacob Widell Zetterström": 6, "Gustaf Lagerbielke": 8, "Isak Hien": 35, "Gabriel Gudmundsson": 12,
+  "Lucas Bergvall": 35, "Benjamin Nygren": 14, "Anthony Elanga": 50, "Ken Sema": 3, "Jesper Karlström": 4,
+  // ---- Norway ----
+  "Ørjan Nyland": 1, "Morten Thorsby": 6, "Leo Østigård": 8, "David Møller Wolfe": 5,
+  "Patrick Berg": 6, "Sander Berge": 22, "Jørgen Strand Larsen": 30, "Fredrik André Bjørkan": 4,
+  // ---- Scotland ----
+  "Grant Hanley": 1, "Scott McKenna": 3, "Lawrence Shankland": 4,
+  // ---- Colombia ----
+  "David Ospina": 0.5, "Davinson Sánchez": 9, "Santiago Arias": 1, "Yerry Mina": 3,
+  "Daniel Muñoz": 12, "James Rodríguez": 3, "Juan Fernando Quintero": 3,
+  "Luis Díaz": 75, "Luis Suárez": 25,
+  // ---- USA ----
+  "Antonee Robinson": 30, "Auston Trusty": 14, "Ricardo Pepi": 20, "Brenden Aaronson": 18,
+  // ---- Japan ----
+  "Zion Suzuki": 14, "Yukinari Sugawara": 12, "Shōgo Taniguchi": 1, "Yūto Nagatomo": 0.3,
+  "Keisuke Gotō": 2, "Daizen Maeda": 8, "Yuito Suzuki": 7,
+  // ---- South Korea ----
+  "Kim Seung-gyu": 1, "Kim Min-jae": 42, "Kim Moon-hwan": 2, "Seol Young-woo": 5, "Cho Yu-min": 2.5,
+  "Lee Jae-sung": 7, "Hwang Hee-chan": 16, "Hwang In-beom": 9, "Son Heung-min": 18,
+  "Cho Gue-sung": 8, "Oh Hyeon-gyu": 5,
+  // ---- Morocco ----
+  "Nayef Aguerd": 18, "Youssef Belammari": 3, "Bilal El Khannouss": 22, "Ayoub El Kaabi": 9,
+  "Abde Ezzalzouli": 14, "Soufiane Rahimi": 6,
+  // ---- Tunisia ----
+  "Montassar Talbi": 4, "Dylan Bronn": 3, "Ali Abdi": 2, "Yan Valery": 3,
+  "Ellyes Skhiri": 18, "Hannibal Mejbri": 7, "Anis Ben Slimane": 4, "Elias Achouri": 8,
+  // ---- Ivory Coast ----
+  "Odilon Kossounou": 26, "Wilfried Singo": 30, "Evan Ndicka": 35, "Jean Michaël Seri": 1.5,
+  "Ibrahim Sangaré": 22, "Nicolas Pépé": 8, "Oumar Diakité": 6, "Simon Adingra": 22,
+  // ---- DR Congo, Cape Verde, Haiti, Bosnia, Panama, Curaçao, New Zealand ----
+  // ---- (Lower-profile teams; representative anchors only.)
+  "Lionel Mpasi": 1, "Théo Bongonda": 6, "Meschak Elia": 3.5, "Edo Kayembe": 6, "Charles Pickel": 2,
+  "Vozinha": 0.3, "Roberto Lopes": 1, "Jamiro Monteiro": 1.5, "Kevin Pina": 1, "Garry Rodrigues": 0.8,
+  "Johny Placide": 0.1, "Frantzdy Pierrot": 1, "Derrick Etienne Jr.": 1, "Duckens Nazon": 0.4,
+  "Nikola Vasilj": 2, "Dennis Hadžikadunić": 1.5, "Amar Dedić": 11, "Nikola Katić": 1.5,
+  "Amir Hadžiahmetović": 4, "Benjamin Tahirović": 5, "Armin Gigović": 3, "Samed Baždar": 3,
+  "Luis Mejía": 0.5, "Eric Davis": 0.3, "Fidel Escobar": 0.5, "Michael Amir Murillo": 6,
+  "Aníbal Godoy": 0.5, "Alberto Quintero": 0.3, "Yoel Bárcenas": 0.8, "José Fajardo": 1,
+  "Ismael Díaz": 1.5, "Cecilio Waterman": 0.8,
+  "Juriën Gaari": 0.3, "Roshon van Eijma": 0.3, "Sherel Floranus": 0.5, "Joshua Brenet": 0.5,
+  "Kenji Gorré": 0.4, "Brandley Kuwas": 0.3, "Gervane Kastaneer": 0.3,
+  "Max Crocombe": 0.4, "Tim Payne": 0.2, "Tyler Bindon": 1.5, "Michael Boxall": 0.4,
+  "Joe Bell": 2, "Matthew Garbett": 1, "Marko Stamenić": 5, "Chris Wood": 8,
+  "Kosta Barbarouses": 0.3, "Ben Waine": 0.8,
+};
+
+// <generated-start>
+export const MARKET_VALUES_GENERATED: Record<string, number> = {};
+// <generated-end>
+
 export function getMarketValue(nameEn: string): number | null {
   if (MARKET_VALUES[nameEn] !== undefined) return MARKET_VALUES[nameEn];
+  if (MARKET_VALUES_2026_ADDITIONS[nameEn] !== undefined) return MARKET_VALUES_2026_ADDITIONS[nameEn];
+  if (MARKET_VALUES_GENERATED[nameEn] !== undefined) return MARKET_VALUES_GENERATED[nameEn];
 
   // Try last name match (useful when squad data uses abbreviated first names)
   const lastName = nameEn.split(" ").pop() || "";
   if (lastName.length < 3) return null; // Avoid false positives on short names
 
   for (const [key, val] of Object.entries(MARKET_VALUES)) {
+    if (key === lastName) return val;
+  }
+  for (const [key, val] of Object.entries(MARKET_VALUES_2026_ADDITIONS)) {
+    if (key === lastName) return val;
+  }
+  for (const [key, val] of Object.entries(MARKET_VALUES_GENERATED)) {
     if (key === lastName) return val;
   }
   return null;

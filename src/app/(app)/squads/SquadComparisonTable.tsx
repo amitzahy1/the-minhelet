@@ -86,7 +86,7 @@ function SortableHead({
 }
 
 export function SquadComparisonTable() {
-  const rows = useMemo(buildRows, []);
+  const rows = useMemo(() => buildRows(), []);
   const [sortKey, setSortKey] = useState<SortKey>("total");
   const [dir, setDir] = useState<"asc" | "desc">("desc");
 

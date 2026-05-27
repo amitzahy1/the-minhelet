@@ -92,8 +92,14 @@ export function scoreAdvancementForUser(
     const [actual1st, actual2nd, actual3rd] = actual;
     const thirdQualified = bestThirdsCodes.has(actual3rd);
 
-    // picks may be either an array [1st, 2nd] or an object { "1st": code, "2nd": code }.
-    const pickArr = Array.isArray(picks) ? picks : [picks?.["1st" as keyof typeof picks], picks?.["2nd" as keyof typeof picks]];
+    // Canonical storage is `[1st, 2nd]` (per sync.ts). Older rows may still
+    // carry `{ "1st": code, "2nd": code }` from earlier saves — accept both.
+    const pickArr = Array.isArray(picks)
+      ? picks
+      : [
+          (picks as { "1st"?: string; "2nd"?: string })?.["1st"],
+          (picks as { "1st"?: string; "2nd"?: string })?.["2nd"],
+        ];
     const [pred1, pred2] = pickArr;
 
     const scoreSlot = (pred: string | undefined, slotOrdinal: 1 | 2): void => {

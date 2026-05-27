@@ -1,5 +1,27 @@
 # WC2026 — Backup & Restore Playbook
 
+## One-time setup (before tomorrow's launch)
+
+Open `/admin → ⚙️ פעולות חירום` and click **רענן בדיקה** at the top. Every red ✗
+line shows what's still missing + the exact migration / fix needed.
+
+The expected setup is:
+
+1. **Apply migrations 010-016.** From the repo root:
+   ```bash
+   npx supabase link --project-ref <your-project-ref>   # one-time
+   npx supabase db push                                 # pushes any unapplied migration
+   ```
+   Or paste each SQL file into Supabase dashboard → SQL Editor in numeric order.
+
+2. **Create the `backups` Storage bucket.** Supabase dashboard → Storage →
+   New bucket → `backups` (Private). The daily cron writes here; no public
+   policy needed because the service role is what reads/writes.
+
+3. **Re-run the readiness check** until everything is ✓.
+
+
+
 ## Daily backups
 
 A Vercel cron at **07:00 UTC** calls `POST /api/admin/backup-snapshot`, which

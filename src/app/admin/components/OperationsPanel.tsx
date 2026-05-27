@@ -20,6 +20,14 @@ function StatusLine({ status }: { status: string | null }) {
   return <p className="mt-2 text-xs text-gray-600 whitespace-pre-wrap">{status}</p>;
 }
 
+interface HealthCheck {
+  id: string;
+  label: string;
+  status: "ok" | "warn" | "fail";
+  detail?: string;
+  fix?: string;
+}
+
 export function OperationsPanel() {
   const [busy, setBusy] = useState<string | null>(null);
   const [status, setStatus] = useState<Record<string, string | null>>({});
@@ -29,8 +37,26 @@ export function OperationsPanel() {
   const [resetEmail, setResetEmail] = useState("");
   const [lockUserId, setLockUserId] = useState("");
   const [restoreKey, setRestoreKey] = useState("");
+  const [healthChecks, setHealthChecks] = useState<HealthCheck[] | null>(null);
+  const [healthSummary, setHealthSummary] = useState<{ ok: number; warn: number; fail: number } | null>(null);
+  const [healthLoading, setHealthLoading] = useState(false);
+
+  async function runHealthCheck() {
+    setHealthLoading(true);
+    try {
+      const res = await fetch("/api/admin/health-check");
+      const data = await res.json();
+      setHealthChecks(data.checks ?? []);
+      setHealthSummary(data.summary ?? null);
+    } catch (e) {
+      setHealthChecks([{ id: "err", label: "Health check failed", status: "fail", detail: String(e) }]);
+    } finally {
+      setHealthLoading(false);
+    }
+  }
 
   useEffect(() => {
+    void runHealthCheck();
     void (async () => {
       try {
         const [bRes, dRes] = await Promise.all([
@@ -65,6 +91,59 @@ export function OperationsPanel() {
 
   return (
     <div className="space-y-6" dir="rtl">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center justify-between">
+            בדיקת מוכנות
+            {healthSummary && (
+              <span className="text-xs font-normal">
+                <span className="text-green-700 me-2">✓ {healthSummary.ok}</span>
+                {healthSummary.warn > 0 && <span className="text-amber-700 me-2">⚠ {healthSummary.warn}</span>}
+                {healthSummary.fail > 0 && <span className="text-red-700">✗ {healthSummary.fail}</span>}
+              </span>
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-xs text-gray-500 mb-3">
+            בודק שכל ה-migrations הוחלו, ה-bucket לגיבויים קיים, וכל מקורות הנתונים זמינים. הריצו לפני השקה ואחרי כל שינוי תשתית.
+          </p>
+          <div className="flex gap-2 mb-3">
+            <Button onClick={runHealthCheck} disabled={healthLoading} variant="outline">
+              {healthLoading ? "בודק..." : "רענן בדיקה"}
+            </Button>
+          </div>
+          {healthChecks && (
+            <ul className="space-y-1.5 text-xs">
+              {healthChecks.map((c) => (
+                <li key={c.id} className="flex items-start gap-2">
+                  <span
+                    className={
+                      c.status === "ok"
+                        ? "text-green-600 shrink-0"
+                        : c.status === "warn"
+                          ? "text-amber-600 shrink-0"
+                          : "text-red-600 shrink-0"
+                    }
+                  >
+                    {c.status === "ok" ? "✓" : c.status === "warn" ? "⚠" : "✗"}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <span className="font-bold">{c.label}</span>
+                    {c.detail && <span className="text-gray-600"> — {c.detail}</span>}
+                    {c.fix && (
+                      <p className="text-[11px] text-gray-500 mt-0.5">
+                        תיקון: <code className="bg-gray-100 px-1 rounded">{c.fix}</code>
+                      </p>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle className="text-base">חישוב ניקוד מחדש</CardTitle>

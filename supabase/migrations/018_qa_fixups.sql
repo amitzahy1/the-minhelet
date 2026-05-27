@@ -33,8 +33,11 @@ BEGIN
   VALUES (NEW.id, v_league_id)
   ON CONFLICT (user_id, league_id) DO NOTHING;
 
+  -- advancement_picks.winner is NOT NULL DEFAULT '' — don't pass NULL or the
+  -- trigger aborts and the entire user creation fails with a generic
+  -- "Database error creating new user".
   INSERT INTO advancement_picks (user_id, league_id, group_qualifiers, advance_to_qf, advance_to_sf, advance_to_final, winner)
-  VALUES (NEW.id, v_league_id, '{}'::JSONB, '{}', '{}', '{}', NULL)
+  VALUES (NEW.id, v_league_id, '{}'::JSONB, '{}', '{}', '{}', '')
   ON CONFLICT (user_id, league_id) DO NOTHING;
 
   RETURN NEW;

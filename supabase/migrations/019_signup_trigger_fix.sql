@@ -1,11 +1,14 @@
 -- ============================================================================
--- WC2026 — Ensure user_brackets / special_bets / advancement_picks rows
---          exist immediately on signup
+-- WC2026 — Fix the signup trigger from migration 018
 --
--- Before: the rows were created only on first save, which meant a user who
--- signed up and left had no DB row for the standings & scoring loaders to
--- find. Now the auth trigger seeds empty rows for the default league so
--- `hydrateFromSupabase` always lands on a target row.
+-- Migration 018 installed handle_new_user_extended() that tried to INSERT
+-- INTO advancement_picks (..., winner) VALUES (..., NULL). The schema
+-- defines `winner TEXT NOT NULL DEFAULT ''`. NULL on a NOT NULL column
+-- aborts the trigger, which in turn fails the parent auth.users INSERT
+-- with a generic "Database error creating new user".
+--
+-- This migration replaces the function with a version that passes empty
+-- string instead of NULL. Idempotent.
 -- ============================================================================
 
 CREATE OR REPLACE FUNCTION handle_new_user_extended()
@@ -16,8 +19,6 @@ AS $$
 DECLARE
   v_league_id UUID;
 BEGIN
-  -- profiles row is inserted by an earlier trigger (handle_new_user); only
-  -- the prediction tables need seeding here.
   SELECT id INTO v_league_id FROM leagues ORDER BY created_at ASC LIMIT 1;
   IF v_league_id IS NULL THEN
     RETURN NEW;
@@ -31,7 +32,6 @@ BEGIN
   VALUES (NEW.id, v_league_id)
   ON CONFLICT (user_id, league_id) DO NOTHING;
 
-  -- winner is NOT NULL DEFAULT '' — pass empty string, not NULL.
   INSERT INTO advancement_picks (user_id, league_id, group_qualifiers, advance_to_qf, advance_to_sf, advance_to_final, winner)
   VALUES (NEW.id, v_league_id, '{}'::JSONB, '{}', '{}', '{}', '')
   ON CONFLICT (user_id, league_id) DO NOTHING;
@@ -45,3 +45,5 @@ CREATE TRIGGER on_auth_user_created_extended
   AFTER INSERT ON auth.users
   FOR EACH ROW
   EXECUTE FUNCTION handle_new_user_extended();
+
+NOTIFY pgrst, 'reload schema';

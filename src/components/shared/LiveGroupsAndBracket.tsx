@@ -20,6 +20,7 @@ import { normalizeGroupLetter } from "@/lib/results-hits";
 import { BestThirdsPanel, extractThirdsFromMatches } from "./BestThirdsPanel";
 import { rankBestThirds } from "@/lib/tournament/thirds-ranker";
 import { SpecialBetsLive } from "./SpecialBetsLive";
+import { FdStandingsCheck } from "./FdStandingsCheck";
 
 interface MatchApi {
   id: number;
@@ -390,6 +391,7 @@ export function LiveGroupsAndBracket() {
             ))}
           </div>
           <BestThirdsPanel matches={matches} overrideGroups={thirdsOverride} />
+          <FdStandingsCheck />
         </div>
       )}
 

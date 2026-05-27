@@ -39,15 +39,17 @@ const BACKUP_TABLES = [
 ];
 
 async function isAuthorized(req: Request): Promise<{ ok: boolean; who: string }> {
-  // Service-role bearer (cron path).
+  // Accept admin cookie OR service-role bearer OR Vercel cron headers.
   const auth = req.headers.get("authorization") || "";
   if (auth.startsWith("Bearer ")) {
     const token = auth.slice(7);
-    if (token && token === process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      return { ok: true, who: "cron" };
+    if (token && (token === process.env.SUPABASE_SERVICE_ROLE_KEY || token === process.env.CRON_SECRET)) {
+      return { ok: true, who: "bearer" };
     }
   }
-  // Admin cookie session path.
+  if (req.headers.get("x-vercel-cron")) {
+    return { ok: true, who: "vercel-cron" };
+  }
   const adminEmail = await verifyAdmin();
   if (adminEmail) return { ok: true, who: adminEmail };
   return { ok: false, who: "" };

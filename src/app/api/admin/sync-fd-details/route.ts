@@ -50,12 +50,22 @@ interface FdDetail {
 }
 
 async function isAuthorized(req: Request): Promise<{ ok: boolean; who: string }> {
+  // Vercel cron jobs hit the route with an x-vercel-cron header (or signed
+  // signature). They do NOT automatically include an Authorization bearer
+  // unless the CRON_SECRET env var is set. Accept any of:
+  //   - admin session cookie (manual trigger from /admin)
+  //   - Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}  (scripts)
+  //   - Authorization: Bearer ${CRON_SECRET}                (Vercel cron)
+  //   - x-vercel-cron header set                            (Vercel cron, fallback)
   const auth = req.headers.get("authorization") || "";
   if (auth.startsWith("Bearer ")) {
     const token = auth.slice(7);
-    if (token && token === process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      return { ok: true, who: "cron" };
+    if (token && (token === process.env.SUPABASE_SERVICE_ROLE_KEY || token === process.env.CRON_SECRET)) {
+      return { ok: true, who: "bearer" };
     }
+  }
+  if (req.headers.get("x-vercel-cron")) {
+    return { ok: true, who: "vercel-cron" };
   }
   const adminEmail = await verifyAdmin();
   if (adminEmail) return { ok: true, who: adminEmail };

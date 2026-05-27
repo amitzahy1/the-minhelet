@@ -13,7 +13,7 @@ import { BadgeCheckIcon, ShieldCheckIcon, ChevronDown, ArrowUpDown } from "lucid
 import { TeamLogo } from "@/components/shared/TeamLogo";
 import { isFifaConfirmed, isOfficiallyAnnounced } from "@/lib/tournament/official-squads";
 import { OFFICIAL_ROSTERS } from "@/lib/tournament/official-rosters";
-import { getMarketValue, formatMarketValue } from "@/lib/tournament/market-values";
+import { getMarketValue } from "@/lib/tournament/market-values";
 import { getSquad } from "@/lib/tournament/squads-data";
 import type { Team } from "@/types";
 
@@ -59,7 +59,7 @@ type SortMode = "alpha" | "value";
 export function TeamPicker({ selected, teams, onSelect }: Props) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [sortMode, setSortMode] = useState<SortMode>("alpha");
+  const [sortMode, setSortMode] = useState<SortMode>("value");
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -162,11 +162,6 @@ export function TeamPicker({ selected, teams, onSelect }: Props) {
                   <TeamLogo code={t.code} size="sm" />
                   <span className="flex-1 truncate font-bold">{t.name_he}</span>
                   <span className="text-[10px] text-gray-400" style={{ fontFamily: "var(--font-inter)" }}>{t.code}</span>
-                  {sortMode === "value" && valuesByCode[t.code] > 0 && (
-                    <span className="text-[10px] text-emerald-600 font-bold tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>
-                      {formatMarketValue(valuesByCode[t.code])}
-                    </span>
-                  )}
                   <StatusBadge code={t.code} />
                 </button>
               </li>

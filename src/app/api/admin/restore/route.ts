@@ -19,6 +19,20 @@ function getAdminClient() {
   return createClient(url, serviceKey);
 }
 
+/** Admin cookie session OR service-role bearer (for the cron / scripts). */
+async function isAuthorized(req: Request): Promise<{ ok: boolean; who: string }> {
+  const auth = req.headers.get("authorization") || "";
+  if (auth.startsWith("Bearer ")) {
+    const token = auth.slice(7);
+    if (token && token === process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      return { ok: true, who: "bearer" };
+    }
+  }
+  const adminEmail = await verifyAdmin();
+  if (adminEmail) return { ok: true, who: adminEmail };
+  return { ok: false, who: "" };
+}
+
 const RESTORE_ORDER = [
   "profiles",
   "tournaments",
@@ -36,8 +50,8 @@ const RESTORE_ORDER = [
 ];
 
 export async function POST(req: Request) {
-  const adminEmail = await verifyAdmin();
-  if (!adminEmail) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+  const auth = await isAuthorized(req);
+  if (!auth.ok) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   const supabase = getAdminClient();
   if (!supabase) return NextResponse.json({ error: "Missing server config" }, { status: 500 });
 
@@ -71,6 +85,6 @@ export async function POST(req: Request) {
     else summary[table].restored = count ?? rows.length;
   }
 
-  await logAdminAction(adminEmail, dryRun ? "restore_dry_run" : "restore_apply", { key, summary });
+  await logAdminAction(auth.who, dryRun ? "restore_dry_run" : "restore_apply", { key, summary });
   return NextResponse.json({ ok: true, key, dryRun, summary });
 }

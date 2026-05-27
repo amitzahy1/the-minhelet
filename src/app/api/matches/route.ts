@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import fdMatchDetails from "@/lib/tournament/fd-match-details.json";
+import fdMatchDetailsBundled from "@/lib/tournament/fd-match-details.json";
 
 interface FdDetails {
   syncedAt?: string;
@@ -11,7 +11,35 @@ interface FdDetails {
     status?: string | null;
   }>;
 }
-const DETAILS = fdMatchDetails as FdDetails;
+const BUNDLED_DETAILS = fdMatchDetailsBundled as FdDetails;
+
+// Cache the dynamically-fetched details from Supabase Storage for 60s so we
+// don't hit Storage on every /api/matches call.
+let cachedDynamic: { fetchedAt: number; data: FdDetails | null } = { fetchedAt: 0, data: null };
+
+async function loadDynamicDetails(): Promise<FdDetails | null> {
+  const now = Date.now();
+  if (cachedDynamic.data && now - cachedDynamic.fetchedAt < 60_000) return cachedDynamic.data;
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !anon) return null;
+  try {
+    const sb = createClient(url, anon);
+    const { data, error } = await sb.storage.from("backups").download("fd-match-details-latest.json");
+    if (error || !data) return null;
+    const text = await data.text();
+    const parsed = JSON.parse(text) as FdDetails;
+    cachedDynamic = { fetchedAt: now, data: parsed };
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function detailFor(id: string | number, dynamicDetails: FdDetails | null) {
+  const key = String(id);
+  return dynamicDetails?.matches?.[key] ?? BUNDLED_DETAILS.matches?.[key] ?? null;
+}
 
 const BASE_URL = "https://api.football-data.org/v4";
 
@@ -77,8 +105,9 @@ export async function GET() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  // 1. Load our stored results in parallel with Football-Data
-  const [fdResult, ourResults] = await Promise.all([
+  // 1. Load our stored results + the dynamically-synced match details in
+  //    parallel with the Football-Data fetch.
+  const [fdResult, ourResults, dynamicDetails] = await Promise.all([
     token
       ? fetch(`${BASE_URL}/competitions/WC/matches?season=2026`, {
           headers: { "X-Auth-Token": token },
@@ -99,6 +128,7 @@ export async function GET() {
           }
         })()
       : Promise.resolve([] as DemoResult[]),
+    loadDynamicDetails(),
   ]);
 
   // 2. Index our results by match_id for quick lookup
@@ -133,8 +163,8 @@ export async function GET() {
       awayGoals: demo?.away_goals ?? m.score?.fullTime?.away ?? null,
       homePenalties: demo?.home_penalties ?? m.score?.penalties?.home ?? null,
       awayPenalties: demo?.away_penalties ?? m.score?.penalties?.away ?? null,
-      venue: DETAILS.matches?.[String(m.id)]?.venue ?? null,
-      referees: DETAILS.matches?.[String(m.id)]?.referees ?? [],
+      venue: detailFor(m.id, dynamicDetails)?.venue ?? null,
+      referees: detailFor(m.id, dynamicDetails)?.referees ?? [],
     });
   }
 

@@ -20,6 +20,8 @@ interface Match {
   status: string;
   homeGoals: number | null;
   awayGoals: number | null;
+  venue?: string | null;
+  referees?: { name: string; role: string; nationality: string | null }[];
 }
 
 // Demo matches shown before the tournament starts
@@ -215,6 +217,17 @@ export function TodayMatches() {
                     <polyline points="6 9 12 15 18 9" />
                   </svg>
                 </div>
+
+                {/* Venue + referee (populated automatically ~24-48h pre-kickoff via the cron) */}
+                {(m.venue || (m.referees && m.referees.length > 0)) && (
+                  <div className="mt-1.5 pt-1.5 border-t border-gray-100 text-[9px] text-gray-500 leading-tight space-y-0.5">
+                    {m.venue && <p className="truncate">🏟️ {m.venue}</p>}
+                    {m.referees && m.referees.length > 0 && (() => {
+                      const main = m.referees.find((r) => r.role === "REFEREE" || r.role === "MAIN_REFEREE") || m.referees[0];
+                      return main ? <p className="truncate">👨‍⚖️ {main.name}</p> : null;
+                    })()}
+                  </div>
+                )}
               </div>
 
               {/* Expanded panel — bettors' predictions */}

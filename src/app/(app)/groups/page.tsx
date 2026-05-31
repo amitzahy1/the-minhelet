@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { useBettingStore } from "@/stores/betting-store";
 import { GROUPS as GROUPS_RAW } from "@/lib/tournament/groups";
 import { calculateStandings } from "@/lib/tournament/standings";
 import { FLAGS as __FLAGS } from "@/lib/flags";
+import { loadRealFixtures, groupFixtureInfo, pairKey, type FixtureInfo } from "@/lib/fixtures-client";
+import { toIsraelDate } from "@/lib/timezone";
 import { SwipeableGroups } from "@/components/shared/SwipeableGroups";
 import { SlotMachineScore } from "@/components/shared/SlotMachineScore";
 import { SaveAndContinue } from "@/components/shared/SaveAndContinue";
@@ -49,6 +51,32 @@ function GroupView({ groupId }: { groupId: string }) {
 
   const codes = teams.map(t => t.code);
   const matchups = useMemo(() => generateMatchups(codes), [codes.join(",")]);
+
+  // The synthetic matchup order above does NOT match the real FIFA matchday
+  // order (the team array in groups.ts isn't in seeded-position order). Sort the
+  // DISPLAY by real kickoff dates from /api/matches — same source as the
+  // schedule page — so every page shows matches in identical chronological
+  // order. Store indices (`i`) are untouched, so saved predictions are safe.
+  const [fixtureInfo, setFixtureInfo] = useState<Record<string, FixtureInfo>>({});
+  useEffect(() => {
+    let active = true;
+    loadRealFixtures().then(matches => {
+      if (active) setFixtureInfo(groupFixtureInfo(matches, groupId));
+    });
+    return () => { active = false; };
+  }, [groupId]);
+
+  const orderedIdx = useMemo(() => {
+    const idx = matchups.map((_, i) => i);
+    // Only reorder once we have a real date for EVERY pairing — a partial map
+    // would scramble the list. Until then, keep the natural order.
+    const hasAllDates = matchups.every(m => fixtureInfo[pairKey(m.h, m.a)]);
+    if (!hasAllDates) return idx;
+    return idx.sort((a, b) =>
+      new Date(fixtureInfo[pairKey(matchups[a].h, matchups[a].a)].date).getTime() -
+      new Date(fixtureInfo[pairKey(matchups[b].h, matchups[b].a)].date).getTime()
+    );
+  }, [matchups, fixtureInfo]);
 
   // Calculate standings from current scores
   const standings = useMemo(() => {
@@ -183,28 +211,53 @@ function GroupView({ groupId }: { groupId: string }) {
               </div>
             </div>
             <div className="p-3 space-y-1.5">
-              {matchups.map((m, i) => {
-                const ht = getTeam(m.h);
-                const at = getTeam(m.a);
+              {orderedIdx.map((i, pos) => {
+                const m = matchups[i];
+                const info = fixtureInfo[pairKey(m.h, m.a)];
                 const isFilled = groupState.scores[i].home !== null && groupState.scores[i].away !== null;
+                // Orient the RIGHT side (RTL) to the real home team — the "1" in
+                // 1X2. The round-robin generator's h/a is arbitrary, so fall back
+                // to m.h as home only when we have no real fixture. Store keys
+                // ("home"/"away") stay tied to m.h/m.a, so saved scores and
+                // standings are unaffected — only the visual side flips.
+                const homeIsMh = !info || info.home === m.h;
+                const rightTeam = getTeam(homeIsMh ? m.h : m.a);
+                const rightKey: "home" | "away" = homeIsMh ? "home" : "away";
+                const leftTeam = getTeam(homeIsMh ? m.a : m.h);
+                const leftKey: "home" | "away" = homeIsMh ? "away" : "home";
+                // Once sorted by real date, the 6 matches fall into 3 matchdays
+                // of 2. Show a "מחזור N · date" header before each pair so it's
+                // unmistakable which bet is first and which is the last (often a
+                // dead rubber). Headers only render when real dates are loaded.
+                const showHeader = !!info && pos % 2 === 0;
+                const matchday = Math.floor(pos / 2) + 1;
                 return (
-                  <div key={i} className={`flex items-center rounded-lg border px-3 py-2 transition-colors ${
-                    isFilled ? "bg-green-50/30 border-green-200" : "bg-gray-50/50 border-gray-100"
-                  }`}>
-                    <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                      <span className="text-lg shrink-0">{getFlag(ht.code)}</span>
-                      <span className="text-xs sm:text-sm font-bold text-gray-900 truncate">{ht.name_he}</span>
+                  <Fragment key={i}>
+                    {showHeader && (
+                      <div className="flex items-center gap-2 pt-2 first:pt-0">
+                        <span className="text-[11px] font-black text-gray-500 shrink-0">מחזור {matchday}</span>
+                        <span className="text-[11px] text-gray-400 shrink-0">· {toIsraelDate(info.date)}</span>
+                        <span className="flex-1 h-px bg-gray-100" />
+                      </div>
+                    )}
+                    <div className={`flex items-center rounded-lg border px-3 py-2 transition-colors ${
+                      isFilled ? "bg-green-50/30 border-green-200" : "bg-gray-50/50 border-gray-100"
+                    }`}>
+                      <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                        <span className="text-lg shrink-0">{getFlag(rightTeam.code)}</span>
+                        <span className="text-xs sm:text-sm font-bold text-gray-900 truncate">{rightTeam.name_he}</span>
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0 mx-1 sm:mx-2">
+                        <ScoreStepper value={groupState.scores[i][rightKey]} onChange={(v) => handleScore(i, rightKey, v)} />
+                        <span className="text-gray-300 text-sm">:</span>
+                        <ScoreStepper value={groupState.scores[i][leftKey]} onChange={(v) => handleScore(i, leftKey, v)} />
+                      </div>
+                      <div className="flex items-center gap-1.5 flex-1 min-w-0 justify-end">
+                        <span className="text-xs sm:text-sm font-bold text-gray-900 truncate">{leftTeam.name_he}</span>
+                        <span className="text-lg shrink-0">{getFlag(leftTeam.code)}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1 shrink-0 mx-1 sm:mx-2">
-                      <ScoreStepper value={groupState.scores[i].home} onChange={(v) => handleScore(i, "home", v)} />
-                      <span className="text-gray-300 text-sm">:</span>
-                      <ScoreStepper value={groupState.scores[i].away} onChange={(v) => handleScore(i, "away", v)} />
-                    </div>
-                    <div className="flex items-center gap-1.5 flex-1 min-w-0 justify-end">
-                      <span className="text-xs sm:text-sm font-bold text-gray-900 truncate">{at.name_he}</span>
-                      <span className="text-lg shrink-0">{getFlag(at.code)}</span>
-                    </div>
-                  </div>
+                  </Fragment>
                 );
               })}
             </div>
@@ -260,14 +313,14 @@ export default function GroupsPage() {
         </summary>
         <div className="mt-2 space-y-1.5 text-blue-900 text-[13px] leading-relaxed">
           <p>
-            מונדיאל 2026 — 48 נבחרות, 12 בתים של 4. לשלב שמינית הגמר עולות 32 נבחרות:
+            מונדיאל 2026 — 48 נבחרות, 12 בתים של 4. לשלב 32 הגדולות עולות 32 נבחרות:
             1-2 מכל בית (24 נבחרות) + 8 המקומות השלישיים הטובים ביותר (מתוך 12).
           </p>
           <p className="font-bold">
-            ✓ כל נבחרת שהיגיעה לשמינית הגמר נחשבת "עולה" — גם אם עלתה ממקום שלישי.
+            ✓ כל נבחרת שהיגיעה לשלב 32 הגדולות נחשבת "עולה" — גם אם עלתה ממקום שלישי.
           </p>
           <p className="text-blue-800/90">
-            אם הימרת שקבוצה X תעלה מהבית והיא באמת הגיעה לשמינית (בכל מסלול), תקבל/י ניקוד:
+            אם הימרת שקבוצה X תעלה מהבית והיא באמת הגיעה ל-32 הגדולות (בכל מסלול), תקבל/י ניקוד:
             שתי הנבחרות שהימרת עליהן עלו → <b>עולה מדויקת</b>, אחת מהן עלתה → <b>חלקי</b>.
           </p>
         </div>

@@ -141,12 +141,12 @@ export default function AdminPage() {
             {scoringConfig && (
               <div className="space-y-6">
                 <ScoringSection title="ניקוד משחקים — טוטו (1X2)" fields={[
-                  ["toto_group", "בתים"], ["toto_r32", "שמינית"], ["toto_r16", "רבע"],
+                  ["toto_group", "בתים"], ["toto_r32", "32 הגדולות"], ["toto_r16", "שמינית"],
                   ["toto_qf", "רבע גמר"], ["toto_sf", "חצי"], ["toto_third", "מקום 3"], ["toto_final", "גמר"],
                 ]} config={scoringConfig} onChange={setScoringConfig} cols={4} />
 
                 <ScoringSection title="ניקוד משחקים — תוצאה מדויקת (בונוס)" fields={[
-                  ["exact_group", "בתים"], ["exact_r32", "שמינית"], ["exact_r16", "רבע"],
+                  ["exact_group", "בתים"], ["exact_r32", "32 הגדולות"], ["exact_r16", "שמינית"],
                   ["exact_qf", "רבע גמר"], ["exact_sf", "חצי"], ["exact_third", "מקום 3"], ["exact_final", "גמר"],
                 ]} config={scoringConfig} onChange={setScoringConfig} cols={4} />
 

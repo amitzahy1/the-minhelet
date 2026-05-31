@@ -202,7 +202,7 @@ function KnockoutView() {
         <div className="text-4xl mb-4">🏆</div>
         <h2 className="text-xl font-bold mb-2">עץ הנוק-אאוט</h2>
         <p className="text-gray-500">
-          יבנה בשלב הבא — כאן תזינו תוצאות לכל משחק מהשמינית ועד הגמר
+          יבנה בשלב הבא — כאן תזינו תוצאות לכל משחק מ-32 הגדולות ועד הגמר
         </p>
       </div>
     </div>

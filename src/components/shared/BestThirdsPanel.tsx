@@ -110,7 +110,7 @@ export function BestThirdsPanel({ matches, overrideGroups }: Props) {
             דירוג מקומות שלישיים
           </h3>
           <p className="text-[11px] text-gray-500 mt-0.5">
-            12 המקומות השלישיים מדורגים חי — 8 הטובות עולות לשמינית הגמר
+            12 המקומות השלישיים מדורגים חי — 8 הטובות עולות לשלב 32 הגדולות
           </p>
         </div>
         <div className="flex items-center gap-2">

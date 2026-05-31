@@ -33,7 +33,7 @@ export function AdminGuide() {
           </div>
           <div className="bg-amber-50 rounded-lg p-3 border border-amber-200">
             <p className="font-bold text-amber-800 mb-1">שלב 2: עץ הנוק-אאוט</p>
-            <p className="text-amber-700">הנבחרות שעלו מהבתים מופיעות אוטומטית. הזנת תוצאה + בחירת מי עולה מהשמינית ועד הגמר.</p>
+            <p className="text-amber-700">הנבחרות שעלו מהבתים מופיעות אוטומטית. הזנת תוצאה + בחירת מי עולה מ-32 הגדולות ועד הגמר.</p>
           </div>
           <div className="bg-purple-50 rounded-lg p-3 border border-purple-200">
             <p className="font-bold text-purple-800 mb-1">שלב 3: הימורים מיוחדים</p>
@@ -50,7 +50,7 @@ export function AdminGuide() {
         <table className="w-full text-xs border border-gray-200 rounded-lg overflow-hidden mb-4">
           <thead><tr className="bg-gray-100"><th className="py-2 px-3 text-start">שלב</th><th className="py-2 px-3 text-center">טוטו</th><th className="py-2 px-3 text-center">מדויקת</th><th className="py-2 px-3 text-center">סה״כ</th></tr></thead>
           <tbody>
-            {[["בתים",2,1,3],["שמינית/רבע",3,1,4],["חצי גמר",3,2,5],["גמר",4,2,6]].map(([s,t,e,tot]) => (
+            {[["בתים",2,1,3],["32 הגדולות / שמינית / רבע גמר",3,1,4],["חצי גמר",3,2,5],["גמר",4,2,6]].map(([s,t,e,tot]) => (
               <tr key={String(s)} className="border-t border-gray-100"><td className="py-1.5 px-3">{s}</td><td className="py-1.5 px-3 text-center text-blue-600 font-bold">{t}</td><td className="py-1.5 px-3 text-center text-green-600 font-bold">+{e}</td><td className="py-1.5 px-3 text-center font-bold">{tot}</td></tr>
             ))}
           </tbody>

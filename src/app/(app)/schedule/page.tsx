@@ -8,7 +8,7 @@ import type { BettorProfile, BettorSpecialBets, BettorAdvancement, MatchPredicti
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { toIsraelTimeShort, toIsraelDate } from "@/lib/timezone";
+import { toIsraelTimeShort, toIsraelDate, toIsraelDateKey } from "@/lib/timezone";
 import { TeamLogo } from "@/components/shared/TeamLogo";
 
 // Mock bettor predictions — in production from Supabase
@@ -293,9 +293,17 @@ export default function SchedulePage() {
   const grouped: Record<string, Match[]> = {};
   const filtered = filter === "ALL" ? matches : matches.filter(m => m.group === `GROUP_${filter}` || m.stage === filter);
   for (const m of filtered) {
-    const date = new Date(m.date).toISOString().split("T")[0];
+    // Group by Israel calendar date (matches the times we display) rather than
+    // UTC, so a late-night kickoff lands under the day users actually see it.
+    const date = toIsraelDateKey(m.date);
     if (!grouped[date]) grouped[date] = [];
     grouped[date].push(m);
+  }
+  // Within each day, order by real kickoff time. The /api/matches payload
+  // appends DB-only rows at the end unsorted, so without this two matches on
+  // the same day could appear out of chronological order.
+  for (const date in grouped) {
+    grouped[date].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }
 
   return (

@@ -933,7 +933,7 @@ function SimulationTab() {
         <div className="border-t border-gray-100">
           {(["R32", "R16", "QF", "SF", "FINAL"] as const).map(round => {
             const roundMatches = KO_MATCHES.filter(m => m.round === round);
-            const roundLabel = round === "R32" ? "שמינית גמר" : round === "R16" ? "רבע" : round === "QF" ? "רבע גמר" : round === "SF" ? "חצי גמר" : "גמר";
+            const roundLabel = round === "R32" ? "שלב 32 הגדולות" : round === "R16" ? "שמינית גמר" : round === "QF" ? "רבע גמר" : round === "SF" ? "חצי גמר" : "גמר";
             const sc = KO_SCORING[round];
             return (
               <details key={round} className="border-b border-gray-100 last:border-0">

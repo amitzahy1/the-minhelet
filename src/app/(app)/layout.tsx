@@ -95,7 +95,7 @@ function OnboardingWizard({ onDismiss, onStart }: { onDismiss: () => void; onSta
                     <strong className="text-sm">עץ הנוק-אאוט</strong>
                     <span className="ms-auto text-[11px] font-bold text-amber-700 bg-amber-100 rounded-full px-2 py-0.5" style={{ fontFamily: "var(--font-inter)" }}>31 משחקים</span>
                   </div>
-                  <p className="text-[13px] text-gray-600 leading-snug ps-8">משמינית הגמר ועד הגמר · בחירת מנצח ותוצאה</p>
+                  <p className="text-[13px] text-gray-600 leading-snug ps-8">משלב 32 הגדולות ועד הגמר · בחירת מנצח ותוצאה</p>
                 </div>
                 <div className="bg-purple-50 rounded-xl p-3.5 border border-purple-100">
                   <div className="flex items-center gap-2 mb-1">
@@ -266,7 +266,7 @@ function OnboardingWizard({ onDismiss, onStart }: { onDismiss: () => void; onSta
                   <span className="mt-1.5 w-2 h-2 rounded-full bg-amber-500 shrink-0"></span>
                   <div>
                     <p className="text-sm font-bold text-gray-900">תוצאות נוקאאוט נשארות פתוחות</p>
-                    <p className="text-[12px] text-gray-600 leading-snug">תוצאה מדויקת לכל משחק נוקאאוט (משמינית הגמר ומעלה) ניתנת לעדכון עד לפני שריקת הפתיחה של אותו משחק.</p>
+                    <p className="text-[12px] text-gray-600 leading-snug">תוצאה מדויקת לכל משחק נוקאאוט (משלב 32 הגדולות ומעלה) ניתנת לעדכון עד לפני שריקת הפתיחה של אותו משחק.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3 px-3 py-2.5 rounded-lg border border-gray-100">

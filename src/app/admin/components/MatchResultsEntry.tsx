@@ -79,8 +79,8 @@ const STAGE_MAP: Record<string, string> = {
 
 const STAGE_LABEL: Record<string, string> = {
   GROUP: "בתים",
-  R32: "שמינית",
-  R16: "רבע",
+  R32: "32 הגדולות",
+  R16: "שמינית",
   QF: "רבע גמר",
   SF: "חצי",
   THIRD: "מקום 3",

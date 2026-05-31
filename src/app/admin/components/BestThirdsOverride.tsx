@@ -136,7 +136,7 @@ export function BestThirdsOverride() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-xs text-gray-500 leading-relaxed">
-            בחרו בדיוק 8 בתים שהשלישייה שלהם עולה לשמינית הגמר. העמודה
+            בחרו בדיוק 8 בתים שהשלישייה שלהם עולה לשלב 32 הגדולות. העמודה
             {" "}<b>אוטומטי</b>{" "} מראה מה המערכת חישבה מהתוצאות. השמירה תחליף את
             החישוב האוטומטי — ניתן לחזור אליו דרך כפתור <b>נקה עקיפה</b>.
           </p>

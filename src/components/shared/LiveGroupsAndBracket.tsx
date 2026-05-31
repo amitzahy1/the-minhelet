@@ -144,10 +144,10 @@ function GroupCard({ letter, matches }: { letter: string; matches: MatchApi[] })
 // ---------------- Bracket -----------------
 
 const BRACKET_ROUNDS: Array<{ label: string; keys: string[]; short: string }> = [
-  { label: "שמינית הגמר", short: "R32",
+  { label: "שלב 32 הגדולות", short: "R32",
     keys: ["r32l_0","r32l_1","r32l_2","r32l_3","r32l_4","r32l_5","r32l_6","r32l_7",
            "r32r_0","r32r_1","r32r_2","r32r_3","r32r_4","r32r_5","r32r_6","r32r_7"] },
-  { label: "רבע גמר מוקדם (R16)", short: "R16",
+  { label: "שמינית הגמר", short: "R16",
     keys: ["r16l_0","r16l_1","r16l_2","r16l_3","r16r_0","r16r_1","r16r_2","r16r_3"] },
   { label: "רבע גמר", short: "QF", keys: ["qfl_0","qfl_1","qfr_0","qfr_1"] },
   { label: "חצי גמר", short: "SF", keys: ["sfl_0","sfr_0"] },

@@ -184,7 +184,7 @@ function MobileKnockoutView({ r32l, r32r, getR32Team, getWinner, knockout, final
       <div className="space-y-2">
         {round === "R32" && (
           <>
-            <p className="text-sm text-gray-500 mb-2">16 משחקים — שמינית גמר</p>
+            <p className="text-sm text-gray-500 mb-2">16 משחקים — שלב 32 הגדולות</p>
             {[...r32l, ...r32r].map((m) => (
               <BracketMatch key={m.key} matchKey={m.key} team1Code={getR32Team(m.h)} team2Code={getR32Team(m.a)} size="md" />
             ))}

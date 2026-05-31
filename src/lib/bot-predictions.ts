@@ -121,7 +121,7 @@ function teamFinalRound(
   }
   // made R16
   for (const k of Object.keys(R32_MATCHUPS)) {
-    if (knockout[k]?.winner === code) return { round: 2, label: "שמינית" };
+    if (knockout[k]?.winner === code) return { round: 2, label: "שמינית גמר" };
   }
   return { round: 1, label: "בתים" };
 }

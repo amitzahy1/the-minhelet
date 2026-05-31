@@ -21,7 +21,7 @@ export default function AdminGuidePage() {
         <ol className="space-y-2 text-gray-700">
           <li className="flex gap-2"><span className="font-black text-blue-600 shrink-0">1.</span> משתמש נכנס לאתר ← מזין קוד ← נרשם עם Google או אימייל</li>
           <li className="flex gap-2"><span className="font-black text-blue-600 shrink-0">2.</span> ממלא <strong>שלב הבתים</strong> — הזנת תוצאה מדויקת ל-72 משחקים ב-12 בתים</li>
-          <li className="flex gap-2"><span className="font-black text-blue-600 shrink-0">3.</span> ממלא <strong>עץ הנוק-אאוט</strong> — הזנת תוצאה + מי עולה מהשמינית ועד הגמר</li>
+          <li className="flex gap-2"><span className="font-black text-blue-600 shrink-0">3.</span> ממלא <strong>עץ הנוק-אאוט</strong> — הזנת תוצאה + מי עולה מ-32 הגדולות ועד הגמר</li>
           <li className="flex gap-2"><span className="font-black text-blue-600 shrink-0">4.</span> ממלא <strong>הימורים מיוחדים</strong> — מי זוכה, עולות, מלך שערים, כסחנית ועוד</li>
         </ol>
         <div className="mt-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
@@ -54,7 +54,7 @@ export default function AdminGuidePage() {
         <table className="w-full text-sm border border-gray-200 rounded-lg overflow-hidden">
           <thead><tr className="bg-gray-100"><th className="py-2 px-3 text-start font-bold">קטגוריה</th><th className="py-2 px-3 text-start font-bold">מה אפשר לשנות</th></tr></thead>
           <tbody>
-            <tr className="border-t border-gray-100"><td className="py-2 px-3">טוטו (1X2)</td><td className="py-2 px-3">נקודות לכל שלב (בתים=2, שמינית=3... גמר=4)</td></tr>
+            <tr className="border-t border-gray-100"><td className="py-2 px-3">טוטו (1X2)</td><td className="py-2 px-3">נקודות לכל שלב (בתים=2, 32 הגדולות=3... גמר=4)</td></tr>
             <tr className="border-t border-gray-100"><td className="py-2 px-3">מדויקת</td><td className="py-2 px-3">בונוס לכל שלב (בתים=1... גמר=2)</td></tr>
             <tr className="border-t border-gray-100"><td className="py-2 px-3">עולות</td><td className="py-2 px-3">עולה מדויקת, חלקית, רבע/חצי/גמר/זוכה</td></tr>
             <tr className="border-t border-gray-100"><td className="py-2 px-3">מיוחדים</td><td className="py-2 px-3">מלך שערים, בישולים, התקפה, כסחנית, מאצ׳אפ</td></tr>
@@ -74,7 +74,7 @@ export default function AdminGuidePage() {
         <table className="w-full text-sm border border-gray-200 rounded-lg overflow-hidden mb-4">
           <thead><tr className="bg-gray-100"><th className="py-2 px-3 text-start">שלב</th><th className="py-2 px-3 text-center">טוטו</th><th className="py-2 px-3 text-center">מדויקת</th></tr></thead>
           <tbody>
-            {[["בתים",2,1],["שמינית/רבע",3,1],["חצי גמר",3,2],["גמר",4,2]].map(([s,t,e]) => (
+            {[["בתים",2,1],["32 הגדולות / שמינית / רבע גמר",3,1],["חצי גמר",3,2],["גמר",4,2]].map(([s,t,e]) => (
               <tr key={String(s)} className="border-t border-gray-100"><td className="py-2 px-3 font-medium">{s}</td><td className="py-2 px-3 text-center text-blue-600 font-bold">{t}</td><td className="py-2 px-3 text-center text-green-600 font-bold">+{e}</td></tr>
             ))}
           </tbody>

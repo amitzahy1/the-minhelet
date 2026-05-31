@@ -26,7 +26,7 @@ export default function RulesPage() {
               </thead>
               <tbody className="font-medium">
                 {[
-                  ["בתים", 2, 1, 3], ["שמינית גמר", 3, 1, 4], ["רבע גמר", 3, 1, 4],
+                  ["בתים", 2, 1, 3], ["שלב 32 הגדולות", 3, 1, 4], ["שמינית גמר", 3, 1, 4], ["רבע גמר", 3, 1, 4],
                   ["חצי גמר", 3, 2, 5], ["משחק מקום 3", 3, 1, 4], ["גמר", 4, 2, 6],
                 ].map(([stage, toto, exact, total]) => (
                   <tr key={stage as string} className="border-b border-gray-50">

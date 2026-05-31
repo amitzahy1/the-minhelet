@@ -76,13 +76,13 @@ const GROUP_MATCH_PAIRS: Array<[number, number]> = [
 const KO_STAGES: Array<{ stage: string; label: string; keys: string[] }> = [
   {
     stage: "r32",
-    label: "שמינית (R32)",
+    label: "32 הגדולות (R32)",
     keys: [
       "r32l_0", "r32l_1", "r32l_2", "r32l_3", "r32l_4", "r32l_5", "r32l_6", "r32l_7",
       "r32r_0", "r32r_1", "r32r_2", "r32r_3", "r32r_4", "r32r_5", "r32r_6", "r32r_7",
     ],
   },
-  { stage: "r16", label: "רבע (R16)", keys: ["r16l_0", "r16l_1", "r16l_2", "r16l_3", "r16r_0", "r16r_1", "r16r_2", "r16r_3"] },
+  { stage: "r16", label: "שמינית (R16)", keys: ["r16l_0", "r16l_1", "r16l_2", "r16l_3", "r16r_0", "r16r_1", "r16r_2", "r16r_3"] },
   { stage: "qf", label: "רבע גמר (QF)", keys: ["qfl_0", "qfl_1", "qfr_0", "qfr_1"] },
   { stage: "sf", label: "חצי גמר (SF)", keys: ["sfl_0", "sfr_0"] },
   { stage: "final", label: "גמר", keys: ["final"] },

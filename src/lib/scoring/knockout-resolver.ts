@@ -7,7 +7,9 @@
 // back to its bracket slot so user predictions for that slot can be scored.
 // ============================================================================
 
-import { GROUPS, GROUP_LETTERS } from "@/lib/tournament/groups";
+import { GROUPS, GROUP_LETTERS, getTeamByCode } from "@/lib/tournament/groups";
+import { calculateStandings } from "@/lib/tournament/standings";
+import type { GroupMatchPrediction } from "@/types";
 import {
   buildR32Matchups,
   LATER_FEEDERS,
@@ -38,50 +40,35 @@ function computeGroupStandings(
   matches: FinishedMatch[],
 ): GroupRow[] {
   const teams = GROUPS[groupLetter] || [];
-  const rows: Record<string, GroupRow> = {};
-  for (const t of teams) {
-    rows[t.code] = {
-      code: t.code,
-      played: 0,
-      wins: 0,
-      draws: 0,
-      losses: 0,
-      gf: 0,
-      ga: 0,
-      gd: 0,
-      pts: 0,
-    };
-  }
+  // Delegate to the single FIFA standings engine (full tiebreakers incl. the
+  // head-to-head mini-table + FIFA-ranking fallback) so the bracket the resolver
+  // builds matches the predicted table the user sees on /groups.
+  const preds: GroupMatchPrediction[] = [];
   for (const m of matches) {
     if (normalizeGroupLetter(m.group) !== groupLetter) continue;
-    const home = rows[m.homeTla];
-    const away = rows[m.awayTla];
-    if (!home || !away) continue;
-    home.played += 1;
-    away.played += 1;
-    home.gf += m.homeGoals;
-    home.ga += m.awayGoals;
-    away.gf += m.awayGoals;
-    away.ga += m.homeGoals;
-    if (m.homeGoals > m.awayGoals) {
-      home.wins += 1;
-      home.pts += 3;
-      away.losses += 1;
-    } else if (m.homeGoals < m.awayGoals) {
-      away.wins += 1;
-      away.pts += 3;
-      home.losses += 1;
-    } else {
-      home.draws += 1;
-      away.draws += 1;
-      home.pts += 1;
-      away.pts += 1;
-    }
+    preds.push({
+      match_id: preds.length,
+      home_team_code: m.homeTla,
+      away_team_code: m.awayTla,
+      home_goals: m.homeGoals,
+      away_goals: m.awayGoals,
+    });
   }
-  for (const r of Object.values(rows)) r.gd = r.gf - r.ga;
-  return Object.values(rows).sort(
-    (a, b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf || a.code.localeCompare(b.code),
+  const entries = calculateStandings(
+    teams.map((t) => ({ id: t.id, code: t.code })),
+    preds,
   );
+  return entries.map((e) => ({
+    code: e.team_code,
+    played: e.played,
+    wins: e.won,
+    draws: e.drawn,
+    losses: e.lost,
+    gf: e.goals_for,
+    ga: e.goals_against,
+    gd: e.goal_difference,
+    pts: e.points,
+  }));
 }
 
 /** Each group's 3rd-placed team, formatted for the best-thirds ranker. */
@@ -98,6 +85,7 @@ function extractThirds(matches: FinishedMatch[]): ThirdsInputRow[] {
       points: third.pts,
       goal_difference: third.gd,
       goals_for: third.gf,
+      fifa_ranking: getTeamByCode(third.code)?.fifa_ranking,
     });
   }
   return out;

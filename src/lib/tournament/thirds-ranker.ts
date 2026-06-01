@@ -7,7 +7,9 @@
 //   2. Goal difference
 //   3. Goals for
 //   4. Fair-play score (fewer cards wins; defaults to 0 if unknown)
-//   5. Drawing of lots — deterministic fallback on group letter
+//   5. FIFA world ranking (lower number = better) — deterministic stand-in for
+//      the regulations' final criterion
+//   6. Group letter — last-resort tiebreak so the order is always deterministic
 //
 // Head-to-head is intentionally not used here: the 3rds come from different
 // groups and have never played each other.
@@ -24,6 +26,8 @@ export interface ThirdsInputRow {
   goal_difference: number;
   goals_for: number;
   fair_play_score?: number;
+  /** FIFA world ranking (lower = better); used as the penultimate tiebreaker. */
+  fifa_ranking?: number;
 }
 
 export interface RankedThird extends ThirdsInputRow {
@@ -79,5 +83,8 @@ function compareThirds(a: ThirdsInputRow, b: ThirdsInputRow): number {
   const fpA = a.fair_play_score ?? 0;
   const fpB = b.fair_play_score ?? 0;
   if (fpA !== fpB) return fpA - fpB;
+  const rA = a.fifa_ranking ?? 999;
+  const rB = b.fifa_ranking ?? 999;
+  if (rA !== rB) return rA - rB; // lower FIFA ranking number = better
   return a.group.localeCompare(b.group);
 }

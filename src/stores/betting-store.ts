@@ -7,6 +7,13 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { persist } from "zustand/middleware";
+import {
+  getStageFromKey,
+  cascadeClear,
+  clearTeamFromSpecialBets,
+  syncAdvancementPicks,
+} from "@/lib/tournament/bracket-cascade";
+import { revalidateTree1 } from "@/lib/tournament/revalidate-bracket";
 
 // --- Types ---
 
@@ -123,120 +130,10 @@ function createInitialGroups(): Record<string, GroupState> {
   return groups;
 }
 
-// --- Bracket tree: each match key → the downstream match it feeds ---
-
-const NEXT_MATCH: Record<string, string> = {
-  // R32 → R16
-  r32l_0: "r16l_0", r32l_1: "r16l_0",
-  r32l_2: "r16l_1", r32l_3: "r16l_1",
-  r32l_4: "r16l_2", r32l_5: "r16l_2",
-  r32l_6: "r16l_3", r32l_7: "r16l_3",
-  r32r_0: "r16r_0", r32r_1: "r16r_0",
-  r32r_2: "r16r_1", r32r_3: "r16r_1",
-  r32r_4: "r16r_2", r32r_5: "r16r_2",
-  r32r_6: "r16r_3", r32r_7: "r16r_3",
-  // R16 → QF
-  r16l_0: "qfl_0", r16l_1: "qfl_0",
-  r16l_2: "qfl_1", r16l_3: "qfl_1",
-  r16r_0: "qfr_0", r16r_1: "qfr_0",
-  r16r_2: "qfr_1", r16r_3: "qfr_1",
-  // QF → SF
-  qfl_0: "sfl_0", qfl_1: "sfl_0",
-  qfr_0: "sfr_0", qfr_1: "sfr_0",
-  // SF → Final
-  sfl_0: "final", sfr_0: "final",
-};
-
-function getStageFromKey(matchKey: string): string {
-  if (matchKey.startsWith("r32")) return "r32";
-  if (matchKey.startsWith("r16")) return "r16";
-  if (matchKey.startsWith("qf")) return "qf";
-  if (matchKey.startsWith("sf")) return "sf";
-  return "final";
-}
-
-/** Recursively clear downstream matches whose winner is the removed team.
- *  Returns the number of downstream matches that were cleared so the UI can
- *  surface this as a toast (cascade-clear is otherwise silent).
- */
-function cascadeClear(
-  knockout: Record<string, KnockoutMatchState>,
-  matchKey: string,
-  oldWinner: string
-): number {
-  const nextKey = NEXT_MATCH[matchKey];
-  if (!nextKey) return 0;
-  const nextMatch = knockout[nextKey];
-  if (nextMatch?.winner === oldWinner) {
-    knockout[nextKey] = { score1: null, score2: null, winner: null };
-    return 1 + cascadeClear(knockout, nextKey, oldWinner);
-  }
-  return 0;
-}
-
-/** Clear eliminated team from special bets at the appropriate levels.
- *  Returns the number of special-bet slots that were cleared.
- */
-function clearTeamFromSpecialBets(
-  sb: SpecialBetsState,
-  teamCode: string,
-  fromStage: string
-): number {
-  const STAGES = ["r32", "r16", "qf", "sf", "final"];
-  const idx = STAGES.indexOf(fromStage);
-  let cleared = 0;
-
-  // R32 or R16 change → team can't reach QF
-  if (idx <= 1) {
-    sb.quarterfinalists = sb.quarterfinalists.map(s => {
-      if (s === teamCode) { cleared++; return ""; }
-      return s;
-    });
-  }
-  // R32, R16, or QF change → team can't reach SF
-  if (idx <= 2) {
-    sb.semifinalists = sb.semifinalists.map(s => {
-      if (s === teamCode) { cleared++; return ""; }
-      return s;
-    });
-  }
-  // R32–SF change → team can't reach final
-  if (idx <= 3) {
-    if (sb.finalist1 === teamCode) { sb.finalist1 = ""; cleared++; }
-    if (sb.finalist2 === teamCode) { sb.finalist2 = ""; cleared++; }
-  }
-  // Any change → team can't be winner
-  if (sb.winner === teamCode) { sb.winner = ""; cleared++; }
-  return cleared;
-}
-
-/** Sync advancement picks from knockout tree (bracket is source of truth) */
-function syncAdvancementPicks(
-  knockout: Record<string, KnockoutMatchState>,
-  sb: SpecialBetsState
-) {
-  const qf = [
-    knockout.r16l_0?.winner, knockout.r16l_1?.winner,
-    knockout.r16l_2?.winner, knockout.r16l_3?.winner,
-    knockout.r16r_0?.winner, knockout.r16r_1?.winner,
-    knockout.r16r_2?.winner, knockout.r16r_3?.winner,
-  ];
-  sb.quarterfinalists = sb.quarterfinalists.map((v, i) => qf[i] || v);
-
-  const sf = [
-    knockout.qfl_0?.winner, knockout.qfl_1?.winner,
-    knockout.qfr_0?.winner, knockout.qfr_1?.winner,
-  ];
-  sb.semifinalists = sb.semifinalists.map((v, i) => sf[i] || v);
-
-  const f1 = knockout.sfl_0?.winner;
-  const f2 = knockout.sfr_0?.winner;
-  if (f1) sb.finalist1 = f1;
-  if (f2) sb.finalist2 = f2;
-
-  const w = knockout.final?.winner;
-  if (w) sb.winner = w;
-}
+// Bracket-cascade helpers (NEXT_MATCH, cascadeClear, clearTeamFromSpecialBets,
+// syncAdvancementPicks, getStageFromKey) now live in the framework-agnostic
+// module @/lib/tournament/bracket-cascade so the store, the hydrate-time
+// re-validator and the admin endpoint all share ONE implementation.
 
 const initialSpecialBets: SpecialBetsState = {
   winner: "",
@@ -459,9 +356,45 @@ export const useBettingStore = create<BettingState & BettingActions>()(
             }
             state.lastUpdated = new Date().toISOString();
           });
+
+          // Silent migration: clear SIMULATION-TREE (Tree 1) picks invalidated by
+          // the corrected FIFA Annex C thirds, so a user never silently scores 0
+          // on a pick referencing a team no longer in its slot. This touches ONLY
+          // `knockout` (Tree 1) + the advancement bets — NOT `knockoutLive`
+          // (Tree 2), whose matchups come from real results, not our computation.
+          let revalCount = 0;
+          set((state) => {
+            const res = revalidateTree1(state.groups, state.knockout, state.specialBets);
+            if (res.changed) {
+              state.knockout = res.knockout;
+              state.specialBets = res.specialBets;
+              revalCount = res.invalidSlots.length;
+              state.lastUpdated = new Date().toISOString();
+            }
+          });
+
           // Re-snapshot the milestone counts so the next edit is compared
           // against the freshly-loaded server state, not the pre-hydration one.
           snapshotCounts();
+
+          if (revalCount > 0) {
+            // Persist the correction once so it isn't re-cleared every load.
+            // (If the deadline already passed the save is rejected — admin bulk
+            // re-validation handles post-lock remediation.)
+            try {
+              const { saveBetsToSupabase } = await import("@/lib/supabase/sync");
+              await saveBetsToSupabase(get());
+            } catch { /* will re-save on the next edit */ }
+            if (typeof window !== "undefined") {
+              import("./toast-store").then((m) =>
+                m.useToastStore.getState().push(
+                  `${revalCount} הימורים בעץ הסימולציה עודכנו: יריבות מקום-3 שהשתנו לפי חוקי פיפ״א`,
+                  "warning",
+                  7000,
+                ),
+              );
+            }
+          }
         } catch (e) {
           console.warn("hydrateFromSupabase failed:", e);
           // Offline fallback: restore from IndexedDB if available

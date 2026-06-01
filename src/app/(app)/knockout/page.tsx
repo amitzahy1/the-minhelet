@@ -15,20 +15,11 @@ import { useMemo } from "react";
 import { useBettingStore } from "@/stores/betting-store";
 import { GROUPS } from "@/lib/tournament/groups";
 import { LATER_FEEDERS } from "@/lib/tournament/knockout-derivation";
+import { deriveUserR32Matchups } from "@/lib/tournament/user-bracket-derivation";
 import { isLocked } from "@/lib/constants";
 import { PageTransition } from "@/components/shared/PageTransition";
 import { SaveAndContinue } from "@/components/shared/SaveAndContinue";
 import { BracketLayout, BracketMatchCell, type SlotTeams } from "@/components/knockout/BracketLayout";
-
-// R32 matchups — map to FIFA's official WC2026 schedule M73-M88.
-// W/RU pairings (8 of 16) are exact; 3rd-place slots (8 of 16) collapse each
-// FIFA "best-of" bucket to a single representative group for the simulation.
-const R32_MATCHUPS: Record<string, { h: string; a: string }> = {
-  r32l_0: { h: "A2", a: "B2" }, r32l_1: { h: "E1", a: "D3" }, r32l_2: { h: "F1", a: "C2" }, r32l_3: { h: "C1", a: "F2" },
-  r32l_4: { h: "A1", a: "C3" }, r32l_5: { h: "H1", a: "J2" }, r32l_6: { h: "B1", a: "E3" }, r32l_7: { h: "D2", a: "G2" },
-  r32r_0: { h: "I1", a: "F3" }, r32r_1: { h: "G1", a: "H3" }, r32r_2: { h: "K2", a: "L2" }, r32r_3: { h: "J1", a: "H2" },
-  r32r_4: { h: "D1", a: "B3" }, r32r_5: { h: "L1", a: "I3" }, r32r_6: { h: "E2", a: "I2" }, r32r_7: { h: "K1", a: "J3" },
-};
 
 type GroupForResolve = { order: number[]; scores: { home: number | null; away: number | null }[] };
 
@@ -54,6 +45,11 @@ export default function KnockoutPage() {
   const filledKnockout = Object.values(knockout).filter((m) => m.winner).length;
   const locked = isLocked();
 
+  // R32 matchups derived from THIS user's group predictions: winner/runner-up
+  // slots resolve per group; the 8 winner-vs-third slots use the user's real
+  // best-8 thirds (FIFA Annex C) once all 12 groups are fully predicted.
+  const { matchups, thirdsReady } = useMemo(() => deriveUserR32Matchups(groups), [groups]);
+
   // Conflict detection: team predicted to finish 4th in its group but appearing
   // as a knockout winner.
   const conflictingTeams = useMemo(() => {
@@ -73,8 +69,8 @@ export default function KnockoutPage() {
   // Teams for any slot: R32 from predicted group standings; R16+ from the
   // winners the user picked in the feeding matches.
   const getTeams = (key: string): SlotTeams => {
-    if (key in R32_MATCHUPS) {
-      const { h, a } = R32_MATCHUPS[key];
+    if (key in matchups) {
+      const { h, a } = matchups[key];
       return { team1: resolveSlot(h, groups), team2: resolveSlot(a, groups) };
     }
     const feeders = LATER_FEEDERS[key];
@@ -109,6 +105,13 @@ export default function KnockoutPage() {
           הימורי העולות (שמינית/רבע/חצי/גמר) והאלופה. <strong>אין כאן הימור על תוצאות משחקים.</strong> הימור על תוצאות
           הנוק-אאוט נעשה ב<Link href="/knockout-live" className="font-bold underline">עץ נתוני אמת</Link> שנפתח בתום שלב הבתים, ורק הוא נספר לניקוד תוצאות הנוק-אאוט.
         </div>
+
+        {!thirdsReady && (
+          <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[13px] text-amber-900 leading-relaxed">
+            יריבות המקום השלישי (3 מהבתים) ייקבעו אוטומטית לפי <strong>חוקי פיפ״א</strong> אחרי שתמלאו את כל
+            12 הבתים — 8 השלישיות הטובות ביותר בלבד מעפילות. עד אז המשבצות מול מנצחות הבתים יופיעו כ״טרם נקבע״.
+          </div>
+        )}
 
         <div className="mb-4 flex items-center gap-4 flex-wrap">
           <div className="flex items-center gap-2 bg-white rounded-lg border border-gray-200 px-3 py-2 shadow-sm">

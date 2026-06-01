@@ -10,6 +10,8 @@ import { useMemo } from "react";
 import { GROUPS, GROUP_LETTERS, getTeamByCode } from "@/lib/tournament/groups";
 import { getFlag } from "@/lib/flags";
 import { normalizeGroupLetter } from "@/lib/results-hits";
+import { calculateStandings } from "@/lib/tournament/standings";
+import type { GroupMatchPrediction } from "@/types";
 import { rankBestThirds, type ThirdsInputRow } from "@/lib/tournament/thirds-ranker";
 
 interface MatchApi {
@@ -33,27 +35,30 @@ interface Row {
 
 function computeGroupRows(groupLetter: string, matches: MatchApi[]): Row[] {
   const teams = GROUPS[groupLetter] || [];
-  const rows: Record<string, Row> = {};
-  for (const t of teams) {
-    rows[t.code] = { code: t.code, group: groupLetter, played: 0, pts: 0, gd: 0, gf: 0 };
-  }
+  // Delegate to the single FIFA standings engine so the 3rd-placed team picked
+  // here matches the resolver and the user-facing predicted table.
+  const preds: GroupMatchPrediction[] = [];
   for (const m of matches) {
     if (normalizeGroupLetter(m.group) !== groupLetter) continue;
     if (m.status !== "FINISHED") continue;
     if (m.homeGoals == null || m.awayGoals == null) continue;
-    const home = rows[m.homeTla];
-    const away = rows[m.awayTla];
-    if (!home || !away) continue;
-    home.played += 1; away.played += 1;
-    home.gf += m.homeGoals; home.gd += m.homeGoals - m.awayGoals;
-    away.gf += m.awayGoals; away.gd += m.awayGoals - m.homeGoals;
-    if (m.homeGoals > m.awayGoals) home.pts += 3;
-    else if (m.homeGoals < m.awayGoals) away.pts += 3;
-    else { home.pts += 1; away.pts += 1; }
+    preds.push({
+      match_id: preds.length,
+      home_team_code: m.homeTla,
+      away_team_code: m.awayTla,
+      home_goals: m.homeGoals,
+      away_goals: m.awayGoals,
+    });
   }
-  return Object.values(rows).sort(
-    (a, b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf || a.code.localeCompare(b.code),
-  );
+  const entries = calculateStandings(teams.map((t) => ({ id: t.id, code: t.code })), preds);
+  return entries.map((e) => ({
+    code: e.team_code,
+    group: groupLetter,
+    played: e.played,
+    pts: e.points,
+    gd: e.goal_difference,
+    gf: e.goals_for,
+  }));
 }
 
 /**
@@ -73,6 +78,7 @@ export function extractThirdsFromMatches(matches: MatchApi[]): ThirdsInputRow[] 
       points: third.pts,
       goal_difference: third.gd,
       goals_for: third.gf,
+      fifa_ranking: getTeamByCode(third.code)?.fifa_ranking,
     });
   }
   return out;

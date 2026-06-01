@@ -4,6 +4,7 @@
 // ============================================================================
 
 import type { GroupMatchPrediction, GroupStandingEntry } from "@/types";
+import { getTeamByCode } from "./groups";
 
 interface TeamStats {
   team_id: number;
@@ -78,30 +79,10 @@ export function calculateStandings(
     }
   }
 
-  // Sort teams by FIFA tiebreaker rules
-  const sorted = Array.from(statsMap.values()).sort((a, b) => {
-    // 1. Points (descending)
-    if (b.points !== a.points) return b.points - a.points;
-
-    // 2. Goal difference (descending)
-    const gdA = a.goals_for - a.goals_against;
-    const gdB = b.goals_for - b.goals_against;
-    if (gdB !== gdA) return gdB - gdA;
-
-    // 3. Goals scored (descending)
-    if (b.goals_for !== a.goals_for) return b.goals_for - a.goals_for;
-
-    // 4. Head-to-head between tied teams
-    const h2h = headToHead(a.team_code, b.team_code, matches);
-    if (h2h !== 0) return h2h;
-
-    // 5. Fair play (lower is better — fewer cards)
-    if (a.fair_play_score !== b.fair_play_score)
-      return a.fair_play_score - b.fair_play_score;
-
-    // 6. Drawing of lots — just use team code as final tiebreaker
-    return a.team_code.localeCompare(b.team_code);
-  });
+  // Sort teams by FIFA tiebreaker rules (see rankTeams — overall pts/GD/GF, then a
+  // head-to-head MINI-TABLE among the still-tied teams, then fair play, FIFA world
+  // ranking, and finally team code).
+  const sorted = rankTeams(Array.from(statsMap.values()), matches);
 
   // Convert to standings entries with positions
   return sorted.map((stats, index) => ({
@@ -120,51 +101,105 @@ export function calculateStandings(
   }));
 }
 
-/**
- * Head-to-head tiebreaker between two teams.
- * Returns negative if team A wins h2h, positive if team B wins, 0 if still tied.
- */
-function headToHead(
-  teamA: string,
-  teamB: string,
+// ============================================================================
+// FIFA tiebreaker engine (single source of truth)
+//
+// Order per the WC2026 regulations:
+//   1. Points          2. Goal difference     3. Goals scored      (all OVERALL)
+// then, among teams STILL equal, a mini-table built from ONLY the matches played
+// among those teams:
+//   4. H2H points      5. H2H goal difference 6. H2H goals scored
+// then:
+//   7. Fair play (fewer cards)  8. FIFA world ranking  9. team code (lots stand-in)
+//
+// The mini-table is applied to the whole tied set at once (NOT pairwise — a
+// pairwise comparator is intransitive for 3+ tied teams). If the mini-table
+// separates some teams but leaves a smaller subset tied, that subset re-applies
+// the mini-table among ONLY its own members (FIFA's documented continuation),
+// recursing on strictly-smaller sets until it terminates.
+// ============================================================================
+
+function fifaRankOf(code: string): number {
+  return getTeamByCode(code)?.fifa_ranking ?? 999;
+}
+
+/** Final, always-decisive comparator once pts/GD/GF and H2H are exhausted. */
+function finalTiebreak(a: TeamStats, b: TeamStats): number {
+  if (a.fair_play_score !== b.fair_play_score) return a.fair_play_score - b.fair_play_score;
+  const ra = fifaRankOf(a.team_code);
+  const rb = fifaRankOf(b.team_code);
+  if (ra !== rb) return ra - rb; // lower FIFA ranking number = better
+  return a.team_code.localeCompare(b.team_code);
+}
+
+/** Head-to-head pts/GD/GF restricted to matches played among the given teams. */
+function miniTable(
+  teams: TeamStats[],
   matches: GroupMatchPrediction[]
-): number {
-  const h2hMatches = matches.filter(
-    (m) =>
-      (m.home_team_code === teamA && m.away_team_code === teamB) ||
-      (m.home_team_code === teamB && m.away_team_code === teamA)
-  );
-
-  let pointsA = 0;
-  let pointsB = 0;
-  let goalsA = 0;
-  let goalsB = 0;
-
-  for (const m of h2hMatches) {
-    const homeIsA = m.home_team_code === teamA;
-    const aGoals = homeIsA ? m.home_goals : m.away_goals;
-    const bGoals = homeIsA ? m.away_goals : m.home_goals;
-
-    goalsA += aGoals;
-    goalsB += bGoals;
-
-    if (aGoals > bGoals) pointsA += 3;
-    else if (bGoals > aGoals) pointsB += 3;
-    else {
-      pointsA += 1;
-      pointsB += 1;
-    }
+): Record<string, { pts: number; gd: number; gf: number }> {
+  const codes = new Set(teams.map((t) => t.team_code));
+  const m: Record<string, { pts: number; gf: number; ga: number }> = {};
+  for (const t of teams) m[t.team_code] = { pts: 0, gf: 0, ga: 0 };
+  for (const match of matches) {
+    if (!codes.has(match.home_team_code) || !codes.has(match.away_team_code)) continue;
+    const h = m[match.home_team_code];
+    const a = m[match.away_team_code];
+    h.gf += match.home_goals; h.ga += match.away_goals;
+    a.gf += match.away_goals; a.ga += match.home_goals;
+    if (match.home_goals > match.away_goals) h.pts += 3;
+    else if (match.home_goals < match.away_goals) a.pts += 3;
+    else { h.pts += 1; a.pts += 1; }
   }
+  const out: Record<string, { pts: number; gd: number; gf: number }> = {};
+  for (const code of codes) out[code] = { pts: m[code].pts, gd: m[code].gf - m[code].ga, gf: m[code].gf };
+  return out;
+}
 
-  // H2H points
-  if (pointsB !== pointsA) return pointsB - pointsA;
-  // H2H goal difference
-  const gdDiff = (goalsB - goalsA) - (goalsA - goalsB);
-  if (gdDiff !== 0) return gdDiff > 0 ? 1 : -1;
-  // H2H goals scored
-  if (goalsB !== goalsA) return goalsB - goalsA;
+/** Order a set of teams already tied on overall pts/GD/GF. */
+function breakTie(tied: TeamStats[], matches: GroupMatchPrediction[]): TeamStats[] {
+  if (tied.length <= 1) return tied;
+  const mini = miniTable(tied, matches);
+  const keyed = tied
+    .map((t) => ({ t, ...mini[t.team_code] }))
+    .sort((x, y) => y.pts - x.pts || y.gd - x.gd || y.gf - x.gf);
 
-  return 0;
+  // If the mini-table can't separate anyone, fall straight to the final tiebreak.
+  const first = keyed[0];
+  const noneSeparated = keyed.every((k) => k.pts === first.pts && k.gd === first.gd && k.gf === first.gf);
+  if (noneSeparated) return [...tied].sort(finalTiebreak);
+
+  // Otherwise emit in mini-table order; any still-equal (strictly smaller) subset
+  // re-runs the mini-table among only its own members.
+  const out: TeamStats[] = [];
+  let i = 0;
+  while (i < keyed.length) {
+    let j = i + 1;
+    while (j < keyed.length && keyed[j].pts === keyed[i].pts && keyed[j].gd === keyed[i].gd && keyed[j].gf === keyed[i].gf) j++;
+    const sub = keyed.slice(i, j).map((k) => k.t);
+    if (sub.length > 1 && sub.length < tied.length) out.push(...breakTie(sub, matches));
+    else if (sub.length > 1) out.push(...[...sub].sort(finalTiebreak));
+    else out.push(sub[0]);
+    i = j;
+  }
+  return out;
+}
+
+/** Full ranking: overall pts/GD/GF, then break each tied run with the mini-table. */
+function rankTeams(teams: TeamStats[], matches: GroupMatchPrediction[]): TeamStats[] {
+  const gd = (t: TeamStats) => t.goals_for - t.goals_against;
+  const primary = [...teams].sort(
+    (a, b) => b.points - a.points || gd(b) - gd(a) || b.goals_for - a.goals_for,
+  );
+  const result: TeamStats[] = [];
+  let i = 0;
+  while (i < primary.length) {
+    let j = i + 1;
+    while (j < primary.length && primary[j].points === primary[i].points && gd(primary[j]) === gd(primary[i]) && primary[j].goals_for === primary[i].goals_for) j++;
+    const run = primary.slice(i, j);
+    result.push(...(run.length > 1 ? breakTie(run, matches) : run));
+    i = j;
+  }
+  return result;
 }
 
 /**

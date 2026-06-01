@@ -60,6 +60,19 @@ export function OperationsPanel() {
   const [healthChecks, setHealthChecks] = useState<HealthCheck[] | null>(null);
   const [healthSummary, setHealthSummary] = useState<{ ok: number; warn: number; fail: number } | null>(null);
   const [healthLoading, setHealthLoading] = useState(false);
+  const [revalReport, setRevalReport] = useState<{ totalUsers: number; affectedCount: number; totalPicksCleared: number; affected: { name: string; invalidSlots: string[]; clearedTeams: string[] }[] } | null>(null);
+  const [revalLoading, setRevalLoading] = useState(false);
+
+  async function runRevalReport() {
+    setRevalLoading(true);
+    try {
+      const res = await fetch("/api/admin/revalidate-brackets");
+      const data = await res.json();
+      if (res.ok) setRevalReport(data);
+    } catch { /* ignore */ } finally {
+      setRevalLoading(false);
+    }
+  }
 
   async function runHealthCheck() {
     setHealthLoading(true);
@@ -194,6 +207,41 @@ export function OperationsPanel() {
             {busy === "recompute" ? "מחשב..." : "הפעל חישוב מחדש"}
           </Button>
           <StatusLine status={status.recompute} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">🔁 דוח עדכון עץ הסימולציה (מקום שלישי)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <OpHelp
+            when={[
+              "אחרי פריסת תיקון חוקי המקום-השלישי (Annex C)",
+              "כדי לראות מי מהמשתמשים הושפע ולתזכר אותם לעדכן לפני הנעילה",
+            ]}
+            why="דוח קריאה-בלבד: מריץ את אותה לוגיקת אימות שרצה אצל המשתמש בטעינה (revalidateTree1) מול עץ הסימולציה (knockout_tree) של כל משתמש, ומדווח מי הימר על קבוצת מקום-שלישי שכבר לא משובצת מולו לפי חוקי פיפ״א. אינו כותב כלום — הניקוי קורה אוטומטית אצל כל משתמש בטעינה הבאה. עץ נתוני האמת (Tree 2) לא מושפע."
+          />
+          <Button onClick={runRevalReport} disabled={revalLoading} variant="outline">
+            {revalLoading ? "בודק..." : "הפק דוח"}
+          </Button>
+          {revalReport && (
+            <div className="mt-3 text-xs">
+              <p className="font-bold">
+                {revalReport.affectedCount}/{revalReport.totalUsers} משתמשים מושפעים · {revalReport.totalPicksCleared} הימורים יעודכנו
+              </p>
+              {revalReport.affectedCount > 0 && (
+                <ul className="mt-2 space-y-1 max-h-60 overflow-y-auto">
+                  {revalReport.affected.map((a, i) => (
+                    <li key={i} className="text-gray-700">
+                      <span className="font-bold">{a.name}</span> — {a.invalidSlots.length} משבצות
+                      {a.clearedTeams.length > 0 && <span className="text-gray-500"> ({a.clearedTeams.join(", ")})</span>}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
 

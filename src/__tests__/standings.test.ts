@@ -94,6 +94,41 @@ describe("calculateStandings", () => {
     expect(standings[3].team_code).toBe("JPN"); // Least goals
   });
 
+  it("breaks a pure all-draw 4-way tie by FIFA world ranking (real teams)", () => {
+    // Group A teams, every match 0-0 → all 3 pts, GD 0, GF 0, H2H all level.
+    // Final tiebreaker must be FIFA ranking: MEX(15) < KOR(25) < CZE(41) < RSA(60).
+    const a = [
+      { id: 769, code: "MEX" }, { id: 772, code: "KOR" },
+      { id: 798, code: "CZE" }, { id: 774, code: "RSA" },
+    ];
+    const draws: GroupMatchPrediction[] = [
+      makeMatch("MEX", "KOR", 0, 0, 1), makeMatch("CZE", "RSA", 0, 0, 2),
+      makeMatch("MEX", "CZE", 0, 0, 3), makeMatch("RSA", "KOR", 0, 0, 4),
+      makeMatch("RSA", "MEX", 0, 0, 5), makeMatch("KOR", "CZE", 0, 0, 6),
+    ];
+    const s = calculateStandings(a, draws);
+    expect(s.map((r) => r.team_code)).toEqual(["MEX", "KOR", "CZE", "RSA"]);
+  });
+
+  it("resolves a 3-way cyclic tie via mini-table → FIFA-ranking fallback (no intransitivity, no dupes)", () => {
+    // BRA, ARG, GER form a 1-0 cycle and each beat JPN 1-0 → all three identical
+    // on pts(6)/GD(+1)/GF(2). The mini-table is also a perfect cycle (can't
+    // separate), so the final tiebreaker is FIFA ranking: ARG(3) < BRA(6) < GER(10).
+    const matches: GroupMatchPrediction[] = [
+      makeMatch("BRA", "ARG", 1, 0, 1),  // BRA > ARG
+      makeMatch("ARG", "GER", 1, 0, 2),  // ARG > GER
+      makeMatch("GER", "BRA", 1, 0, 3),  // GER > BRA  (cycle)
+      makeMatch("BRA", "JPN", 1, 0, 4),
+      makeMatch("ARG", "JPN", 1, 0, 5),
+      makeMatch("GER", "JPN", 1, 0, 6),
+    ];
+    const s = calculateStandings(teams, matches);
+    const codes = s.map((r) => r.team_code);
+    expect(new Set(codes).size).toBe(4);          // no duplicates / drops
+    expect(codes[3]).toBe("JPN");                  // lost all three → last
+    expect(codes.slice(0, 3)).toEqual(["ARG", "BRA", "GER"]); // by FIFA ranking
+  });
+
   it("returns correct played/won/drawn/lost counts", () => {
     const matches: GroupMatchPrediction[] = [
       makeMatch("BRA", "ARG", 2, 0, 1),

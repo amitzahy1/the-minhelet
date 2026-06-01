@@ -16,6 +16,8 @@ import {
   resolveGroupSlot,
 } from "@/lib/tournament/knockout-derivation";
 import { getThirdsAssignment, DEFAULT_ASSIGNMENT } from "@/lib/tournament/annex-c";
+import { calculateStandings } from "@/lib/tournament/standings";
+import type { GroupMatchPrediction } from "@/types";
 import { normalizeGroupLetter } from "@/lib/results-hits";
 import { BestThirdsPanel, extractThirdsFromMatches } from "./BestThirdsPanel";
 import { rankBestThirds } from "@/lib/tournament/thirds-ranker";
@@ -50,37 +52,34 @@ interface GroupRow {
 
 function computeGroupStandings(groupLetter: string, matches: MatchApi[]): GroupRow[] {
   const teams = GROUPS[groupLetter] || [];
-  const rows: Record<string, GroupRow> = {};
-  for (const t of teams) {
-    rows[t.code] = {
-      code: t.code,
-      name: t.name_he,
-      played: 0, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, gd: 0, pts: 0,
-    };
-  }
+  // Delegate ordering to the single FIFA standings engine so this live view, the
+  // /groups predicted table and the knockout resolver always agree on 1st/2nd/3rd.
+  const preds: GroupMatchPrediction[] = [];
   for (const m of matches) {
     if (normalizeGroupLetter(m.group) !== groupLetter) continue;
     if (m.status !== "FINISHED") continue;
-    if (m.homeGoals === null || m.homeGoals === undefined) continue;
-    if (m.awayGoals === null || m.awayGoals === undefined) continue;
-    const home = rows[m.homeTla];
-    const away = rows[m.awayTla];
-    if (!home || !away) continue;
-    home.played += 1; away.played += 1;
-    home.gf += m.homeGoals; home.ga += m.awayGoals;
-    away.gf += m.awayGoals; away.ga += m.homeGoals;
-    if (m.homeGoals > m.awayGoals) { home.wins += 1; home.pts += 3; away.losses += 1; }
-    else if (m.homeGoals < m.awayGoals) { away.wins += 1; away.pts += 3; home.losses += 1; }
-    else { home.draws += 1; away.draws += 1; home.pts += 1; away.pts += 1; }
+    if (m.homeGoals == null || m.awayGoals == null) continue;
+    preds.push({
+      match_id: preds.length,
+      home_team_code: m.homeTla,
+      away_team_code: m.awayTla,
+      home_goals: m.homeGoals,
+      away_goals: m.awayGoals,
+    });
   }
-  for (const r of Object.values(rows)) r.gd = r.gf - r.ga;
-  return Object.values(rows).sort(
-    (a, b) =>
-      b.pts - a.pts ||
-      b.gd - a.gd ||
-      b.gf - a.gf ||
-      a.name.localeCompare(b.name, "he")
-  );
+  const entries = calculateStandings(teams.map((t) => ({ id: t.id, code: t.code })), preds);
+  return entries.map((e) => ({
+    code: e.team_code,
+    name: getTeamByCode(e.team_code)?.name_he ?? e.team_code,
+    played: e.played,
+    wins: e.won,
+    draws: e.drawn,
+    losses: e.lost,
+    gf: e.goals_for,
+    ga: e.goals_against,
+    gd: e.goal_difference,
+    pts: e.points,
+  }));
 }
 
 function GroupCard({ letter, matches }: { letter: string; matches: MatchApi[] }) {

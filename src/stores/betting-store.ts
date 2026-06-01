@@ -717,6 +717,11 @@ async function performSave(state: BettingState) {
 let lastCounts = { groups: 0, knockout: 0, specials: 0, allDone: false };
 let lastGroupFilled: Record<string, number> = {};
 let lastBetSig = "";
+// Fingerprint of just the special-bets object. Any change auto-saves (debounced)
+// so individual special picks are never left unsaved — they used to require the
+// manual Save button or a 5-edit batch, so a few picks could be wiped by the
+// next server-authoritative hydration (refresh / redeploy).
+let lastSpecialsSig = "";
 let hasHydrated = false;
 // True while hydrateFromSupabase is overwriting local state with DB content.
 // The subscribe callback must ignore these writes — they're not user edits.
@@ -748,6 +753,7 @@ function snapshotCounts() {
   lastGroupFilled = {};
   for (const letter of GROUP_LETTERS) lastGroupFilled[letter] = countGroupFilled(s, letter);
   lastBetSig = betSig(s);
+  lastSpecialsSig = JSON.stringify(s.specialBets);
   // Align batch baselines with the just-hydrated DB state so the first 5
   // edits after login are the ones that trip the batch save, not counted
   // from zero.
@@ -764,6 +770,7 @@ if (typeof window !== "undefined") {
     // this write will change the sig but must not flash "pending".
     if (isHydrating) {
       lastBetSig = betSig(state);
+      lastSpecialsSig = JSON.stringify(state.specialBets);
       return;
     }
 
@@ -772,6 +779,12 @@ if (typeof window !== "undefined") {
     const sig = betSig(state);
     if (sig === lastBetSig) return;
     lastBetSig = sig;
+
+    // Did the special-bets object itself change this tick? Every special pick
+    // must auto-save (debounced) — see lastSpecialsSig note above.
+    const specialsSig = JSON.stringify(state.specialBets);
+    const specialsChanged = specialsSig !== lastSpecialsSig;
+    lastSpecialsSig = specialsSig;
 
     hasPendingChanges = true;
 
@@ -832,7 +845,8 @@ if (typeof window !== "undefined") {
       || knockoutJustCompleted
       || specialsJustCompleted
       || knockoutBatchHit
-      || specialsBatchHit;
+      || specialsBatchHit
+      || specialsChanged; // every special pick saves (debounced), never batched-away
 
     lastCounts = { groups, knockout, specials, allDone };
 

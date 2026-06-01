@@ -445,7 +445,7 @@ function BettingSubNav({ pathname }: { pathname: string }) {
             if (isComplete) {
               mobileClass = isActive
                 ? "bg-white text-green-700 ring-2 ring-white shadow-lg"
-                : "bg-green-400/30 text-white border border-green-200/40 hover:bg-green-400/40";
+                : "bg-green-500 text-white border border-green-400 shadow-sm hover:bg-green-600";
               desktopClass = isActive
                 ? "sm:bg-green-100 sm:text-green-800 sm:border sm:border-green-400 sm:shadow-sm sm:ring-0"
                 : "sm:bg-green-50 sm:text-green-700 sm:border sm:border-green-200 sm:hover:bg-green-100";
@@ -466,10 +466,19 @@ function BettingSubNav({ pathname }: { pathname: string }) {
                   className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg text-sm sm:text-sm font-bold w-full justify-center transition-all ${mobileClass} ${desktopClass}`}
                 >
                   <span className="relative shrink-0 w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center">
-                    <span className="absolute inset-0 flex items-center justify-center">
-                      <ProgressRing pct={pct} size={22} stroke={2.5} color="currentColor" />
-                    </span>
-                    <span className="text-[11px] sm:text-xs font-black relative z-10">{labelText}</span>
+                    {isComplete ? (
+                      // Clean check badge (the old ProgressRing + "✓" read like a ⊘).
+                      <span className={`w-5 h-5 sm:w-[22px] sm:h-[22px] rounded-full flex items-center justify-center ${isActive ? "bg-green-500 text-white" : "bg-white text-green-600"}`}>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                      </span>
+                    ) : (
+                      <>
+                        <span className="absolute inset-0 flex items-center justify-center">
+                          <ProgressRing pct={pct} size={22} stroke={2.5} color="currentColor" />
+                        </span>
+                        <span className="text-[11px] sm:text-xs font-black relative z-10">{labelText}</span>
+                      </>
+                    )}
                   </span>
                   <span className="truncate">{p.label}</span>
                 </Link>

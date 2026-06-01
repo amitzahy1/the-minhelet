@@ -311,13 +311,21 @@ function applyPredictedLineup(code: string, squad: SquadData): SquadData {
 
   const starterNames: string[] = [];
   const starterSet = new Set<string>();
+  const posByName = new Map<string, PlayerData["pos"]>(); // matched player → RotoWire role
   for (const s of pl.starters) {
     const match = byExact.get(norm(s.name)) || byLast.get(lastToken(s.name));
-    if (match) { starterNames.push(match.nameEn); starterSet.add(match.nameEn); }
+    if (match) { starterNames.push(match.nameEn); starterSet.add(match.nameEn); posByName.set(match.nameEn, s.pos); }
     else starterNames.push(s.name); // unmatched → show RotoWire name as-is
   }
 
-  const players = squad.players.map((p) => ({ ...p, starter: starterSet.has(p.nameEn) }));
+  // Override each starter's position with the RotoWire role (wingers/attacking
+  // mids → MID) so the PITCH SHAPE matches the formation label (e.g. a 4-5-1
+  // renders as 4 DEF / 5 MID / 1 FW, not the roster-position 4-2-4).
+  const players = squad.players.map((p) => ({
+    ...p,
+    starter: starterSet.has(p.nameEn),
+    pos: posByName.get(p.nameEn) ?? p.pos,
+  }));
   return {
     ...squad,
     formation: pl.formation,

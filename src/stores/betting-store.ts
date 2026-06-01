@@ -385,29 +385,20 @@ export const useBettingStore = create<BettingState & BettingActions>()(
           const { loadBetsFromSupabase } = await import("@/lib/supabase/sync");
           const { data, serverUpdatedAt } = await loadBetsFromSupabase();
 
-          // Conflict check: if Supabase has a newer timestamp than local state,
-          // ask the user which version to keep instead of silently overwriting.
-          if (serverUpdatedAt && get().lastUpdated) {
+          // Cross-device resolution: the SERVER is the source of truth on load.
+          // Apply it unless this device's LOCAL state is genuinely newer (i.e.
+          // unsaved edits made here since the last server save) — only then do
+          // we keep local so we don't clobber it (autosave will push it up).
+          //
+          // This fixes the cross-device bug where bets filled on one device did
+          // NOT appear on another: the second device's stale localStorage (e.g.
+          // groups only) used to block the server load and leave knockout /
+          // specials empty. Now newer-server always wins.
+          if (data && serverUpdatedAt && get().lastUpdated) {
             const serverTs = new Date(serverUpdatedAt).getTime();
             const localTs = new Date(get().lastUpdated!).getTime();
-            if (serverTs > localTs + 60000 && typeof window !== "undefined") {
-              // Server is more than 60s newer → emit conflict event for the modal
-              window.dispatchEvent(new CustomEvent("wc:hydration-conflict", {
-                detail: {
-                  serverUpdatedAt,
-                  localUpdatedAt: get().lastUpdated,
-                  serverData: data,
-                },
-              }));
-              // Register a one-time listener for when the user picks "use cloud"
-              const applyHandler = (e: Event) => {
-                const ce = e as CustomEvent;
-                window.removeEventListener("wc:apply-server-data", applyHandler);
-                // Re-run hydration with the accepted server data
-                useBettingStore.getState().hydrateFromSupabase();
-              };
-              window.addEventListener("wc:apply-server-data", applyHandler, { once: true });
-              return; // Don't auto-apply
+            if (localTs > serverTs + 60000) {
+              return; // local has newer unsaved edits → keep them, don't overwrite
             }
           }
 

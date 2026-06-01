@@ -9,10 +9,22 @@ export default function RulesPage() {
       <h1 className="text-3xl font-black text-gray-900 mb-6" style={{ fontFamily: "var(--font-secular)" }}>חוקים וניקוד</h1>
 
       <div className="space-y-6">
+        {/* Two-tree model */}
+        <section className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
+          <div className="px-5 py-4 bg-gradient-to-l from-white via-amber-50/40 to-amber-50/30 border-b border-amber-100/50">
+            <h2 className="text-lg font-bold text-gray-900">שני עצי נוק-אאוט</h2>
+          </div>
+          <div className="p-5 space-y-3 text-sm text-gray-700 leading-relaxed">
+            <p><strong>🟡 עץ סימולציה (מבעוד מועד):</strong> בוחרים מי עולה בכל שלב ומי האלופה. זו סימולציה לבחירת העולות — <strong>אין בה הימור על תוצאות משחקים</strong>. ממנה נגזר ניקוד העולות (שמינית/רבע/חצי/גמר) והאלופה. ננעלת ב-10.06.2026.</p>
+            <p><strong>🟢 עץ נתוני אמת (במהלך הטורניר):</strong> נפתח בתום שלב הבתים עם 32 העולות האמיתיות (כולל 8 המקומות השלישיים הטובים). מנחשים תוצאה + מי עולה לכל משחק אמיתי — <strong>וזהו העץ היחיד שנספר לניקוד תוצאות הנוק-אאוט</strong>. אין דד-ליין אחד: כל משחק ניתן לעדכון עד שעה לפני שריקת הפתיחה.</p>
+          </div>
+        </section>
+
         {/* Match scoring */}
         <section className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
           <div className="px-5 py-4 bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/40 border-b border-blue-100/50">
             <h2 className="text-lg font-bold text-gray-900">הימורי תוצאות — לכל משחק</h2>
+            <p className="text-xs text-gray-500 mt-0.5">נוק-אאוט: רק מ<strong>עץ נתוני אמת</strong>. שלב הבתים: מדף ההימורים של הבתים.</p>
           </div>
           <div className="p-5">
             <table className="w-full text-sm">

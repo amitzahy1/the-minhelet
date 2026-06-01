@@ -20,6 +20,8 @@ export interface BettorBracket {
   displayName: string;
   groupPredictions: Record<string, { order: number[]; scores: { home: number | null; away: number | null }[] }>;
   knockoutTree: Record<string, { score1: number | null; score2: number | null; winner: string | null }>;
+  /** Tree 2 — real-data knockout predictions (score + winner per real match). Scored for match results. */
+  knockoutTreeLive: Record<string, { score1: number | null; score2: number | null; winner: string | null }>;
   champion: string | null;
   lockedAt: string | null;
 }
@@ -124,7 +126,7 @@ export async function loadAllBrackets(): Promise<BettorBracket[]> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("user_brackets")
-    .select("user_id, group_predictions, knockout_tree, champion, locked_at, profiles(display_name)")
+    .select("user_id, group_predictions, knockout_tree, knockout_tree_live, champion, locked_at, profiles(display_name)")
     .eq("league_id", await getLeagueId());
 
   if (error) {
@@ -140,6 +142,7 @@ export async function loadAllBrackets(): Promise<BettorBracket[]> {
       displayName: (d.profiles as unknown as { display_name: string })?.display_name || "",
       groupPredictions: d.group_predictions || {},
       knockoutTree: d.knockout_tree || {},
+      knockoutTreeLive: d.knockout_tree_live || {},
       champion: d.champion,
       lockedAt: d.locked_at,
     }));
@@ -326,6 +329,7 @@ export async function loadAllBetsViaServer(): Promise<{
         displayName: ((d.profiles as { display_name: string } | null)?.display_name) || "",
         groupPredictions: d.group_predictions || {},
         knockoutTree: d.knockout_tree || {},
+        knockoutTreeLive: d.knockout_tree_live || {},
         champion: d.champion,
         lockedAt: d.locked_at,
       }));

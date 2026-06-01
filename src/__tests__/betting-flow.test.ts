@@ -115,6 +115,7 @@ describe("Full betting flow integration", () => {
     const baseState: BettingState = {
       groups: {},
       knockout: {},
+      knockoutLive: {},
       specialBets: {
         winner: "",
         finalist1: "",

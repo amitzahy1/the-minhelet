@@ -289,6 +289,52 @@ export function indexKnockoutResultsBySlot(
   return out;
 }
 
+/** Minimal match shape for kickoff lookup — includes scheduled (un-played) matches. */
+export interface ScheduleMatch {
+  homeTla: string;
+  awayTla: string;
+  date: string;
+  status?: string | null;
+}
+
+/**
+ * Kickoff time + status for the real match that fills a resolved knockout slot.
+ *
+ * `tree` is the output of `resolveKnockoutTree` (so callers resolve once and
+ * reuse). `schedule` is the FULL match list including not-yet-played matches
+ * (e.g. /api/matches), used to find the upcoming match's date. Returns null
+ * when the slot's teams aren't resolved yet (→ the slot is not yet openable)
+ * or no scheduled match exists for the pair.
+ *
+ * The Tree-2 per-match lock is then `date − match_prediction_lock_before_minutes`
+ * (default 60 → 1 hour before kickoff); the slot reveals to opponents at `date`.
+ */
+export function findKickoffForSlot(
+  slotKey: KoSlotKey | "third_place",
+  tree: Record<KoSlotKey, SlotState>,
+  schedule: ScheduleMatch[],
+  thirdPlaceTeams?: { team1: string | null; team2: string | null } | null,
+): { date: string; status: string | null } | null {
+  let team1: string | null = null;
+  let team2: string | null = null;
+  if (slotKey === "third_place") {
+    team1 = thirdPlaceTeams?.team1 ?? null;
+    team2 = thirdPlaceTeams?.team2 ?? null;
+  } else {
+    const slot = tree[slotKey];
+    team1 = slot?.team1 ?? null;
+    team2 = slot?.team2 ?? null;
+  }
+  if (!team1 || !team2) return null;
+  const m = schedule.find(
+    (x) =>
+      (x.homeTla === team1 && x.awayTla === team2) ||
+      (x.homeTla === team2 && x.awayTla === team1),
+  );
+  if (!m) return null;
+  return { date: m.date, status: m.status ?? null };
+}
+
 /**
  * Separate path for the third-place play-off. The bracket tree doesn't have
  * a slot for it (it's outside the main knockout chain), but users can predict

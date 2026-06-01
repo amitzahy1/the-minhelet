@@ -215,6 +215,7 @@ export async function loadBetsFromSupabase(
     data: {
       groups: bracket?.group_predictions || {},
       knockout: bracket?.knockout_tree || {},
+      knockoutLive: bracket?.knockout_tree_live || {},
       specialBets: {
         winner: advancement?.winner || "",
         finalist1: advancement?.advance_to_final?.[0] || "",
@@ -242,4 +243,90 @@ export async function loadBetsFromSupabase(
       },
     },
   };
+}
+
+// ── Tree 2 (real-data knockout) — per-match save ───────────────────────────
+
+export interface LiveKnockoutSlot {
+  score1: number | null;
+  score2: number | null;
+  winner: string | null;
+}
+
+/**
+ * Save ONE Tree-2 (real-data) knockout slot prediction. Unlike the June-10
+ * global lock used by saveBetsToSupabase, Tree 2 has a PER-MATCH lock: a slot
+ * is editable until 1 hour before its real match kicks off. `lockAtISO` is
+ * derived by the caller from /api/matches via resolveKnockoutTree/findKickoffForSlot
+ * (kickoff − match_prediction_lock_before_minutes). The server re-validates.
+ *
+ * Uses the save_live_knockout RPC (migration 020), which JSONB-merges the one
+ * slot so concurrent per-match saves never clobber each other. Falls back to a
+ * read-merge-write upsert when the RPC isn't installed (local dev only).
+ */
+export async function saveLiveKnockout(
+  slotKey: string,
+  slot: LiveKnockoutSlot,
+  lockAtISO: string | null,
+  leagueId?: string,
+): Promise<{ success: boolean; error?: string }> {
+  // Client-side guard (server re-validates authoritatively).
+  if (lockAtISO && new Date() > new Date(lockAtISO)) {
+    return { success: false, error: "המשחק ננעל — לא ניתן לעדכן (פחות משעה לפתיחה)" };
+  }
+
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: "Not logged in" };
+
+  let lid = leagueId;
+  if (!lid) {
+    const { data: league } = await supabase.from("leagues").select("id").limit(1).single();
+    lid = league?.id;
+    if (!lid) return { success: false, error: "No league found in database" };
+  }
+
+  const { error: rpcError } = await supabase.rpc("save_live_knockout", {
+    p_user_id: user.id,
+    p_league_id: lid,
+    p_slot_key: slotKey,
+    p_slot: slot,
+    p_lock_at: lockAtISO,
+  });
+
+  if (rpcError && /LOCKED/.test(rpcError.message || "")) {
+    return { success: false, error: "המשחק ננעל — לא ניתן לעדכן (פחות משעה לפתיחה)" };
+  }
+
+  const rpcUnavailable =
+    rpcError &&
+    (/function .* does not exist/i.test(rpcError.message || "") ||
+      /in the schema cache/i.test(rpcError.message || "") ||
+      /could not find the function/i.test(rpcError.message || ""));
+
+  if (rpcError && !rpcUnavailable) {
+    console.error("Failed to save live knockout slot:", rpcError);
+    return { success: false, error: rpcError.message };
+  }
+
+  if (rpcUnavailable) {
+    // Read-merge-write fallback (NOT atomic vs concurrent edits — only used
+    // when the RPC isn't installed, i.e. local dev).
+    const { data: row } = await supabase
+      .from("user_brackets")
+      .select("knockout_tree_live")
+      .eq("user_id", user.id)
+      .eq("league_id", lid)
+      .single();
+    const merged = { ...(row?.knockout_tree_live || {}), [slotKey]: slot };
+    const { error } = await supabase
+      .from("user_brackets")
+      .upsert(
+        { user_id: user.id, league_id: lid, knockout_tree_live: merged, updated_at: new Date().toISOString() },
+        { onConflict: "user_id,league_id" },
+      );
+    if (error) return { success: false, error: error.message };
+  }
+
+  return { success: true };
 }

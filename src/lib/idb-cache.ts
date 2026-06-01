@@ -14,6 +14,8 @@ const KEY = "current";
 interface CachedBets {
   groups: unknown;
   knockout: unknown;
+  /** Tree 2 — real-data knockout predictions (optional; added with the two-tree feature). */
+  knockoutLive?: unknown;
   specialBets: unknown;
   cachedAt: number;
 }

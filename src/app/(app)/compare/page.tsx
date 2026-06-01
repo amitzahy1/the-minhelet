@@ -455,7 +455,7 @@ export default function ComparePage() {
 
 interface ResultsViewProps {
   matches: FinishedMatch[];
-  brackets: { userId: string; displayName: string; groupPredictions: Record<string, { order: number[]; scores: { home: number | null; away: number | null }[] }>; knockoutTree: Record<string, { score1: number | null; score2: number | null; winner: string | null }>; champion: string | null; lockedAt: string | null }[];
+  brackets: { userId: string; displayName: string; groupPredictions: Record<string, { order: number[]; scores: { home: number | null; away: number | null }[] }>; knockoutTree: Record<string, { score1: number | null; score2: number | null; winner: string | null }>; knockoutTreeLive: Record<string, { score1: number | null; score2: number | null; winner: string | null }>; champion: string | null; lockedAt: string | null }[];
   currentUserId: string | null;
   loading: boolean;
 }

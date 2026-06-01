@@ -119,7 +119,12 @@ interface KnockoutPick {
 }
 
 function knockoutPick(bracket: BettorBracket, slotKey: string): KnockoutPick | null {
-  const tree = (bracket.knockoutTree || {}) as Record<string, KnockoutPick>;
+  // Knockout MATCH-RESULT scoring reads Tree 2 (the real-data tree), NOT the
+  // pre-tournament "עץ סימולציה" (knockoutTree). The simulation tree is
+  // winner-only and feeds advancement/champion via advancement_picks; its match
+  // scores earn ZERO points. Real matchups (which teams land in each slot) are
+  // resolved from real results, so only Tree-2 predictions are meaningful here.
+  const tree = (bracket.knockoutTreeLive || {}) as Record<string, KnockoutPick>;
   const v = tree[slotKey];
   if (!v || (v.score1 === null && v.score2 === null && v.winner === null)) return null;
   return v;

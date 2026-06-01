@@ -52,7 +52,13 @@ export interface BettingState {
   groups: Record<string, GroupState>;
 
   // Knockout: keyed by "r32l_0", "r32r_3", "r16l_1", etc.
+  // This is TREE 1 — the pre-tournament "עץ סימולציה" (winner-only simulation).
   knockout: Record<string, KnockoutMatchState>;
+
+  // Tree 2 — "עץ נתוני אמת" (real-data). Same slot keys, but predictions on the
+  // REAL knockout matchups (score + winner). Saved per-match to Supabase via
+  // saveLiveKnockout (NOT the June-10 path) and scored for knockout results.
+  knockoutLive: Record<string, KnockoutMatchState>;
 
   // Special bets
   specialBets: SpecialBetsState;
@@ -71,6 +77,9 @@ export interface BettingActions {
 
   // Knockout
   setKnockoutMatch: (matchKey: string, data: Partial<KnockoutMatchState>) => void;
+  // Tree 2 (real-data) — set a real-match prediction. Local only (no cascade);
+  // the page persists to Supabase via saveLiveKnockout with the per-match lock.
+  setKnockoutLiveMatch: (matchKey: string, data: Partial<KnockoutMatchState>) => void;
 
   // Special bets
   setSpecialBet: <K extends keyof SpecialBetsState>(key: K, value: SpecialBetsState[K]) => void;
@@ -258,6 +267,7 @@ export const useBettingStore = create<BettingState & BettingActions>()(
       // State
       groups: createInitialGroups(),
       knockout: {},
+      knockoutLive: {},
       specialBets: initialSpecialBets,
       currentGroupIndex: 0,
       bracketLocked: false,
@@ -321,6 +331,19 @@ export const useBettingStore = create<BettingState & BettingActions>()(
           state.lastUpdated = new Date().toISOString();
         }),
 
+      // Tree 2 (real-data). No cascade/advancement-sync: the next round's teams
+      // come from REAL results, not the user's picked winners, so each real
+      // match is an independent prediction. Supabase save is the page's job
+      // (saveLiveKnockout, which enforces the per-match 1h-before-kickoff lock).
+      setKnockoutLiveMatch: (matchKey, data) =>
+        set((state) => {
+          if (!state.knockoutLive[matchKey]) {
+            state.knockoutLive[matchKey] = { score1: null, score2: null, winner: null };
+          }
+          Object.assign(state.knockoutLive[matchKey], data);
+          state.lastUpdated = new Date().toISOString();
+        }),
+
       // --- Special Bets Actions ---
       setSpecialBet: (key, value) =>
         set((state) => {
@@ -340,6 +363,7 @@ export const useBettingStore = create<BettingState & BettingActions>()(
         set((state) => {
           state.groups = createInitialGroups();
           state.knockout = {};
+          state.knockoutLive = {};
           state.specialBets = initialSpecialBets;
           state.currentGroupIndex = 0;
           state.bracketLocked = false;
@@ -389,6 +413,7 @@ export const useBettingStore = create<BettingState & BettingActions>()(
               // counts from localStorage don't stick around.
               state.groups = createInitialGroups();
               state.knockout = {};
+              state.knockoutLive = {};
               state.specialBets = initialSpecialBets;
               state.lastUpdated = null;
               return;
@@ -409,6 +434,7 @@ export const useBettingStore = create<BettingState & BettingActions>()(
               state.groups = createInitialGroups();
             }
             state.knockout = data.knockout || {};
+            state.knockoutLive = data.knockoutLive || {};
             if (data.specialBets) {
               // The save pipeline strips empty strings via filter(Boolean),
               // so the DB can return shorter arrays than the UI expects
@@ -447,6 +473,7 @@ export const useBettingStore = create<BettingState & BettingActions>()(
               set((state) => {
                 if (cached.groups) state.groups = cached.groups as typeof state.groups;
                 if (cached.knockout) state.knockout = cached.knockout as typeof state.knockout;
+                if (cached.knockoutLive) state.knockoutLive = cached.knockoutLive as typeof state.knockoutLive;
                 if (cached.specialBets) state.specialBets = cached.specialBets as typeof state.specialBets;
                 state.lastUpdated = new Date().toISOString();
               });
@@ -547,6 +574,7 @@ export const useBettingStore = create<BettingState & BettingActions>()(
       migrate: () => ({
         groups: createInitialGroups(),
         knockout: {},
+        knockoutLive: {},
         specialBets: initialSpecialBets,
         currentGroupIndex: 0,
         bracketLocked: false,
@@ -572,6 +600,7 @@ export const useBettingStore = create<BettingState & BettingActions>()(
                   exportedAt: new Date().toISOString(),
                   groups: state.groups,
                   knockout: state.knockout,
+                  knockoutLive: state.knockoutLive,
                   specialBets: state.specialBets,
                 }));
               }
@@ -605,12 +634,13 @@ async function performSave(state: BettingState) {
   const snapshot = {
     groups: JSON.parse(JSON.stringify(state.groups)),
     knockout: JSON.parse(JSON.stringify(state.knockout)),
+    knockoutLive: JSON.parse(JSON.stringify(state.knockoutLive)),
     specialBets: JSON.parse(JSON.stringify(state.specialBets)),
   };
 
   // 1. Save to IndexedDB (offline cache — fire and forget)
   import("@/lib/idb-cache").then(({ writeBetsToIDB }) =>
-    writeBetsToIDB({ groups: state.groups, knockout: state.knockout, specialBets: state.specialBets })
+    writeBetsToIDB({ groups: state.groups, knockout: state.knockout, knockoutLive: state.knockoutLive, specialBets: state.specialBets })
   );
 
   // 2. Save to localStorage backup
@@ -621,6 +651,7 @@ async function performSave(state: BettingState) {
       exportedAt: new Date().toISOString(),
       groups: state.groups,
       knockout: state.knockout,
+      knockoutLive: state.knockoutLive,
       specialBets: state.specialBets,
     }));
   } catch { /* localStorage full or unavailable */ }
@@ -670,6 +701,7 @@ async function performSave(state: BettingState) {
     useBettingStore.setState((s) => {
       s.groups = snapshot.groups;
       s.knockout = snapshot.knockout;
+      s.knockoutLive = snapshot.knockoutLive;
       s.specialBets = snapshot.specialBets;
     });
   }
@@ -822,6 +854,7 @@ if (typeof window !== "undefined") {
           exportedAt: new Date().toISOString(),
           groups: state.groups,
           knockout: state.knockout,
+          knockoutLive: state.knockoutLive,
           specialBets: state.specialBets,
         }));
       } catch { /* ignore */ }
@@ -830,6 +863,7 @@ if (typeof window !== "undefined") {
         navigator.sendBeacon("/api/sync-beacon", JSON.stringify({
           groups: state.groups,
           knockout: state.knockout,
+          knockoutLive: state.knockoutLive,
           specialBets: state.specialBets,
         }));
       } catch { /* ignore */ }

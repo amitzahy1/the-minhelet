@@ -112,7 +112,7 @@ export async function POST() {
   // Pull all data sources in parallel.
   const [profilesRes, bracketsRes, specialRes, advRes, stats, finished] = await Promise.all([
     supabase.from("profiles").select("id, display_name"),
-    supabase.from("user_brackets").select("user_id, group_predictions, knockout_tree, champion, locked_at").eq("league_id", leagueId),
+    supabase.from("user_brackets").select("user_id, group_predictions, knockout_tree, knockout_tree_live, champion, locked_at").eq("league_id", leagueId),
     supabase.from("special_bets").select("user_id, top_scorer_player, top_assists_player, best_attack_team, most_prolific_group, driest_group, dirtiest_team, matchup_pick, penalties_over_under").eq("league_id", leagueId),
     supabase.from("advancement_picks").select("user_id, group_qualifiers, advance_to_qf, advance_to_sf, advance_to_final, winner").eq("league_id", leagueId),
     getTournamentStats(),
@@ -124,12 +124,13 @@ export async function POST() {
   for (const p of (profilesRes.data || []) as { id: string; display_name: string }[]) nameById[p.id] = p.display_name;
 
   const brackets: BettorBracket[] = ((bracketsRes.data || []) as Array<{
-    user_id: string; group_predictions: unknown; knockout_tree: unknown; champion: string | null; locked_at: string | null;
+    user_id: string; group_predictions: unknown; knockout_tree: unknown; knockout_tree_live: unknown; champion: string | null; locked_at: string | null;
   }>).map((r) => ({
     userId: r.user_id,
     displayName: nameById[r.user_id] || "",
     groupPredictions: (r.group_predictions || {}) as BettorBracket["groupPredictions"],
     knockoutTree: (r.knockout_tree || {}) as BettorBracket["knockoutTree"],
+    knockoutTreeLive: (r.knockout_tree_live || {}) as BettorBracket["knockoutTreeLive"],
     champion: r.champion,
     lockedAt: r.locked_at,
   }));

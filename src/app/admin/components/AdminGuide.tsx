@@ -32,8 +32,8 @@ export function AdminGuide() {
             <p className="text-blue-700">הזנת תוצאה מדויקת ל-72 משחקים ב-12 בתים. הטבלה מתעדכנת אוטומטית לפי חוקי FIFA.</p>
           </div>
           <div className="bg-amber-50 rounded-lg p-3 border border-amber-200">
-            <p className="font-bold text-amber-800 mb-1">שלב 2: עץ הנוק-אאוט</p>
-            <p className="text-amber-700">הנבחרות שעלו מהבתים מופיעות אוטומטית. הזנת תוצאה + בחירת מי עולה מ-32 הגדולות ועד הגמר.</p>
+            <p className="font-bold text-amber-800 mb-1">שלב 2: שני עצי נוק-אאוט</p>
+            <p className="text-amber-700"><strong>עץ סימולציה</strong> — המהמרים בוחרים מי עולה (ללא תוצאות); משמש לניקוד עולות/אלופה. <strong>עץ נתוני אמת</strong> — נפתח בתום הבתים עם 32 העולות האמיתיות; המהמרים מנחשים תוצאות המשחקים האמיתיים, וזה העץ שנספר לניקוד תוצאות הנוק-אאוט. כאדמין אתה רק מזין את תוצאות האמת (טאב תוצאות) — הניקוד אוטומטי.</p>
           </div>
           <div className="bg-purple-50 rounded-lg p-3 border border-purple-200">
             <p className="font-bold text-purple-800 mb-1">שלב 3: הימורים מיוחדים</p>

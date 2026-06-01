@@ -803,7 +803,7 @@ export function UserBetsEditor() {
         <Tabs defaultValue="groups" dir="rtl">
           <TabsList>
             <TabsTrigger value="groups">בתים {completion.groupsCompleted === 12 && "✓"}</TabsTrigger>
-            <TabsTrigger value="knockout">נוקאאוט {completion.koFilled === 31 && "✓"}</TabsTrigger>
+            <TabsTrigger value="knockout">עץ סימולציה {completion.koFilled === 31 && "✓"}</TabsTrigger>
             <TabsTrigger value="special">מיוחדים {completion.specialOnly === 10 && "✓"}</TabsTrigger>
             <TabsTrigger value="advancement">עולות {completion.advanceOnly === 15 && "✓"}</TabsTrigger>
           </TabsList>
@@ -851,7 +851,7 @@ export function UserBetsEditor() {
           <TabsContent value="knockout">
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">נוקאאוט — {selectedUser.name}</CardTitle>
+                <CardTitle className="text-base">עץ סימולציה — {selectedUser.name}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-5">
                 <p className="text-xs text-gray-500">

@@ -23,18 +23,20 @@ const Icons = {
   live: (a: boolean) => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={a ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49M7.76 16.24a6 6 0 0 1 0-8.49M19.07 4.93a10 10 0 0 1 0 14.14M4.93 19.07a10 10 0 0 1 0-14.14"/></svg>,
   squads: (a: boolean) => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={a ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
   schedule: (a: boolean) => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={a ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
+  bracket: (a: boolean) => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={a ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20 17 22M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>,
 };
 
 // Betting steps
 const BETTING_PAGES = [
   { href: "/groups", label: "שלב הבתים", step: 1 },
-  { href: "/knockout", label: "עץ טורניר", step: 2 },
+  { href: "/knockout", label: "עץ סימולציה", step: 2 },
   { href: "/special-bets", label: "הימורים מיוחדים", step: 3 },
 ];
 
 // Tracking/social pages
 const TRACKING_ITEMS = [
   { href: "/standings", label: "ראשי", iconKey: "leaderboard" as const },
+  { href: "/knockout-live", label: "עץ אמת", iconKey: "bracket" as const },
   { href: "/compare", label: "השוואה", iconKey: "compare" as const },
   { href: "/live", label: "לייב", iconKey: "live" as const },
   { href: "/schedule", label: "לו״ז", iconKey: "schedule" as const },
@@ -92,10 +94,10 @@ function OnboardingWizard({ onDismiss, onStart }: { onDismiss: () => void; onSta
                 <div className="bg-amber-50 rounded-xl p-3.5 border border-amber-100">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-600 text-white text-xs font-black" style={{ fontFamily: "var(--font-inter)" }}>2</span>
-                    <strong className="text-sm">עץ הנוק-אאוט</strong>
+                    <strong className="text-sm">עץ סימולציה</strong>
                     <span className="ms-auto text-[11px] font-bold text-amber-700 bg-amber-100 rounded-full px-2 py-0.5" style={{ fontFamily: "var(--font-inter)" }}>31 משחקים</span>
                   </div>
-                  <p className="text-[13px] text-gray-600 leading-snug ps-8">משלב 32 הגדולות ועד הגמר · בחירת מנצח ותוצאה</p>
+                  <p className="text-[13px] text-gray-600 leading-snug ps-8">בוחרים מי עולה בכל שלב ומי האלופה — סימולציה לבחירת העולות (ללא תוצאות).</p>
                 </div>
                 <div className="bg-purple-50 rounded-xl p-3.5 border border-purple-100">
                   <div className="flex items-center gap-2 mb-1">
@@ -105,6 +107,15 @@ function OnboardingWizard({ onDismiss, onStart }: { onDismiss: () => void; onSta
                   </div>
                   <p className="text-[13px] text-gray-600 leading-snug ps-8">אלוף, מלך שערים, בית פורה, מאצ׳אפים ועוד</p>
                 </div>
+              </div>
+              <div className="bg-emerald-50 rounded-xl p-3.5 border border-emerald-100">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-base">🟢</span>
+                  <strong className="text-sm">עץ נתוני אמת — במהלך הטורניר</strong>
+                </div>
+                <p className="text-[13px] text-gray-600 leading-snug ps-7">
+                  בתום שלב הבתים נפתח עץ עם המשחקים <strong>האמיתיים</strong> (32 העולות, כולל 8 המקומות השלישיים הטובים). שם מנחשים תוצאה + מי עולה — וזהו העץ שנספר לניקוד תוצאות הנוק-אאוט. אין דד-ליין אחד: כל משחק ניתן לעדכון <strong>עד שעה לפני שריקת הפתיחה</strong>.
+                </p>
               </div>
               <p className="text-[11px] text-gray-500 text-center bg-gray-50 rounded-lg py-2 border border-gray-100">
                 סה״כ <strong className="text-gray-700" style={{ fontFamily: "var(--font-inter)" }}>128</strong> הימורים · שמירה אוטומטית
@@ -141,13 +152,14 @@ function OnboardingWizard({ onDismiss, onStart }: { onDismiss: () => void; onSta
                         <td className="py-1.5 pe-4 text-center font-black text-blue-600" style={{ fontFamily: "var(--font-inter)" }}>2</td>
                       </tr>
                       <tr className="border-t border-gray-100">
-                        <td className="py-1.5 ps-4 font-bold text-[13px]">נוקאאוט</td>
+                        <td className="py-1.5 ps-4 font-bold text-[13px]">נוקאאוט · עץ אמת</td>
                         <td className="text-center font-black text-green-600" style={{ fontFamily: "var(--font-inter)" }}>3</td>
                         <td className="py-1.5 pe-4 text-center font-black text-blue-600" style={{ fontFamily: "var(--font-inter)" }}>2</td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
+                <p className="text-[11px] text-gray-400 mt-1 leading-snug">ניקוד תוצאות הנוק-אאוט מגיע מ<strong>עץ נתוני אמת</strong> בלבד. עץ הסימולציה משמש לבחירת העולות והאלופה (ניקוד עולות).</p>
               </div>
 
               {/* Advancement scoring */}

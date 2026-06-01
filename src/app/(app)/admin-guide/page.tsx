@@ -21,8 +21,9 @@ export default function AdminGuidePage() {
         <ol className="space-y-2 text-gray-700">
           <li className="flex gap-2"><span className="font-black text-blue-600 shrink-0">1.</span> משתמש נכנס לאתר ← מזין קוד ← נרשם עם Google או אימייל</li>
           <li className="flex gap-2"><span className="font-black text-blue-600 shrink-0">2.</span> ממלא <strong>שלב הבתים</strong> — הזנת תוצאה מדויקת ל-72 משחקים ב-12 בתים</li>
-          <li className="flex gap-2"><span className="font-black text-blue-600 shrink-0">3.</span> ממלא <strong>עץ הנוק-אאוט</strong> — הזנת תוצאה + מי עולה מ-32 הגדולות ועד הגמר</li>
+          <li className="flex gap-2"><span className="font-black text-blue-600 shrink-0">3.</span> ממלא <strong>עץ סימולציה</strong> — בוחר מי עולה בכל שלב ומי האלופה (ללא תוצאות; משמש לניקוד עולות/אלופה)</li>
           <li className="flex gap-2"><span className="font-black text-blue-600 shrink-0">4.</span> ממלא <strong>הימורים מיוחדים</strong> — מי זוכה, עולות, מלך שערים, כסחנית ועוד</li>
+          <li className="flex gap-2"><span className="font-black text-blue-600 shrink-0">5.</span> במהלך הטורניר — <strong>עץ נתוני אמת</strong> נפתח בתום הבתים; המהמר מנחש תוצאות המשחקים האמיתיים (עד שעה לפני כל משחק). רק עץ זה נספר לניקוד תוצאות הנוק-אאוט.</li>
         </ol>
         <div className="mt-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
           <p className="font-bold text-amber-800">ב-10 ביוני 17:00 — כל ההימורים ננעלים. לא ניתן לשנות יותר.</p>

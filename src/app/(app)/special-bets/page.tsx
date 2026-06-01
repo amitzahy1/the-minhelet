@@ -65,6 +65,21 @@ function getSquadPlayers(team: string): string[] {
     .map((p) => p.nameEn);
 }
 
+// Reverse lookup: player name → team code, built from the SAME source as the
+// picker dropdowns. Lets us restore a scorer/assists team when only the player
+// was persisted (older saves dropped the team column — see migration 021), so
+// the field renders as filled instead of an empty, disabled picker. First team
+// wins on duplicate names.
+const PLAYER_TO_TEAM: Record<string, string> = (() => {
+  const map: Record<string, string> = {};
+  for (const t of ALL_TEAMS) {
+    for (const p of getSquadPlayers(t.code)) {
+      if (p && !(p in map)) map[p] = t.code;
+    }
+  }
+  return map;
+})();
+
 function SectionCard({ title, subtitle, points, warning, children }: { title: string; subtitle?: string; points: string; warning?: string; children: React.ReactNode }) {
   return (
     <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden hover:shadow-lg transition-all">
@@ -213,6 +228,22 @@ export default function SpecialBetsPage() {
     if (qfMerged.some((v, i) => v !== current.quarterfinalists[i])) setBet("quarterfinalists", qfMerged);
   }, [expected]);
 
+  // Restore a scorer/assists TEAM from the saved player when only the player
+  // persisted (older saves dropped the team column — see migration 021).
+  // Without this the team picker is empty and the player <select> stays
+  // disabled, so the field looks blank even though the player is set — which
+  // also mis-fired the "all bets complete" celebration.
+  useEffect(() => {
+    const st = useBettingStore.getState();
+    const cur = st.specialBets;
+    if (cur.topScorerPlayer && !cur.topScorerTeam && PLAYER_TO_TEAM[cur.topScorerPlayer]) {
+      st.setSpecialBet("topScorerTeam", PLAYER_TO_TEAM[cur.topScorerPlayer]);
+    }
+    if (cur.topAssistsPlayer && !cur.topAssistsTeam && PLAYER_TO_TEAM[cur.topAssistsPlayer]) {
+      st.setSpecialBet("topAssistsTeam", PLAYER_TO_TEAM[cur.topAssistsPlayer]);
+    }
+  }, [sb.topScorerPlayer, sb.topAssistsPlayer, sb.topScorerTeam, sb.topAssistsTeam]);
+
   // Mismatch detection (team sets — order doesn't matter)
   const sameSet = (a: string[], b: string[]) => {
     const A = a.filter(Boolean), B = b.filter(Boolean);
@@ -239,11 +270,15 @@ export default function SpecialBetsPage() {
   const fireConfetti = useConfetti();
   const [showCelebration, setShowCelebration] = useState(false);
   const prevCountRef = useRef(filledCount);
+  const hasCelebratedRef = useRef(false);
   useEffect(() => {
     const prev = prevCountRef.current;
     prevCountRef.current = filledCount;
-    // Only trigger on the transition (prev < 25 && now === 25), not on mount
-    if (prev < 25 && filledCount === 25) {
+    // Fire once per mount on the genuine <25 → 25 transition. The latch stops
+    // it re-popping every time the count dips and returns to 25 (e.g. changing
+    // an already-picked field clears then re-sets it) now that every edit saves.
+    if (prev < 25 && filledCount === 25 && !hasCelebratedRef.current) {
+      hasCelebratedRef.current = true;
       setShowCelebration(true);
       fireConfetti();
       const interval = setInterval(() => fireConfetti(), 800);

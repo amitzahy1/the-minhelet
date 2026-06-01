@@ -300,6 +300,46 @@ function pickDefaultStarters(players: { nameEn: string; pos: string }[]): string
   return picked;
 }
 
+// Official WC2026 squad limit. squads-api.json is a broad season call-up POOL
+// (some teams list 50-60 players, multiple keepers on #1), so non-official
+// squads must be trimmed down to a believable squad of at most this size.
+const SQUAD_CAP = 26;
+const POS_QUOTA: Record<string, number> = { GK: 3, DEF: 9, MID: 8, FW: 6 }; // = 26
+
+/**
+ * Normalise a player list to a real squad: dedupe by nameEn, then if it exceeds
+ * SQUAD_CAP trim it down with a position-balanced quota, preferring starters
+ * then higher market value (so we keep the most relevant players, never drop
+ * all keepers). Lists already ≤ cap are returned as-is (deduped). The floor
+ * (≥15) is guaranteed upstream by always merging in the API pool (≥22/team).
+ */
+function trimToCap(players: PlayerData[], cap = SQUAD_CAP): PlayerData[] {
+  const seen = new Set<string>();
+  const dedup: PlayerData[] = [];
+  for (const p of players) {
+    if (!p.nameEn || seen.has(p.nameEn)) continue;
+    seen.add(p.nameEn);
+    dedup.push(p);
+  }
+  if (dedup.length <= cap) return dedup;
+
+  const rank = (a: PlayerData, b: PlayerData) =>
+    (Number(!!b.starter) - Number(!!a.starter)) ||
+    ((b.marketValue ?? -1) - (a.marketValue ?? -1));
+  const byPos: Record<string, PlayerData[]> = { GK: [], DEF: [], MID: [], FW: [] };
+  for (const p of dedup) (byPos[p.pos] ??= []).push(p);
+  for (const k of Object.keys(byPos)) byPos[k].sort(rank);
+
+  const picked: PlayerData[] = [];
+  for (const pos of ["GK", "DEF", "MID", "FW"]) picked.push(...(byPos[pos] ?? []).slice(0, POS_QUOTA[pos] ?? 0));
+  if (picked.length < cap) {
+    const pickedSet = new Set(picked.map((p) => p.nameEn));
+    const rest = dedup.filter((p) => !pickedSet.has(p.nameEn)).sort(rank);
+    picked.push(...rest.slice(0, cap - picked.length));
+  }
+  return picked.slice(0, cap).sort((a, b) => (a.num ?? 99) - (b.num ?? 99));
+}
+
 // Get squad for a team — merges manual data with API data, preferring the
 // federation-announced 26-man roster from Wikipedia when present.
 export function getSquad(code: string): SquadData | null {
@@ -338,41 +378,62 @@ export function getSquad(code: string): SquadData | null {
     // anyone who didn't make the cut, replace with a positional substitute,
     // and pad up to four outlets so every announced team renders a full
     // set of predicted XIs.
+    const officialPlayers = trimToCap(players); // dedupe + safety cap (already ~26)
     if (manual) {
       const sources = expandSourcesToFour(manual.sources, official);
-      return { ...manual, sources, players };
+      return { ...manual, sources, players: officialPlayers };
     }
     return {
       coach: "",
       coachEn: "",
       formation: "4-3-3",
       sources: expandSourcesToFour([], official),
-      players,
+      players: officialPlayers,
     };
   }
 
   if (manual && api) {
-    // Merge: use manual structure but add photos + clubs + market values from API
+    // Merge: curated players first (Hebrew names + starter flags), enriched with
+    // API photos/clubs/values, THEN top up from the API pool so partial hand-
+    // curated squads (3-20 players) reach a full squad. trimToCap then bounds it
+    // to ≤26 and dedupes. Net effect: every team renders 15-26 players.
     const apiMap = new Map(api.players.map(p => [p.nameEn, p]));
-    return {
-      ...manual,
-      players: manual.players.map(p => {
-        const apiPlayer = apiMap.get(p.nameEn) || api.players.find(ap => ap.nameEn.includes(p.nameEn.split(" ").pop() || ""));
-        const mv = getMarketValue(p.nameEn);
+    const curated: PlayerData[] = manual.players.map(p => {
+      const apiPlayer = apiMap.get(p.nameEn) || api.players.find(ap => ap.nameEn.includes(p.nameEn.split(" ").pop() || ""));
+      const mv = getMarketValue(p.nameEn);
+      return {
+        ...p,
+        photo: apiPlayer?.photo || undefined,
+        club: p.club || apiPlayer?.club || "",
+        ...(mv !== null ? { marketValue: mv } : {}),
+      };
+    });
+    // API players not already represented in the curated list (match by exact
+    // name or shared last name to avoid duplicates).
+    const curatedLast = new Set(curated.map(p => (p.nameEn.split(/\s+/).pop() || "").toLowerCase()));
+    const curatedNames = new Set(curated.map(p => p.nameEn));
+    const extras: PlayerData[] = api.players
+      .filter(ap => !curatedNames.has(ap.nameEn) && !curatedLast.has((ap.nameEn.split(/\s+/).pop() || "").toLowerCase()))
+      .map(ap => {
+        const mv = getMarketValue(ap.nameEn);
         return {
-          ...p,
-          photo: apiPlayer?.photo || undefined,
-          // Keep manual club if present, otherwise use API club
-          club: p.club || apiPlayer?.club || "",
+          name: ap.nameEn,
+          nameEn: ap.nameEn,
+          num: ap.num,
+          club: ap.club || "",
+          pos: ap.pos,
+          starter: false,
+          photo: ap.photo,
           ...(mv !== null ? { marketValue: mv } : {}),
         };
-      }),
-    };
+      });
+    return { ...manual, players: trimToCap([...curated, ...extras]) };
   }
 
   if (api) {
-    // API-only team: build a SquadData from API with default formation + starters
-    const players = api.players.map(p => {
+    // API-only team: the API list is a broad pool (often 40-60). Trim to a real
+    // squad (≤26) first, then build default formation + starters from it.
+    const allPlayers = api.players.map(p => {
       const mv = getMarketValue(p.nameEn);
       return {
         name: p.nameEn, // No Hebrew available from API
@@ -384,6 +445,7 @@ export function getSquad(code: string): SquadData | null {
         ...(mv !== null ? { marketValue: mv } : {}),
       };
     });
+    const players = trimToCap(allPlayers);
     const starterNames = pickDefaultStarters(players);
     return {
       coach: "",

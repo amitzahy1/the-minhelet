@@ -850,11 +850,17 @@ if (typeof window !== "undefined") {
 
     lastCounts = { groups, knockout, specials, allDone };
 
-    if (shouldAutoSave) {
-      if (saveTimeout) clearTimeout(saveTimeout);
-      saveTimeout = setTimeout(() => performSave(state), allDone ? 3000 : 1000);
-    }
-    // else: don't save — user must click the manual "Save" button on the page.
+    // Auto-save EVERY real bet edit (debounced). We only reach here when the
+    // bet signature actually changed — navigation and DB→local hydration are
+    // filtered out above — so this is a genuine pick in groups, the simulation
+    // knockout tree, or specials. None of them rely on the manual Save button
+    // or a batch threshold anymore, so no pick can sit unsaved and be wiped by
+    // the next server-authoritative hydration (a refresh or a redeploy). The
+    // `shouldAutoSave` milestone flags now only shorten the debounce window;
+    // the real-data knockout tree saves per-slot on its own page.
+    if (saveTimeout) clearTimeout(saveTimeout);
+    const debounceMs = allDone ? 3000 : shouldAutoSave ? 700 : 1200;
+    saveTimeout = setTimeout(() => performSave(state), debounceMs);
   });
 
   // Force-save on page unload to prevent data loss

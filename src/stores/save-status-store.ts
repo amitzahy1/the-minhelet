@@ -1,7 +1,7 @@
 // ============================================================================
 // WC2026 — Save-status sidecar store
-// The main betting-store already auto-saves on a 5s debounce, but there's no
-// visible signal to the user that their change is on its way to the DB.
+// The main betting-store auto-saves every bet edit (debounced ~0.7–1.2s), but
+// there's no visible signal to the user that their change is on its way to the DB.
 // This store is updated by the betting-store's save lifecycle so a
 // <SaveIndicator /> component can render a real-time "שומר…" / "✓ נשמר"
 // pill anywhere in the app without coupling to the betting state.

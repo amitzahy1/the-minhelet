@@ -322,10 +322,12 @@ export function SpecialTrackerView({
   bettors,
   specialBets,
   currentUserId,
+  started = true,
 }: {
   bettors?: BettorLike[];
   specialBets?: BettorSpecialBets[];
   currentUserId?: string | null;
+  started?: boolean; // false = tournament hasn't kicked off → hide picks
 }) {
   // Dev-only design preview: ?demo=1 swaps in fake bettors + tournament stats
   // so the full card design renders before any real data exists. Ignored in
@@ -545,6 +547,17 @@ export function SpecialTrackerView({
       },
     ];
   }, [stats, normalizedBettors, isDemo, fetchedAt]);
+
+  // Before the first match kicks off there's nothing to track — don't surface
+  // anyone's picks (the demo preview bypasses this).
+  if (!isDemo && !started) {
+    return (
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-6 py-12 text-center">
+        <h3 className="text-lg font-black text-gray-800 mb-1">הטורניר עוד לא התחיל</h3>
+        <p className="text-sm text-gray-500 max-w-sm mx-auto">מעקב ההימורים המיוחדים יופיע כאן ברגע שהמשחקים יתחילו.</p>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

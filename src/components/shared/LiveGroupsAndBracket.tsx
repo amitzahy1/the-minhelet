@@ -305,6 +305,14 @@ export function LiveGroupsAndBracket() {
 
   const groupOrders = useMemo(() => computeGroupOrdersFromStandings(matches), [matches]);
 
+  // Tournament has kicked off once any match is live or finished — used to gate
+  // the special-bets tracker so picks aren't surfaced before there's anything
+  // to track.
+  const tournamentStarted = useMemo(
+    () => matches.some((m) => m.status === "IN_PLAY" || m.status === "PAUSED" || m.status === "LIVE" || m.status === "FINISHED"),
+    [matches],
+  );
+
   // Resolve the Annex C 3rd-place assignment from the live ranking + admin
   // override. Falls back to the hardcoded default when no scenario is known.
   const r32Matchups = useMemo(() => {
@@ -427,7 +435,7 @@ export function LiveGroupsAndBracket() {
         </div>
       )}
 
-      {tab === "specials" && <SpecialTrackerView specialBets={specialBets} currentUserId={currentUserId} />}
+      {tab === "specials" && <SpecialTrackerView specialBets={specialBets} currentUserId={currentUserId} started={tournamentStarted} />}
     </div>
   );
 }

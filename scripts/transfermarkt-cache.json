@@ -1,0 +1,2912 @@
+{
+  "Luca Zidane": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T08:27:30.861Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Luca%20Zidane"
+  },
+  "Oussama Benbot": {
+    "value": 0.9,
+    "fetchedAt": "2026-06-01T08:27:33.020Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Oussama%20Benbot"
+  },
+  "Melvin Mastil": {
+    "value": 0.3,
+    "fetchedAt": "2026-06-01T08:27:35.218Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Melvin%20Mastil"
+  },
+  "Aïssa Mandi": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T08:27:37.407Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=A%C3%AFssa%20Mandi"
+  },
+  "Ramy Bensebaini": {
+    "value": 7,
+    "fetchedAt": "2026-06-01T08:27:39.564Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ramy%20Bensebaini"
+  },
+  "Mohamed Amine Tougai": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T08:27:41.791Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Mohamed%20Amine%20Tougai"
+  },
+  "Rayan Aït-Nouri": {
+    "value": 40,
+    "fetchedAt": "2026-06-01T08:27:43.998Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Rayan%20A%C3%AFt-Nouri"
+  },
+  "Jaouen Hadjam": {
+    "value": 8,
+    "fetchedAt": "2026-06-01T08:27:46.151Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Jaouen%20Hadjam"
+  },
+  "Rafik Belghali": {
+    "value": 7,
+    "fetchedAt": "2026-06-01T08:27:48.327Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Rafik%20Belghali"
+  },
+  "Zineddine Belaïd": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T08:27:51.447Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Zineddine%20Bela%C3%AFd"
+  },
+  "Achref Abada": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T08:27:53.603Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Achref%20Abada"
+  },
+  "Samir Chergui": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T08:27:55.900Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Samir%20Chergui"
+  },
+  "Nabil Bentaleb": {
+    "value": 5,
+    "fetchedAt": "2026-06-01T08:27:58.084Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Nabil%20Bentaleb"
+  },
+  "Ramiz Zerrouki": {
+    "value": 7,
+    "fetchedAt": "2026-06-01T08:28:00.372Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ramiz%20Zerrouki"
+  },
+  "Hicham Boudaoui": {
+    "value": 12,
+    "fetchedAt": "2026-06-01T08:28:02.984Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Hicham%20Boudaoui"
+  },
+  "Farès Chaïbi": {
+    "value": 15,
+    "fetchedAt": "2026-06-01T08:28:05.462Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Far%C3%A8s%20Cha%C3%AFbi"
+  },
+  "Houssem Aouar": {
+    "value": 8,
+    "fetchedAt": "2026-06-01T08:28:07.685Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Houssem%20Aouar"
+  },
+  "Ibrahim Maza": {
+    "value": 45,
+    "fetchedAt": "2026-06-01T08:28:09.906Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ibrahim%20Maza"
+  },
+  "Mohamed Amoura": {
+    "value": 20,
+    "fetchedAt": "2026-06-01T08:28:14.398Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Mohamed%20Amoura"
+  },
+  "Amine Gouiri": {
+    "value": 28,
+    "fetchedAt": "2026-06-01T08:28:16.602Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Amine%20Gouiri"
+  },
+  "Anis Hadj Moussa": {
+    "value": 23,
+    "fetchedAt": "2026-06-01T08:28:18.896Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Anis%20Hadj%20Moussa"
+  },
+  "Adil Boulbina": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T08:28:21.042Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Adil%20Boulbina"
+  },
+  "Nadhir Benbouali": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T08:28:24.155Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Nadhir%20Benbouali"
+  },
+  "Farès Ghedjemis": {
+    "value": 6,
+    "fetchedAt": "2026-06-01T08:28:26.432Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Far%C3%A8s%20Ghedjemis"
+  },
+  "Juan Musso": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T08:28:28.585Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Juan%20Musso"
+  },
+  "Leonardo Balerdi": {
+    "value": 18,
+    "fetchedAt": "2026-06-01T08:28:30.867Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Leonardo%20Balerdi"
+  },
+  "Nicolás Tagliafico": {
+    "value": 5,
+    "fetchedAt": "2026-06-01T08:28:33.190Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Nicol%C3%A1s%20Tagliafico"
+  },
+  "Gonzalo Montiel": {
+    "value": 5,
+    "fetchedAt": "2026-06-01T08:28:36.867Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Gonzalo%20Montiel"
+  },
+  "Leandro Paredes": {
+    "value": 5,
+    "fetchedAt": "2026-06-01T08:28:39.196Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Leandro%20Paredes"
+  },
+  "Lisandro Martínez": {
+    "value": 40,
+    "fetchedAt": "2026-06-01T08:28:41.465Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Lisandro%20Mart%C3%ADnez"
+  },
+  "Rodrigo De Paul": {
+    "value": 15,
+    "fetchedAt": "2026-06-01T08:28:45.124Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Rodrigo%20De%20Paul"
+  },
+  "Valentín Barco": {
+    "value": 35,
+    "fetchedAt": "2026-06-01T08:28:47.325Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Valent%C3%ADn%20Barco"
+  },
+  "Julián Alvarez": {
+    "value": 90,
+    "fetchedAt": "2026-06-01T08:28:49.596Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Juli%C3%A1n%20Alvarez"
+  },
+  "Giovani Lo Celso": {
+    "value": 10,
+    "fetchedAt": "2026-06-01T08:28:53.117Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Giovani%20Lo%20Celso"
+  },
+  "Gerónimo Rulli": {
+    "value": 8,
+    "fetchedAt": "2026-06-01T08:28:55.430Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ger%C3%B3nimo%20Rulli"
+  },
+  "Exequiel Palacios": {
+    "value": 25,
+    "fetchedAt": "2026-06-01T08:28:57.626Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Exequiel%20Palacios"
+  },
+  "Nicolás González": {
+    "value": 45,
+    "fetchedAt": "2026-06-01T08:29:00.582Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Nicol%C3%A1s%20Gonz%C3%A1lez"
+  },
+  "Thiago Almada": {
+    "value": 20,
+    "fetchedAt": "2026-06-01T08:29:02.851Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Thiago%20Almada"
+  },
+  "Giuliano Simeone": {
+    "value": 40,
+    "fetchedAt": "2026-06-01T08:29:05.138Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Giuliano%20Simeone"
+  },
+  "Nico Paz": {
+    "value": 80,
+    "fetchedAt": "2026-06-01T08:29:07.337Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Nico%20Paz"
+  },
+  "Nicolás Otamendi": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T08:29:09.720Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Nicol%C3%A1s%20Otamendi"
+  },
+  "Alexis Mac Allister": {
+    "value": 80,
+    "fetchedAt": "2026-06-01T08:29:12.126Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Alexis%20Mac%20Allister"
+  },
+  "José Manuel López": {
+    "value": 25,
+    "fetchedAt": "2026-06-01T08:29:14.628Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Jos%C3%A9%20Manuel%20L%C3%B3pez"
+  },
+  "Lautaro Martínez": {
+    "value": 85,
+    "fetchedAt": "2026-06-01T08:29:17.148Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Lautaro%20Mart%C3%ADnez"
+  },
+  "Emiliano Martínez": {
+    "value": 15,
+    "fetchedAt": "2026-06-01T08:29:19.549Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Emiliano%20Mart%C3%ADnez"
+  },
+  "Enzo Fernández": {
+    "value": 90,
+    "fetchedAt": "2026-06-01T08:29:21.890Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Enzo%20Fern%C3%A1ndez"
+  },
+  "Facundo Medina": {
+    "value": 18,
+    "fetchedAt": "2026-06-01T08:29:24.143Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Facundo%20Medina"
+  },
+  "Mathew Ryan": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T08:29:26.361Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Mathew%20Ryan"
+  },
+  "Paul Izzo": {
+    "value": 0.5,
+    "fetchedAt": "2026-06-01T08:29:28.995Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Paul%20Izzo"
+  },
+  "Patrick Beach": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T08:29:31.568Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Patrick%20Beach"
+  },
+  "Aziz Behich": {
+    "value": 0.3,
+    "fetchedAt": "2026-06-01T08:29:33.971Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Aziz%20Behich"
+  },
+  "Miloš Degenek": {
+    "value": 0.5,
+    "fetchedAt": "2026-06-01T08:29:36.127Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Milo%C5%A1%20Degenek"
+  },
+  "Jordan Bos": {
+    "value": 12,
+    "fetchedAt": "2026-06-01T08:29:38.437Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Jordan%20Bos"
+  },
+  "Cameron Burgess": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T08:29:40.616Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Cameron%20Burgess"
+  },
+  "Jason Geria": {
+    "value": 0.4,
+    "fetchedAt": "2026-06-01T08:29:42.795Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Jason%20Geria"
+  },
+  "Alessandro Circati": {
+    "value": 12,
+    "fetchedAt": "2026-06-01T08:29:45.036Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Alessandro%20Circati"
+  },
+  "Kai Trewin": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T08:29:47.292Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Kai%20Trewin"
+  },
+  "Jacob Italiano": {
+    "value": 0.6,
+    "fetchedAt": "2026-06-01T08:29:50.208Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Jacob%20Italiano"
+  },
+  "Lucas Herrington": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T08:29:52.399Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Lucas%20Herrington"
+  },
+  "Connor Metcalfe": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T08:29:54.612Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Connor%20Metcalfe"
+  },
+  "Aiden O'Neill": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T08:29:56.874Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Aiden%20O'Neill"
+  },
+  "Paul Okon-Engstler": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T08:29:59.154Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Paul%20Okon-Engstler"
+  },
+  "Cammy Devlin": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T08:30:03.221Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Cammy%20Devlin"
+  },
+  "Mathew Leckie": {
+    "value": 0.3,
+    "fetchedAt": "2026-06-01T08:30:05.375Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Mathew%20Leckie"
+  },
+  "Awer Mabil": {
+    "value": 0.4,
+    "fetchedAt": "2026-06-01T08:30:08.066Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Awer%20Mabil"
+  },
+  "Nestory Irankunda": {
+    "value": 8,
+    "fetchedAt": "2026-06-01T08:30:10.355Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Nestory%20Irankunda"
+  },
+  "Mohamed Touré": {
+    "value": 8,
+    "fetchedAt": "2026-06-01T08:30:12.730Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Mohamed%20Tour%C3%A9"
+  },
+  "Nishan Velupillay": {
+    "value": 0.7,
+    "fetchedAt": "2026-06-01T08:30:14.898Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Nishan%20Velupillay"
+  },
+  "Cristian Volpato": {
+    "value": 10,
+    "fetchedAt": "2026-06-01T08:30:17.086Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Cristian%20Volpato"
+  },
+  "Tete Yengi": {
+    "value": 0.3,
+    "fetchedAt": "2026-06-01T08:30:19.248Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Tete%20Yengi"
+  },
+  "Florian Grillitsch": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T08:30:21.413Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Florian%20Grillitsch"
+  },
+  "Florian Wiegele": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T08:30:23.586Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Florian%20Wiegele"
+  },
+  "Patrick Pentz": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T08:30:26.028Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Patrick%20Pentz"
+  },
+  "Philipp Lienhart": {
+    "value": 10,
+    "fetchedAt": "2026-06-01T08:30:28.274Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Philipp%20Lienhart"
+  },
+  "Phillipp Mwene": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T08:30:30.624Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Phillipp%20Mwene"
+  },
+  "Carney Chukwuemeka": {
+    "value": 20,
+    "fetchedAt": "2026-06-01T08:30:32.783Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Carney%20Chukwuemeka"
+  },
+  "Romano Schmid": {
+    "value": 15,
+    "fetchedAt": "2026-06-01T08:30:35.027Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Romano%20Schmid"
+  },
+  "Christoph Baumgartner": {
+    "value": 40,
+    "fetchedAt": "2026-06-01T08:30:37.303Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Christoph%20Baumgartner"
+  },
+  "Patrick Wimmer": {
+    "value": 12,
+    "fetchedAt": "2026-06-01T08:30:39.740Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Patrick%20Wimmer"
+  },
+  "Alexander Prass": {
+    "value": 9,
+    "fetchedAt": "2026-06-01T08:30:42.183Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Alexander%20Prass"
+  },
+  "Marco Friedl": {
+    "value": 10,
+    "fetchedAt": "2026-06-01T08:30:44.446Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Marco%20Friedl"
+  },
+  "Paul Wanner": {
+    "value": 22,
+    "fetchedAt": "2026-06-01T08:30:46.831Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Paul%20Wanner"
+  },
+  "Michael Svoboda": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T08:30:49.186Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Michael%20Svoboda"
+  },
+  "Alessandro Schöpf": {
+    "value": 0.8,
+    "fetchedAt": "2026-06-01T08:30:51.739Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Alessandro%20Sch%C3%B6pf"
+  },
+  "Senne Lammens": {
+    "value": 30,
+    "fetchedAt": "2026-06-01T08:30:53.915Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Senne%20Lammens"
+  },
+  "Mike Penders": {
+    "value": 22,
+    "fetchedAt": "2026-06-01T08:30:56.112Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Mike%20Penders"
+  },
+  "Maxim De Cuyper": {
+    "value": 22,
+    "fetchedAt": "2026-06-01T08:30:58.540Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Maxim%20De%20Cuyper"
+  },
+  "Brandon Mechele": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T08:31:00.744Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Brandon%20Mechele"
+  },
+  "Koni De Winter": {
+    "value": 23,
+    "fetchedAt": "2026-06-01T08:31:04.156Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Koni%20De%20Winter"
+  },
+  "Joaquin Seys": {
+    "value": 17,
+    "fetchedAt": "2026-06-01T08:31:06.387Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Joaquin%20Seys"
+  },
+  "Nathan Ngoy": {
+    "value": 20,
+    "fetchedAt": "2026-06-01T08:31:08.644Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Nathan%20Ngoy"
+  },
+  "Hans Vanaken": {
+    "value": 6,
+    "fetchedAt": "2026-06-01T08:31:10.808Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Hans%20Vanaken"
+  },
+  "Nicolas Raskin": {
+    "value": 12,
+    "fetchedAt": "2026-06-01T08:31:13.048Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Nicolas%20Raskin"
+  },
+  "Dodi Lukébakio": {
+    "value": 15,
+    "fetchedAt": "2026-06-01T08:31:15.200Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Dodi%20Luk%C3%A9bakio"
+  },
+  "Charles De Ketelaere": {
+    "value": 30,
+    "fetchedAt": "2026-06-01T08:31:17.408Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Charles%20De%20Ketelaere"
+  },
+  "Alexis Saelemaekers": {
+    "value": 20,
+    "fetchedAt": "2026-06-01T08:31:20.862Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Alexis%20Saelemaekers"
+  },
+  "Diego Moreira": {
+    "value": 25,
+    "fetchedAt": "2026-06-01T08:31:23.149Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Diego%20Moreira"
+  },
+  "Matias Fernandez-Pardo": {
+    "value": 30,
+    "fetchedAt": "2026-06-01T08:31:25.406Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Matias%20Fernandez-Pardo"
+  },
+  "Martin Zlomislić": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T08:31:28.003Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Martin%20Zlomisli%C4%87"
+  },
+  "Osman Hadžikić": {
+    "value": 0.4,
+    "fetchedAt": "2026-06-01T08:31:38.356Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Osman%20Had%C5%BEiki%C4%87"
+  },
+  "Tarik Muharemović": {
+    "value": 25,
+    "fetchedAt": "2026-06-01T08:31:41.288Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Tarik%20Muharemovi%C4%87"
+  },
+  "Nihad Mujakić": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T08:31:44.984Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Nihad%20Mujaki%C4%87"
+  },
+  "Stjepan Radeljić": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T08:31:47.145Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Stjepan%20Radelji%C4%87"
+  },
+  "Nidal Čelik": {
+    "value": 4,
+    "fetchedAt": "2026-06-01T08:31:49.500Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Nidal%20%C4%8Celik"
+  },
+  "Dženis Burnić": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T08:31:51.665Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=D%C5%BEenis%20Burni%C4%87"
+  },
+  "Ivan Bašić": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T08:31:53.861Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ivan%20Ba%C5%A1i%C4%87"
+  },
+  "Esmir Bajraktarević": {
+    "value": 8,
+    "fetchedAt": "2026-06-01T08:31:56.552Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Esmir%20Bajraktarevi%C4%87"
+  },
+  "Amar Memić": {
+    "value": 5,
+    "fetchedAt": "2026-06-01T08:31:58.763Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Amar%20Memi%C4%87"
+  },
+  "Ivan Šunjić": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T08:32:00.989Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ivan%20%C5%A0unji%C4%87"
+  },
+  "Kerim Alajbegović": {
+    "value": 22,
+    "fetchedAt": "2026-06-01T08:32:03.185Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Kerim%20Alajbegovi%C4%87"
+  },
+  "Ermin Mahmić": {
+    "value": 5,
+    "fetchedAt": "2026-06-01T08:32:05.385Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ermin%20Mahmi%C4%87"
+  },
+  "Haris Tabaković": {
+    "value": 4,
+    "fetchedAt": "2026-06-01T08:32:07.549Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Haris%20Tabakovi%C4%87"
+  },
+  "Jovo Lukić": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T08:32:09.856Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Jovo%20Luki%C4%87"
+  },
+  "Wesley": {
+    "value": 28,
+    "fetchedAt": "2026-06-01T08:32:12.478Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Wesley"
+  },
+  "Matheus Cunha": {
+    "value": 70,
+    "fetchedAt": "2026-06-01T08:32:14.795Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Matheus%20Cunha"
+  },
+  "Weverton": {
+    "value": 0.7,
+    "fetchedAt": "2026-06-01T08:32:17.790Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Weverton"
+  },
+  "Bremer": {
+    "value": 35,
+    "fetchedAt": "2026-06-01T08:32:20.729Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Bremer"
+  },
+  "Léo Pereira": {
+    "value": 12,
+    "fetchedAt": "2026-06-01T08:32:23.182Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=L%C3%A9o%20Pereira"
+  },
+  "Douglas Santos": {
+    "value": 8,
+    "fetchedAt": "2026-06-01T08:32:25.965Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Douglas%20Santos"
+  },
+  "Fabinho": {
+    "value": 13,
+    "fetchedAt": "2026-06-01T08:32:29.410Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Fabinho"
+  },
+  "Luiz Henrique": {
+    "value": 24,
+    "fetchedAt": "2026-06-01T08:32:34.318Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Luiz%20Henrique"
+  },
+  "Gabriel Martinelli": {
+    "value": 45,
+    "fetchedAt": "2026-06-01T08:32:36.585Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Gabriel%20Martinelli"
+  },
+  "Roger Ibañez": {
+    "value": 17,
+    "fetchedAt": "2026-06-01T08:32:38.792Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Roger%20Iba%C3%B1ez"
+  },
+  "Igor Thiago": {
+    "value": 50,
+    "fetchedAt": "2026-06-01T08:32:41.852Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Igor%20Thiago"
+  },
+  "Rayan": {
+    "value": 65,
+    "fetchedAt": "2026-06-01T08:32:44.562Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Rayan"
+  },
+  "Dayne St. Clair": {
+    "value": 4,
+    "fetchedAt": "2026-06-01T08:32:46.757Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Dayne%20St.%20Clair"
+  },
+  "Luc de Fougerolles": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T08:32:49.295Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Luc%20de%20Fougerolles"
+  },
+  "Alfie Jones": {
+    "value": 6,
+    "fetchedAt": "2026-06-01T08:32:51.539Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Alfie%20Jones"
+  },
+  "Joel Waterman": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T08:32:53.839Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Joel%20Waterman"
+  },
+  "Mathieu Choinière": {
+    "value": 0.8,
+    "fetchedAt": "2026-06-01T08:32:56.022Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Mathieu%20Choini%C3%A8re"
+  },
+  "Stephen Eustáquio": {
+    "value": 7,
+    "fetchedAt": "2026-06-01T08:32:58.822Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Stephen%20Eust%C3%A1quio"
+  },
+  "Ismaël Koné": {
+    "value": 25,
+    "fetchedAt": "2026-06-01T08:33:01.087Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Isma%C3%ABl%20Kon%C3%A9"
+  },
+  "Liam Millar": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T08:33:04.255Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Liam%20Millar"
+  },
+  "Tani Oluwaseyi": {
+    "value": 8,
+    "fetchedAt": "2026-06-01T08:33:06.475Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Tani%20Oluwaseyi"
+  },
+  "Derek Cornelius": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T08:33:08.653Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Derek%20Cornelius"
+  },
+  "Jacob Shaffelburg": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T08:33:12.467Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Jacob%20Shaffelburg"
+  },
+  "Moïse Bombito": {
+    "value": 8,
+    "fetchedAt": "2026-06-01T08:33:15.147Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Mo%C3%AFse%20Bombito"
+  },
+  "Owen Goodman": {
+    "value": 0.6,
+    "fetchedAt": "2026-06-01T08:33:17.872Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Owen%20Goodman"
+  },
+  "Alphonso Davies": {
+    "value": 40,
+    "fetchedAt": "2026-06-01T08:33:20.448Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Alphonso%20Davies"
+  },
+  "Ali Ahmed": {
+    "value": 5,
+    "fetchedAt": "2026-06-01T08:33:22.882Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ali%20Ahmed"
+  },
+  "Richie Laryea": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T08:33:25.305Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Richie%20Laryea"
+  },
+  "Niko Sigur": {
+    "value": 4,
+    "fetchedAt": "2026-06-01T08:33:27.568Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Niko%20Sigur"
+  },
+  "Promise David": {
+    "value": 17,
+    "fetchedAt": "2026-06-01T08:33:29.895Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Promise%20David"
+  },
+  "Alban Lafont": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T08:33:32.072Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Alban%20Lafont"
+  },
+  "Mohamed Koné": {
+    "value": 0.8,
+    "fetchedAt": "2026-06-01T08:33:34.548Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Mohamed%20Kon%C3%A9"
+  },
+  "Emmanuel Agbadou": {
+    "value": 16,
+    "fetchedAt": "2026-06-01T08:33:36.763Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Emmanuel%20Agbadou"
+  },
+  "Guéla Doué": {
+    "value": 18,
+    "fetchedAt": "2026-06-01T08:33:39.575Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Gu%C3%A9la%20Dou%C3%A9"
+  },
+  "Ousmane Diomande": {
+    "value": 42,
+    "fetchedAt": "2026-06-01T08:33:42.031Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ousmane%20Diomande"
+  },
+  "Christopher Opéri": {
+    "value": 4,
+    "fetchedAt": "2026-06-01T08:33:44.309Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Christopher%20Op%C3%A9ri"
+  },
+  "Christ Inao Oulaï": {
+    "value": 23,
+    "fetchedAt": "2026-06-01T08:33:46.607Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Christ%20Inao%20Oula%C3%AF"
+  },
+  "Parfait Guiagon": {
+    "value": 5,
+    "fetchedAt": "2026-06-01T08:33:48.767Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Parfait%20Guiagon"
+  },
+  "Evann Guessand": {
+    "value": 28,
+    "fetchedAt": "2026-06-01T08:33:51.158Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Evann%20Guessand"
+  },
+  "Amad Diallo": {
+    "value": 50,
+    "fetchedAt": "2026-06-01T08:33:53.371Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Amad%20Diallo"
+  },
+  "Yan Diomande": {
+    "value": 90,
+    "fetchedAt": "2026-06-01T08:33:56.304Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Yan%20Diomande"
+  },
+  "Bazoumana Touré": {
+    "value": 40,
+    "fetchedAt": "2026-06-01T08:33:58.588Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Bazoumana%20Tour%C3%A9"
+  },
+  "Elye Wahi": {
+    "value": 12,
+    "fetchedAt": "2026-06-01T08:34:00.796Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Elye%20Wahi"
+  },
+  "Ange-Yoan Bonny": {
+    "value": 35,
+    "fetchedAt": "2026-06-01T08:34:03.000Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ange-Yoan%20Bonny"
+  },
+  "Timothy Fayulu": {
+    "value": 0.8,
+    "fetchedAt": "2026-06-01T08:34:05.629Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Timothy%20Fayulu"
+  },
+  "Matthieu Epolo": {
+    "value": 5,
+    "fetchedAt": "2026-06-01T08:34:08.985Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Matthieu%20Epolo"
+  },
+  "Dylan Batubinsika": {
+    "value": 0.7,
+    "fetchedAt": "2026-06-01T08:34:12.400Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Dylan%20Batubinsika"
+  },
+  "Axel Tuanzebe": {
+    "value": 5,
+    "fetchedAt": "2026-06-01T08:34:14.555Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Axel%20Tuanzebe"
+  },
+  "Aaron Wan-Bissaka": {
+    "value": 22,
+    "fetchedAt": "2026-06-01T08:34:16.785Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Aaron%20Wan-Bissaka"
+  },
+  "Steve Kapuadi": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T08:34:18.939Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Steve%20Kapuadi"
+  },
+  "Gaël Kakuta": {
+    "value": 0.3,
+    "fetchedAt": "2026-06-01T08:34:21.143Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ga%C3%ABl%20Kakuta"
+  },
+  "Noah Sadiki": {
+    "value": 30,
+    "fetchedAt": "2026-06-01T08:34:23.339Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Noah%20Sadiki"
+  },
+  "Aaron Tshibola": {
+    "value": 0.2,
+    "fetchedAt": "2026-06-01T08:34:25.530Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Aaron%20Tshibola"
+  },
+  "Ngal'ayel Mukau": {
+    "value": 12,
+    "fetchedAt": "2026-06-01T08:34:28.792Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ngal'ayel%20Mukau"
+  },
+  "Brian Cipenga": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T08:34:30.977Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Brian%20Cipenga"
+  },
+  "Fiston Mayele": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T08:34:33.221Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Fiston%20Mayele"
+  },
+  "Yoane Wissa": {
+    "value": 30,
+    "fetchedAt": "2026-06-01T08:34:35.403Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Yoane%20Wissa"
+  },
+  "Nathanaël Mbuku": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T08:34:37.632Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Nathana%C3%ABl%20Mbuku"
+  },
+  "Simon Banza": {
+    "value": 10,
+    "fetchedAt": "2026-06-01T08:34:41.024Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Simon%20Banza"
+  },
+  "Camilo Vargas": {
+    "value": 0.5,
+    "fetchedAt": "2026-06-01T08:34:43.961Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Camilo%20Vargas"
+  },
+  "Álvaro Montero": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T08:34:46.182Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=%C3%81lvaro%20Montero"
+  },
+  "Johan Mojica": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T08:34:49.382Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Johan%20Mojica"
+  },
+  "Jhon Lucumí": {
+    "value": 22,
+    "fetchedAt": "2026-06-01T08:34:51.766Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Jhon%20Lucum%C3%AD"
+  },
+  "Deiver Machado": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T08:34:53.985Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Deiver%20Machado"
+  },
+  "Willer Ditta": {
+    "value": 6,
+    "fetchedAt": "2026-06-01T08:34:57.412Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Willer%20Ditta"
+  },
+  "Jhon Arias": {
+    "value": 15,
+    "fetchedAt": "2026-06-01T08:34:59.621Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Jhon%20Arias"
+  },
+  "Richard Ríos": {
+    "value": 25,
+    "fetchedAt": "2026-06-01T08:35:02.046Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Richard%20R%C3%ADos"
+  },
+  "Kevin Castaño": {
+    "value": 5,
+    "fetchedAt": "2026-06-01T08:35:04.736Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Kevin%20Casta%C3%B1o"
+  },
+  "Jorge Carrascal": {
+    "value": 13,
+    "fetchedAt": "2026-06-01T08:35:06.954Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Jorge%20Carrascal"
+  },
+  "Jaminton Campaz": {
+    "value": 6,
+    "fetchedAt": "2026-06-01T08:35:09.677Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Jaminton%20Campaz"
+  },
+  "Juan Portilla": {
+    "value": 5,
+    "fetchedAt": "2026-06-01T08:35:11.904Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Juan%20Portilla"
+  },
+  "Gustavo Puerta": {
+    "value": 5,
+    "fetchedAt": "2026-06-01T08:35:14.678Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Gustavo%20Puerta"
+  },
+  "Cucho Hernández": {
+    "value": 18,
+    "fetchedAt": "2026-06-01T08:35:17.449Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Cucho%20Hern%C3%A1ndez"
+  },
+  "Andrés Gómez": {
+    "value": 11,
+    "fetchedAt": "2026-06-01T08:35:20.080Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Andr%C3%A9s%20G%C3%B3mez"
+  },
+  "Márcio Rosa": {
+    "value": 0.4,
+    "fetchedAt": "2026-06-01T08:35:22.414Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=M%C3%A1rcio%20Rosa"
+  },
+  "CJ dos Santos": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T08:35:24.782Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=CJ%20dos%20Santos"
+  },
+  "Logan Costa": {
+    "value": 18,
+    "fetchedAt": "2026-06-01T08:35:28.095Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Logan%20Costa"
+  },
+  "Steven Moreira": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T08:35:30.505Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Steven%20Moreira"
+  },
+  "Wagner Pina": {
+    "value": 11,
+    "fetchedAt": "2026-06-01T08:35:33.021Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Wagner%20Pina"
+  },
+  "Sidny Lopes Cabral": {
+    "value": 4,
+    "fetchedAt": "2026-06-01T08:35:35.216Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Sidny%20Lopes%20Cabral"
+  },
+  "Kelvin Pires": {
+    "value": 0.3,
+    "fetchedAt": "2026-06-01T08:35:38.211Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Kelvin%20Pires"
+  },
+  "Telmo Arcanjo": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T08:35:40.477Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Telmo%20Arcanjo"
+  },
+  "Laros Duarte": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T08:35:42.751Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Laros%20Duarte"
+  },
+  "Yannick Semedo": {
+    "value": 0.3,
+    "fetchedAt": "2026-06-01T08:35:44.939Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Yannick%20Semedo"
+  },
+  "Jovane Cabral": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T08:35:48.986Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Jovane%20Cabral"
+  },
+  "Gilson Benchimol": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T08:35:51.156Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Gilson%20Benchimol"
+  },
+  "Dailon Livramento": {
+    "value": 0.8,
+    "fetchedAt": "2026-06-01T08:35:53.389Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Dailon%20Livramento"
+  },
+  "Hélio Varela": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T08:35:55.737Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=H%C3%A9lio%20Varela"
+  },
+  "Nuno da Costa": {
+    "value": 0.4,
+    "fetchedAt": "2026-06-01T08:35:58.106Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Nuno%20da%20Costa"
+  },
+  "Dominik Kotarski": {
+    "value": 5,
+    "fetchedAt": "2026-06-01T08:36:00.437Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Dominik%20Kotarski"
+  },
+  "Ivor Pandur": {
+    "value": 5,
+    "fetchedAt": "2026-06-01T08:36:02.638Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ivor%20Pandur"
+  },
+  "Marin Pongračić": {
+    "value": 7,
+    "fetchedAt": "2026-06-01T08:36:04.814Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Marin%20Pongra%C4%8Di%C4%87"
+  },
+  "Martin Erlić": {
+    "value": 4,
+    "fetchedAt": "2026-06-01T08:36:07.315Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Martin%20Erli%C4%87"
+  },
+  "Luka Vušković": {
+    "value": 60,
+    "fetchedAt": "2026-06-01T08:36:09.655Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Luka%20Vu%C5%A1kovi%C4%87"
+  },
+  "Nikola Vlašić": {
+    "value": 10,
+    "fetchedAt": "2026-06-01T08:36:11.861Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Nikola%20Vla%C5%A1i%C4%87"
+  },
+  "Luka Sučić": {
+    "value": 10,
+    "fetchedAt": "2026-06-01T08:36:14.008Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Luka%20Su%C4%8Di%C4%87"
+  },
+  "Martin Baturina": {
+    "value": 30,
+    "fetchedAt": "2026-06-01T08:36:16.481Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Martin%20Baturina"
+  },
+  "Kristijan Jakić": {
+    "value": 6,
+    "fetchedAt": "2026-06-01T08:36:19.322Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Kristijan%20Jaki%C4%87"
+  },
+  "Petar Sučić": {
+    "value": 40,
+    "fetchedAt": "2026-06-01T08:36:21.669Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Petar%20Su%C4%8Di%C4%87"
+  },
+  "Nikola Moro": {
+    "value": 7,
+    "fetchedAt": "2026-06-01T08:36:23.987Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Nikola%20Moro"
+  },
+  "Toni Fruk": {
+    "value": 9,
+    "fetchedAt": "2026-06-01T08:36:26.157Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Toni%20Fruk"
+  },
+  "Marco Pašalić": {
+    "value": 7,
+    "fetchedAt": "2026-06-01T08:36:28.374Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Marco%20Pa%C5%A1ali%C4%87"
+  },
+  "Petar Musa": {
+    "value": 8,
+    "fetchedAt": "2026-06-01T08:36:30.725Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Petar%20Musa"
+  },
+  "Igor Matanović": {
+    "value": 22,
+    "fetchedAt": "2026-06-01T08:36:32.881Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Igor%20Matanovi%C4%87"
+  },
+  "Shurandy Sambo": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T08:36:35.620Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Shurandy%20Sambo"
+  },
+  "Livano Comenencia": {
+    "value": 0.7,
+    "fetchedAt": "2026-06-01T08:36:37.805Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Livano%20Comenencia"
+  },
+  "Jürgen Locadia": {
+    "value": 0.2,
+    "fetchedAt": "2026-06-01T08:36:39.992Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=J%C3%BCrgen%20Locadia"
+  },
+  "Jeremy Antonisse": {
+    "value": 0.8,
+    "fetchedAt": "2026-06-01T08:36:42.724Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Jeremy%20Antonisse"
+  },
+  "Sontje Hansen": {
+    "value": 4,
+    "fetchedAt": "2026-06-01T08:36:47.438Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Sontje%20Hansen"
+  },
+  "Tyrese Noslin": {
+    "value": 0.8,
+    "fetchedAt": "2026-06-01T08:36:49.589Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Tyrese%20Noslin"
+  },
+  "Ar'jany Martha": {
+    "value": 0.7,
+    "fetchedAt": "2026-06-01T08:36:52.104Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ar'jany%20Martha"
+  },
+  "Jearl Margaritha": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T08:36:54.290Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Jearl%20Margaritha"
+  },
+  "Armando Obispo": {
+    "value": 4,
+    "fetchedAt": "2026-06-01T08:36:56.472Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Armando%20Obispo"
+  },
+  "Tahith Chong": {
+    "value": 4,
+    "fetchedAt": "2026-06-01T08:36:58.795Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Tahith%20Chong"
+  },
+  "Kevin Felida": {
+    "value": 0.4,
+    "fetchedAt": "2026-06-01T08:37:01.019Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Kevin%20Felida"
+  },
+  "Riechedly Bazoer": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T08:37:03.204Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Riechedly%20Bazoer"
+  },
+  "Deveron Fonville": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T08:37:05.382Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Deveron%20Fonville"
+  },
+  "Tyrick Bodak": {
+    "value": 0,
+    "fetchedAt": "2026-06-01T08:37:07.551Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Tyrick%20Bodak"
+  },
+  "Trevor Doornbusch": {
+    "value": 0.1,
+    "fetchedAt": "2026-06-01T08:37:09.738Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Trevor%20Doornbusch"
+  },
+  "Matěj Kovář": {
+    "value": 8,
+    "fetchedAt": "2026-06-01T08:37:12.279Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Mat%C4%9Bj%20Kov%C3%A1%C5%99"
+  },
+  "Jindřich Staněk": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T08:37:14.916Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Jind%C5%99ich%20Stan%C4%9Bk"
+  },
+  "Lukáš Horníček": {
+    "value": 18,
+    "fetchedAt": "2026-06-01T08:37:17.263Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Luk%C3%A1%C5%A1%20Horn%C3%AD%C4%8Dek"
+  },
+  "Tomáš Holeš": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T08:37:19.459Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Tom%C3%A1%C5%A1%20Hole%C5%A1"
+  },
+  "Ladislav Krejčí": {
+    "value": 22,
+    "fetchedAt": "2026-06-01T08:37:21.686Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ladislav%20Krej%C4%8D%C3%AD"
+  },
+  "David Zima": {
+    "value": 7,
+    "fetchedAt": "2026-06-01T08:37:24.261Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=David%20Zima"
+  },
+  "Jaroslav Zelený": {
+    "value": 0.6,
+    "fetchedAt": "2026-06-01T08:37:26.547Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Jaroslav%20Zelen%C3%BD"
+  },
+  "David Jurásek": {
+    "value": 5,
+    "fetchedAt": "2026-06-01T08:37:29.130Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=David%20Jur%C3%A1sek"
+  },
+  "David Douděra": {
+    "value": 4,
+    "fetchedAt": "2026-06-01T08:37:31.388Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=David%20Doud%C4%9Bra"
+  },
+  "Robin Hranáč": {
+    "value": 10,
+    "fetchedAt": "2026-06-01T08:37:33.615Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Robin%20Hran%C3%A1%C4%8D"
+  },
+  "Štěpán Chaloupek": {
+    "value": 10,
+    "fetchedAt": "2026-06-01T08:37:35.818Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=%C5%A0t%C4%9Bp%C3%A1n%20Chaloupek"
+  },
+  "Vladimír Darida": {
+    "value": 0.4,
+    "fetchedAt": "2026-06-01T08:37:37.992Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Vladim%C3%ADr%20Darida"
+  },
+  "Michal Sadílek": {
+    "value": 8,
+    "fetchedAt": "2026-06-01T08:37:40.329Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Michal%20Sad%C3%ADlek"
+  },
+  "Pavel Šulc": {
+    "value": 20,
+    "fetchedAt": "2026-06-01T08:37:42.662Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Pavel%20%C5%A0ulc"
+  },
+  "Lukáš Červ": {
+    "value": 6,
+    "fetchedAt": "2026-06-01T08:37:45.508Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Luk%C3%A1%C5%A1%20%C4%8Cerv"
+  },
+  "Hugo Sochůrek": {
+    "value": 4,
+    "fetchedAt": "2026-06-01T08:37:47.703Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Hugo%20Soch%C5%AFrek"
+  },
+  "Alexandr Sojka": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T08:37:51.614Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Alexandr%20Sojka"
+  },
+  "Denis Višinský": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T08:37:53.959Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Denis%20Vi%C5%A1insk%C3%BD"
+  },
+  "Jan Kuchta": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T08:37:58.707Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Jan%20Kuchta"
+  },
+  "Mojmír Chytil": {
+    "value": 4,
+    "fetchedAt": "2026-06-01T08:38:01.086Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Mojm%C3%ADr%20Chytil"
+  },
+  "Tomáš Chorý": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T08:38:03.371Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Tom%C3%A1%C5%A1%20Chor%C3%BD"
+  },
+  "Hernán Galíndez": {
+    "value": 0.3,
+    "fetchedAt": "2026-06-01T08:38:05.660Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Hern%C3%A1n%20Gal%C3%ADndez"
+  },
+  "Félix Torres": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T08:38:08.181Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=F%C3%A9lix%20Torres"
+  },
+  "Joel Ordóñez": {
+    "value": 33,
+    "fetchedAt": "2026-06-01T08:38:10.351Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Joel%20Ord%C3%B3%C3%B1ez"
+  },
+  "Jordy Alcívar": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T08:38:12.935Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Jordy%20Alc%C3%ADvar"
+  },
+  "Willian Pacho": {
+    "value": 70,
+    "fetchedAt": "2026-06-01T08:38:15.275Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Willian%20Pacho"
+  },
+  "Denil Castillo": {
+    "value": 7,
+    "fetchedAt": "2026-06-01T08:38:17.931Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Denil%20Castillo"
+  },
+  "John Yeboah": {
+    "value": 5,
+    "fetchedAt": "2026-06-01T08:38:20.457Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=John%20Yeboah"
+  },
+  "Kevin Rodríguez": {
+    "value": 5,
+    "fetchedAt": "2026-06-01T08:38:23.925Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Kevin%20Rodr%C3%ADguez"
+  },
+  "Moisés Ramírez": {
+    "value": 0.8,
+    "fetchedAt": "2026-06-01T08:38:27.279Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Mois%C3%A9s%20Ram%C3%ADrez"
+  },
+  "Enner Valencia": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T08:38:30.161Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Enner%20Valencia"
+  },
+  "Alan Minda": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T08:38:32.753Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Alan%20Minda"
+  },
+  "Pedro Vite": {
+    "value": 6,
+    "fetchedAt": "2026-06-01T08:38:35.021Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Pedro%20Vite"
+  },
+  "Anthony Valencia": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T08:38:37.673Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Anthony%20Valencia"
+  },
+  "Ángelo Preciado": {
+    "value": 4,
+    "fetchedAt": "2026-06-01T08:38:40.002Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=%C3%81ngelo%20Preciado"
+  },
+  "Gonzalo Plata": {
+    "value": 9,
+    "fetchedAt": "2026-06-01T08:38:42.430Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Gonzalo%20Plata"
+  },
+  "Nilson Angulo": {
+    "value": 17,
+    "fetchedAt": "2026-06-01T08:38:44.625Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Nilson%20Angulo"
+  },
+  "Alan Franco": {
+    "value": 4,
+    "fetchedAt": "2026-06-01T08:38:46.994Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Alan%20Franco"
+  },
+  "Gonzalo Valle": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T08:38:49.367Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Gonzalo%20Valle"
+  },
+  "Yaimar Medina": {
+    "value": 4,
+    "fetchedAt": "2026-06-01T08:38:51.893Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Yaimar%20Medina"
+  },
+  "Jackson Porozo": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T08:38:54.106Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Jackson%20Porozo"
+  },
+  "Jeremy Arévalo": {
+    "value": 7,
+    "fetchedAt": "2026-06-01T08:38:56.314Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Jeremy%20Ar%C3%A9valo"
+  },
+  "Mohamed El Shenawy": {
+    "value": 0.5,
+    "fetchedAt": "2026-06-01T08:38:58.907Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Mohamed%20El%20Shenawy"
+  },
+  "Mohamed Alaa": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T08:51:04.876Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Mohamed%20Alaa"
+  },
+  "Hamdy Fathy": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T08:51:09.624Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Hamdy%20Fathy"
+  },
+  "Ramy Rabia": {
+    "value": 0.6,
+    "fetchedAt": "2026-06-01T08:51:12.169Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ramy%20Rabia"
+  },
+  "Mohamed Hany": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T08:51:14.503Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Mohamed%20Hany"
+  },
+  "Ahmed Fatouh": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T08:51:16.759Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ahmed%20Fatouh"
+  },
+  "Mohamed Abdelmonem": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T08:51:21.184Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Mohamed%20Abdelmonem"
+  },
+  "Hossam Abdelmaguid": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T08:51:36.207Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Hossam%20Abdelmaguid"
+  },
+  "Karim Hafez": {
+    "value": 0.7,
+    "fetchedAt": "2026-06-01T08:51:38.757Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Karim%20Hafez"
+  },
+  "Emam Ashour": {
+    "value": 4,
+    "fetchedAt": "2026-06-01T08:51:45.439Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Emam%20Ashour"
+  },
+  "Mohanad Lasheen": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T08:51:47.706Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Mohanad%20Lasheen"
+  },
+  "Mahmoud Saber": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T08:51:50.381Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Mahmoud%20Saber"
+  },
+  "Nabil Emad": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T08:51:53.297Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Nabil%20Emad"
+  },
+  "Zizo": {
+    "value": 4,
+    "fetchedAt": "2026-06-01T08:52:00.546Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Zizo"
+  },
+  "Omar Marmoush": {
+    "value": 60,
+    "fetchedAt": "2026-06-01T08:52:03.211Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Omar%20Marmoush"
+  },
+  "Ibrahim Adel": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T08:52:13.647Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ibrahim%20Adel"
+  },
+  "Haissem Hassan": {
+    "value": 4,
+    "fetchedAt": "2026-06-01T08:52:16.001Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Haissem%20Hassan"
+  },
+  "Hamza Abdelkarim": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T08:52:18.301Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Hamza%20Abdelkarim"
+  },
+  "Dean Henderson": {
+    "value": 28,
+    "fetchedAt": "2026-06-01T08:52:20.609Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Dean%20Henderson"
+  },
+  "James Trafford": {
+    "value": 25,
+    "fetchedAt": "2026-06-01T08:52:23.289Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=James%20Trafford"
+  },
+  "Dan Burn": {
+    "value": 5,
+    "fetchedAt": "2026-06-01T08:52:25.723Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Dan%20Burn"
+  },
+  "Tino Livramento": {
+    "value": 40,
+    "fetchedAt": "2026-06-01T08:52:28.014Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Tino%20Livramento"
+  },
+  "Djed Spence": {
+    "value": 30,
+    "fetchedAt": "2026-06-01T08:52:30.325Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Djed%20Spence"
+  },
+  "Nico O'Reilly": {
+    "value": 50,
+    "fetchedAt": "2026-06-01T08:52:32.493Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Nico%20O'Reilly"
+  },
+  "Jarell Quansah": {
+    "value": 45,
+    "fetchedAt": "2026-06-01T08:52:34.685Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Jarell%20Quansah"
+  },
+  "Morgan Rogers": {
+    "value": 80,
+    "fetchedAt": "2026-06-01T08:52:36.837Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Morgan%20Rogers"
+  },
+  "Kobbie Mainoo": {
+    "value": 50,
+    "fetchedAt": "2026-06-01T08:52:39.000Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Kobbie%20Mainoo"
+  },
+  "Elliot Anderson": {
+    "value": 60,
+    "fetchedAt": "2026-06-01T08:52:41.430Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Elliot%20Anderson"
+  },
+  "Ollie Watkins": {
+    "value": 30,
+    "fetchedAt": "2026-06-01T08:52:43.601Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ollie%20Watkins"
+  },
+  "Eberechi Eze": {
+    "value": 60,
+    "fetchedAt": "2026-06-01T08:52:46.786Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Eberechi%20Eze"
+  },
+  "Noni Madueke": {
+    "value": 50,
+    "fetchedAt": "2026-06-01T08:52:49.297Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Noni%20Madueke"
+  },
+  "Ivan Toney": {
+    "value": 20,
+    "fetchedAt": "2026-06-01T08:52:51.468Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ivan%20Toney"
+  },
+  "David Raya": {
+    "value": 35,
+    "fetchedAt": "2026-06-01T08:52:53.735Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=David%20Raya"
+  },
+  "Joan Garcia": {
+    "value": 40,
+    "fetchedAt": "2026-06-01T08:52:56.702Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Joan%20Garcia"
+  },
+  "Pedro Porro": {
+    "value": 40,
+    "fetchedAt": "2026-06-01T08:52:58.936Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Pedro%20Porro"
+  },
+  "Pau Cubarsí": {
+    "value": 80,
+    "fetchedAt": "2026-06-01T08:53:01.121Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Pau%20Cubars%C3%AD"
+  },
+  "Marc Pubill": {
+    "value": 28,
+    "fetchedAt": "2026-06-01T08:53:03.647Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Marc%20Pubill"
+  },
+  "Gavi": {
+    "value": 30,
+    "fetchedAt": "2026-06-01T08:53:06.981Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Gavi"
+  },
+  "Martín Zubimendi": {
+    "value": 80,
+    "fetchedAt": "2026-06-01T08:53:10.634Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Mart%C3%ADn%20Zubimendi"
+  },
+  "Álex Baena": {
+    "value": 45,
+    "fetchedAt": "2026-06-01T08:53:15.160Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=%C3%81lex%20Baena"
+  },
+  "Nico Williams": {
+    "value": 50,
+    "fetchedAt": "2026-06-01T08:53:23.006Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Nico%20Williams"
+  },
+  "Yéremy Pino": {
+    "value": 35,
+    "fetchedAt": "2026-06-01T08:53:28.704Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Y%C3%A9remy%20Pino"
+  },
+  "Borja Iglesias": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T08:53:35.480Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Borja%20Iglesias"
+  },
+  "Víctor Muñoz": {
+    "value": 20,
+    "fetchedAt": "2026-06-01T08:53:43.062Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=V%C3%ADctor%20Mu%C3%B1oz"
+  },
+  "Michael Olise": {
+    "value": 150,
+    "fetchedAt": "2026-06-01T08:53:49.924Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Michael%20Olise"
+  },
+  "Bradley Barcola": {
+    "value": 70,
+    "fetchedAt": "2026-06-01T08:53:53.209Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Bradley%20Barcola"
+  },
+  "Warren Zaïre-Emery": {
+    "value": 60,
+    "fetchedAt": "2026-06-01T08:53:56.673Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Warren%20Za%C3%AFre-Emery"
+  },
+  "Théo Hernandez": {
+    "value": 28,
+    "fetchedAt": "2026-06-01T08:53:59.218Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Th%C3%A9o%20Hernandez"
+  },
+  "Désiré Doué": {
+    "value": 90,
+    "fetchedAt": "2026-06-01T08:54:01.974Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=D%C3%A9sir%C3%A9%20Dou%C3%A9"
+  },
+  "Lucas Hernandez": {
+    "value": 20,
+    "fetchedAt": "2026-06-01T08:54:04.628Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Lucas%20Hernandez"
+  },
+  "Jean-Philippe Mateta": {
+    "value": 35,
+    "fetchedAt": "2026-06-01T08:54:06.782Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Jean-Philippe%20Mateta"
+  },
+  "Robin Risser": {
+    "value": 25,
+    "fetchedAt": "2026-06-01T08:54:08.947Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Robin%20Risser"
+  },
+  "Rayan Cherki": {
+    "value": 65,
+    "fetchedAt": "2026-06-01T08:54:12.508Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Rayan%20Cherki"
+  },
+  "Maghnes Akliouche": {
+    "value": 50,
+    "fetchedAt": "2026-06-01T08:54:14.701Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Maghnes%20Akliouche"
+  },
+  "Maxence Lacroix": {
+    "value": 40,
+    "fetchedAt": "2026-06-01T08:54:16.874Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Maxence%20Lacroix"
+  },
+  "Jamie Leweling": {
+    "value": 40,
+    "fetchedAt": "2026-06-01T08:54:19.027Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Jamie%20Leweling"
+  },
+  "Oliver Baumann": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T08:54:21.691Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Oliver%20Baumann"
+  },
+  "Pascal Groß": {
+    "value": 4,
+    "fetchedAt": "2026-06-01T08:54:25.336Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Pascal%20Gro%C3%9F"
+  },
+  "Angelo Stiller": {
+    "value": 45,
+    "fetchedAt": "2026-06-01T08:54:27.503Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Angelo%20Stiller"
+  },
+  "Nathaniel Brown": {
+    "value": 40,
+    "fetchedAt": "2026-06-01T08:54:29.778Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Nathaniel%20Brown"
+  },
+  "Nadiem Amiri": {
+    "value": 17,
+    "fetchedAt": "2026-06-01T08:54:34.081Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Nadiem%20Amiri"
+  },
+  "Alexander Nübel": {
+    "value": 12,
+    "fetchedAt": "2026-06-01T08:54:36.980Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Alexander%20N%C3%BCbel"
+  },
+  "Felix Nmecha": {
+    "value": 50,
+    "fetchedAt": "2026-06-01T08:54:39.202Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Felix%20Nmecha"
+  },
+  "Malick Thiaw": {
+    "value": 45,
+    "fetchedAt": "2026-06-01T08:54:41.470Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Malick%20Thiaw"
+  },
+  "Lennart Karl": {
+    "value": 60,
+    "fetchedAt": "2026-06-01T08:54:43.683Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Lennart%20Karl"
+  },
+  "Deniz Undav": {
+    "value": 22,
+    "fetchedAt": "2026-06-01T08:54:45.869Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Deniz%20Undav"
+  },
+  "Alexandre Pierre": {
+    "value": 0.7,
+    "fetchedAt": "2026-06-01T08:54:48.256Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Alexandre%20Pierre"
+  },
+  "Josué Duverger": {
+    "value": 0.1,
+    "fetchedAt": "2026-06-01T08:54:51.383Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Josu%C3%A9%20Duverger"
+  },
+  "Duke Lacroix": {
+    "value": 0.1,
+    "fetchedAt": "2026-06-01T08:54:53.562Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Duke%20Lacroix"
+  },
+  "Wilguens Paugain": {
+    "value": 0.6,
+    "fetchedAt": "2026-06-01T08:54:55.776Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Wilguens%20Paugain"
+  },
+  "Hannes Delcroix": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T08:54:58.064Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Hannes%20Delcroix"
+  },
+  "Keeto Thermoncy": {
+    "value": 0,
+    "fetchedAt": "2026-06-01T08:55:01.669Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Keeto%20Thermoncy"
+  },
+  "Jean-Ricner Bellegarde": {
+    "value": 16,
+    "fetchedAt": "2026-06-01T08:55:03.836Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Jean-Ricner%20Bellegarde"
+  },
+  "Woodensky Pierre": {
+    "value": 0.1,
+    "fetchedAt": "2026-06-01T08:55:07.601Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Woodensky%20Pierre"
+  },
+  "Dominique Simon": {
+    "value": 0.2,
+    "fetchedAt": "2026-06-01T08:55:10.208Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Dominique%20Simon"
+  },
+  "Louicius Deedson": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T08:55:12.466Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Louicius%20Deedson"
+  },
+  "Ruben Providence": {
+    "value": 0.3,
+    "fetchedAt": "2026-06-01T08:55:14.857Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ruben%20Providence"
+  },
+  "Josué Casimir": {
+    "value": 4,
+    "fetchedAt": "2026-06-01T08:55:17.342Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Josu%C3%A9%20Casimir"
+  },
+  "Yassin Fortuné": {
+    "value": 0.2,
+    "fetchedAt": "2026-06-01T08:55:19.881Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Yassin%20Fortun%C3%A9"
+  },
+  "Wilson Isidor": {
+    "value": 18,
+    "fetchedAt": "2026-06-01T08:55:22.627Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Wilson%20Isidor"
+  },
+  "Lenny Joseph": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T08:55:25.024Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Lenny%20Joseph"
+  },
+  "Ritsu Dōan": {
+    "value": 17,
+    "fetchedAt": "2026-06-01T08:55:27.210Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ritsu%20D%C5%8Dan"
+  },
+  "Keisuke Ōsako": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T08:55:30.610Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Keisuke%20%C5%8Csako"
+  },
+  "Keito Nakamura": {
+    "value": 10,
+    "fetchedAt": "2026-06-01T08:55:32.786Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Keito%20Nakamura"
+  },
+  "Junya Itō": {
+    "value": 4,
+    "fetchedAt": "2026-06-01T08:55:35.205Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Junya%20It%C5%8D"
+  },
+  "Tsuyoshi Watanabe": {
+    "value": 10,
+    "fetchedAt": "2026-06-01T08:55:38.506Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Tsuyoshi%20Watanabe"
+  },
+  "Ayase Ueda": {
+    "value": 17,
+    "fetchedAt": "2026-06-01T08:55:42.445Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ayase%20Ueda"
+  },
+  "Kōki Ogawa": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T08:55:46.746Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=K%C5%8Dki%20Ogawa"
+  },
+  "Ayumu Seko": {
+    "value": 5,
+    "fetchedAt": "2026-06-01T08:55:49.073Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ayumu%20Seko"
+  },
+  "Hiroki Itō": {
+    "value": 18,
+    "fetchedAt": "2026-06-01T08:55:51.627Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Hiroki%20It%C5%8D"
+  },
+  "Tomoki Hayakawa": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T08:55:53.828Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Tomoki%20Hayakawa"
+  },
+  "Kaishū Sano": {
+    "value": 40,
+    "fetchedAt": "2026-06-01T08:55:56.076Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Kaish%C5%AB%20Sano"
+  },
+  "Junnosuke Suzuki": {
+    "value": 4,
+    "fetchedAt": "2026-06-01T08:55:58.269Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Junnosuke%20Suzuki"
+  },
+  "Kento Shiogai": {
+    "value": 8,
+    "fetchedAt": "2026-06-01T08:56:01.261Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Kento%20Shiogai"
+  },
+  "Jens Castrop": {
+    "value": 10,
+    "fetchedAt": "2026-06-01T08:56:24.663Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Jens%20Castrop"
+  },
+  "Nawaf Al-Aqidi": {
+    "value": 0.7,
+    "fetchedAt": "2026-06-01T08:56:56.635Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Nawaf%20Al-Aqidi"
+  },
+  "Ahmed Al-Kassar": {
+    "value": 0.2,
+    "fetchedAt": "2026-06-01T08:56:58.862Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ahmed%20Al-Kassar"
+  },
+  "Saud Abdulhamid": {
+    "value": 5,
+    "fetchedAt": "2026-06-01T08:57:01.021Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Saud%20Abdulhamid"
+  },
+  "Hassan Al-Tambakti": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T08:57:03.256Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Hassan%20Al-Tambakti"
+  },
+  "Abdulelah Al-Amri": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T08:57:05.446Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Abdulelah%20Al-Amri"
+  },
+  "Nawaf Boushal": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T08:57:07.858Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Nawaf%20Boushal"
+  },
+  "Ali Lajami": {
+    "value": 0.8,
+    "fetchedAt": "2026-06-01T08:57:10.504Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ali%20Lajami"
+  },
+  "Ali Majrashi": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T08:57:12.665Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ali%20Majrashi"
+  },
+  "Hassan Kadesh": {
+    "value": 0.3,
+    "fetchedAt": "2026-06-01T08:57:15.026Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Hassan%20Kadesh"
+  },
+  "Moteb Al-Harbi": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T08:57:17.196Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Moteb%20Al-Harbi"
+  },
+  "Jehad Thakri": {
+    "value": 0.9,
+    "fetchedAt": "2026-06-01T08:57:19.377Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Jehad%20Thakri"
+  },
+  "Mohammed Abu Al-Shamat": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T08:57:21.680Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Mohammed%20Abu%20Al-Shamat"
+  },
+  "Abdullah Al-Khaibari": {
+    "value": 0.8,
+    "fetchedAt": "2026-06-01T08:57:23.985Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Abdullah%20Al-Khaibari"
+  },
+  "Musab Al-Juwayr": {
+    "value": 5,
+    "fetchedAt": "2026-06-01T08:57:26.240Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Musab%20Al-Juwayr"
+  },
+  "Ayman Yahya": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T08:57:29.192Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ayman%20Yahya"
+  },
+  "Ziyad Al-Johani": {
+    "value": 0.8,
+    "fetchedAt": "2026-06-01T08:57:32.223Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ziyad%20Al-Johani"
+  },
+  "Sultan Mandash": {
+    "value": 0.4,
+    "fetchedAt": "2026-06-01T08:57:34.821Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Sultan%20Mandash"
+  },
+  "Abdullah Al-Hamdan": {
+    "value": 0.3,
+    "fetchedAt": "2026-06-01T08:57:40.044Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Abdullah%20Al-Hamdan"
+  },
+  "Khalid Al-Ghannam": {
+    "value": 0.9,
+    "fetchedAt": "2026-06-01T08:57:42.216Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Khalid%20Al-Ghannam"
+  },
+  "Ahmed Reda Tagnaouti": {
+    "value": 0.8,
+    "fetchedAt": "2026-06-01T08:57:48.043Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ahmed%20Reda%20Tagnaouti"
+  },
+  "Anass Salah-Eddine": {
+    "value": 12,
+    "fetchedAt": "2026-06-01T08:57:50.233Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Anass%20Salah-Eddine"
+  },
+  "Chadi Riad": {
+    "value": 12,
+    "fetchedAt": "2026-06-01T08:57:53.240Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Chadi%20Riad"
+  },
+  "Issa Diop": {
+    "value": 10,
+    "fetchedAt": "2026-06-01T08:57:55.472Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Issa%20Diop"
+  },
+  "Zakaria El Ouahdi": {
+    "value": 15,
+    "fetchedAt": "2026-06-01T08:57:58.146Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Zakaria%20El%20Ouahdi"
+  },
+  "Redouane Halhal": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T08:58:01.487Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Redouane%20Halhal"
+  },
+  "Ismael Saibari": {
+    "value": 40,
+    "fetchedAt": "2026-06-01T08:58:04.101Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ismael%20Saibari"
+  },
+  "Neil El Aynaoui": {
+    "value": 23,
+    "fetchedAt": "2026-06-01T08:58:06.257Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Neil%20El%20Aynaoui"
+  },
+  "Samir El Mourabet": {
+    "value": 18,
+    "fetchedAt": "2026-06-01T08:58:08.434Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Samir%20El%20Mourabet"
+  },
+  "Ayyoub Bouaddi": {
+    "value": 50,
+    "fetchedAt": "2026-06-01T08:58:10.601Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ayyoub%20Bouaddi"
+  },
+  "Brahim Díaz": {
+    "value": 35,
+    "fetchedAt": "2026-06-01T08:58:12.954Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Brahim%20D%C3%ADaz"
+  },
+  "Chemsdine Talbi": {
+    "value": 25,
+    "fetchedAt": "2026-06-01T08:58:15.117Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Chemsdine%20Talbi"
+  },
+  "Gessime Yassine": {
+    "value": 10,
+    "fetchedAt": "2026-06-01T08:58:17.563Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Gessime%20Yassine"
+  },
+  "Ayoube Amaimouni": {
+    "value": 10,
+    "fetchedAt": "2026-06-01T08:58:19.737Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ayoube%20Amaimouni"
+  },
+  "Guillermo Ochoa": {
+    "value": 0.3,
+    "fetchedAt": "2026-06-01T08:58:21.998Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Guillermo%20Ochoa"
+  },
+  "Raúl Rangel": {
+    "value": 7,
+    "fetchedAt": "2026-06-01T08:58:24.194Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ra%C3%BAl%20Rangel"
+  },
+  "Carlos Acevedo": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T08:58:26.383Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Carlos%20Acevedo"
+  },
+  "Jesús Gallardo": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T08:58:28.633Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Jes%C3%BAs%20Gallardo"
+  },
+  "César Montes": {
+    "value": 8,
+    "fetchedAt": "2026-06-01T08:58:30.821Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=C%C3%A9sar%20Montes"
+  },
+  "Jorge Sánchez": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T08:58:33.260Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Jorge%20S%C3%A1nchez"
+  },
+  "Johan Vásquez": {
+    "value": 12,
+    "fetchedAt": "2026-06-01T08:58:35.437Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Johan%20V%C3%A1squez"
+  },
+  "Israel Reyes": {
+    "value": 7,
+    "fetchedAt": "2026-06-01T08:58:38.133Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Israel%20Reyes"
+  },
+  "Mateo Chávez": {
+    "value": 4,
+    "fetchedAt": "2026-06-01T08:58:40.304Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Mateo%20Ch%C3%A1vez"
+  },
+  "Orbelín Pineda": {
+    "value": 7,
+    "fetchedAt": "2026-06-01T08:58:42.903Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Orbel%C3%ADn%20Pineda"
+  },
+  "Roberto Alvarado": {
+    "value": 8,
+    "fetchedAt": "2026-06-01T08:58:45.069Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Roberto%20Alvarado"
+  },
+  "Luis Chávez": {
+    "value": 6,
+    "fetchedAt": "2026-06-01T08:58:47.370Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Luis%20Ch%C3%A1vez"
+  },
+  "Érik Lira": {
+    "value": 12,
+    "fetchedAt": "2026-06-01T08:58:49.533Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=%C3%89rik%20Lira"
+  },
+  "Gilberto Mora": {
+    "value": 10,
+    "fetchedAt": "2026-06-01T08:58:51.880Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Gilberto%20Mora"
+  },
+  "Brian Gutiérrez": {
+    "value": 8,
+    "fetchedAt": "2026-06-01T08:58:55.120Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Brian%20Guti%C3%A9rrez"
+  },
+  "Obed Vargas": {
+    "value": 8,
+    "fetchedAt": "2026-06-01T08:58:57.301Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Obed%20Vargas"
+  },
+  "Álvaro Fidalgo": {
+    "value": 10,
+    "fetchedAt": "2026-06-01T08:58:59.516Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=%C3%81lvaro%20Fidalgo"
+  },
+  "Raúl Jiménez": {
+    "value": 4,
+    "fetchedAt": "2026-06-01T08:59:01.811Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ra%C3%BAl%20Jim%C3%A9nez"
+  },
+  "Alexis Vega": {
+    "value": 8,
+    "fetchedAt": "2026-06-01T08:59:04.121Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Alexis%20Vega"
+  },
+  "César Huerta": {
+    "value": 5,
+    "fetchedAt": "2026-06-01T08:59:06.318Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=C%C3%A9sar%20Huerta"
+  },
+  "Julián Quiñones": {
+    "value": 12,
+    "fetchedAt": "2026-06-01T08:59:08.568Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Juli%C3%A1n%20Qui%C3%B1ones"
+  },
+  "Guillermo Martínez": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T08:59:11.497Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Guillermo%20Mart%C3%ADnez"
+  },
+  "Armando González": {
+    "value": 15,
+    "fetchedAt": "2026-06-01T08:59:13.881Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Armando%20Gonz%C3%A1lez"
+  },
+  "Mark Flekken": {
+    "value": 6,
+    "fetchedAt": "2026-06-01T08:59:16.047Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Mark%20Flekken"
+  },
+  "Robin Roefs": {
+    "value": 25,
+    "fetchedAt": "2026-06-01T08:59:18.214Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Robin%20Roefs"
+  },
+  "Virgil van Dijk": {
+    "value": 18,
+    "fetchedAt": "2026-06-01T08:59:20.557Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Virgil%20van%20Dijk"
+  },
+  "Jurriën Timber": {
+    "value": 70,
+    "fetchedAt": "2026-06-01T08:59:22.724Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Jurri%C3%ABn%20Timber"
+  },
+  "Micky van de Ven": {
+    "value": 65,
+    "fetchedAt": "2026-06-01T08:59:25.353Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Micky%20van%20de%20Ven"
+  },
+  "Mats Wieffer": {
+    "value": 25,
+    "fetchedAt": "2026-06-01T08:59:28.044Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Mats%20Wieffer"
+  },
+  "Jan Paul van Hecke": {
+    "value": 35,
+    "fetchedAt": "2026-06-01T08:59:30.225Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Jan%20Paul%20van%20Hecke"
+  },
+  "Jorrel Hato": {
+    "value": 35,
+    "fetchedAt": "2026-06-01T08:59:32.421Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Jorrel%20Hato"
+  },
+  "Frenkie de Jong": {
+    "value": 45,
+    "fetchedAt": "2026-06-01T08:59:34.789Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Frenkie%20de%20Jong"
+  },
+  "Marten de Roon": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T08:59:36.986Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Marten%20de%20Roon"
+  },
+  "Teun Koopmeiners": {
+    "value": 14,
+    "fetchedAt": "2026-06-01T08:59:39.145Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Teun%20Koopmeiners"
+  },
+  "Ryan Gravenberch": {
+    "value": 90,
+    "fetchedAt": "2026-06-01T08:59:41.332Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ryan%20Gravenberch"
+  },
+  "Justin Kluivert": {
+    "value": 30,
+    "fetchedAt": "2026-06-01T08:59:44.233Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Justin%20Kluivert"
+  },
+  "Quinten Timber": {
+    "value": 25,
+    "fetchedAt": "2026-06-01T08:59:46.420Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Quinten%20Timber"
+  },
+  "Guus Til": {
+    "value": 15,
+    "fetchedAt": "2026-06-01T08:59:48.979Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Guus%20Til"
+  },
+  "Wout Weghorst": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T08:59:51.887Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Wout%20Weghorst"
+  },
+  "Noa Lang": {
+    "value": 22,
+    "fetchedAt": "2026-06-01T08:59:54.129Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Noa%20Lang"
+  },
+  "Brian Brobbey": {
+    "value": 25,
+    "fetchedAt": "2026-06-01T08:59:56.710Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Brian%20Brobbey"
+  },
+  "Crysencio Summerville": {
+    "value": 30,
+    "fetchedAt": "2026-06-01T08:59:59.008Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Crysencio%20Summerville"
+  },
+  "Sander Tangvik": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T09:00:01.189Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Sander%20Tangvik"
+  },
+  "Egil Selvik": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T09:00:03.347Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Egil%20Selvik"
+  },
+  "Fredrik Aursnes": {
+    "value": 15,
+    "fetchedAt": "2026-06-01T09:00:05.640Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Fredrik%20Aursnes"
+  },
+  "Marcus Holmgren Pedersen": {
+    "value": 4,
+    "fetchedAt": "2026-06-01T09:00:08.861Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Marcus%20Holmgren%20Pedersen"
+  },
+  "Torbjørn Heggem": {
+    "value": 13,
+    "fetchedAt": "2026-06-01T09:00:11.023Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Torbj%C3%B8rn%20Heggem"
+  },
+  "Kristian Thorstvedt": {
+    "value": 12,
+    "fetchedAt": "2026-06-01T09:00:13.230Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Kristian%20Thorstvedt"
+  },
+  "Thelo Aasgaard": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T09:00:15.388Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Thelo%20Aasgaard"
+  },
+  "Jens Petter Hauge": {
+    "value": 12,
+    "fetchedAt": "2026-06-01T09:00:17.729Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Jens%20Petter%20Hauge"
+  },
+  "Sondre Langås": {
+    "value": 4,
+    "fetchedAt": "2026-06-01T09:00:19.898Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Sondre%20Lang%C3%A5s"
+  },
+  "Henrik Falchener": {
+    "value": 6,
+    "fetchedAt": "2026-06-01T09:00:22.091Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Henrik%20Falchener"
+  },
+  "Elijah Just": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T09:00:24.496Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Elijah%20Just"
+  },
+  "Alex Paulsen": {
+    "value": 0.8,
+    "fetchedAt": "2026-06-01T09:00:27.425Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Alex%20Paulsen"
+  },
+  "Alex Rufer": {
+    "value": 0.6,
+    "fetchedAt": "2026-06-01T09:00:29.610Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Alex%20Rufer"
+  },
+  "Nando Pijnaker": {
+    "value": 0.4,
+    "fetchedAt": "2026-06-01T09:00:31.812Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Nando%20Pijnaker"
+  },
+  "Finn Surman": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T09:00:33.972Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Finn%20Surman"
+  },
+  "Ben Old": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T09:00:36.636Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ben%20Old"
+  },
+  "Callum McCowatt": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T09:00:38.806Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Callum%20McCowatt"
+  },
+  "Jesse Randall": {
+    "value": 0.9,
+    "fetchedAt": "2026-06-01T09:00:41.178Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Jesse%20Randall"
+  },
+  "Michael Woud": {
+    "value": 0.4,
+    "fetchedAt": "2026-06-01T09:00:43.467Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Michael%20Woud"
+  },
+  "Ryan Thomas": {
+    "value": 0.7,
+    "fetchedAt": "2026-06-01T09:00:46.192Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ryan%20Thomas"
+  },
+  "Callan Elliot": {
+    "value": 0.5,
+    "fetchedAt": "2026-06-01T09:00:48.459Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Callan%20Elliot"
+  },
+  "Lachlan Bayliss": {
+    "value": 0.6,
+    "fetchedAt": "2026-06-01T09:00:50.675Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Lachlan%20Bayliss"
+  },
+  "Orlando Mosquera": {
+    "value": 0.7,
+    "fetchedAt": "2026-06-01T09:00:56.098Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Orlando%20Mosquera"
+  },
+  "César Samudio": {
+    "value": 0.3,
+    "fetchedAt": "2026-06-01T09:00:58.289Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=C%C3%A9sar%20Samudio"
+  },
+  "Andrés Andrade": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T09:01:00.597Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Andr%C3%A9s%20Andrade"
+  },
+  "César Blackman": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T09:01:04.346Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=C%C3%A9sar%20Blackman"
+  },
+  "Jiovany Ramos": {
+    "value": 0.5,
+    "fetchedAt": "2026-06-01T09:01:06.960Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Jiovany%20Ramos"
+  },
+  "Edgardo Fariña": {
+    "value": 0.9,
+    "fetchedAt": "2026-06-01T09:01:11.856Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Edgardo%20Fari%C3%B1a"
+  },
+  "Adalberto Carrasquilla": {
+    "value": 4,
+    "fetchedAt": "2026-06-01T09:01:14.484Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Adalberto%20Carrasquilla"
+  },
+  "César Yanis": {
+    "value": 0.4,
+    "fetchedAt": "2026-06-01T09:01:22.762Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=C%C3%A9sar%20Yanis"
+  },
+  "Carlos Harvey": {
+    "value": 0.6,
+    "fetchedAt": "2026-06-01T09:01:24.963Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Carlos%20Harvey"
+  },
+  "Azarias Londoño": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T09:01:27.120Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Azarias%20Londo%C3%B1o"
+  },
+  "Tomás Rodríguez": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T09:01:34.888Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Tom%C3%A1s%20Rodr%C3%ADguez"
+  },
+  "Rui Silva": {
+    "value": 7,
+    "fetchedAt": "2026-06-01T09:01:41.521Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Rui%20Silva"
+  },
+  "Diogo Dalot": {
+    "value": 30,
+    "fetchedAt": "2026-06-01T09:01:43.900Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Diogo%20Dalot"
+  },
+  "Gonçalo Inácio": {
+    "value": 40,
+    "fetchedAt": "2026-06-01T09:01:47.035Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Gon%C3%A7alo%20In%C3%A1cio"
+  },
+  "Matheus Nunes": {
+    "value": 45,
+    "fetchedAt": "2026-06-01T09:01:49.247Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Matheus%20Nunes"
+  },
+  "Renato Veiga": {
+    "value": 25,
+    "fetchedAt": "2026-06-01T09:01:51.623Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Renato%20Veiga"
+  },
+  "João Neves": {
+    "value": 110,
+    "fetchedAt": "2026-06-01T09:01:53.912Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Jo%C3%A3o%20Neves"
+  },
+  "Samú Costa": {
+    "value": 15,
+    "fetchedAt": "2026-06-01T09:01:56.289Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Sam%C3%BA%20Costa"
+  },
+  "Gonçalo Guedes": {
+    "value": 6,
+    "fetchedAt": "2026-06-01T09:01:58.868Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Gon%C3%A7alo%20Guedes"
+  },
+  "Gonçalo Ramos": {
+    "value": 35,
+    "fetchedAt": "2026-06-01T09:02:01.476Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Gon%C3%A7alo%20Ramos"
+  },
+  "Francisco Trincão": {
+    "value": 40,
+    "fetchedAt": "2026-06-01T09:02:03.897Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Francisco%20Trinc%C3%A3o"
+  },
+  "Francisco Conceição": {
+    "value": 30,
+    "fetchedAt": "2026-06-01T09:02:06.295Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Francisco%20Concei%C3%A7%C3%A3o"
+  },
+  "Ronwen Williams": {
+    "value": 0.9,
+    "fetchedAt": "2026-06-01T09:02:08.607Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ronwen%20Williams"
+  },
+  "Ricardo Goss": {
+    "value": 0.4,
+    "fetchedAt": "2026-06-01T09:02:11.849Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ricardo%20Goss"
+  },
+  "Sipho Chaine": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T09:02:14.009Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Sipho%20Chaine"
+  },
+  "Aubrey Modiba": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T09:02:16.239Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Aubrey%20Modiba"
+  },
+  "Khuliso Mudau": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T09:02:18.427Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Khuliso%20Mudau"
+  },
+  "Nkosinathi Sibisi": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T09:02:20.602Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Nkosinathi%20Sibisi"
+  },
+  "Mbekezeli Mbokazi": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T09:02:22.961Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Mbekezeli%20Mbokazi"
+  },
+  "Ime Okon": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T09:02:25.115Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ime%20Okon"
+  },
+  "Samukele Kabini": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T09:02:28.118Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Samukele%20Kabini"
+  },
+  "Khulumani Ndamane": {
+    "value": 0.8,
+    "fetchedAt": "2026-06-01T09:02:30.972Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Khulumani%20Ndamane"
+  },
+  "Thabang Matuludi": {
+    "value": 0.9,
+    "fetchedAt": "2026-06-01T09:02:33.145Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Thabang%20Matuludi"
+  },
+  "Kamogelo Sebelebele": {
+    "value": 0.9,
+    "fetchedAt": "2026-06-01T09:02:35.469Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Kamogelo%20Sebelebele"
+  },
+  "Bradley Cross": {
+    "value": 0.7,
+    "fetchedAt": "2026-06-01T09:02:37.647Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Bradley%20Cross"
+  },
+  "Olwethu Makhanya": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T09:02:40.292Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Olwethu%20Makhanya"
+  },
+  "Sphephelo Sithole": {
+    "value": 0.6,
+    "fetchedAt": "2026-06-01T09:02:42.448Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Sphephelo%20Sithole"
+  },
+  "Thalente Mbatha": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T09:02:44.656Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Thalente%20Mbatha"
+  },
+  "Lyle Foster": {
+    "value": 10,
+    "fetchedAt": "2026-06-01T09:02:46.831Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Lyle%20Foster"
+  },
+  "Evidence Makgopa": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T09:02:49.010Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Evidence%20Makgopa"
+  },
+  "Oswin Appollis": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T09:02:51.173Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Oswin%20Appollis"
+  },
+  "Iqraam Rayners": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T09:02:53.325Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Iqraam%20Rayners"
+  },
+  "Relebohile Mofokeng": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T09:02:56.350Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Relebohile%20Mofokeng"
+  },
+  "Thapelo Maseko": {
+    "value": 0.8,
+    "fetchedAt": "2026-06-01T09:02:58.538Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Thapelo%20Maseko"
+  },
+  "Tshepang Moremi": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T09:03:01.051Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Tshepang%20Moremi"
+  },
+  "Liam Kelly": {
+    "value": 0.3,
+    "fetchedAt": "2026-06-01T09:03:03.451Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Liam%20Kelly"
+  },
+  "Jack Hendry": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T09:03:05.624Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Jack%20Hendry"
+  },
+  "Nathan Patterson": {
+    "value": 10,
+    "fetchedAt": "2026-06-01T09:03:08.754Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Nathan%20Patterson"
+  },
+  "Anthony Ralston": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T09:03:10.992Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Anthony%20Ralston"
+  },
+  "Aaron Hickey": {
+    "value": 16,
+    "fetchedAt": "2026-06-01T09:03:14.656Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Aaron%20Hickey"
+  },
+  "Dominic Hyam": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T09:03:17.391Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Dominic%20Hyam"
+  },
+  "Kenny McLean": {
+    "value": 0.4,
+    "fetchedAt": "2026-06-01T09:03:19.588Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Kenny%20McLean"
+  },
+  "Lewis Ferguson": {
+    "value": 14,
+    "fetchedAt": "2026-06-01T09:03:21.962Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Lewis%20Ferguson"
+  },
+  "Ben Gannon-Doak": {
+    "value": 16,
+    "fetchedAt": "2026-06-01T09:03:24.667Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ben%20Gannon-Doak"
+  },
+  "Findlay Curtis": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T09:03:26.822Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Findlay%20Curtis"
+  },
+  "George Hirst": {
+    "value": 10,
+    "fetchedAt": "2026-06-01T09:03:31.277Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=George%20Hirst"
+  },
+  "Ross Stewart": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T09:03:33.767Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Ross%20Stewart"
+  },
+  "Herman Johansson": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T09:03:36.203Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Herman%20Johansson"
+  },
+  "Daniel Svensson": {
+    "value": 22,
+    "fetchedAt": "2026-06-01T09:03:38.424Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Daniel%20Svensson"
+  },
+  "Viktor Johansson": {
+    "value": 12,
+    "fetchedAt": "2026-06-01T09:03:40.656Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Viktor%20Johansson"
+  },
+  "Hjalmar Ekdal": {
+    "value": 6,
+    "fetchedAt": "2026-06-01T09:03:42.815Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Hjalmar%20Ekdal"
+  },
+  "Carl Starfelt": {
+    "value": 5,
+    "fetchedAt": "2026-06-01T09:03:45.469Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Carl%20Starfelt"
+  },
+  "Yasin Ayari": {
+    "value": 30,
+    "fetchedAt": "2026-06-01T09:03:47.659Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Yasin%20Ayari"
+  },
+  "Mattias Svanberg": {
+    "value": 8,
+    "fetchedAt": "2026-06-01T09:03:50.303Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Mattias%20Svanberg"
+  },
+  "Eric Smith": {
+    "value": 5,
+    "fetchedAt": "2026-06-01T09:03:52.596Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Eric%20Smith"
+  },
+  "Alexander Bernhardsson": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T09:03:54.775Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Alexander%20Bernhardsson"
+  },
+  "Besfort Zeneli": {
+    "value": 5,
+    "fetchedAt": "2026-06-01T09:03:58.017Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Besfort%20Zeneli"
+  },
+  "Kristoffer Nordfeldt": {
+    "value": 0.2,
+    "fetchedAt": "2026-06-01T09:04:00.170Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Kristoffer%20Nordfeldt"
+  },
+  "Elliot Stroud": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T09:04:02.341Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Elliot%20Stroud"
+  },
+  "Gustaf Nilsson": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T09:04:04.755Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Gustaf%20Nilsson"
+  },
+  "Taha Ali": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T09:04:07.395Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Taha%20Ali"
+  },
+  "Sabri Ben Hessen": {
+    "value": 0.4,
+    "fetchedAt": "2026-06-01T09:04:10.481Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Sabri%20Ben%20Hessen"
+  },
+  "Mouhib Chamakh": {
+    "value": 0.5,
+    "fetchedAt": "2026-06-01T09:04:12.702Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Mouhib%20Chamakh"
+  },
+  "Mohamed Amine Ben Hamida": {
+    "value": 0.7,
+    "fetchedAt": "2026-06-01T09:04:15.069Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Mohamed%20Amine%20Ben%20Hamida"
+  },
+  "Moutaz Neffati": {
+    "value": 0.9,
+    "fetchedAt": "2026-06-01T09:04:18.721Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Moutaz%20Neffati"
+  },
+  "Omar Rekik": {
+    "value": 0.5,
+    "fetchedAt": "2026-06-01T09:04:21.806Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Omar%20Rekik"
+  },
+  "Adem Arous": {
+    "value": 4,
+    "fetchedAt": "2026-06-01T09:04:24.052Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Adem%20Arous"
+  },
+  "Raed Chikhaoui": {
+    "value": 0.3,
+    "fetchedAt": "2026-06-01T09:04:26.548Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Raed%20Chikhaoui"
+  },
+  "Mortadha Ben Ouanes": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T09:04:28.836Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Mortadha%20Ben%20Ouanes"
+  },
+  "Ismaël Gharbi": {
+    "value": 5,
+    "fetchedAt": "2026-06-01T09:04:31.447Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Isma%C3%ABl%20Gharbi"
+  },
+  "Hadj Mahmoud": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T09:04:34.377Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Hadj%20Mahmoud"
+  },
+  "Rani Khedira": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T09:04:36.654Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Rani%20Khedira"
+  },
+  "Elias Saad": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T09:04:39.549Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Elias%20Saad"
+  },
+  "Sebastian Tounekti": {
+    "value": 5,
+    "fetchedAt": "2026-06-01T09:04:41.759Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Sebastian%20Tounekti"
+  },
+  "Khalil Ayari": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T09:04:44.088Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Khalil%20Ayari"
+  },
+  "Rayan Elloumi": {
+    "value": 0.6,
+    "fetchedAt": "2026-06-01T09:04:46.259Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Rayan%20Elloumi"
+  },
+  "Fernando Muslera": {
+    "value": 0.7,
+    "fetchedAt": "2026-06-01T09:04:48.608Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Fernando%20Muslera"
+  },
+  "Sergio Rochet": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T09:04:51.465Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Sergio%20Rochet"
+  },
+  "Santiago Mele": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T09:04:53.773Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Santiago%20Mele"
+  },
+  "Matías Viña": {
+    "value": 4,
+    "fetchedAt": "2026-06-01T09:04:56.067Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Mat%C3%ADas%20Vi%C3%B1a"
+  },
+  "Mathías Olivera": {
+    "value": 15,
+    "fetchedAt": "2026-06-01T09:04:58.245Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Math%C3%ADas%20Olivera"
+  },
+  "Guillermo Varela": {
+    "value": 1,
+    "fetchedAt": "2026-06-01T09:05:01.953Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Guillermo%20Varela"
+  },
+  "Sebastián Cáceres": {
+    "value": 5,
+    "fetchedAt": "2026-06-01T09:05:04.180Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Sebasti%C3%A1n%20C%C3%A1ceres"
+  },
+  "Joaquín Piquerez": {
+    "value": 12,
+    "fetchedAt": "2026-06-01T09:05:06.529Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Joaqu%C3%ADn%20Piquerez"
+  },
+  "Santiago Bueno": {
+    "value": 10,
+    "fetchedAt": "2026-06-01T09:05:09.403Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Santiago%20Bueno"
+  },
+  "Giorgian de Arrascaeta": {
+    "value": 14,
+    "fetchedAt": "2026-06-01T09:05:12.373Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Giorgian%20de%20Arrascaeta"
+  },
+  "Facundo Pellistri": {
+    "value": 6,
+    "fetchedAt": "2026-06-01T09:05:15.271Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Facundo%20Pellistri"
+  },
+  "Nicolás de la Cruz": {
+    "value": 8,
+    "fetchedAt": "2026-06-01T09:05:17.891Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Nicol%C3%A1s%20de%20la%20Cruz"
+  },
+  "Brian Rodríguez": {
+    "value": 8,
+    "fetchedAt": "2026-06-01T09:05:20.570Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Brian%20Rodr%C3%ADguez"
+  },
+  "Agustín Canobbio": {
+    "value": 8,
+    "fetchedAt": "2026-06-01T09:05:22.762Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Agust%C3%ADn%20Canobbio"
+  },
+  "Rodrigo Zalazar": {
+    "value": 30,
+    "fetchedAt": "2026-06-01T09:05:25.450Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Rodrigo%20Zalazar"
+  },
+  "Federico Viñas": {
+    "value": 4,
+    "fetchedAt": "2026-06-01T09:05:29.208Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Federico%20Vi%C3%B1as"
+  },
+  "Rodrigo Aguirre": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T09:05:31.980Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Rodrigo%20Aguirre"
+  },
+  "Miles Robinson": {
+    "value": 4,
+    "fetchedAt": "2026-06-01T09:05:34.275Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Miles%20Robinson"
+  },
+  "Tim Ream": {
+    "value": 0.2,
+    "fetchedAt": "2026-06-01T09:05:36.797Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Tim%20Ream"
+  },
+  "Sebastian Berhalter": {
+    "value": 5,
+    "fetchedAt": "2026-06-01T09:05:39.153Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Sebastian%20Berhalter"
+  },
+  "Cristian Roldan": {
+    "value": 4,
+    "fetchedAt": "2026-06-01T09:05:41.577Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Cristian%20Roldan"
+  },
+  "Alex Freeman": {
+    "value": 4,
+    "fetchedAt": "2026-06-01T09:05:44.742Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Alex%20Freeman"
+  },
+  "Malik Tillman": {
+    "value": 30,
+    "fetchedAt": "2026-06-01T09:05:47.182Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Malik%20Tillman"
+  },
+  "Maximilian Arfsten": {
+    "value": 5,
+    "fetchedAt": "2026-06-01T09:05:49.370Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Maximilian%20Arfsten"
+  },
+  "Haji Wright": {
+    "value": 16,
+    "fetchedAt": "2026-06-01T09:05:51.540Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Haji%20Wright"
+  },
+  "Mark McKenzie": {
+    "value": 6,
+    "fetchedAt": "2026-06-01T09:05:53.699Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Mark%20McKenzie"
+  },
+  "Joe Scally": {
+    "value": 7,
+    "fetchedAt": "2026-06-01T09:05:55.871Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Joe%20Scally"
+  },
+  "Matt Freese": {
+    "value": 2,
+    "fetchedAt": "2026-06-01T09:05:58.035Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Matt%20Freese"
+  },
+  "Chris Brady": {
+    "value": 3,
+    "fetchedAt": "2026-06-01T09:06:00.678Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Chris%20Brady"
+  },
+  "Alejandro Zendejas": {
+    "value": 10,
+    "fetchedAt": "2026-06-01T09:06:02.942Z",
+    "sourceUrl": "https://www.transfermarkt.com/schnellsuche/ergebnis/schnellsuche?query=Alejandro%20Zendejas"
+  }
+}

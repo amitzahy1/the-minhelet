@@ -208,7 +208,7 @@ export const OFFICIAL_SQUADS: Record<string, OfficialStatus> = {
     source: "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_squads#United_States",
   },
 };
-export const LAST_SYNC: string | null = "2026-06-01T08:22:14.899Z";
+export const LAST_SYNC: string | null = "2026-06-01T08:27:22.569Z";
 // <generated-end>
 
 export function getOfficialStatus(code: string): OfficialStatus | null {

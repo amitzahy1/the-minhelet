@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import fdMatchDetailsBundled from "@/lib/tournament/fd-match-details.json";
+import { toAppCode, findUnmappedTeams } from "@/lib/fd-team-mapping";
 
 interface FdDetails {
   syncedAt?: string;
@@ -42,20 +43,6 @@ function detailFor(id: string | number, dynamicDetails: FdDetails | null) {
 }
 
 const BASE_URL = "https://api.football-data.org/v4";
-
-// Football-Data.org uses a few TLAs that differ from the FIFA codes this app
-// keys everything on (flags, squads, market values, group definitions). If
-// these aren't normalised here, every downstream consumer fails to match the
-// fixture to its team: the betting page can't sort by real kickoff date (so
-// matchday headers come out in the wrong order), and names/flags/advancement
-// silently fall back to placeholders. Normalise at the API boundary — the one
-// place external data enters — so the rest of the app only ever sees app codes.
-const FD_TLA_TO_APP: Record<string, string> = {
-  CUW: "CUR", // Curaçao (Group E)
-  URY: "URU", // Uruguay (Group H)
-};
-const toAppCode = (tla: string | undefined): string =>
-  (tla && FD_TLA_TO_APP[tla]) || tla || "TBD";
 
 interface FdRawMatch {
   id: number;
@@ -206,7 +193,18 @@ export async function GET() {
     });
   }
 
-  const payload: { matches: Match[]; error?: string } = { matches: merged };
+  // Loud identity guard: any real (non-TBD) team whose code the app doesn't
+  // recognise means a missing TLA alias — the bug that scrambled the matchday
+  // order. Surface it in the payload (admin SystemStatus shows it) and log it,
+  // instead of silently serving a fixture nobody can match. Re-trips whenever
+  // a knockout draw introduces a team with an unmapped TLA.
+  const unmappedTeams = findUnmappedTeams(merged);
+  if (unmappedTeams.length) {
+    console.error(`[/api/matches] Unmapped team codes: ${unmappedTeams.join(", ")} — add to FD_TLA_TO_APP in src/lib/fd-team-mapping.ts`);
+  }
+
+  const payload: { matches: Match[]; error?: string; unmappedTeams?: string[] } = { matches: merged };
   if ("error" in fdResult && fdResult.error) payload.error = fdResult.error;
+  if (unmappedTeams.length) payload.unmappedTeams = unmappedTeams;
   return NextResponse.json(payload);
 }

@@ -32,7 +32,12 @@ export function SystemStatus() {
     try {
       const res = await fetch("/api/matches");
       const data = await res.json();
-      results.footballApi = data.matches?.length > 0
+      // An unmapped team code means a missing TLA alias (the bug that scrambled
+      // the matchday order) — flag it loudly even when matches loaded fine.
+      const unmapped: string[] = data.unmappedTeams || [];
+      results.footballApi = unmapped.length > 0
+        ? { ok: false, message: `קודי קבוצה לא ממופים: ${unmapped.join(", ")} — הוסף ל-FD_TLA_TO_APP` }
+        : data.matches?.length > 0
         ? { ok: true, message: `${data.matches.length} משחקים זמינים`, lastUpdate: new Date().toLocaleString("he-IL") }
         : { ok: false, message: data.error || "אין נתוני משחקים" };
     } catch { results.footballApi = { ok: false, message: "שגיאת חיבור ל-API" }; }

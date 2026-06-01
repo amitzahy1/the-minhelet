@@ -36,7 +36,6 @@ const BETTING_PAGES = [
 // Tracking/social pages
 const TRACKING_ITEMS = [
   { href: "/standings", label: "ראשי", iconKey: "leaderboard" as const },
-  { href: "/knockout-live", label: "עץ אמת", iconKey: "bracket" as const },
   { href: "/compare", label: "השוואה", iconKey: "compare" as const },
   { href: "/live", label: "לייב", iconKey: "live" as const },
   { href: "/schedule", label: "לו״ז", iconKey: "schedule" as const },
@@ -678,6 +677,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                         {p.label}
                       </Link>
                     ))}
+                    <div className="px-4 pt-2 pb-1 mt-1 border-t border-gray-100">
+                      <p className="text-xs text-gray-400 font-bold">במהלך הטורניר</p>
+                    </div>
+                    <Link href="/knockout-live" onClick={() => setShowBetsMenu(false)}
+                      className={`flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors ${
+                        pathname === "/knockout-live" ? "bg-emerald-50 text-emerald-700" : "text-gray-700 hover:bg-gray-50"
+                      }`}>
+                      <span className="w-6 h-6 rounded-full flex items-center justify-center bg-emerald-100 text-emerald-700">🟢</span>
+                      עץ נתוני אמת
+                    </Link>
                   </div>
                 </>
               )}

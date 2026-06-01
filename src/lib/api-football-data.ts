@@ -19,7 +19,7 @@ async function fetchAPI(endpoint: string) {
 
   const res = await fetch(`${BASE_URL}${endpoint}`, {
     headers: { "X-Auth-Token": token },
-    next: { revalidate: 300 }, // Cache for 5 minutes
+    next: { revalidate: 600 }, // Cache for 10 minutes
   });
 
   if (!res.ok) {

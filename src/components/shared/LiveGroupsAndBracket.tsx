@@ -384,7 +384,7 @@ export function LiveGroupsAndBracket() {
         </button>
       </div>
 
-      <p className="text-[10px] text-gray-400 font-medium">מקור: תוצאות אמת · עדכון כל 5 דק׳</p>
+      <p className="text-[10px] text-gray-400 font-medium">מקור: תוצאות אמת · עדכון כל 10 דק׳</p>
 
       {tab === "groups" && (
         <div className="space-y-4">

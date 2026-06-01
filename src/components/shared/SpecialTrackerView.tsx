@@ -403,12 +403,12 @@ export function SpecialTrackerView({
       if (alive) setLoading(false);
     };
     load();
-    // Refresh every 5 min while the tab is visible — matches the upstream
-    // Football-Data cache window and keeps the "עודכן" timestamp honest. Skipped
-    // when hidden so idle background tabs don't poll forever.
+    // Refresh every 10 min while the tab is visible. Special bets are slow-moving
+    // tournament aggregates, so 10 min is plenty (and matches the upstream cache).
+    // Skipped when hidden so idle background tabs don't poll.
     const id = setInterval(() => {
       if (typeof document === "undefined" || document.visibilityState === "visible") load();
-    }, 5 * 60 * 1000);
+    }, 10 * 60 * 1000);
     return () => { alive = false; clearInterval(id); };
   }, [isDemo]);
 

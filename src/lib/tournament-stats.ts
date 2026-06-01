@@ -129,7 +129,7 @@ async function fetchFdScorers(limit = 25): Promise<ScorerRow[]> {
   try {
     const res = await fetch(
       `https://api.football-data.org/v4/competitions/WC/scorers?season=2026&limit=${limit}`,
-      { headers: { "X-Auth-Token": token }, next: { revalidate: 300 } }
+      { headers: { "X-Auth-Token": token }, next: { revalidate: 600 } }
     );
     if (!res.ok) return [];
     const data = await res.json();

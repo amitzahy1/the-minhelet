@@ -7,6 +7,7 @@
 // ============================================================================
 
 import { createClient } from "@supabase/supabase-js";
+import { penaltiesResult } from "@/lib/constants";
 
 // ---------- Types ----------
 
@@ -182,7 +183,14 @@ async function fetchActuals(): Promise<TournamentActuals | null> {
       .select("*")
       .limit(1)
       .maybeSingle();
-    return (data as TournamentActuals | null) ?? null;
+    const actuals = (data as TournamentActuals | null) ?? null;
+    if (actuals) {
+      // OVER/UNDER is always derived from the entered total vs PENALTIES_LINE —
+      // never the stored column — so a line change re-resolves correctly and a
+      // stale/blank stored value can't mis-score. (Includes ET, excludes shootouts.)
+      actuals.penalties_over_under = penaltiesResult(actuals.total_penalties);
+    }
+    return actuals;
   } catch {
     return null;
   }

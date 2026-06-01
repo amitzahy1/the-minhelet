@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { getTopScorers, type Scorer } from "@/lib/api-football-data";
+import { penaltiesResult } from "@/lib/constants";
 
 // /api/special-live
 //   Public, read-only. Aggregates real special-bet results from football-data.org
@@ -153,8 +154,10 @@ export async function GET() {
       actuals?.matchup_result_2 ?? null,
       actuals?.matchup_result_3 ?? null,
     ],
-    penalties: actuals?.penalties_over_under
-      ? { result: actuals.penalties_over_under, total: actuals.total_penalties ?? null }
+    // OVER/UNDER derived from the entered total vs PENALTIES_LINE (not the
+    // stored column) so display matches scoring. Shown once a total is entered.
+    penalties: actuals?.total_penalties != null
+      ? { result: penaltiesResult(actuals.total_penalties), total: actuals.total_penalties }
       : null,
     champion: actuals?.champion ?? null,
     lastUpdated: actuals?.updated_at ?? null,

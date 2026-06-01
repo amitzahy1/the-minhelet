@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GROUPS, GROUP_LETTERS, ALL_TEAMS } from "@/lib/tournament/groups";
 import { getFlag } from "@/lib/flags";
 import { MATCHUPS, parseMatchupPick, joinMatchupPicks } from "@/lib/matchups";
+import { PENALTIES_LINE } from "@/lib/constants";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -1074,7 +1075,7 @@ export function UserBetsEditor() {
                       })}
                     </div>
                   </div>
-                  <Field label="פנדלים — מעל/מתחת 18.5" locked={isFilledStr(lockedSpecial.penalties_over_under)}>
+                  <Field label={`פנדלים — מעל/מתחת ${PENALTIES_LINE}`} locked={isFilledStr(lockedSpecial.penalties_over_under)}>
                     <select
                       className={`rounded-lg border border-gray-300 px-3 py-2 text-sm w-full ${isFilledStr(lockedSpecial.penalties_over_under) ? "bg-gray-100" : "bg-white"}`}
                       value={special.penalties_over_under || ""}
@@ -1082,8 +1083,8 @@ export function UserBetsEditor() {
                       onChange={(e) => setSpecialField("penalties_over_under", e.target.value)}
                     >
                       <option value="">—</option>
-                      <option value="OVER">מעל 18.5</option>
-                      <option value="UNDER">מתחת 18.5</option>
+                      <option value="OVER">מעל {PENALTIES_LINE}</option>
+                      <option value="UNDER">מתחת {PENALTIES_LINE}</option>
                     </select>
                   </Field>
                 </div>

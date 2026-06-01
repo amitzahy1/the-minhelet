@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import { getFlag, getTeamNameHe } from "@/lib/flags";
 import { getTeamByCode } from "@/lib/tournament/groups";
 import { MATCHUPS } from "@/lib/matchups";
+import { PENALTIES_LINE } from "@/lib/constants";
 import type {
   BettorSpecialBets,
   BettorAdvancement,
@@ -535,7 +536,7 @@ export function SpecialTrackerView({ specialBets, advancements, currentUserId }:
       userId: b.userId,
       name: b.name,
       pick,
-      pickLabel: pick === "OVER" ? "⬆ מעל 18.5" : pick === "UNDER" ? "⬇ מתחת 18.5" : "—",
+      pickLabel: pick === "OVER" ? `⬆ מעל ${PENALTIES_LINE}` : pick === "UNDER" ? `⬇ מתחת ${PENALTIES_LINE}` : "—",
       status,
       isYou: b.isYou,
     };
@@ -671,14 +672,14 @@ export function SpecialTrackerView({ specialBets, advancements, currentUserId }:
         {/* PENALTIES */}
         <CategoryCard
           icon="⚖️"
-          title="סה״כ פנדלים (מעל / מתחת 18.5)"
+          title={`סה״כ פנדלים (מעל / מתחת ${PENALTIES_LINE})`}
           subtitle={penaltiesSubtitle}
           hitCount={penaltiesHits}
         >
           {stats.actuals?.penalties_over_under && (
             <LeaderList
               items={[{
-                label: stats.actuals.penalties_over_under === "OVER" ? "⬆ מעל 18.5" : "⬇ מתחת 18.5",
+                label: stats.actuals.penalties_over_under === "OVER" ? `⬆ מעל ${PENALTIES_LINE}` : `⬇ מתחת ${PENALTIES_LINE}`,
                 value: stats.actuals.total_penalties ? `${stats.actuals.total_penalties} פנדלים` : "סומן ע״י מנהל",
               }]}
             />

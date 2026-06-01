@@ -16,6 +16,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { getFlag, getTeamNameHe } from "@/lib/flags";
 import { MATCHUPS } from "@/lib/matchups";
+import { PENALTIES_LINE } from "@/lib/constants";
 import type {
   TournamentStatsPayload,
   ScorerRow,
@@ -314,7 +315,7 @@ function evalPenaltiesPick(
   bettors: BettorLike[],
   actualTotal: number | null,
   actualResult: "OVER" | "UNDER" | null,
-  threshold = 18.5
+  threshold = PENALTIES_LINE
 ): PickEval[] {
   return bettors.map((b) => {
     const pick = b.penalties;
@@ -525,11 +526,11 @@ export function SpecialTrackerView({
 
     // Category 10: Penalties total over/under
     const penalties = {
-      title: "סה״כ פנדלים · מעל/מתחת 18.5",
+      title: `סה״כ פנדלים · מעל/מתחת ${PENALTIES_LINE}`,
       subtitle: actuals?.penalties_over_under ? `הוכרע: ${actuals.penalties_over_under === "OVER" ? "מעל" : "מתחת"}` : undefined,
       icon: "🎯",
       leaders: actuals?.total_penalties != null ? [{ label: "בפועל עד כה", value: `${actuals.total_penalties} פנדלים` }] : [],
-      picks: evalPenaltiesPick(bettorsEval, actuals?.total_penalties ?? null, actuals?.penalties_over_under ?? null, 18.5),
+      picks: evalPenaltiesPick(bettorsEval, actuals?.total_penalties ?? null, actuals?.penalties_over_under ?? null, PENALTIES_LINE),
       empty: actuals?.total_penalties == null && !actuals?.penalties_over_under,
     };
 

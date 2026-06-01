@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { ALL_TEAMS, GROUP_LETTERS } from "@/lib/tournament/groups";
 import { getFlag } from "@/lib/flags";
 import { MATCHUPS } from "@/lib/matchups";
+import { PENALTIES_LINE, penaltiesResult } from "@/lib/constants";
 
 type Actuals = {
   top_scorer_player: string | null;
@@ -323,7 +324,7 @@ export function SpecialResultsEntry() {
         {/* Penalties + champion */}
         <Section title="⚖️ פנדלים ואלוף">
           <div className="grid sm:grid-cols-2 gap-3">
-            <Field label="סה״כ פנדלים בטורניר">
+            <Field label="סה״כ פנדלים בטורניר (כולל הארכות, ללא דו-קרב פנדלים)">
               <Input
                 type="number"
                 min={0}
@@ -332,28 +333,28 @@ export function SpecialResultsEntry() {
                 dir="ltr"
               />
             </Field>
-            <Field label="פנדלים — מעל / מתחת 18.5">
-              <div className="flex gap-2">
-                {(["OVER", "UNDER"] as const).map((side) => {
-                  const active = actuals.penalties_over_under === side;
+            <Field label={`מעל / מתחת ${PENALTIES_LINE} (מחושב אוטומטית)`}>
+              {(() => {
+                const derived = penaltiesResult(actuals.total_penalties);
+                if (!derived) {
                   return (
-                    <button
-                      key={side}
-                      type="button"
-                      onClick={() => set("penalties_over_under", active ? null : side)}
-                      className={`flex-1 py-2 rounded-lg border text-xs font-bold transition-colors ${
-                        active
-                          ? side === "OVER"
-                            ? "bg-emerald-600 text-white border-emerald-600"
-                            : "bg-blue-600 text-white border-blue-600"
-                          : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
-                      }`}
-                    >
-                      {side === "OVER" ? "⬆ מעל 18.5" : "⬇ מתחת 18.5"}
-                    </button>
+                    <div className="py-2 px-3 rounded-lg border border-dashed border-gray-200 text-xs text-gray-400">
+                      הזן סה״כ פנדלים כדי לחשב
+                    </div>
                   );
-                })}
-              </div>
+                }
+                return (
+                  <div
+                    className={`py-2 px-3 rounded-lg border text-xs font-bold ${
+                      derived === "OVER"
+                        ? "bg-emerald-600 text-white border-emerald-600"
+                        : "bg-blue-600 text-white border-blue-600"
+                    }`}
+                  >
+                    {derived === "OVER" ? `⬆ מעל ${PENALTIES_LINE}` : `⬇ מתחת ${PENALTIES_LINE}`}
+                  </div>
+                );
+              })()}
             </Field>
             <Field label="אלוף העולם">
               <TeamPicker value={actuals.champion} onChange={(v) => set("champion", v)} />

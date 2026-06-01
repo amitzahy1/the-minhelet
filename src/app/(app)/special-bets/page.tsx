@@ -9,7 +9,7 @@ import { getSquad } from "@/lib/tournament/squads-data";
 import { getFlag } from "@/lib/flags";
 import { PageTransition } from "@/components/shared/PageTransition";
 import { SaveAndContinue } from "@/components/shared/SaveAndContinue";
-import { formatLockDeadline } from "@/lib/constants";
+import { formatLockDeadline, PENALTIES_LINE } from "@/lib/constants";
 import { AgreementBadge } from "@/components/shared/AgreementBadge";
 import { StillAliveBadge } from "@/components/shared/StillAliveBadge";
 import { useConfetti } from "@/hooks/useConfetti";
@@ -508,9 +508,9 @@ export default function SpecialBetsPage() {
           </SectionCard>
         ))}
 
-        <SectionCard title="סה״כ פנדלים בטורניר" subtitle="אובר / אנדר 18.5" points="5 נק׳">
+        <SectionCard title="סה״כ פנדלים בטורניר" subtitle={`אובר / אנדר ${PENALTIES_LINE} · כולל הארכות, ללא דו-קרב פנדלים`} points="5 נק׳">
           <div className="flex gap-3">
-            {[{ val: "OVER", label: "מעל 18.5" }, { val: "UNDER", label: "מתחת 18.5" }].map(opt => (
+            {[{ val: "OVER", label: `מעל ${PENALTIES_LINE}` }, { val: "UNDER", label: `מתחת ${PENALTIES_LINE}` }].map(opt => (
               <button key={opt.val} onClick={() => set("penaltiesOverUnder", opt.val)}
                 className={`flex-1 py-3 rounded-xl border text-sm font-bold transition-all ${
                   sb.penaltiesOverUnder === opt.val ? "bg-blue-50 border-blue-300 text-blue-700 shadow-sm" : "border-gray-200 text-gray-600 hover:bg-gray-50"

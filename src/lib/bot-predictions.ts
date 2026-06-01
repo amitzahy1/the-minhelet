@@ -12,6 +12,7 @@ import {
   resolveGroupSlot,
 } from "./tournament/knockout-derivation";
 import { joinMatchupPicks } from "./matchups";
+import { PENALTIES_LINE } from "./constants";
 
 export interface BotPrediction {
   group_predictions: Record<string, { order: number[]; scores: Array<{ home: number; away: number }> }>;
@@ -301,7 +302,7 @@ export function generateBotPrediction(): BotPrediction {
   // Penalties over/under — champion runs typically accumulate many penalty kicks
   const penalties = "OVER";
   rationale.push(
-    `פנדלים: מעל 18.5 — 104 משחקים זה הרבה, ובשלבי הנוקאאוט יש הרבה פנדלים (כולל הארכות).`
+    `פנדלים: מעל ${PENALTIES_LINE} — 104 משחקים זה הרבה, ובשלבי הנוקאאוט יש הרבה פנדלים (כולל הארכות, ללא דו-קרב פנדלים).`
   );
 
   return {

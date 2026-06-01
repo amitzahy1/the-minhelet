@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { verifyAdmin } from "../verify-admin";
+import { penaltiesResult } from "@/lib/constants";
 
 /**
  * /api/admin/special-results
@@ -16,7 +17,9 @@ const SPECIAL_FIELDS = [
   "most_prolific_group", "most_prolific_goals",
   "driest_group", "driest_group_goals",
   "matchup_result_1", "matchup_result_2", "matchup_result_3",
-  "total_penalties", "penalties_over_under",
+  // penalties_over_under is NOT client-settable — it is derived from
+  // total_penalties vs PENALTIES_LINE below.
+  "total_penalties",
   "champion",
 ] as const;
 
@@ -88,6 +91,17 @@ export async function POST(request: Request) {
       changed.push(f);
     }
   }
+  // Derive OVER/UNDER from the entered total so the stored column stays in sync
+  // with the count. Scoring re-derives the same way (see fetchActuals), so this
+  // is a convenience cache for direct readers, not the source of truth.
+  if ("total_penalties" in body) {
+    const derived = penaltiesResult(updates["total_penalties"] as number | null);
+    if (JSON.stringify(existing?.penalties_over_under ?? null) !== JSON.stringify(derived)) {
+      changed.push("penalties_over_under");
+    }
+    updates["penalties_over_under"] = derived;
+  }
+
   updates["entered_by"] = adminEmail;
   updates["updated_at"] = new Date().toISOString();
 

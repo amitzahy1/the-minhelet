@@ -13,15 +13,15 @@
 // blue-indigo gradient headers, Secular One for Hebrew, Inter for numbers.
 // ============================================================================
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { getFlag, getTeamNameHe } from "@/lib/flags";
 import { MATCHUPS } from "@/lib/matchups";
+import { GROUPS } from "@/lib/tournament/groups";
 import { PENALTIES_LINE } from "@/lib/constants";
+import { SCORING } from "@/types";
+import { DEMO_BETTORS, DEMO_STATS } from "./special-tracker-demo";
 import type {
   TournamentStatsPayload,
-  ScorerRow,
-  TeamGoalStats,
-  GroupGoalStats,
   TournamentActuals,
 } from "@/lib/tournament-stats";
 
@@ -46,29 +46,61 @@ export interface BettorLike {
 
 type PickStatus = "hit" | "leading" | "onTrack" | "listed" | "behind" | "notInRace" | "tied" | "empty";
 
-interface PickEval {
+interface BettorChip {
   userId: string;
   name: string;
   isYou?: boolean;
-  pickLabel: string;
   status: PickStatus;
-  note?: string; // e.g. "#3 במירוץ" or "5⚽"
+}
+
+// One option line in a card: the contender (player / team / group / choice),
+// its current standing, and the participants who bet on it shown right beside it.
+interface OptionRow {
+  key: string;
+  label: ReactNode;
+  sub?: ReactNode;    // tiny secondary line under the name (e.g. group teams)
+  value2?: ReactNode; // optional leading metric (e.g. weighted dirtiness score)
+  value?: ReactNode;  // main metric cell (number, or a card breakdown)
+  rank?: number | null;
+  decided?: boolean;  // this option is the confirmed actual result
+  bettors: BettorChip[];
 }
 
 // -- Helpers ----------------------------------------------------------------
 
-function statusStyle(s: PickStatus): { bg: string; text: string; icon: string; label: string } {
-  switch (s) {
-    case "hit":       return { bg: "bg-green-100", text: "text-green-800", icon: "✓", label: "תפס!" };
-    case "leading":   return { bg: "bg-emerald-50 border border-emerald-300", text: "text-emerald-800", icon: "🏆", label: "מוביל" };
-    case "onTrack":   return { bg: "bg-amber-50 border border-amber-200", text: "text-amber-800", icon: "📈", label: "בדרך" };
-    case "listed":    return { bg: "bg-blue-50/70 border border-blue-200", text: "text-blue-800", icon: "📊", label: "במירוץ" };
-    case "tied":      return { bg: "bg-amber-50 border border-amber-200", text: "text-amber-800", icon: "🤝", label: "תיקו" };
-    case "behind":    return { bg: "bg-orange-50/60 border border-orange-200", text: "text-orange-700", icon: "📉", label: "מאחור" };
-    case "notInRace": return { bg: "bg-gray-50 border border-gray-200", text: "text-gray-500", icon: "❌", label: "לא במירוץ" };
-    case "empty":     return { bg: "bg-gray-50 border border-dashed border-gray-200", text: "text-gray-400", icon: "—", label: "לא הימר" };
-  }
+// Each participant gets ONE fixed color across every card, so you can scan a
+// single friend top-to-bottom. Pastel bg + dark text — same family as the
+// compare page. Status (hit / miss / leading) is conveyed by the row instead:
+// the settled row is green-tinted and misses are dimmed.
+const PERSON_COLORS: { bg: string; text: string }[] = [
+  { bg: "bg-blue-100", text: "text-blue-800" },
+  { bg: "bg-emerald-100", text: "text-emerald-800" },
+  { bg: "bg-amber-100", text: "text-amber-900" },
+  { bg: "bg-purple-100", text: "text-purple-800" },
+  { bg: "bg-pink-100", text: "text-pink-800" },
+  { bg: "bg-cyan-100", text: "text-cyan-800" },
+  { bg: "bg-orange-100", text: "text-orange-800" },
+  { bg: "bg-indigo-100", text: "text-indigo-800" },
+  { bg: "bg-lime-100", text: "text-lime-800" },
+  { bg: "bg-rose-100", text: "text-rose-800" },
+  { bg: "bg-teal-100", text: "text-teal-800" },
+  { bg: "bg-sky-100", text: "text-sky-800" },
+];
+const NEUTRAL_COLOR = { bg: "bg-gray-100", text: "text-gray-600" };
+
+// "עודכן לפני X" relative label. Client-clock based; fine for a freshness hint.
+function relTime(d: Date | null | undefined): string {
+  if (!d) return "";
+  const min = Math.round((Date.now() - d.getTime()) / 60000);
+  if (min < 1) return "עכשיו";
+  if (min < 60) return `לפני ${min} דק׳`;
+  const hr = Math.round(min / 60);
+  if (hr < 24) return `לפני ${hr} שע׳`;
+  return `לפני ${Math.round(hr / 24)} ימים`;
 }
+
+// "אתה" always leads the chip list on a row, so you spot yourself instantly.
+const pinYouFirst = (a: BettorChip, b: BettorChip) => (b.isYou ? 1 : 0) - (a.isYou ? 1 : 0);
 
 function rankToStatus(rank: number | null, actualIsDecided: boolean, matchesPick: boolean): PickStatus {
   if (actualIsDecided) return matchesPick ? "hit" : "notInRace";
@@ -83,270 +115,203 @@ function rankToStatus(rank: number | null, actualIsDecided: boolean, matchesPick
 
 function CategoryCard({
   title,
-  subtitle,
-  icon,
-  leaders,
-  picks,
-  empty,
+  points,
+  statusLine,
+  decidedLabel,
+  updatedAt,
+  nameHeader,
+  valueHeader2,
+  valueHeader,
+  rows,
+  notBetCount,
+  footNote,
+  colorOf,
 }: {
   title: string;
-  subtitle?: string;
-  icon: string;
-  leaders: Array<{ label: string; value: string; isActual?: boolean }>;
-  picks: PickEval[];
-  empty?: boolean;
+  points: string;              // e.g. "9 / 5 נק׳" or "5 נק׳"
+  statusLine?: string;         // live state shown inline, e.g. "12 פנדלים"
+  decidedLabel?: string;       // short result line when the bet is settled
+  updatedAt?: Date | null;
+  nameHeader: string;          // column header for the contender
+  valueHeader2?: string;       // optional leading metric column (right of valueHeader)
+  valueHeader?: string;        // column header for the metric (omit = no value column)
+  rows: OptionRow[];
+  notBetCount?: number;
+  footNote?: string;           // tiny legend, e.g. card weighting
+  colorOf: (userId: string) => { bg: string; text: string };
 }) {
-  const hits = picks.filter((p) => p.status === "hit" || p.status === "leading").length;
-  const onTrack = picks.filter((p) => p.status === "onTrack").length;
-
   return (
     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-      {/* Header — matches site style */}
-      <div className="px-4 py-3 bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/40 border-b border-blue-100/50 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <span className="text-2xl shrink-0">{icon}</span>
-          <div className="min-w-0">
-            <h3 className="text-sm sm:text-base font-black text-gray-900 truncate" style={{ fontFamily: "var(--font-secular)" }}>{title}</h3>
-            {subtitle && <p className="text-[11px] text-gray-500 truncate">{subtitle}</p>}
-          </div>
+      {/* Title bar */}
+      <div className="px-4 pt-3 pb-2 flex items-baseline justify-between gap-2">
+        <div className="min-w-0 flex items-baseline gap-2">
+          <h3 className="text-base sm:text-lg font-black text-gray-900 truncate" style={{ fontFamily: "var(--font-secular)" }}>{title}</h3>
+          <span className="shrink-0 text-[10px] font-bold text-blue-700 bg-blue-50 rounded px-1.5 py-0.5 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{points}</span>
         </div>
-        {!empty && (
-          <div className="flex items-center gap-1.5 text-[11px] shrink-0">
-            {hits > 0 && <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full px-2 py-0.5 font-bold">🏆 {hits}</span>}
-            {onTrack > 0 && <span className="bg-amber-50 text-amber-700 border border-amber-200 rounded-full px-2 py-0.5 font-bold">📈 {onTrack}</span>}
-          </div>
-        )}
-      </div>
-
-      <div className="p-4 space-y-3">
-        {/* Current leaders */}
-        {leaders.length > 0 && (
-          <div>
-            <p className="text-[11px] font-bold text-gray-500 mb-1.5 uppercase tracking-wide" style={{ fontFamily: "var(--font-inter)" }}>
-              {empty ? "טרם נקבע" : "בראש המירוץ"}
-            </p>
-            <ol className="space-y-1">
-              {leaders.slice(0, 5).map((l, i) => (
-                <li
-                  key={i}
-                  className={`flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg ${
-                    i === 0 ? "bg-gradient-to-l from-amber-50 to-yellow-50 border border-amber-200" : "bg-gray-50"
-                  }`}
-                >
-                  <span className="flex items-center gap-2 min-w-0">
-                    <span className={`text-[11px] font-black w-5 text-center ${i === 0 ? "text-amber-700" : "text-gray-400"}`} style={{ fontFamily: "var(--font-inter)" }}>
-                      {i + 1}
-                    </span>
-                    <span className="text-sm font-bold text-gray-800 truncate">{l.label}</span>
-                  </span>
-                  <span className="text-xs font-bold text-gray-700 tabular-nums shrink-0" style={{ fontFamily: "var(--font-inter)" }}>
-                    {l.value}
-                  </span>
-                </li>
-              ))}
-            </ol>
-          </div>
-        )}
-
-        {/* Bettors' picks */}
-        <div>
-          <p className="text-[11px] font-bold text-gray-500 mb-1.5 uppercase tracking-wide" style={{ fontFamily: "var(--font-inter)" }}>הימורי המשתתפים</p>
-          <div className="flex flex-wrap gap-1.5">
-            {picks.map((p) => {
-              const s = statusStyle(p.status);
-              return (
-                <span
-                  key={p.userId}
-                  className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold ${s.bg} ${s.text} ${p.isYou ? "ring-1 ring-inset ring-blue-300" : ""}`}
-                  title={`${p.name}: ${p.pickLabel} · ${s.label}${p.note ? ` · ${p.note}` : ""}`}
-                >
-                  <span className="shrink-0">{s.icon}</span>
-                  <span style={{ fontFamily: "var(--font-secular)" }}>{p.name}</span>
-                  {p.isYou && <span className="bg-blue-100 text-blue-700 rounded px-1 text-[9px]">אתה</span>}
-                  <span className="text-gray-500 font-medium">· {p.pickLabel}</span>
-                  {p.note && <span className="text-gray-400 text-[10px]">· {p.note}</span>}
-                </span>
-              );
-            })}
-            {picks.length === 0 && <span className="text-[11px] text-gray-400">אף מהמר לא בחר</span>}
-          </div>
+        <div className="flex items-baseline gap-2 shrink-0">
+          {statusLine && <span className="text-[11px] font-bold text-gray-600 whitespace-nowrap">{statusLine}</span>}
+          {decidedLabel && <span className="text-[11px] font-bold text-green-700 truncate max-w-[9rem]">{decidedLabel}</span>}
+          {updatedAt && <span className="text-[10px] text-gray-400 whitespace-nowrap">עודכן {relTime(updatedAt)}</span>}
         </div>
       </div>
+
+      {rows.length === 0 ? (
+        <p className="px-4 py-5 text-center text-[11px] text-gray-400 border-t border-gray-100">אין נתונים עדיין</p>
+      ) : (
+        <table className="w-full text-sm border-t border-gray-100">
+          <thead>
+            <tr className="text-[10px] font-bold text-gray-400 bg-gray-50/60" style={{ fontFamily: "var(--font-inter)" }}>
+              <th className="w-6 py-1.5 text-center font-bold">#</th>
+              <th className="py-1.5 px-2 text-start font-bold whitespace-nowrap">{nameHeader}</th>
+              {valueHeader2 && <th className="py-1.5 px-2 text-center font-bold whitespace-nowrap">{valueHeader2}</th>}
+              {valueHeader && <th className="py-1.5 px-2 text-center font-bold whitespace-nowrap">{valueHeader}</th>}
+              <th className="w-full py-1.5 px-2 text-end font-bold">מהמרים</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-50">
+            {rows.map((row) => (
+              <tr key={row.key} className={row.decided ? "bg-green-50/60" : ""}>
+                <td className="py-2 text-center text-[11px] font-black text-gray-300 tabular-nums align-middle" style={{ fontFamily: "var(--font-inter)" }}>
+                  {row.rank ?? ""}
+                </td>
+                <td className="py-2 px-2 align-middle">
+                  <div className={`font-bold leading-tight whitespace-nowrap ${row.decided ? "text-green-900" : "text-gray-800"}`}>{row.label}</div>
+                  {row.sub && <div className="text-[10px] text-gray-400 leading-tight mt-0.5 whitespace-nowrap">{row.sub}</div>}
+                </td>
+                {valueHeader2 && (
+                  <td className={`py-2 px-2 text-center align-middle tabular-nums text-base font-black whitespace-nowrap ${row.decided ? "text-green-700" : "text-gray-900"}`} style={{ fontFamily: "var(--font-inter)" }}>
+                    {row.value2 ?? ""}
+                  </td>
+                )}
+                {valueHeader && (
+                  <td className={`py-2 px-2 text-center align-middle tabular-nums whitespace-nowrap ${valueHeader2 ? "text-xs font-medium" : "text-base font-bold"} ${row.decided ? "text-green-700" : valueHeader2 ? "text-gray-500" : "text-gray-900"}`} style={{ fontFamily: "var(--font-inter)" }}>
+                    {row.value ?? ""}
+                  </td>
+                )}
+                <td className="py-2 px-2 align-middle">
+                  <div className="flex flex-wrap gap-1 justify-end">
+                    {row.bettors.map((bt) => {
+                      const c = colorOf(bt.userId);
+                      const miss = bt.status === "notInRace";
+                      return (
+                        <span
+                          key={bt.userId}
+                          className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-bold ${c.bg} ${c.text} ${miss ? "opacity-50" : ""} ${bt.isYou ? "ring-2 ring-inset ring-blue-500" : ""}`}
+                          style={{ fontFamily: "var(--font-secular)" }}
+                        >
+                          {bt.name}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      {(footNote || (notBetCount ?? 0) > 0) && (
+        <p className="px-4 py-1.5 text-[10px] text-gray-400 border-t border-gray-50 flex items-center justify-between gap-2">
+          <span>{footNote}</span>
+          {(notBetCount ?? 0) > 0 ? <span className="shrink-0">{notBetCount} טרם בחרו</span> : null}
+        </p>
+      )}
     </div>
   );
 }
 
-// -- Per-category evaluators ------------------------------------------------
-
-function evalPlayerPick(
-  bettors: BettorLike[],
-  getBettorPick: (b: BettorLike) => string | null,
-  scorers: ScorerRow[],
-  actualWinner: string | null,
-  sortBy: "goals" | "assists"
-): PickEval[] {
-  const sorted = [...scorers].sort(
-    (a, b) => (sortBy === "goals" ? b.goals - a.goals : b.assists - a.assists) ||
-              (sortBy === "goals" ? b.assists - a.assists : b.goals - a.goals)
-  );
-  return bettors.map((b) => {
-    const pick = getBettorPick(b);
-    if (!pick) {
-      return { userId: b.userId, name: b.name, isYou: b.isYou, pickLabel: "—", status: "empty" as PickStatus };
-    }
-    // Case-insensitive, partial-match lookup — stored names may differ slightly
-    const normalized = pick.toLowerCase();
-    const rankIdx = sorted.findIndex((s) => s.name.toLowerCase().includes(normalized) || normalized.includes(s.name.toLowerCase()));
-    const found = rankIdx >= 0 ? sorted[rankIdx] : null;
-    const rank = rankIdx >= 0 ? rankIdx + 1 : null;
-    const actualDecided = !!actualWinner;
-    const matches = actualWinner ? pick.toLowerCase().includes(actualWinner.toLowerCase()) || actualWinner.toLowerCase().includes(pick.toLowerCase()) : false;
-    const status = rankToStatus(rank, actualDecided, matches);
-    const metric = found ? `${sortBy === "goals" ? found.goals : found.assists}${sortBy === "goals" ? "⚽" : "🎯"}` : "";
-    return {
-      userId: b.userId,
-      name: b.name,
-      isYou: b.isYou,
-      pickLabel: pick,
-      status,
-      note: rank ? `#${rank}${metric ? ` · ${metric}` : ""}` : (found ? metric : "לא רשום"),
-    };
+// Group bettors under each contender. Ranked categories (scorer, team, group)
+// pass the full standings; choice categories (matchups, penalties) pass fixed
+// options. Picks outside the top rows are appended so no participant is hidden.
+function buildRankedRows(opts: {
+  bettors: BettorLike[];
+  getPick: (b: BettorLike) => string | null;
+  ranked: { key: string; label: ReactNode; sub?: ReactNode; value2?: ReactNode; value?: ReactNode }[];
+  topN: number;
+  actualKey: string | null;
+  fuzzy?: boolean;
+}): { rows: OptionRow[]; notBet: number } {
+  const { bettors, getPick, ranked, topN, actualKey, fuzzy } = opts;
+  const eq = (a: string, b: string) =>
+    fuzzy ? a.toLowerCase().includes(b.toLowerCase()) || b.toLowerCase().includes(a.toLowerCase()) : a === b;
+  const rankOf = (key: string) => {
+    const i = ranked.findIndex((r) => eq(r.key, key));
+    return i >= 0 ? i + 1 : null;
+  };
+  const picks = bettors
+    .map((b) => ({ b, pick: getPick(b) }))
+    .filter((x): x is { b: BettorLike; pick: string } => !!x.pick);
+  const notBet = bettors.length - picks.length;
+  const chip = (b: BettorLike, pick: string): BettorChip => ({
+    userId: b.userId,
+    name: b.name,
+    isYou: b.isYou,
+    status: rankToStatus(rankOf(pick), actualKey != null, actualKey != null && eq(pick, actualKey)),
   });
+
+  const rows: OptionRow[] = [];
+  const shown: string[] = [];
+  for (const r of ranked.slice(0, topN)) {
+    shown.push(r.key);
+    rows.push({
+      key: r.key,
+      label: r.label,
+      sub: r.sub,
+      value2: r.value2,
+      value: r.value,
+      rank: rankOf(r.key),
+      decided: actualKey != null && eq(r.key, actualKey),
+      bettors: picks.filter((p) => eq(p.pick, r.key)).map((p) => chip(p.b, p.pick)).sort(pinYouFirst),
+    });
+  }
+  // Picked options that aren't in the top rows — append so nobody is hidden.
+  const extra: string[] = [];
+  for (const p of picks) {
+    if (shown.some((k) => eq(k, p.pick)) || extra.some((k) => eq(k, p.pick))) continue;
+    extra.push(p.pick);
+    const entry = ranked.find((r) => eq(r.key, p.pick));
+    rows.push({
+      key: `x:${p.pick}`,
+      label: entry ? entry.label : p.pick,
+      sub: entry?.sub,
+      value2: entry?.value2,
+      value: entry?.value,
+      rank: rankOf(p.pick),
+      decided: actualKey != null && eq(p.pick, actualKey),
+      bettors: picks.filter((q) => eq(q.pick, p.pick)).map((q) => chip(q.b, q.pick)).sort(pinYouFirst),
+    });
+  }
+  return { rows, notBet };
 }
 
-function evalTeamPick(
-  bettors: BettorLike[],
-  getBettorPick: (b: BettorLike) => string | null,
-  teamStats: TeamGoalStats[],
-  actualWinner: string | null,
-  sortBy: "goalsFor" | "cards" | "goalsAgainst",
-  metricLabel: string
-): PickEval[] {
-  const sorted = [...teamStats].sort((a, b) => {
-    if (sortBy === "goalsFor") return b.goalsFor - a.goalsFor;
-    if (sortBy === "goalsAgainst") return b.goalsAgainst - a.goalsAgainst;
-    return (b.yellowCards + b.redCards * 2) - (a.yellowCards + a.redCards * 2);
-  });
-  return bettors.map((b) => {
-    const pick = getBettorPick(b);
-    if (!pick) {
-      return { userId: b.userId, name: b.name, isYou: b.isYou, pickLabel: "—", status: "empty" as PickStatus };
-    }
-    const rankIdx = sorted.findIndex((t) => t.code === pick);
-    const found = rankIdx >= 0 ? sorted[rankIdx] : null;
-    const rank = rankIdx >= 0 ? rankIdx + 1 : null;
-    const actualDecided = !!actualWinner;
-    const matches = actualWinner === pick;
-    const status = rankToStatus(rank, actualDecided, matches);
-    const metric = found
-      ? sortBy === "goalsFor" ? `${found.goalsFor}${metricLabel}` :
-        sortBy === "goalsAgainst" ? `${found.goalsAgainst}${metricLabel}` :
-        `${found.yellowCards}🟨 ${found.redCards}🟥`
-      : "לא שיחקה";
-    return {
-      userId: b.userId,
-      name: b.name,
-      isYou: b.isYou,
-      pickLabel: `${getFlag(pick)} ${getTeamNameHe(pick) || pick}`,
-      status,
-      note: rank ? `#${rank} · ${metric}` : metric,
-    };
-  });
-}
-
-function evalGroupPick(
-  bettors: BettorLike[],
-  getBettorPick: (b: BettorLike) => string | null,
-  groupStats: GroupGoalStats[],
-  actualWinner: string | null,
-  sortOrder: "mostGoals" | "fewestGoals"
-): PickEval[] {
-  const sorted = [...groupStats].sort((a, b) => sortOrder === "mostGoals" ? b.goals - a.goals : a.goals - b.goals);
-  return bettors.map((b) => {
-    const pick = getBettorPick(b);
-    if (!pick) {
-      return { userId: b.userId, name: b.name, isYou: b.isYou, pickLabel: "—", status: "empty" as PickStatus };
-    }
-    const rankIdx = sorted.findIndex((g) => g.letter === pick);
-    const found = rankIdx >= 0 ? sorted[rankIdx] : null;
-    const rank = rankIdx >= 0 ? rankIdx + 1 : null;
-    const actualDecided = !!actualWinner;
-    const matches = actualWinner === pick;
-    const status = rankToStatus(rank, actualDecided, matches);
-    const metric = found ? `${found.goals}⚽ · ${found.matches} מש׳` : "טרם";
-    return {
-      userId: b.userId,
-      name: b.name,
-      isYou: b.isYou,
-      pickLabel: `בית ${pick}`,
-      status,
-      note: rank ? `#${rank} · ${metric}` : metric,
-    };
-  });
-}
-
-function evalMatchupPick(
-  bettors: BettorLike[],
-  matchupIdx: 0 | 1 | 2,
-  actualResult: "1" | "X" | "2" | null
-): PickEval[] {
-  const mu = MATCHUPS[matchupIdx];
-  return bettors.map((b) => {
-    const pick = ([b.matchup1, b.matchup2, b.matchup3] as const)[matchupIdx];
-    if (!pick) {
-      return { userId: b.userId, name: b.name, isYou: b.isYou, pickLabel: "—", status: "empty" as PickStatus };
-    }
-    const pickLabel = pick === "1" ? mu.p1Short : pick === "2" ? mu.p2Short : "שווה";
-    if (!actualResult) {
-      return { userId: b.userId, name: b.name, isYou: b.isYou, pickLabel, status: "listed" as PickStatus, note: "ממתין לתוצאה" };
-    }
-    const matches = pick === actualResult;
-    return {
-      userId: b.userId,
-      name: b.name,
-      isYou: b.isYou,
-      pickLabel,
-      status: matches ? ("hit" as PickStatus) : ("notInRace" as PickStatus),
-    };
-  });
-}
-
-function evalPenaltiesPick(
-  bettors: BettorLike[],
-  actualTotal: number | null,
-  actualResult: "OVER" | "UNDER" | null,
-  threshold = PENALTIES_LINE
-): PickEval[] {
-  return bettors.map((b) => {
-    const pick = b.penalties;
-    if (!pick) {
-      return { userId: b.userId, name: b.name, isYou: b.isYou, pickLabel: "—", status: "empty" as PickStatus };
-    }
-    const pickLabel = pick === "OVER" ? `מעל ${threshold}` : `מתחת ${threshold}`;
-    if (actualResult) {
-      return {
-        userId: b.userId,
-        name: b.name,
-        isYou: b.isYou,
-        pickLabel,
-        status: pick === actualResult ? "hit" : "notInRace",
-        note: actualTotal != null ? `בפועל: ${actualTotal}` : undefined,
-      };
-    }
-    if (actualTotal == null) {
-      return { userId: b.userId, name: b.name, isYou: b.isYou, pickLabel, status: "listed", note: "טרם הוכרע" };
-    }
-    const currentlyOver = actualTotal > threshold;
-    const onTrack = (pick === "OVER" && currentlyOver) || (pick === "UNDER" && !currentlyOver);
-    return {
-      userId: b.userId,
-      name: b.name,
-      isYou: b.isYou,
-      pickLabel,
-      status: onTrack ? "onTrack" : "behind",
-      note: `בפועל: ${actualTotal}`,
-    };
-  });
+function buildChoiceRows(opts: {
+  bettors: BettorLike[];
+  getPick: (b: BettorLike) => string | null;
+  options: { key: string; label: ReactNode; value2?: ReactNode; value?: ReactNode }[];
+  actualKey: string | null;
+}): { rows: OptionRow[]; notBet: number } {
+  const { bettors, getPick, options, actualKey } = opts;
+  const picks = bettors
+    .map((b) => ({ b, pick: getPick(b) }))
+    .filter((x): x is { b: BettorLike; pick: string } => !!x.pick);
+  const rows = options.map<OptionRow>((o) => ({
+    key: o.key,
+    label: o.label,
+    value2: o.value2,
+    value: o.value,
+    decided: actualKey != null && o.key === actualKey,
+    bettors: picks
+      .filter((p) => p.pick === o.key)
+      .map((p) => ({
+        userId: p.b.userId,
+        name: p.b.name,
+        isYou: p.b.isYou,
+        status: actualKey != null ? (p.pick === actualKey ? "hit" : "notInRace") : ("listed" as PickStatus),
+      }))
+      .sort(pinYouFirst),
+  }));
+  return { rows, notBet: bettors.length - picks.length };
 }
 
 // -- Main component ---------------------------------------------------------
@@ -362,9 +327,21 @@ export function SpecialTrackerView({
   specialBets?: BettorSpecialBets[];
   currentUserId?: string | null;
 }) {
+  // Dev-only design preview: ?demo=1 swaps in fake bettors + tournament stats
+  // so the full card design renders before any real data exists. Ignored in
+  // production so real users never see fake data.
+  const isDemo = useMemo(
+    () =>
+      typeof window !== "undefined" &&
+      process.env.NODE_ENV !== "production" &&
+      new URLSearchParams(window.location.search).has("demo"),
+    [],
+  );
+
   // Build the BettorLike list from either an explicit `bettors` prop (legacy
   // callers) or the raw shared-data specialBets array (preferred).
   const normalizedBettors: BettorLike[] = useMemo(() => {
+    if (isDemo) return DEMO_BETTORS;
     if (bettors && bettors.length > 0) return bettors;
     if (!specialBets) return [];
     return specialBets.map<BettorLike>((sb) => {
@@ -385,157 +362,189 @@ export function SpecialTrackerView({
         penalties: (sb.penaltiesOverUnder as "OVER" | "UNDER" | null) || null,
       };
     });
-  }, [bettors, specialBets, currentUserId]);
+  }, [isDemo, bettors, specialBets, currentUserId]);
+
+  // Fixed color per participant (stable by userId), reused on every card.
+  const colorOf = useMemo(() => {
+    const ordered = [...normalizedBettors].sort((a, b) => a.userId.localeCompare(b.userId));
+    const map = new Map<string, { bg: string; text: string }>();
+    ordered.forEach((b, i) => map.set(b.userId, PERSON_COLORS[i % PERSON_COLORS.length]));
+    return (userId: string) => map.get(userId) ?? NEUTRAL_COLOR;
+  }, [normalizedBettors]);
 
   const [stats, setStats] = useState<TournamentStatsPayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [fetchedAt, setFetchedAt] = useState<Date | null>(null);
 
   useEffect(() => {
+    if (isDemo) {
+      setStats(DEMO_STATS);
+      setFetchedAt(new Date());
+      setLoading(false);
+      return;
+    }
     let alive = true;
-    (async () => {
+    const load = async () => {
       try {
-        const res = await fetch("/api/tournament-stats");
+        const res = await fetch("/api/tournament-stats", { cache: "no-store" });
         const data = await res.json();
         if (!alive) return;
         if ("error" in data) {
           setError(String(data.error));
         } else {
           setStats(data as TournamentStatsPayload);
+          setFetchedAt(new Date());
+          setError(null);
         }
       } catch (e) {
         if (alive) setError(String(e));
       }
       if (alive) setLoading(false);
-    })();
-    return () => { alive = false; };
-  }, []);
+    };
+    load();
+    // Refresh every 5 min while the tab is visible — matches the upstream
+    // Football-Data cache window and keeps the "עודכן" timestamp honest. Skipped
+    // when hidden so idle background tabs don't poll forever.
+    const id = setInterval(() => {
+      if (typeof document === "undefined" || document.visibilityState === "visible") load();
+    }, 5 * 60 * 1000);
+    return () => { alive = false; clearInterval(id); };
+  }, [isDemo]);
 
   const cards = useMemo(() => {
     if (!stats) return null;
     const actuals: TournamentActuals | null = stats.actuals;
-    const bettorsEval = normalizedBettors;
+    const bs = normalizedBettors;
+    // Player races refresh live (data fetch time); admin-decided results carry
+    // their own edit time. Demo offsets them so the "עודכן" hint is visible.
+    const liveAt = isDemo ? new Date(Date.now() - 3 * 60000) : fetchedAt;
+    const actRaw = actuals as (TournamentActuals & { updated_at?: string }) | null;
+    const actAt = isDemo
+      ? new Date(Date.now() - 125 * 60000)
+      : actRaw?.updated_at ? new Date(actRaw.updated_at) : fetchedAt;
 
-    // Category 1: Top scorer (player)
-    const topScorer = {
-      title: "מלך שערים",
-      subtitle: actuals?.top_scorer_player ? `בפועל: ${actuals.top_scorer_player}` : "מי יסיים עם הכי הרבה גולים",
-      icon: "⚽",
-      leaders: stats.scorers.slice(0, 5).map((s) => ({
-        label: `${getFlag(s.team)} ${s.name}`,
-        value: `${s.goals}⚽`,
-      })),
-      picks: evalPlayerPick(bettorsEval, (b) => b.topScorerPlayer, stats.scorers, actuals?.top_scorer_player ?? null, "goals"),
-      empty: stats.scorers.length === 0,
-    };
-
-    // Category 2: Top assists
-    const topAssists = {
-      title: "מלך בישולים",
-      subtitle: actuals?.top_assists_player ? `בפועל: ${actuals.top_assists_player}` : "מי יסיים עם הכי הרבה בישולים",
-      icon: "🎯",
-      leaders: stats.assistsLeaders.slice(0, 5).map((s) => ({
-        label: `${getFlag(s.team)} ${s.name}`,
-        value: `${s.assists}🎯`,
-      })),
-      picks: evalPlayerPick(bettorsEval, (b) => b.topAssistsPlayer, stats.assistsLeaders, actuals?.top_assists_player ?? null, "assists"),
-      empty: stats.assistsLeaders.length === 0,
-    };
-
-    // Category 3: Best attack (team with most goals)
-    const bestAttack = {
-      title: "ההתקפה הכי פורייה",
-      subtitle: actuals?.best_attack_team ? `בפועל: ${actuals.best_attack_team}` : "הנבחרת שכבשה הכי הרבה",
-      icon: "🔥",
-      leaders: stats.teamStats.slice(0, 5).map((t) => ({
-        label: `${getFlag(t.code)} ${getTeamNameHe(t.code) || t.code}`,
-        value: `${t.goalsFor}⚽`,
-      })),
-      picks: evalTeamPick(bettorsEval, (b) => b.bestAttack, stats.teamStats, actuals?.best_attack_team ?? null, "goalsFor", "⚽"),
-      empty: stats.teamStats.length === 0,
-    };
-
-    // Category 4: Dirtiest team (most cards)
-    const dirtiestRows = [...stats.teamStats].sort((a, b) =>
-      (b.yellowCards + b.redCards * 2) - (a.yellowCards + a.redCards * 2)
+    const flagName = (code: string) => <span>{getFlag(code)} {getTeamNameHe(code) || code}</span>;
+    const playerLabel = (name: string, team: string) => <span>{getFlag(team)} {name}</span>;
+    // Tiny "MEX · KOR · CZE · RSA" roster line under each group row.
+    const groupTeams = (letter: string) => (GROUPS[letter] || []).map((t) => t.code).join(" · ");
+    // Card-weighting for "dirtiest": a red counts double a yellow.
+    const RED_W = 2, YEL_W = 1;
+    const cardVal = (y: number, r: number) => (
+      <span className="leading-tight">
+        <span>{y}</span><span className="text-[9px] text-gray-400"> צ׳</span>
+        {" · "}
+        <span>{r}</span><span className="text-[9px] text-gray-400"> א׳</span>
+      </span>
     );
-    const dirtiest = {
-      title: "הכסחנית של הטורניר",
-      subtitle: actuals?.dirtiest_team ? `בפועל: ${actuals.dirtiest_team}` : "הכי הרבה כרטיסים",
-      icon: "🟨",
-      leaders: dirtiestRows.slice(0, 5).map((t) => ({
-        label: `${getFlag(t.code)} ${getTeamNameHe(t.code) || t.code}`,
-        value: `${t.yellowCards}🟨 ${t.redCards}🟥`,
-      })),
-      picks: evalTeamPick(bettorsEval, (b) => b.dirtiestTeam, dirtiestRows, actuals?.dirtiest_team ?? null, "cards", "כרטיסים"),
-      empty: stats.teamStats.length === 0,
+    // Live goals/assists for a matchup player (fuzzy name match against scorers).
+    const playerStat = (name: string) => {
+      const s = stats.scorers.find((x) => x.name.toLowerCase().includes(name.toLowerCase()) || name.toLowerCase().includes(x.name.toLowerCase()));
+      return { g: s?.goals ?? 0, a: s?.assists ?? 0 };
+    };
+    // Inline "Xש · Yב" breakdown for the matchup value column — ש (שערים) + ב
+    // (בישולים) to match the "ש+ב" column header.
+    const gaCell = (g: number, a: number) => (
+      <span className="leading-tight whitespace-nowrap">
+        <span>{g}</span><span className="text-[9px] text-gray-400"> ש׳</span>
+        {" · "}
+        <span>{a}</span><span className="text-[9px] text-gray-400"> ב׳</span>
+      </span>
+    );
+
+    const scorerRanked = [...stats.scorers].sort((a, b) => b.goals - a.goals || b.assists - a.assists)
+      .map((s) => ({ key: s.name, label: playerLabel(s.name, s.team), value: `${s.goals}` }));
+    const assistRanked = [...stats.assistsLeaders].sort((a, b) => b.assists - a.assists || b.goals - a.goals)
+      .map((s) => ({ key: s.name, label: playerLabel(s.name, s.team), value: `${s.assists}` }));
+    const attackRanked = [...stats.teamStats].sort((a, b) => b.goalsFor - a.goalsFor)
+      .map((t) => ({ key: t.code, label: flagName(t.code), value: `${t.goalsFor}` }));
+    // Dirtiest: ranked by a weighted score (red counts double). value2 = the
+    // weighted score (headline), value = the yellow/red breakdown.
+    const dirtyRanked = [...stats.teamStats].sort((a, b) => (b.yellowCards * YEL_W + b.redCards * RED_W) - (a.yellowCards * YEL_W + a.redCards * RED_W))
+      .map((t) => ({ key: t.code, label: flagName(t.code), value2: `${t.yellowCards * YEL_W + t.redCards * RED_W}`, value: cardVal(t.yellowCards, t.redCards) }));
+    const prolificRanked = [...stats.groupStats].sort((a, b) => b.goals - a.goals)
+      .map((g) => ({ key: g.letter, label: `בית ${g.letter}`, sub: groupTeams(g.letter), value: `${g.goals}` }));
+    const driestRanked = [...stats.groupStats].sort((a, b) => a.goals - b.goals)
+      .map((g) => ({ key: g.letter, label: `בית ${g.letter}`, sub: groupTeams(g.letter), value: `${g.goals}` }));
+
+    const sp = SCORING.specials;
+    type RankList = { key: string; label: ReactNode; sub?: ReactNode; value2?: ReactNode; value?: ReactNode }[];
+    const ranked = (o: {
+      title: string; points: string; nameHeader: string; valueHeader?: string; valueHeader2?: string;
+      updatedAt: Date | null; getPick: (b: BettorLike) => string | null; list: RankList;
+      actualKey: string | null; fuzzy?: boolean; decidedLabel?: string; footNote?: string;
+    }) => {
+      const { rows, notBet } = buildRankedRows({ bettors: bs, getPick: o.getPick, ranked: o.list, topN: 5, actualKey: o.actualKey, fuzzy: o.fuzzy });
+      return {
+        title: o.title, points: o.points, nameHeader: o.nameHeader, valueHeader: o.valueHeader, valueHeader2: o.valueHeader2,
+        updatedAt: o.updatedAt, rows, notBetCount: notBet, footNote: o.footNote,
+        decided: o.actualKey != null, decidedLabel: o.actualKey ? o.decidedLabel : undefined,
+      };
     };
 
-    // Category 5: Most prolific group
-    const prolific = {
-      title: "הבית הכי פורה",
-      subtitle: actuals?.most_prolific_group ? `בפועל: בית ${actuals.most_prolific_group}` : "הכי הרבה שערים בבית",
-      icon: "🎉",
-      leaders: stats.groupStats.slice(0, 5).map((g) => ({
-        label: `בית ${g.letter}`,
-        value: `${g.goals}⚽ · ${g.matches} מש׳`,
-      })),
-      picks: evalGroupPick(bettorsEval, (b) => b.prolificGroup, stats.groupStats, actuals?.most_prolific_group ?? null, "mostGoals"),
-      empty: stats.groupStats.length === 0,
+    const matchupCard = (i: 0 | 1 | 2, actualKey: "1" | "X" | "2" | null) => {
+      const mu = MATCHUPS[i];
+      const s1 = playerStat(mu.name1), s2 = playerStat(mu.name2);
+      const t1 = s1.g + s1.a, t2 = s2.g + s2.a;
+      const p1Opt = { key: "1", label: `${mu.flag1} ${mu.p1Short}`, value2: `${t1}`, value: gaCell(s1.g, s1.a) };
+      const p2Opt = { key: "2", label: `${mu.flag2} ${mu.p2Short}`, value2: `${t2}`, value: gaCell(s2.g, s2.a) };
+      // Players ordered by total (most first); שוויון always last.
+      const players = t2 > t1 ? [p2Opt, p1Opt] : [p1Opt, p2Opt];
+      const { rows, notBet } = buildChoiceRows({
+        bettors: bs,
+        getPick: (b) => [b.matchup1, b.matchup2, b.matchup3][i],
+        options: [...players, { key: "X", label: "שוויון" }],
+        actualKey,
+      });
+      return {
+        title: `${mu.p1Short} מול ${mu.p2Short}`,
+        points: `${sp.matchup} נק׳`,
+        nameHeader: "תוצאה",
+        valueHeader2: "סהכ",
+        valueHeader: "ש+ב",
+        updatedAt: actAt,
+        rows,
+        notBetCount: notBet,
+        footNote: "ש+ב = שערים + בישולים",
+        decided: actualKey != null,
+        decidedLabel: actualKey ? "הוכרע" : undefined,
+      };
     };
 
-    // Category 6: Driest group (fewest goals)
-    const driestGroups = [...stats.groupStats].sort((a, b) => a.goals - b.goals);
-    const driest = {
-      title: "הבית הכי יבש",
-      subtitle: actuals?.driest_group ? `בפועל: בית ${actuals.driest_group}` : "הכי פחות שערים בבית",
-      icon: "🏜️",
-      leaders: driestGroups.slice(0, 5).map((g) => ({
-        label: `בית ${g.letter}`,
-        value: `${g.goals}⚽ · ${g.matches} מש׳`,
-      })),
-      picks: evalGroupPick(bettorsEval, (b) => b.driestGroup, driestGroups, actuals?.driest_group ?? null, "fewestGoals"),
-      empty: stats.groupStats.length === 0,
-    };
+    const pen = buildChoiceRows({
+      bettors: bs,
+      getPick: (b) => b.penalties,
+      options: [
+        { key: "OVER", label: `מעל ${PENALTIES_LINE}` },
+        { key: "UNDER", label: `מתחת ${PENALTIES_LINE}` },
+      ],
+      actualKey: actuals?.penalties_over_under ?? null,
+    });
 
-    // Categories 7-9: Matchup duels
-    const matchup1 = {
-      title: `${MATCHUPS[0].flag1} ${MATCHUPS[0].p1Short} vs ${MATCHUPS[0].p2Short} ${MATCHUPS[0].flag2}`,
-      subtitle: "שערים + בישולים במונדיאל",
-      icon: "🤺",
-      leaders: [] as Array<{ label: string; value: string }>,
-      picks: evalMatchupPick(bettorsEval, 0, actuals?.matchup_result_1 ?? null),
-      empty: true,
-    };
-    const matchup2 = {
-      title: `${MATCHUPS[1].flag1} ${MATCHUPS[1].p1Short} vs ${MATCHUPS[1].p2Short} ${MATCHUPS[1].flag2}`,
-      subtitle: "שערים + בישולים במונדיאל",
-      icon: "🤺",
-      leaders: [],
-      picks: evalMatchupPick(bettorsEval, 1, actuals?.matchup_result_2 ?? null),
-      empty: true,
-    };
-    const matchup3 = {
-      title: `${MATCHUPS[2].flag1} ${MATCHUPS[2].p1Short} vs ${MATCHUPS[2].p2Short} ${MATCHUPS[2].flag2}`,
-      subtitle: "שערים + בישולים במונדיאל",
-      icon: "🤺",
-      leaders: [],
-      picks: evalMatchupPick(bettorsEval, 2, actuals?.matchup_result_3 ?? null),
-      empty: true,
-    };
-
-    // Category 10: Penalties total over/under
-    const penalties = {
-      title: `סה״כ פנדלים · מעל/מתחת ${PENALTIES_LINE}`,
-      subtitle: actuals?.penalties_over_under ? `הוכרע: ${actuals.penalties_over_under === "OVER" ? "מעל" : "מתחת"}` : undefined,
-      icon: "🎯",
-      leaders: actuals?.total_penalties != null ? [{ label: "בפועל עד כה", value: `${actuals.total_penalties} פנדלים` }] : [],
-      picks: evalPenaltiesPick(bettorsEval, actuals?.total_penalties ?? null, actuals?.penalties_over_under ?? null, PENALTIES_LINE),
-      empty: actuals?.total_penalties == null && !actuals?.penalties_over_under,
-    };
-
-    return [topScorer, topAssists, bestAttack, dirtiest, prolific, driest, matchup1, matchup2, matchup3, penalties];
-  }, [stats, normalizedBettors]);
+    return [
+      ranked({ title: "מלך שערים", points: `${sp.top_scorer_exact} / ${sp.top_scorer_relative} נק׳`, nameHeader: "שחקן", valueHeader: "שערים", updatedAt: liveAt, getPick: (b) => b.topScorerPlayer, list: scorerRanked, actualKey: actuals?.top_scorer_player ?? null, fuzzy: true, decidedLabel: actuals?.top_scorer_player ? `הוכרע: ${actuals.top_scorer_player}` : undefined }),
+      ranked({ title: "מלך בישולים", points: `${sp.top_assists_exact} / ${sp.top_assists_relative} נק׳`, nameHeader: "שחקן", valueHeader: "בישולים", updatedAt: liveAt, getPick: (b) => b.topAssistsPlayer, list: assistRanked, actualKey: actuals?.top_assists_player ?? null, fuzzy: true, decidedLabel: actuals?.top_assists_player ? `הוכרע: ${actuals.top_assists_player}` : undefined }),
+      ranked({ title: "התקפה פורייה", points: `${sp.best_attack} נק׳`, nameHeader: "נבחרת", valueHeader: "שערים", updatedAt: actAt, getPick: (b) => b.bestAttack, list: attackRanked, actualKey: actuals?.best_attack_team ?? null, decidedLabel: "הוכרע" }),
+      ranked({ title: "הנבחרת הכסחנית", points: `${sp.dirtiest_team} נק׳`, nameHeader: "נבחרת", valueHeader2: "ניקוד", valueHeader: "כרטיסים", updatedAt: actAt, getPick: (b) => b.dirtiestTeam, list: dirtyRanked, actualKey: actuals?.dirtiest_team ?? null, decidedLabel: "הוכרע", footNote: "ניקוד: צהוב = 1 · אדום = 2" }),
+      ranked({ title: "הבית הפורה", points: `${sp.prolific_group} נק׳`, nameHeader: "בית", valueHeader: "שערים", updatedAt: actAt, getPick: (b) => b.prolificGroup, list: prolificRanked, actualKey: actuals?.most_prolific_group ?? null, decidedLabel: "הוכרע" }),
+      ranked({ title: "הבית היבש", points: `${sp.driest_group} נק׳`, nameHeader: "בית", valueHeader: "שערים", updatedAt: actAt, getPick: (b) => b.driestGroup, list: driestRanked, actualKey: actuals?.driest_group ?? null, decidedLabel: "הוכרע" }),
+      matchupCard(0, actuals?.matchup_result_1 ?? null),
+      matchupCard(1, actuals?.matchup_result_2 ?? null),
+      matchupCard(2, actuals?.matchup_result_3 ?? null),
+      {
+        title: `סה״כ פנדלים · ${PENALTIES_LINE}`,
+        points: `${sp.penalties_over_under} נק׳`,
+        nameHeader: "הימור",
+        valueHeader: undefined,
+        statusLine: actuals?.total_penalties != null ? `${actuals.total_penalties} פנדלים` : undefined,
+        updatedAt: actAt,
+        rows: pen.rows,
+        notBetCount: pen.notBet,
+        decided: actuals?.penalties_over_under != null,
+        decidedLabel: actuals?.penalties_over_under ? (actuals.penalties_over_under === "OVER" ? `מעל ${PENALTIES_LINE}` : `מתחת ${PENALTIES_LINE}`) : undefined,
+      },
+    ];
+  }, [stats, normalizedBettors, isDemo, fetchedAt]);
 
   if (loading) {
     return (
@@ -557,19 +566,25 @@ export function SpecialTrackerView({
 
   if (!cards) return null;
 
+  // Settled bets float to the top once the tournament is live.
+  const decidedCount = cards.filter((c) => c.decided).length;
+  const ordered = [...cards].sort((a, b) => Number(b.decided) - Number(a.decided));
+
   return (
-    <div className="space-y-4">
-      <div className="bg-gradient-to-l from-blue-50 via-white to-indigo-50/40 border border-blue-100/60 rounded-2xl px-4 py-3 text-sm">
-        <p className="font-bold text-gray-800">מעקב הימורים מיוחדים</p>
-        <p className="text-xs text-gray-500 mt-0.5">
-          הנתונים מתעדכנים מ-Football-Data בכל 5 דקות. ערכים שמנהל הזין ידנית ב-
-          <code className="bg-gray-100 rounded px-1 text-[10px]">תוצאות משחקים</code>
-          {" "}נלקחים כאמת המחייבת.
-        </p>
+    <div className="space-y-3">
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-xs font-bold text-gray-500">
+          {decidedCount}/{cards.length} הוכרעו
+        </span>
+        {isDemo && (
+          <span className="text-[11px] font-bold text-purple-700 bg-purple-50 border border-purple-200 rounded-lg px-2.5 py-1">
+            תצוגת דמו · נתונים לדוגמה
+          </span>
+        )}
       </div>
       <div className="grid gap-3 md:grid-cols-2">
-        {cards.map((c, i) => (
-          <CategoryCard key={i} {...c} />
+        {ordered.map((c, i) => (
+          <CategoryCard key={i} {...c} colorOf={colorOf} />
         ))}
       </div>
     </div>

@@ -189,19 +189,15 @@ export default function KnockoutLivePage() {
           <p className="text-lg text-gray-600 mt-1">ניחוש תוצאות על המשחקים האמיתיים — לפי הנתונים בזמן אמת</p>
         </div>
 
-        <div className="mb-4 rounded-xl border border-blue-200 bg-blue-50/70 px-4 py-3 text-[13px] text-blue-900 leading-relaxed">
-          כאן מנחשים את <strong>תוצאות</strong> משחקי הנוק-אאוט האמיתיים. הניקוד הוא על <strong>כיוון נכון (טוטו)</strong> ו<strong>תוצאה מדויקת</strong> בלבד —
-          <strong> לא על מי עולה</strong> (את ניקוד העולות והאלופה כבר הימרת מראש בעץ הסימולציה). בחירת המנצחת כאן רק קובעת את כיוון המשחק ומעלה את הקבוצה בעץ.
-          כל משחק ניתן לעריכה <strong>עד שעה לפני שריקת הפתיחה</strong> — אין דד-ליין אחד; השלב הבא נפתח אוטומטית כשהמנצחות מהשלב הקודם ידועות.
+        <div className="mb-4 rounded-xl border border-blue-200 bg-blue-50/70 px-4 py-2.5 text-[13px] text-blue-900">
+          ניקוד על <strong>טוטו ותוצאה מדויקת</strong> בלבד. כל משחק נעול שעה לפני שריקת הפתיחה, ונפתח אוטומטית בשלב הבא.
         </div>
 
         {!groupStageComplete ? (
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-6 py-12 text-center">
-            <div className="text-5xl mb-4">⏳</div>
             <h2 className="text-xl font-black text-gray-800 mb-2">ייפתח בתום שלב הבתים</h2>
-            <p className="text-sm text-gray-500 max-w-sm mx-auto leading-relaxed">
-              עץ נתוני האמת ייפתח כשכל 12 הבתים יסיימו את משחקיהם ויקבעו 32 העולות (כולל 8 המקומות השלישיים הטובים).
-              בינתיים — מלאו את <Link href="/knockout" className="text-blue-600 font-bold underline">עץ הסימולציה</Link> לבחירת העולות והאלופה.
+            <p className="text-sm text-gray-500 max-w-sm mx-auto">
+              בינתיים השלימו את <Link href="/knockout" className="text-blue-600 font-bold underline">עץ הסימולציה</Link>.
             </p>
           </div>
         ) : (

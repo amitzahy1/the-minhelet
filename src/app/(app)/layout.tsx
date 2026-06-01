@@ -396,6 +396,8 @@ function KoLiveOpenModal({ onClose, onGo, openCount }: { onClose: () => void; on
 // Betting sub-nav — shows each stage as green once fully completed
 // ============================================================================
 function BettingSubNav({ pathname }: { pathname: string }) {
+  const koStatus = useRealKnockoutStatus();
+  const isLiveActive = pathname === "/knockout-live";
   const groupsFilled = useBettingStore((s) => s.getCompletedGroupsCount());
   const knockoutFilled = useBettingStore((s) => Object.keys(s.knockout).filter((k) => s.knockout[k]?.winner).length);
   const specialsFilled = useBettingStore((s) => {
@@ -428,9 +430,15 @@ function BettingSubNav({ pathname }: { pathname: string }) {
     "/special-bets": specialsFilled >= 25,
   };
 
+  // The second tree ("עץ נתוני אמת", /knockout-live) opens once the group stage
+  // ends. Desktop surfaces it in the הימורים dropdown; on mobile there was no
+  // hint a second tree existed — so we render it as a distinct row below the
+  // three stage tabs, making both trees visible.
+  const liveOpen = koStatus.groupStageComplete && koStatus.openCount > 0;
+
   return (
     <div className="bg-gradient-to-l from-blue-600 to-indigo-600 sm:bg-white sm:bg-none border-y-2 border-blue-700/40 sm:border-y sm:border-x-0 sm:border-gray-200 shadow-md sm:shadow-none">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2.5 sm:py-2 flex items-center gap-3">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2.5 sm:py-2 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
         <div className="flex items-center gap-1.5 sm:gap-1 flex-1">
           {BETTING_PAGES.map((p, i) => {
             const isActive = pathname === p.href;
@@ -491,6 +499,30 @@ function BettingSubNav({ pathname }: { pathname: string }) {
             );
           })}
         </div>
+
+        {/* Mobile-only: the SECOND tree ("עץ נתוני אמת"). Desktop surfaces it in
+            the הימורים dropdown; on mobile there was no hint it existed. */}
+        <Link
+          href="/knockout-live"
+          className={`sm:hidden flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-bold transition-all ${
+            isLiveActive
+              ? "bg-white text-emerald-700 shadow-lg"
+              : liveOpen
+                ? "bg-emerald-500 text-white border border-emerald-300/60 shadow-sm"
+                : "bg-white/15 text-white/90 border border-white/20"
+          }`}
+        >
+          <span className="text-base">🟢</span>
+          <span>עץ נתוני אמת</span>
+          <span className={`text-[11px] font-medium ${isLiveActive ? "text-emerald-600" : "opacity-80"}`}>
+            · {liveOpen ? "במהלך הטורניר" : "ייפתח בתום שלב הבתים"}
+          </span>
+          {koStatus.unfilledOpenCount > 0 && (
+            <span className="ms-auto min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-white text-emerald-700 text-[10px] font-black shadow" style={{ fontFamily: "var(--font-inter)" }}>
+              {koStatus.unfilledOpenCount}
+            </span>
+          )}
+        </Link>
       </div>
     </div>
   );
@@ -675,6 +707,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   const initial = userName ? userName[0].toUpperCase() : userEmail ? userEmail[0].toUpperCase() : "?";
   const isBettingPage = BETTING_PAGES.some(p => pathname === p.href);
+  const inBettingFlow = isBettingPage || pathname === "/knockout-live";
   const isTrackingPage = TRACKING_ITEMS.some(p => pathname === p.href);
 
   // Skip splash for returning users who visited within last 24h
@@ -864,7 +897,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       {/* ════════════════════════════════════════════ */}
       {/* BETTING SUB-NAV (only on betting pages)     */}
       {/* ════════════════════════════════════════════ */}
-      {isBettingPage && <BettingSubNav pathname={pathname} />}
+      {inBettingFlow && <BettingSubNav pathname={pathname} />}
 
       {/* ════════════════════════════════════════════ */}
       {/* BREADCRUMB on tracking pages                */}
@@ -935,8 +968,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <span className="text-[8px] font-bold">חוקים</span>
           </Link>
           <Link href="/groups"
-            className={`flex flex-col items-center gap-0.5 py-1 ${isBettingPage ? "text-blue-600" : "text-gray-400"}`}>
-            {Icons.bets(isBettingPage)}
+            className={`flex flex-col items-center gap-0.5 py-1 ${inBettingFlow ? "text-blue-600" : "text-gray-400"}`}>
+            {Icons.bets(inBettingFlow)}
             <span className="text-[8px] font-bold">הימורים</span>
           </Link>
         </div>

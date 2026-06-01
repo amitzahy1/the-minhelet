@@ -43,6 +43,20 @@ function detailFor(id: string | number, dynamicDetails: FdDetails | null) {
 
 const BASE_URL = "https://api.football-data.org/v4";
 
+// Football-Data.org uses a few TLAs that differ from the FIFA codes this app
+// keys everything on (flags, squads, market values, group definitions). If
+// these aren't normalised here, every downstream consumer fails to match the
+// fixture to its team: the betting page can't sort by real kickoff date (so
+// matchday headers come out in the wrong order), and names/flags/advancement
+// silently fall back to placeholders. Normalise at the API boundary — the one
+// place external data enters — so the rest of the app only ever sees app codes.
+const FD_TLA_TO_APP: Record<string, string> = {
+  CUW: "CUR", // Curaçao (Group E)
+  URY: "URU", // Uruguay (Group H)
+};
+const toAppCode = (tla: string | undefined): string =>
+  (tla && FD_TLA_TO_APP[tla]) || tla || "TBD";
+
 interface FdRawMatch {
   id: number;
   utcDate: string;
@@ -149,8 +163,8 @@ export async function GET() {
       date: m.utcDate,
       homeTeam: m.homeTeam?.shortName || m.homeTeam?.name || "TBD",
       awayTeam: m.awayTeam?.shortName || m.awayTeam?.name || "TBD",
-      homeTla: m.homeTeam?.tla || "TBD",
-      awayTla: m.awayTeam?.tla || "TBD",
+      homeTla: toAppCode(m.homeTeam?.tla),
+      awayTla: toAppCode(m.awayTeam?.tla),
       group: m.group,
       stage: m.stage,
       // Demo data wins — admin-entered scores are authoritative for the demo.

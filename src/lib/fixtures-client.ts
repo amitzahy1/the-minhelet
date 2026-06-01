@@ -14,13 +14,18 @@ export interface RealFixture {
   awayTla: string;
   group?: string;
   stage?: string;
+  status?: string | null;
+  homeGoals?: number | null;
+  awayGoals?: number | null;
+  homePenalties?: number | null;
+  awayPenalties?: number | null;
 }
 
 let _cache: { ts: number; matches: RealFixture[] } | null = null;
-const TTL = 300_000; // 5 min — fixtures barely change
+const TTL = 120_000; // 2 min — refresh fast enough for live knockout state
 
-export async function loadRealFixtures(): Promise<RealFixture[]> {
-  if (_cache && Date.now() - _cache.ts < TTL) return _cache.matches;
+export async function loadRealFixtures(force = false): Promise<RealFixture[]> {
+  if (!force && _cache && Date.now() - _cache.ts < TTL) return _cache.matches;
   try {
     const res = await fetch("/api/matches");
     const data = await res.json();
@@ -31,6 +36,11 @@ export async function loadRealFixtures(): Promise<RealFixture[]> {
       awayTla: m.awayTla,
       group: m.group,
       stage: m.stage,
+      status: m.status ?? null,
+      homeGoals: m.homeGoals ?? null,
+      awayGoals: m.awayGoals ?? null,
+      homePenalties: m.homePenalties ?? null,
+      awayPenalties: m.awayPenalties ?? null,
     }));
     _cache = { ts: Date.now(), matches };
     return matches;

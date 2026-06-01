@@ -13,7 +13,8 @@ import { ConflictResolutionModal } from "@/components/shared/ConflictResolutionM
 import { NavProgressBar } from "@/components/shared/NavProgressBar";
 import { Suspense } from "react";
 import { useSharedData } from "@/hooks/useSharedData";
-import { formatLockDeadline, isLocked } from "@/lib/constants";
+import { useRealKnockoutStatus } from "@/hooks/useRealKnockoutStatus";
+import { formatLockDeadline, isLocked, PENALTIES_LINE } from "@/lib/constants";
 
 const Icons = {
   bets: (a: boolean) => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={a ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6M9 15l3 3 3-3"/></svg>,
@@ -183,7 +184,7 @@ function OnboardingWizard({ onDismiss, onStart }: { onDismiss: () => void; onSta
                   <div className="bg-amber-50 rounded-lg py-1.5 px-2.5 border border-amber-100 flex items-center justify-between"><span className="text-gray-700">בית פורה / יבש</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>5</span></div>
                   <div className="bg-amber-50 rounded-lg py-1.5 px-2.5 border border-amber-100 flex items-center justify-between"><span className="text-gray-700">נבחרת כסחנית</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>5</span></div>
                   <div className="bg-amber-50 rounded-lg py-1.5 px-2.5 border border-amber-100 flex items-center justify-between"><span className="text-gray-700">מאצ׳אפ נכון</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>5</span></div>
-                  <div className="bg-amber-50 rounded-lg py-1.5 px-2.5 border border-amber-100 flex items-center justify-between col-span-2"><span className="text-gray-700">סה״כ פנדלים (אובר/אנדר 18.5)</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>5</span></div>
+                  <div className="bg-amber-50 rounded-lg py-1.5 px-2.5 border border-amber-100 flex items-center justify-between col-span-2"><span className="text-gray-700">סה״כ פנדלים (אובר/אנדר {PENALTIES_LINE})</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>5</span></div>
                 </div>
               </div>
               <p className="text-[11px] text-gray-500 text-center bg-gray-50 rounded-lg py-2 border border-gray-100">
@@ -367,6 +368,31 @@ function LockedCelebrationModal({ onClose, groupsFilled, knockoutFilled, special
 }
 
 // ============================================================================
+// "Group stage ended → fill עץ נתוני אמת" — one-time nudge modal
+// ============================================================================
+function KoLiveOpenModal({ onClose, onGo, openCount }: { onClose: () => void; onGo: () => void; openCount: number }) {
+  return (
+    <div className="fixed inset-0 z-[60] bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full text-center p-8"
+        style={{ animation: "popIn 0.4s cubic-bezier(0.34,1.56,0.64,1)" }} onClick={(e) => e.stopPropagation()}>
+        <div className="text-6xl mb-3">🟢</div>
+        <h2 className="text-2xl font-black text-gray-900 mb-1" style={{ fontFamily: "var(--font-secular)" }}>שלב הבתים נגמר!</h2>
+        <p className="text-gray-600 text-sm mb-5 leading-relaxed">
+          נקבעו 32 העולות האמיתיות. נפתח <strong>עץ נתוני אמת</strong> — נחשו תוצאות על המשחקים האמיתיים (כולל מי עולה).
+          {openCount > 0 && <> כרגע פתוחים <strong>{openCount}</strong> משחקים להימור.</>} כל משחק ניתן לעדכון עד שעה לפני שריקת הפתיחה.
+        </p>
+        <button onClick={onGo} className="w-full py-3 rounded-xl bg-emerald-600 text-white font-bold text-sm hover:bg-emerald-700 transition-colors mb-2">
+          למילוי עץ נתוני אמת ←
+        </button>
+        <button onClick={onClose} className="w-full py-2 rounded-xl text-gray-500 font-bold text-sm hover:bg-gray-50 transition-colors">
+          אחר כך
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
 // Betting sub-nav — shows each stage as green once fully completed
 // ============================================================================
 function BettingSubNav({ pathname }: { pathname: string }) {
@@ -465,6 +491,7 @@ function BettingSubNav({ pathname }: { pathname: string }) {
 // Progress Banner — shows on ALL pages
 // ============================================================================
 function ProgressBanner() {
+  const koStatus = useRealKnockoutStatus();
   const groupsFilled = useBettingStore((s) => s.getCompletedGroupsCount());
   const knockoutFilled = useBettingStore((s) => Object.keys(s.knockout).filter(k => s.knockout[k]?.winner).length);
   const specialsFilled = useBettingStore((s) => {
@@ -492,14 +519,22 @@ function ProgressBanner() {
   // Check if pre-tournament lock passed (June 10, 2026 17:00 IST)
   const preLockPassed = new Date() >= new Date("2026-06-10T14:00:00Z");
 
-  // During tournament: show different banner
+  // During tournament: show a live banner; once the group stage ends, nudge the
+  // bettor to fill the real-data tree (עץ נתוני אמת) whenever open matches remain.
   if (preLockPassed && tournamentStarted) {
+    const needsLive = koStatus.groupStageComplete && koStatus.unfilledOpenCount > 0;
     return (
-      <div className="bg-gradient-to-l from-green-50 to-emerald-50/70 border-b border-green-200/60">
+      <div className={`border-b ${needsLive ? "bg-gradient-to-l from-emerald-50 to-green-100/70 border-emerald-300/70" : "bg-gradient-to-l from-green-50 to-emerald-50/70 border-green-200/60"}`}>
         <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2 flex items-center gap-3 text-xs sm:text-sm">
           <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse shrink-0"></span>
-          <span className="text-green-700 font-bold">הטורניר בעיצומו!</span>
-          <Link href="/live" className="text-green-600 font-bold hover:underline ms-auto">צפו בלייב ←</Link>
+          <span className="text-green-700 font-bold shrink-0">הטורניר בעיצומו!</span>
+          {needsLive ? (
+            <Link href="/knockout-live" className="ms-auto flex items-center gap-1.5 bg-emerald-600 text-white font-bold rounded-full px-3 py-1 shadow-sm hover:bg-emerald-700 transition-colors animate-pulse shrink-0">
+              🟢 עץ אמת — נותרו {koStatus.unfilledOpenCount} משחקים להימור ←
+            </Link>
+          ) : (
+            <Link href="/live" className="text-green-600 font-bold hover:underline ms-auto">צפו בלייב ←</Link>
+          )}
         </div>
       </div>
     );
@@ -547,7 +582,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [authReady, setAuthReady] = useState(false);
   const [showLockedCelebration, setShowLockedCelebration] = useState(false);
+  const [showKoLive, setShowKoLive] = useState(false);
   const { loading: dataLoading } = useSharedData();
+  const koStatus = useRealKnockoutStatus();
 
   const groupsFilled = useBettingStore((s) => s.getCompletedGroupsCount());
   const knockoutFilled = useBettingStore((s) => Object.keys(s.knockout).filter((k) => s.knockout[k]?.winner).length);
@@ -591,6 +628,21 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     } catch { /* ignore */ }
   }, [appReady]);
 
+  // One-time nudge when the group stage ends and the real-data tree opens.
+  useEffect(() => {
+    if (!appReady || !koStatus.groupStageComplete) return;
+    try {
+      if (!localStorage.getItem("wc_ko_live_opened_seen") && pathname !== "/knockout-live") {
+        setShowKoLive(true);
+      }
+    } catch { /* ignore */ }
+  }, [appReady, koStatus.groupStageComplete, pathname]);
+
+  const dismissKoLive = () => {
+    setShowKoLive(false);
+    try { localStorage.setItem("wc_ko_live_opened_seen", "true"); } catch { /* ignore */ }
+  };
+
   const dismissOnboarding = () => {
     setShowOnboarding(false);
     localStorage.setItem("wc2026-onboarding-seen", "true");
@@ -629,6 +681,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         />
       )}
 
+      {showKoLive && (
+        <KoLiveOpenModal
+          openCount={koStatus.openCount}
+          onClose={dismissKoLive}
+          onGo={() => { dismissKoLive(); router.push("/knockout-live"); }}
+        />
+      )}
+
       {/* Top progress strip — animates on every navigation so tapping a
           nav item feels responsive even when the destination page is
           fetching data on mount. Wrapped in Suspense because it reads
@@ -652,12 +712,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             {/* BETTING — dropdown with blue accent */}
             <div className="relative">
               <button onClick={() => { setShowBetsMenu(!showBetsMenu); setShowUserMenu(false); }}
-                className={`flex items-center gap-1.5 px-3 lg:px-4 py-2 lg:py-2.5 rounded-xl text-xs lg:text-sm font-bold transition-all ${
+                className={`relative flex items-center gap-1.5 px-3 lg:px-4 py-2 lg:py-2.5 rounded-xl text-xs lg:text-sm font-bold transition-all ${
                   isBettingPage ? "bg-gradient-to-l from-blue-600 to-indigo-600 text-white shadow-md" : "bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100"
                 }`}>
                 {Icons.bets(isBettingPage)}
                 <span>הימורים</span>
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 9l6 6 6-6"/></svg>
+                {koStatus.unfilledOpenCount > 0 && (
+                  <span className="absolute -top-1 -end-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-emerald-500 text-white text-[10px] font-black shadow ring-2 ring-white animate-pulse" style={{ fontFamily: "var(--font-inter)" }}>
+                    {koStatus.unfilledOpenCount}
+                  </span>
+                )}
               </button>
               {showBetsMenu && (
                 <>

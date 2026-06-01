@@ -160,22 +160,30 @@ export default function SquadsPage() {
 
       {squad ? (
         <>
-          {/* Source selector — 4 tabs (only for teams with manual source data) */}
-          {squad.sources.length > 0 && (
-          <div className="mb-5">
-            <p className="text-sm text-gray-500 mb-2 font-medium">מקור ההרכב המשוער:</p>
-            <div className="flex gap-2 flex-wrap">
-              {squad.sources.map((s, i) => (
-                <button key={s.name} onClick={() => setSourceIdx(i)}
-                  className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl border text-sm font-bold transition-all ${
-                    sourceIdx === i ? "bg-white border-blue-300 text-blue-700 shadow-md" : "border-gray-200 text-gray-500 hover:bg-gray-50"
-                  }`}>
-                  {s.name}
-                  <span className="text-[10px] text-gray-400 font-normal">{s.formation}</span>
-                </button>
-              ))}
+          {/* Predicted XI — single source ("הרכב משוער", RotoWire). Legacy
+              multi-source data still renders as selectable tabs. */}
+          {squad.sources.length === 1 ? (
+            <div className="mb-5">
+              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-sm font-bold text-emerald-700">
+                ⚽ הרכב משוער · {source?.formation || squad.formation}
+                <span className="text-[10px] text-emerald-500/80 font-normal">מבוסס RotoWire</span>
+              </span>
             </div>
-          </div>
+          ) : squad.sources.length > 1 && (
+            <div className="mb-5">
+              <p className="text-sm text-gray-500 mb-2 font-medium">מקור ההרכב המשוער:</p>
+              <div className="flex gap-2 flex-wrap">
+                {squad.sources.map((s, i) => (
+                  <button key={s.name} onClick={() => setSourceIdx(i)}
+                    className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl border text-sm font-bold transition-all ${
+                      sourceIdx === i ? "bg-white border-blue-300 text-blue-700 shadow-md" : "border-gray-200 text-gray-500 hover:bg-gray-50"
+                    }`}>
+                    {s.name}
+                    <span className="text-[10px] text-gray-400 font-normal">{s.formation}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
 
           <div className="grid gap-6 lg:grid-cols-2">

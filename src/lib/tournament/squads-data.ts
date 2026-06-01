@@ -278,6 +278,54 @@ const API_DATA = apiSquads as Record<string, { players: { nameEn: string; num: n
 // --- Wikipedia-scraped official 26-man rosters (announced teams only) ---
 import { OFFICIAL_ROSTERS } from "./official-rosters";
 
+// --- RotoWire predicted starting XIs (all 48 teams), auto-generated ---
+import { PREDICTED_LINEUPS } from "./predicted-lineups";
+
+/** Accent-insensitive lowercase, for matching RotoWire names to roster names. */
+function norm(s: string): string {
+  return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+}
+function lastToken(s: string): string {
+  const parts = norm(s).split(/\s+/);
+  return parts[parts.length - 1] || "";
+}
+
+/**
+ * Replace a squad's predicted XI with the single RotoWire lineup (when we have
+ * one). Each RotoWire starter is matched to a roster player by exact name, then
+ * accent-stripped last-name; matched players get `starter:true` and the source
+ * uses their roster nameEn (so the pitch renders photo/Hebrew name). Unmatched
+ * RotoWire names are kept as-is (rendered name-only). Drops the synthetic
+ * 4-source tabs in favour of one "הרכב משוער" source.
+ */
+function applyPredictedLineup(code: string, squad: SquadData): SquadData {
+  const pl = PREDICTED_LINEUPS[code];
+  if (!pl || !pl.starters.length) return squad;
+
+  const byExact = new Map(squad.players.map((p) => [norm(p.nameEn), p]));
+  const byLast = new Map<string, PlayerData>();
+  for (const p of squad.players) {
+    const k = lastToken(p.nameEn);
+    if (k && !byLast.has(k)) byLast.set(k, p);
+  }
+
+  const starterNames: string[] = [];
+  const starterSet = new Set<string>();
+  for (const s of pl.starters) {
+    const match = byExact.get(norm(s.name)) || byLast.get(lastToken(s.name));
+    if (match) { starterNames.push(match.nameEn); starterSet.add(match.nameEn); }
+    else starterNames.push(s.name); // unmatched → show RotoWire name as-is
+  }
+
+  const players = squad.players.map((p) => ({ ...p, starter: starterSet.has(p.nameEn) }));
+  return {
+    ...squad,
+    formation: pl.formation,
+    players,
+    sources: [{ name: "הרכב משוער", formation: pl.formation, starters: starterNames }],
+  };
+}
+
 // --- Predicted-XI validator (drops dropped players, pads to 4 outlets) ---
 import { expandSourcesToFour } from "./lineup-validator";
 
@@ -343,6 +391,11 @@ function trimToCap(players: PlayerData[], cap = SQUAD_CAP): PlayerData[] {
 // Get squad for a team — merges manual data with API data, preferring the
 // federation-announced 26-man roster from Wikipedia when present.
 export function getSquad(code: string): SquadData | null {
+  const squad = buildSquadRaw(code);
+  return squad ? applyPredictedLineup(code, squad) : null;
+}
+
+function buildSquadRaw(code: string): SquadData | null {
   const manual = SQUADS_DATA[code];
   const api = API_DATA[code];
   const official = OFFICIAL_ROSTERS[code];

@@ -591,6 +591,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const specialsFilled = useBettingStore((s) => s.getSpecialsFilledCount());
   const bettingOverallPct = Math.round((groupsFilled / 12 + knockoutFilled / 31 + specialsFilled / 25) / 3 * 100);
 
+  // Completion per betting destination — drives the green ✓ in the הימורים menu.
+  const stepDone: Record<string, boolean> = {
+    "/groups": groupsFilled >= 12,
+    "/knockout": knockoutFilled >= 31,
+    "/special-bets": specialsFilled >= 25,
+  };
+  // Real-data tree "done" = all currently-open matches predicted (it fills round
+  // by round, so completion is relative to what's open right now).
+  const koLiveDone = koStatus.groupStageComplete && koStatus.openCount > 0 && koStatus.unfilledOpenCount === 0;
+
   const appReady = authReady && !dataLoading;
 
   useEffect(() => {
@@ -731,25 +741,30 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     <div className="px-4 py-2 border-b border-gray-100">
                       <p className="text-xs text-gray-400 font-bold">3 שלבים להשלמת ההימורים</p>
                     </div>
-                    {BETTING_PAGES.map(p => (
+                    {BETTING_PAGES.map(p => {
+                      const done = stepDone[p.href];
+                      return (
                       <Link key={p.href} href={p.href} onClick={() => setShowBetsMenu(false)}
                         className={`flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors ${
-                          pathname === p.href ? "bg-blue-50 text-blue-700" : "text-gray-700 hover:bg-gray-50"
+                          pathname === p.href ? "bg-blue-50 text-blue-700" : done ? "text-green-700 hover:bg-gray-50" : "text-gray-700 hover:bg-gray-50"
                         }`}>
                         <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black ${
-                          pathname === p.href ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-500"
-                        }`}>{p.step}</span>
+                          done ? "bg-green-500 text-white" : pathname === p.href ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-500"
+                        }`}>{done ? "✓" : p.step}</span>
                         {p.label}
                       </Link>
-                    ))}
+                      );
+                    })}
                     <div className="px-4 pt-2 pb-1 mt-1 border-t border-gray-100">
                       <p className="text-xs text-gray-400 font-bold">במהלך הטורניר</p>
                     </div>
                     <Link href="/knockout-live" onClick={() => setShowBetsMenu(false)}
                       className={`flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors ${
-                        pathname === "/knockout-live" ? "bg-emerald-50 text-emerald-700" : "text-gray-700 hover:bg-gray-50"
+                        pathname === "/knockout-live" ? "bg-emerald-50 text-emerald-700" : koLiveDone ? "text-green-700 hover:bg-gray-50" : "text-gray-700 hover:bg-gray-50"
                       }`}>
-                      <span className="w-6 h-6 rounded-full flex items-center justify-center bg-emerald-100 text-emerald-700">🟢</span>
+                      <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black ${
+                        koLiveDone ? "bg-green-500 text-white" : "bg-gray-200 text-gray-400"
+                      }`}>{koLiveDone ? "✓" : ""}</span>
                       עץ נתוני אמת
                     </Link>
                   </div>

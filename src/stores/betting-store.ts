@@ -337,10 +337,19 @@ export const useBettingStore = create<BettingState & BettingActions>()(
       // (saveLiveKnockout, which enforces the per-match 1h-before-kickoff lock).
       setKnockoutLiveMatch: (matchKey, data) =>
         set((state) => {
+          const oldWinner = state.knockoutLive[matchKey]?.winner;
           if (!state.knockoutLive[matchKey]) {
             state.knockoutLive[matchKey] = { score1: null, score2: null, winner: null };
           }
           Object.assign(state.knockoutLive[matchKey], data);
+          const newWinner = state.knockoutLive[matchKey].winner;
+          // Forward-fill cascade (same as the simulation tree): when the picked
+          // winner changes, clear downstream picks that relied on the old one,
+          // so the bracket the user fills forward stays consistent. No
+          // advancement-sync here — Tree 2 doesn't feed advancement bets.
+          if (oldWinner && oldWinner !== newWinner) {
+            cascadeClear(state.knockoutLive, matchKey, oldWinner);
+          }
           state.lastUpdated = new Date().toISOString();
         }),
 

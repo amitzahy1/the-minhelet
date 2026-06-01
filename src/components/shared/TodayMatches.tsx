@@ -32,10 +32,30 @@ const DEMO_MATCHES: Match[] = [
   { id: -3, date: "2026-06-11T22:00:00Z", homeTeam: "France", awayTeam: "Iraq", homeTla: "FRA", awayTla: "IRQ", group: "GROUP_I", stage: "GROUP_STAGE", status: "SCHEDULED", homeGoals: null, awayGoals: null },
 ];
 
+// Human-readable Hebrew stage label (the API/FD stage codes look like "LAST_32").
+const STAGE_LABEL_HE: Record<string, string> = {
+  GROUP_STAGE: "שלב הבתים",
+  LAST_32: "שלב 32 הגדולות",
+  ROUND_OF_32: "שלב 32 הגדולות",
+  LAST_16: "שמינית גמר",
+  ROUND_OF_16: "שמינית גמר",
+  QUARTER_FINALS: "רבע גמר",
+  QUARTER_FINAL: "רבע גמר",
+  SEMI_FINALS: "חצי גמר",
+  SEMI_FINAL: "חצי גמר",
+  THIRD_PLACE: "משחק על המקום ה-3",
+  FINAL: "גמר",
+};
+function stageLabelHe(stage?: string): string {
+  if (!stage) return "נוק-אאוט";
+  return STAGE_LABEL_HE[stage] || "נוק-אאוט";
+}
+
 export function TodayMatches() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [heading, setHeading] = useState("משחקים קרובים");
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [showAll, setShowAll] = useState(false);
   const { predictions, specialBets, brackets, profiles } = useSharedData();
   const locked = isLocked();
 
@@ -138,8 +158,8 @@ export function TodayMatches() {
         <h2 className="text-base font-bold text-gray-800">{heading}</h2>
         <span className="text-sm text-gray-400">{matches.length} משחקים</span>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-        {matches.map((m) => {
+      <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
+        {(showAll ? matches : matches.slice(0, 4)).map((m, idx) => {
           const isFinished = m.status === "FINISHED";
           const isLive = m.status === "IN_PLAY" || m.status === "PAUSED";
           const isExpanded = expandedId === m.id;
@@ -156,7 +176,7 @@ export function TodayMatches() {
           const missCount = counts.miss;
 
           return (
-            <div key={m.id} className="col-span-1">
+            <div key={m.id} className={`col-span-1${!showAll && idx === 3 ? " hidden md:block" : ""}`}>
               <div
                 onClick={() => setExpandedId(isExpanded ? null : m.id)}
                 className={`bg-white rounded-xl border shadow-sm p-3 text-center transition-all cursor-pointer ${
@@ -209,7 +229,7 @@ export function TodayMatches() {
                 {/* Group + expand hint */}
                 <div className="flex items-center justify-center gap-1 mt-1.5">
                   <p className="text-[10px] text-gray-400">
-                    {m.group ? `בית ${m.group.replace("GROUP_", "")}` : m.stage}
+                    {m.group ? `בית ${m.group.replace("GROUP_", "")}` : stageLabelHe(m.stage)}
                   </p>
                   <svg
                     width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
@@ -337,6 +357,18 @@ export function TodayMatches() {
           );
         })}
       </div>
+      {matches.length > 4 && (
+        <button
+          onClick={() => setShowAll((v) => !v)}
+          className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 rounded-xl border border-gray-200 bg-white text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
+        >
+          {showAll ? "הצג פחות" : `הצג את כל ${matches.length} המשחקים`}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+            className={`transition-transform ${showAll ? "rotate-180" : ""}`}>
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 }

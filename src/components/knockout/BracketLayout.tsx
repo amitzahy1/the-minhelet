@@ -124,9 +124,15 @@ export const BracketMatchCell = memo(function BracketMatchCell({
         {isWinner2 && <span className="text-green-500 text-xs font-bold ms-0.5">✓</span>}
       </div>
       {isTie && editable && (
-        <div className="text-center py-1 bg-amber-50 border-t border-amber-200">
-          <span className="text-[10px] text-amber-700 font-bold">תיקו — לחצו על מי שעולה</span>
-        </div>
+        value?.winner ? (
+          <div className="text-center py-1 bg-green-50 border-t border-green-200">
+            <span className="text-[10px] text-green-700 font-bold">תיקו · עולה: {value.winner} ✓</span>
+          </div>
+        ) : (
+          <div className="text-center py-1 bg-amber-50 border-t border-amber-200">
+            <span className="text-[10px] text-amber-700 font-bold">תיקו — לחצו על מי שעולה</span>
+          </div>
+        )
       )}
       {status === "locked" && !realResult && (
         <div className="text-center py-1 bg-gray-50 border-t border-gray-200">

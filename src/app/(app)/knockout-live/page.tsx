@@ -22,8 +22,9 @@ import {
   type KoSlotKey,
   type ScheduleMatch,
 } from "@/lib/scoring/knockout-resolver";
-import { slotStatus, lockAtFor } from "@/lib/tournament/ko-live-state";
-import { BracketLayout, BracketMatchCell, type KOValue, type SlotTeams } from "@/components/knockout/BracketLayout";
+import { lockAtFor } from "@/lib/tournament/ko-live-state";
+import { LATER_FEEDERS } from "@/lib/tournament/knockout-derivation";
+import { BracketLayout, BracketMatchCell, type KOValue, type SlotTeams, type SlotStatus } from "@/components/knockout/BracketLayout";
 import type { FinishedMatch } from "@/lib/results-hits";
 import { saveLiveKnockout } from "@/lib/supabase/sync";
 
@@ -39,6 +40,13 @@ interface ApiMatch {
   awayGoals?: number | null;
   homePenalties?: number | null;
   awayPenalties?: number | null;
+}
+
+// slot → the downstream match it feeds (derived from the feeder map).
+const NEXT_MATCH: Record<string, string> = {};
+for (const [downstream, [f1, f2]] of Object.entries(LATER_FEEDERS)) {
+  NEXT_MATCH[f1] = downstream;
+  NEXT_MATCH[f2] = downstream;
 }
 
 export default function KnockoutLivePage() {
@@ -106,32 +114,54 @@ export default function KnockoutLivePage() {
 
   const tree = useMemo(() => resolveKnockoutTree(scored, thirdsOverride), [scored, thirdsOverride]);
   const groupStageComplete = useMemo(() => Object.keys(computeGroupOrders(scored)).length === 12, [scored]);
-  const champion = tree.final?.winner ?? null;
+  const champion = tree.final?.winner ?? knockoutLive.final?.winner ?? null;
   const filled = Object.values(knockoutLive).filter((m) => m.winner).length;
 
+  // Teams for a slot: prefer the REAL team (once the feeding real match has
+  // finished), otherwise fall back to the winner the user PICKED in the feeding
+  // match — so the bracket fills forward exactly like the simulation tree, and
+  // tie-winners advance. As real results land, the real team replaces the
+  // predicted one and the user can re-edit (still editable until 1h pre-kickoff).
   const getTeams = (key: string): SlotTeams => {
-    const s = tree[key as KoSlotKey];
-    return { team1: s?.team1 ?? null, team2: s?.team2 ?? null };
+    const slot = tree[key as KoSlotKey];
+    const feeders = LATER_FEEDERS[key];
+    const team1 = slot?.team1 ?? (feeders ? knockoutLive[feeders[0]]?.winner ?? null : null);
+    const team2 = slot?.team2 ?? (feeders ? knockoutLive[feeders[1]]?.winner ?? null : null);
+    return { team1, team2 };
   };
 
   // Debounced per-slot save (Supabase enforces the per-match lock).
   const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
-  const onChange = (key: string, data: Partial<KOValue>) => {
-    const cur = useBettingStore.getState().knockoutLive[key] || { score1: null, score2: null, winner: null };
-    const merged: KOValue = { ...cur, ...data };
-    setLive(key, data);
-    const lockAt = lockAtFor(key as KoSlotKey, tree, schedule);
+  const scheduleSave = (key: string) => {
     if (timers.current[key]) clearTimeout(timers.current[key]);
     timers.current[key] = setTimeout(() => {
-      saveLiveKnockout(key, merged, lockAt);
+      const v = useBettingStore.getState().knockoutLive[key] || { score1: null, score2: null, winner: null };
+      saveLiveKnockout(key, v, lockAtFor(key as KoSlotKey, tree, schedule));
     }, 800);
+  };
+  const onChange = (key: string, data: Partial<KOValue>) => {
+    const oldWinner = useBettingStore.getState().knockoutLive[key]?.winner ?? null;
+    setLive(key, data);
+    scheduleSave(key);
+    // If the winner changed, the store cascade-cleared downstream picks — persist
+    // those cleared slots too so the DB doesn't keep stale forward predictions.
+    const newWinner = useBettingStore.getState().knockoutLive[key]?.winner ?? null;
+    if (oldWinner && oldWinner !== newWinner) {
+      let d: string | undefined = NEXT_MATCH[key];
+      while (d) { scheduleSave(d); d = NEXT_MATCH[d]; }
+    }
   };
 
   const renderMatch = (key: string, teams: SlotTeams, size: "sm" | "md") => {
-    const status = slotStatus(key as KoSlotKey, tree, schedule, now);
     const real = tree[key as KoSlotKey];
-    const realResult =
-      status === "finished" && real ? { score1: real.score1, score2: real.score2, winner: real.winner } : null;
+    const realFinished = !!real?.winner && real?.score1 != null;
+    const lockAt = lockAtFor(key as KoSlotKey, tree, schedule);
+    let status: SlotStatus;
+    if (!teams.team1 || !teams.team2) status = "waiting";
+    else if (realFinished) status = "finished";
+    else if (lockAt && now >= new Date(lockAt).getTime()) status = "locked";
+    else status = "open";
+    const realResult = realFinished ? { score1: real.score1, score2: real.score2, winner: real.winner } : null;
     return (
       <BracketMatchCell
         key={key}
@@ -160,8 +190,9 @@ export default function KnockoutLivePage() {
         </div>
 
         <div className="mb-4 rounded-xl border border-blue-200 bg-blue-50/70 px-4 py-3 text-[13px] text-blue-900 leading-relaxed">
-          זהו העץ שנספר לניקוד תוצאות הנוק-אאוט. המשחקים מתעדכנים מהנתונים האמיתיים של הטורניר.
-          כל משחק ניתן לעריכה <strong>עד שעה לפני שריקת הפתיחה</strong> — אין דד-ליין אחד. השלב הבא נפתח אוטומטית כשהמנצחות מהשלב הקודם ידועות.
+          כאן מנחשים את <strong>תוצאות</strong> משחקי הנוק-אאוט האמיתיים. הניקוד הוא על <strong>כיוון נכון (טוטו)</strong> ו<strong>תוצאה מדויקת</strong> בלבד —
+          <strong> לא על מי עולה</strong> (את ניקוד העולות והאלופה כבר הימרת מראש בעץ הסימולציה). בחירת המנצחת כאן רק קובעת את כיוון המשחק ומעלה את הקבוצה בעץ.
+          כל משחק ניתן לעריכה <strong>עד שעה לפני שריקת הפתיחה</strong> — אין דד-ליין אחד; השלב הבא נפתח אוטומטית כשהמנצחות מהשלב הקודם ידועות.
         </div>
 
         {!groupStageComplete ? (

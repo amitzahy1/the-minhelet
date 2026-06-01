@@ -19,7 +19,8 @@ import { getThirdsAssignment, DEFAULT_ASSIGNMENT } from "@/lib/tournament/annex-
 import { normalizeGroupLetter } from "@/lib/results-hits";
 import { BestThirdsPanel, extractThirdsFromMatches } from "./BestThirdsPanel";
 import { rankBestThirds } from "@/lib/tournament/thirds-ranker";
-import { SpecialBetsLive } from "./SpecialBetsLive";
+import { SpecialTrackerView } from "./SpecialTrackerView";
+import { useSharedData } from "@/hooks/useSharedData";
 import { FdStandingsCheck } from "./FdStandingsCheck";
 
 interface MatchApi {
@@ -279,6 +280,8 @@ export function LiveGroupsAndBracket() {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"groups" | "bracket" | "specials">("groups");
   const [thirdsOverride, setThirdsOverride] = useState<string[] | null>(null);
+  // All bettors' special-bet picks → drives the "who currently holds each bet" view.
+  const { specialBets, currentUserId } = useSharedData();
 
   useEffect(() => {
     let alive = true;
@@ -424,7 +427,7 @@ export function LiveGroupsAndBracket() {
         </div>
       )}
 
-      {tab === "specials" && <SpecialBetsLive matches={matches} />}
+      {tab === "specials" && <SpecialTrackerView specialBets={specialBets} currentUserId={currentUserId} />}
     </div>
   );
 }

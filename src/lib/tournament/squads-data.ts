@@ -302,19 +302,45 @@ function applyPredictedLineup(code: string, squad: SquadData): SquadData {
   const pl = PREDICTED_LINEUPS[code];
   if (!pl || !pl.starters.length) return squad;
 
-  const byExact = new Map(squad.players.map((p) => [norm(p.nameEn), p]));
-  const byLast = new Map<string, PlayerData>();
-  for (const p of squad.players) {
-    const k = lastToken(p.nameEn);
-    if (k && !byLast.has(k)) byLast.set(k, p);
+  // Position- and initial-aware matcher with used-tracking, so teams with
+  // multiple same-surname players (e.g. Argentina's three Martínez — GK Emiliano,
+  // DEF Lisandro, FW Lautaro) resolve to the RIGHT one and the keeper isn't lost.
+  const used = new Set<string>();
+  const firstInitial = (s: string) => (norm(s).match(/^([a-z])[.\s]/) || [])[1] || "";
+  function matchStarter(name: string, pos: PlayerData["pos"]): PlayerData | undefined {
+    const nm = norm(name);
+    const last = lastToken(name);
+    const init = firstInitial(name);
+    // 1. exact full-name, unused
+    let cand = squad.players.find((p) => !used.has(p.nameEn) && norm(p.nameEn) === nm);
+    if (cand) return cand;
+    // 2. same surname, unused — narrow by first initial then by position
+    let pool = squad.players.filter((p) => !used.has(p.nameEn) && lastToken(p.nameEn) === last);
+    if (pool.length > 1 && init) {
+      const byInit = pool.filter((p) => norm(p.nameEn).startsWith(init));
+      if (byInit.length) pool = byInit;
+    }
+    if (pool.length > 1) {
+      const byPos = pool.filter((p) => p.pos === pos);
+      if (byPos.length) pool = byPos;
+    }
+    if (pool.length) return pool[0];
+    // 3. name failed (transliteration, e.g. "Bono"→"Bounou") — fill the slot
+    // with an unused roster player of the same position so the XI is always
+    // complete (a GK is never missing); fall back to attacker bucket for MID/FW.
+    const bucket = (p: PlayerData["pos"]) => (p === "GK" ? "GK" : p === "DEF" ? "DEF" : "ATT");
+    return (
+      squad.players.find((p) => !used.has(p.nameEn) && p.pos === pos) ||
+      squad.players.find((p) => !used.has(p.nameEn) && bucket(p.pos) === bucket(pos))
+    );
   }
 
   const starterNames: string[] = [];
   const starterSet = new Set<string>();
   const posByName = new Map<string, PlayerData["pos"]>(); // matched player → RotoWire role
   for (const s of pl.starters) {
-    const match = byExact.get(norm(s.name)) || byLast.get(lastToken(s.name));
-    if (match) { starterNames.push(match.nameEn); starterSet.add(match.nameEn); posByName.set(match.nameEn, s.pos); }
+    const match = matchStarter(s.name, s.pos);
+    if (match) { used.add(match.nameEn); starterNames.push(match.nameEn); starterSet.add(match.nameEn); posByName.set(match.nameEn, s.pos); }
     else starterNames.push(s.name); // unmatched → show RotoWire name as-is
   }
 

@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { useBettingStore } from "@/stores/betting-store";
-import { GROUPS as GROUPS_RAW } from "@/lib/tournament/groups";
+import { GROUPS as GROUPS_RAW, getTeamByCode } from "@/lib/tournament/groups";
 import { calculateStandings } from "@/lib/tournament/standings";
+import { rankBestThirds, type ThirdsInputRow } from "@/lib/tournament/thirds-ranker";
 import { FLAGS as __FLAGS } from "@/lib/flags";
 import { loadRealFixtures, groupFixtureInfo, pairKey, type FixtureInfo } from "@/lib/fixtures-client";
 import { toIsraelDate } from "@/lib/timezone";
@@ -268,9 +269,111 @@ function GroupView({ groupId }: { groupId: string }) {
   );
 }
 
+// Best third-placed teams, computed from the USER'S predicted group tables.
+// 8 of 12 thirds advance (FIFA ranking: pts → GD → GF → fair-play → world rank).
+// Doubles as a check that the R32 third-place teams in the simulation tree match.
+function BestThirdsPredicted() {
+  const groups = useBettingStore((s) => s.groups);
+  const { ranked, completeCount } = useMemo(() => {
+    const rows: ThirdsInputRow[] = [];
+    let complete = 0;
+    for (const letter of GROUP_LETTERS) {
+      const teams = GROUPS_RAW[letter];
+      const g = groups[letter];
+      const codes = teams.map((t) => t.code);
+      const filled = g?.scores?.filter((s) => s.home !== null && s.away !== null).length ?? 0;
+      if (filled < 6) continue;
+      complete++;
+      const preds: GroupMatchPrediction[] = generateMatchups(codes).map((m, i) => ({
+        match_id: i,
+        home_team_code: m.h,
+        away_team_code: m.a,
+        home_goals: g.scores[i].home ?? 0,
+        away_goals: g.scores[i].away ?? 0,
+      }));
+      const standings = calculateStandings(teams.map((t) => ({ id: t.id, code: t.code })), preds);
+      const third = standings[2];
+      if (!third) continue;
+      rows.push({
+        group: letter,
+        team_code: third.team_code,
+        played: 3,
+        points: third.points,
+        goal_difference: third.goal_difference,
+        goals_for: third.goals_for,
+        fifa_ranking: getTeamByCode(third.team_code)?.fifa_ranking,
+      });
+    }
+    return { ranked: rankBestThirds(rows).ranked, completeCount: complete };
+  }, [groups]);
+
+  const teamName = (code: string) => getTeamByCode(code)?.name_he || code;
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+      <div className="px-5 py-4 bg-gradient-to-l from-amber-50 to-white border-b border-amber-100">
+        <h2 className="text-xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>🥉 המקומות השלישיים הטובים</h2>
+        <p className="text-sm text-gray-500 mt-0.5">8 מתוך 12 עולות לשלב 32 — מחושב מהטבלאות שניחשת</p>
+      </div>
+
+      {completeCount < 12 && (
+        <div className="mx-4 mt-4 rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-[13px] text-amber-800">
+          השלמת {completeCount}/12 בתים. הדירוג ייסגר סופית רק אחרי שכל 12 הבתים מלאים — מה שמוצג כאן מבוסס על הבתים שכבר מילאת.
+        </div>
+      )}
+
+      {ranked.length === 0 ? (
+        <p className="px-5 py-8 text-center text-sm text-gray-400">מלאו תוצאות בבתים כדי לראות את דירוג המקומות השלישיים.</p>
+      ) : (
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="text-gray-500 bg-gray-50 text-xs font-semibold">
+              <th className="py-2.5 ps-4 text-start w-8">#</th>
+              <th className="py-2.5 text-start">נבחרת</th>
+              <th className="py-2.5 text-center w-10">בית</th>
+              <th className="py-2.5 text-center w-12">נק׳</th>
+              <th className="py-2.5 text-center w-12">הפרש</th>
+              <th className="py-2.5 pe-4 text-center w-12">שערים</th>
+            </tr>
+          </thead>
+          <tbody>
+            {ranked.map((r, i) => {
+              const qualifies = i < 8;
+              return (
+                <tr key={r.group} className={`border-t border-gray-100 ${qualifies ? "bg-green-50/50" : "opacity-60"}`}>
+                  <td className="py-3 ps-4">
+                    <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-[11px] font-black ${qualifies ? "bg-green-500 text-white" : "bg-gray-200 text-gray-500"}`} style={{ fontFamily: "var(--font-inter)" }}>{i + 1}</span>
+                  </td>
+                  <td className="py-3">
+                    <span className="flex items-center gap-2">
+                      <span className="text-lg">{__FLAGS[r.team_code] || "🏳️"}</span>
+                      <span className="font-bold text-gray-900">{teamName(r.team_code)}</span>
+                      {qualifies && <span className="text-[10px] font-bold text-green-700 bg-green-100 rounded px-1.5 py-0.5">עולה</span>}
+                    </span>
+                  </td>
+                  <td className="text-center font-bold text-gray-500" style={{ fontFamily: "var(--font-inter)" }}>{r.group}</td>
+                  <td className="text-center font-black text-gray-800" style={{ fontFamily: "var(--font-inter)" }}>{r.points}</td>
+                  <td className="text-center text-gray-600 font-semibold" style={{ fontFamily: "var(--font-inter)" }}>{r.goal_difference > 0 ? `+${r.goal_difference}` : r.goal_difference}</td>
+                  <td className="text-center pe-4 text-gray-600 font-medium" style={{ fontFamily: "var(--font-inter)" }}>{r.goals_for}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      )}
+      <div className="px-5 py-3 border-t border-gray-100 bg-gray-50/60">
+        <p className="text-[12px] text-gray-500 leading-snug">
+          8 הירוקות הן השלישיות שעולות לשלב 32 — ואלו בדיוק הנבחרות שמופיעות במשבצות המקום-השלישי ב<Link href="/knockout" className="font-bold underline">עץ הסימולציה</Link>. אם משהו לא תואם — בדקו את התוצאות בבתים.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default function GroupsPage() {
   const currentGroupIndex = useBettingStore((s) => s.currentGroupIndex);
   const setCurrentGroupIndex = useBettingStore((s) => s.setCurrentGroupIndex);
+  const [showThirds, setShowThirds] = useState(false);
 
   // First-ever visit to /groups → land on group A. Returning visitors keep their place.
   useEffect(() => {
@@ -371,9 +474,9 @@ export default function GroupsPage() {
             const filled = useBettingStore.getState().getGroupFilledCount(letter);
             const done = filled === 6;
             return (
-              <button key={letter} onClick={() => setCurrentGroupIndex(i)}
+              <button key={letter} onClick={() => { setShowThirds(false); setCurrentGroupIndex(i); }}
                 className={`shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-lg text-base sm:text-lg font-black transition-all ${
-                  i === currentGroupIndex ? "bg-gray-900 text-white shadow-md scale-110" :
+                  !showThirds && i === currentGroupIndex ? "bg-gray-900 text-white shadow-md scale-110" :
                   done ? "bg-green-100 text-green-700 border border-green-200" :
                   filled > 0 ? "bg-blue-50 text-blue-600 border border-blue-200" :
                   "bg-gray-100 text-gray-400"
@@ -382,6 +485,14 @@ export default function GroupsPage() {
               </button>
             );
           })}
+          {/* Best-thirds view — appended after the group letters */}
+          <button onClick={() => setShowThirds(true)}
+            title="המקומות השלישיים הטובים"
+            className={`shrink-0 h-10 sm:h-11 px-3 rounded-lg text-base sm:text-lg font-black transition-all ${
+              showThirds ? "bg-gray-900 text-white shadow-md scale-105" : "bg-amber-50 text-amber-700 border border-amber-200"
+            }`} style={{ fontFamily: "var(--font-inter)" }}>
+            🥉
+          </button>
         </div>
       </div>
 
@@ -391,38 +502,51 @@ export default function GroupsPage() {
         <p className="text-sm font-medium text-gray-700">ננעל ב-{formatLockDeadline()} (שעון ישראל) · ניתן לשנות עד אז</p>
       </div>
 
-      {/* Carousel header */}
-      <div className="flex items-center justify-between mb-4">
-        <button onClick={() => setCurrentGroupIndex(Math.max(0, currentGroupIndex - 1))} disabled={currentGroupIndex === 0}
-          className={`px-3 py-2 rounded-lg text-sm font-medium ${currentGroupIndex === 0 ? "text-gray-300" : "text-gray-600 hover:bg-gray-100"}`}>
-          בית {currentGroupIndex > 0 ? GROUP_LETTERS[currentGroupIndex - 1] : ""} →
-        </button>
-        <div className="text-center">
-          <h2 className="text-xl font-bold text-gray-900">בית {groupId}</h2>
-          <p className="text-sm text-gray-400">{currentGroupIndex + 1} מתוך 12</p>
-        </div>
-        <button onClick={() => setCurrentGroupIndex(Math.min(11, currentGroupIndex + 1))} disabled={currentGroupIndex === 11}
-          className={`px-3 py-2 rounded-lg text-sm font-medium ${currentGroupIndex === 11 ? "text-gray-300" : "text-gray-600 hover:bg-gray-100"}`}>
-          ← בית {currentGroupIndex < 11 ? GROUP_LETTERS[currentGroupIndex + 1] : ""}
-        </button>
-      </div>
+      {showThirds ? (
+        <BestThirdsPredicted />
+      ) : (
+        <>
+          {/* Carousel header */}
+          <div className="flex items-center justify-between mb-4">
+            <button onClick={() => setCurrentGroupIndex(Math.max(0, currentGroupIndex - 1))} disabled={currentGroupIndex === 0}
+              className={`px-3 py-2 rounded-lg text-sm font-medium ${currentGroupIndex === 0 ? "text-gray-300" : "text-gray-600 hover:bg-gray-100"}`}>
+              בית {currentGroupIndex > 0 ? GROUP_LETTERS[currentGroupIndex - 1] : ""} →
+            </button>
+            <div className="text-center">
+              <h2 className="text-xl font-bold text-gray-900">בית {groupId}</h2>
+              <p className="text-sm text-gray-400">{currentGroupIndex + 1} מתוך 12</p>
+            </div>
+            <button onClick={() => setCurrentGroupIndex(Math.min(11, currentGroupIndex + 1))} disabled={currentGroupIndex === 11}
+              className={`px-3 py-2 rounded-lg text-sm font-medium ${currentGroupIndex === 11 ? "text-gray-300" : "text-gray-600 hover:bg-gray-100"}`}>
+              ← בית {currentGroupIndex < 11 ? GROUP_LETTERS[currentGroupIndex + 1] : ""}
+            </button>
+          </div>
 
-      {/* Group view */}
-      <SwipeableGroups
-        onSwipeLeft={() => setCurrentGroupIndex(Math.min(11, currentGroupIndex + 1))}
-        onSwipeRight={() => setCurrentGroupIndex(Math.max(0, currentGroupIndex - 1))}
-      >
-        <GroupView groupId={groupId} />
-      </SwipeableGroups>
+          {/* Group view */}
+          <SwipeableGroups
+            onSwipeLeft={() => setCurrentGroupIndex(Math.min(11, currentGroupIndex + 1))}
+            onSwipeRight={() => setCurrentGroupIndex(Math.max(0, currentGroupIndex - 1))}
+          >
+            <GroupView groupId={groupId} />
+          </SwipeableGroups>
 
-      {/* Next button */}
-      {currentGroupIndex < 11 && (
-        <div className="mt-6 text-center">
-          <button onClick={() => setCurrentGroupIndex(currentGroupIndex + 1)}
-            className="px-8 py-3 rounded-xl bg-gray-900 text-white font-medium text-sm hover:bg-gray-800 transition-colors shadow-sm">
-            ← המשך לבית {GROUP_LETTERS[currentGroupIndex + 1]}
-          </button>
-        </div>
+          {/* Next button — after the last group, point to the best-thirds view */}
+          {currentGroupIndex < 11 ? (
+            <div className="mt-6 text-center">
+              <button onClick={() => setCurrentGroupIndex(currentGroupIndex + 1)}
+                className="px-8 py-3 rounded-xl bg-gray-900 text-white font-medium text-sm hover:bg-gray-800 transition-colors shadow-sm">
+                ← המשך לבית {GROUP_LETTERS[currentGroupIndex + 1]}
+              </button>
+            </div>
+          ) : (
+            <div className="mt-6 text-center">
+              <button onClick={() => setShowThirds(true)}
+                className="px-8 py-3 rounded-xl bg-amber-500 text-white font-medium text-sm hover:bg-amber-600 transition-colors shadow-sm">
+                🥉 צפו במקומות השלישיים הטובים
+              </button>
+            </div>
+          )}
+        </>
       )}
 
       {/* Explicit save button — always visible so partial progress persists */}

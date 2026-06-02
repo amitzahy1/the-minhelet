@@ -23,7 +23,15 @@ const ACTUALS: TournamentActuals = {
   best_attack_team: "BRA",
   best_attack_goals: 14,
   dirtiest_team: "ARG",
-  dirtiest_team_cards: 14,
+  dirtiest_team_cards: 15, // 12 yellow + 1 red = 12 + 3
+  dirtiest_board: [
+    { team: "ARG", yellow: 12, red: 1 },
+    { team: "FRA", yellow: 10, red: 1 },
+    { team: "POR", yellow: 9, red: 0 },
+    { team: "BRA", yellow: 8, red: 0 },
+    { team: "ESP", yellow: 6, red: 0 },
+    { team: "ENG", yellow: 5, red: 0 },
+  ],
   most_prolific_group: "C",
   most_prolific_goals: 14,
   driest_group: "H",

@@ -13,7 +13,7 @@ const SPECIAL_FIELDS = [
   "top_scorer_player", "top_scorer_team", "top_scorer_goals",
   "top_assists_player", "top_assists_team", "top_assists_count",
   "best_attack_team", "best_attack_goals",
-  "dirtiest_team", "dirtiest_team_cards",
+  "dirtiest_team", "dirtiest_team_cards", "dirtiest_board",
   "most_prolific_group", "most_prolific_goals",
   "driest_group", "driest_group_goals",
   "matchup_result_1", "matchup_result_2", "matchup_result_3",

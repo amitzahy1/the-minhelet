@@ -14,6 +14,7 @@ import {
   syncAdvancementPicks,
 } from "@/lib/tournament/bracket-cascade";
 import { revalidateTree1 } from "@/lib/tournament/revalidate-bracket";
+import { isLocked } from "@/lib/constants";
 
 // --- Types ---
 
@@ -738,6 +739,20 @@ if (typeof window !== "undefined") {
     // server state differs from localStorage (e.g. after an admin reset),
     // this write will change the sig but must not flash "pending".
     if (isHydrating) {
+      lastBetSig = betSig(state);
+      lastSpecialsSig = JSON.stringify(state.specialBets);
+      return;
+    }
+
+    // After the global lock, the full-bracket save (saveBetsToSupabase) is
+    // rejected server-side and would trigger the optimistic ROLLBACK below
+    // (performSave) that wipes a live edit. Every post-lock editable surface
+    // owns its own per-item save: Tree 2 via saveLiveKnockout, and group-stage
+    // scores via saveLiveGroupScore on the /groups live page. So just record
+    // the new signature and bail — no global save, no "pending" flash.
+    // (zustand `persist` still mirrors the edit to localStorage.) Pre-lock
+    // behavior is unchanged.
+    if (isLocked()) {
       lastBetSig = betSig(state);
       lastSpecialsSig = JSON.stringify(state.specialBets);
       return;

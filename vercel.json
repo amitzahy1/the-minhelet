@@ -5,6 +5,10 @@
       "schedule": "0 6 * * *"
     },
     {
+      "path": "/api/sync-locks",
+      "schedule": "0 */3 * * *"
+    },
+    {
       "path": "/api/admin/backup-snapshot",
       "schedule": "0 7 * * *"
     },

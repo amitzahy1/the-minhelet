@@ -70,6 +70,39 @@ export function classifyHit(
 }
 
 /**
+ * Map a real group-stage fixture (group letter + the two team TLAs, in any
+ * order) to the canonical stored-prediction pair index (0–5) used in
+ * `group_predictions[group].scores`, plus whether the real home/away is flipped
+ * vs the canonical {@link GROUP_MATCH_PAIRS} orientation.
+ *
+ * Single source of truth shared by the hit computation, the live-edit save
+ * path, and the shared-bets visibility redaction so all three agree on which
+ * stored score belongs to which real match. Returns null when either team
+ * isn't in the group or the pairing isn't a recognised group match.
+ */
+export function matchPairIndex(
+  group: string,
+  homeTla: string,
+  awayTla: string,
+): { pairIdx: number; flipped: boolean } | null {
+  const teams = GROUPS[group];
+  if (!teams) return null;
+  const homeCode = normalizeTla(homeTla);
+  const awayCode = normalizeTla(awayTla);
+  const homeIdx = teams.findIndex((t) => t.code === homeCode);
+  const awayIdx = teams.findIndex((t) => t.code === awayCode);
+  if (homeIdx < 0 || awayIdx < 0) return null;
+
+  // Match the pair (order-insensitive) and record if flipped vs canonical.
+  for (let i = 0; i < GROUP_MATCH_PAIRS.length; i++) {
+    const [a, b] = GROUP_MATCH_PAIRS[i];
+    if (a === homeIdx && b === awayIdx) return { pairIdx: i, flipped: false };
+    if (a === awayIdx && b === homeIdx) return { pairIdx: i, flipped: true };
+  }
+  return null;
+}
+
+/**
  * For a group-stage match, look up each bettor's stored prediction from
  * their bracket and compare to the actual result.
  */
@@ -77,23 +110,9 @@ export function computeGroupHits(
   match: FinishedMatch,
   brackets: BettorBracket[]
 ): BettorHit[] {
-  const teams = GROUPS[match.group];
-  if (!teams) return [];
-  const homeCode = normalizeTla(match.homeTla);
-  const awayCode = normalizeTla(match.awayTla);
-  const homeIdx = teams.findIndex((t) => t.code === homeCode);
-  const awayIdx = teams.findIndex((t) => t.code === awayCode);
-  if (homeIdx < 0 || awayIdx < 0) return [];
-
-  // Match the pair (order-insensitive) and record if flipped vs canonical.
-  let pairIdx = -1;
-  let flipped = false;
-  for (let i = 0; i < GROUP_MATCH_PAIRS.length; i++) {
-    const [a, b] = GROUP_MATCH_PAIRS[i];
-    if (a === homeIdx && b === awayIdx) { pairIdx = i; flipped = false; break; }
-    if (a === awayIdx && b === homeIdx) { pairIdx = i; flipped = true; break; }
-  }
-  if (pairIdx < 0) return [];
+  const pair = matchPairIndex(match.group, match.homeTla, match.awayTla);
+  if (!pair) return [];
+  const { pairIdx, flipped } = pair;
 
   const out: BettorHit[] = [];
   for (const b of brackets) {

@@ -212,6 +212,29 @@ export function OperationsPanel() {
 
       <Card>
         <CardHeader>
+          <CardTitle className="text-base">🔒 סנכרון זמני נעילה</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <OpHelp
+            when={[
+              "פעם אחת אחרי פריסה ראשונה, כדי לאכלס את טבלת הנעילות מיד",
+              "אם פיפ״א שינו שעת משחק והנעילה צריכה להתעדכן עכשיו (בלי לחכות ל-cron)",
+              "אם משתמש מדווח שמשחק נעול/פתוח בזמן הלא נכון",
+            ]}
+            why="זמני הנעילה (שלב הבתים + עץ נתוני אמת) נשמרים בטבלת `prediction_locks` ונאכפים בשרת — לא נסמכים על שעון הדפדפן ולא על זמינות ה-API ברגע השמירה. הפעולה מחשבת מחדש את הנעילות מהלוז (אותה לוגיקה של התצוגה) ומעדכנת את הטבלה. רץ אוטומטית כל 3 שעות; זה רק טריגר ידני לעדכון מיידי. אם ה-API לא זמין — לא מוחק כלום."
+          />
+          <Button
+            onClick={() => call("sync_locks", "סנכרון זמני נעילה", "/api/sync-locks", { method: "POST" })}
+            disabled={busy === "sync_locks"}
+          >
+            {busy === "sync_locks" ? "מסנכרן..." : "סנכרן זמני נעילה עכשיו"}
+          </Button>
+          <StatusLine status={status.sync_locks} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <CardTitle className="text-base">🔁 דוח עדכון עץ הסימולציה (מקום שלישי)</CardTitle>
         </CardHeader>
         <CardContent>

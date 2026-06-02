@@ -333,12 +333,21 @@ function BestThirdsPredicted() {
               <th className="py-2.5 text-center w-10">בית</th>
               <th className="py-2.5 text-center w-12">נק׳</th>
               <th className="py-2.5 text-center w-12">הפרש</th>
-              <th className="py-2.5 pe-4 text-center w-12">שערים</th>
+              <th className="py-2.5 text-center w-12">שערים</th>
+              <th className="py-2.5 pe-4 text-center w-16" title="דירוג עולמי — שובר שוויון">דירוג פיפ״א</th>
             </tr>
           </thead>
           <tbody>
             {ranked.map((r, i) => {
               const qualifies = i < 8;
+              // The FIFA ranking is what separated this team from the one above it
+              // when they're level on pts / GD / GF (fair-play isn't tracked for
+              // predictions) — flag that so the order is transparent.
+              const prev = i > 0 ? ranked[i - 1] : null;
+              const decidedByRanking = !!prev
+                && prev.points === r.points
+                && prev.goal_difference === r.goal_difference
+                && prev.goals_for === r.goals_for;
               return (
                 <tr key={r.group} className={`border-t border-gray-100 ${qualifies ? "bg-green-50/50" : "opacity-60"}`}>
                   <td className="py-3 ps-4">
@@ -349,19 +358,28 @@ function BestThirdsPredicted() {
                       <span className="text-lg">{__FLAGS[r.team_code] || "🏳️"}</span>
                       <span className="font-bold text-gray-900">{teamName(r.team_code)}</span>
                       {qualifies && <span className="text-[10px] font-bold text-green-700 bg-green-100 rounded px-1.5 py-0.5">עולה</span>}
+                      {decidedByRanking && <span className="text-[9px] font-bold text-amber-700 bg-amber-100 rounded px-1.5 py-0.5" title="הופרד מהקבוצה שמעל לפי דירוג פיפ״א">שובר: דירוג</span>}
                     </span>
                   </td>
                   <td className="text-center font-bold text-gray-500" style={{ fontFamily: "var(--font-inter)" }}>{r.group}</td>
                   <td className="text-center font-black text-gray-800" style={{ fontFamily: "var(--font-inter)" }}>{r.points}</td>
                   <td className="text-center text-gray-600 font-semibold" style={{ fontFamily: "var(--font-inter)" }}>{r.goal_difference > 0 ? `+${r.goal_difference}` : r.goal_difference}</td>
-                  <td className="text-center pe-4 text-gray-600 font-medium" style={{ fontFamily: "var(--font-inter)" }}>{r.goals_for}</td>
+                  <td className="text-center text-gray-600 font-medium" style={{ fontFamily: "var(--font-inter)" }}>{r.goals_for}</td>
+                  <td className="text-center pe-4" style={{ fontFamily: "var(--font-inter)" }}>
+                    <span className={`text-[12px] font-semibold ${decidedByRanking ? "text-amber-700 bg-amber-100 rounded px-1.5 py-0.5" : "text-gray-400"}`}>
+                      {r.fifa_ranking ?? "—"}
+                    </span>
+                  </td>
                 </tr>
               );
             })}
           </tbody>
         </table>
       )}
-      <div className="px-5 py-3 border-t border-gray-100 bg-gray-50/60">
+      <div className="px-5 py-3 border-t border-gray-100 bg-gray-50/60 space-y-1">
+        <p className="text-[12px] text-gray-500 leading-snug">
+          סדר השובר (לפי פיפ״א): <strong>נקודות → הפרש שערים → שערי זכות → דירוג עולמי</strong>. דירוג פיפ״א (מספר נמוך = טוב יותר) שובר שוויון כשהכול שווה — מסומן בכתום.
+        </p>
         <p className="text-[12px] text-gray-500 leading-snug">
           8 הירוקות הן השלישיות שעולות לשלב 32 — ואלו בדיוק הנבחרות שמופיעות במשבצות המקום-השלישי ב<Link href="/knockout" className="font-bold underline">עץ הסימולציה</Link>. אם משהו לא תואם — בדקו את התוצאות בבתים.
         </p>

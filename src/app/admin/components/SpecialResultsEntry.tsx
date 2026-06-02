@@ -175,6 +175,9 @@ export function SpecialResultsEntry() {
           הזינו את התוצאות בפועל של ההימורים המיוחדים. הנתונים יוצגו בדף המעקב
           במערכת ויחושבו מול ההימורים של המהמרים. משדות ריקים — עדיין טרם נסגר.
         </p>
+        <div className="mt-2 rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-800 leading-relaxed">
+          <strong>⚠️ חובה למלא ידנית (אין מקור אוטומטי):</strong> הנבחרת הכסחנית + מס׳ כרטיסים · 3 תוצאות המאצ׳אפים (5 נק׳ לכל דו-קרב) · סה״כ פנדלים. בלי הזנה — 0 נקודות למהמרים על ההימורים האלה. מלך שערים/בישולים/התקפה/בתים מתעדכנים אוטומטית אך טעונים אישור סופי.
+        </div>
       </CardHeader>
       <CardContent className="space-y-5">
         {/* Top scorer + assists */}

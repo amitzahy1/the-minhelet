@@ -430,8 +430,11 @@ export function SpecialTrackerView({
     const playerLabel = (name: string, team: string) => <span>{getFlag(team)} {name}</span>;
     // Tiny "MEX · KOR · CZE · RSA" roster line under each group row.
     const groupTeams = (letter: string) => (GROUPS[letter] || []).map((t) => t.code).join(" · ");
-    // Card-weighting for "dirtiest": a red counts double a yellow.
-    const RED_W = 2, YEL_W = 1;
+    // Card-weighting for "dirtiest": yellow = 1, red = 3 (canonical — matches
+    // the rules page). A second yellow in the same match is counted as ONE red,
+    // not two yellows; a genuine yellow + direct red counts as both. See the
+    // rules page (הנבחרת הכסחנית) for the full card-counting convention.
+    const RED_W = 3, YEL_W = 1;
     const cardVal = (y: number, r: number) => (
       <span className="leading-tight">
         <span>{y}</span><span className="text-[9px] text-gray-400"> צ׳</span>
@@ -460,7 +463,7 @@ export function SpecialTrackerView({
       .map((s) => ({ key: s.name, label: playerLabel(s.name, s.team), value: `${s.assists}` }));
     const attackRanked = [...stats.teamStats].sort((a, b) => b.goalsFor - a.goalsFor)
       .map((t) => ({ key: t.code, label: flagName(t.code), value: `${t.goalsFor}` }));
-    // Dirtiest: ranked by a weighted score (red counts double). value2 = the
+    // Dirtiest: ranked by a weighted score (red counts triple). value2 = the
     // weighted score (headline), value = the yellow/red breakdown.
     const dirtyRanked = [...stats.teamStats].sort((a, b) => (b.yellowCards * YEL_W + b.redCards * RED_W) - (a.yellowCards * YEL_W + a.redCards * RED_W))
       .map((t) => ({ key: t.code, label: flagName(t.code), value2: `${t.yellowCards * YEL_W + t.redCards * RED_W}`, value: cardVal(t.yellowCards, t.redCards) }));
@@ -527,7 +530,7 @@ export function SpecialTrackerView({
       ranked({ title: "מלך שערים", points: `${sp.top_scorer_exact} / ${sp.top_scorer_relative} נק׳`, nameHeader: "שחקן", valueHeader: "שערים", updatedAt: liveAt, getPick: (b) => b.topScorerPlayer, list: scorerRanked, actualKey: actuals?.top_scorer_player ?? null, fuzzy: true, decidedLabel: actuals?.top_scorer_player ? `הוכרע: ${actuals.top_scorer_player}` : undefined }),
       ranked({ title: "מלך בישולים", points: `${sp.top_assists_exact} / ${sp.top_assists_relative} נק׳`, nameHeader: "שחקן", valueHeader: "בישולים", updatedAt: liveAt, getPick: (b) => b.topAssistsPlayer, list: assistRanked, actualKey: actuals?.top_assists_player ?? null, fuzzy: true, decidedLabel: actuals?.top_assists_player ? `הוכרע: ${actuals.top_assists_player}` : undefined }),
       ranked({ title: "התקפה פורייה", points: `${sp.best_attack} נק׳`, nameHeader: "נבחרת", valueHeader: "שערים", updatedAt: actAt, getPick: (b) => b.bestAttack, list: attackRanked, actualKey: actuals?.best_attack_team ?? null, decidedLabel: "הוכרע" }),
-      ranked({ title: "הנבחרת הכסחנית", points: `${sp.dirtiest_team} נק׳`, nameHeader: "נבחרת", valueHeader2: "ניקוד", valueHeader: "כרטיסים", updatedAt: actAt, getPick: (b) => b.dirtiestTeam, list: dirtyRanked, actualKey: actuals?.dirtiest_team ?? null, decidedLabel: "הוכרע", footNote: "ניקוד: צהוב = 1 · אדום = 2" }),
+      ranked({ title: "הנבחרת הכסחנית", points: `${sp.dirtiest_team} נק׳`, nameHeader: "נבחרת", valueHeader2: "ניקוד", valueHeader: "כרטיסים", updatedAt: actAt, getPick: (b) => b.dirtiestTeam, list: dirtyRanked, actualKey: actuals?.dirtiest_team ?? null, decidedLabel: "הוכרע", footNote: "ניקוד: צהוב = 1 · אדום = 3 · צהוב שני באותו משחק = אדום אחד" }),
       ranked({ title: "הבית הפורה", points: `${sp.prolific_group} נק׳`, nameHeader: "בית", valueHeader: "שערים", updatedAt: actAt, getPick: (b) => b.prolificGroup, list: prolificRanked, actualKey: actuals?.most_prolific_group ?? null, decidedLabel: "הוכרע" }),
       ranked({ title: "הבית היבש", points: `${sp.driest_group} נק׳`, nameHeader: "בית", valueHeader: "שערים", updatedAt: actAt, getPick: (b) => b.driestGroup, list: driestRanked, actualKey: actuals?.driest_group ?? null, decidedLabel: "הוכרע" }),
       matchupCard(0, actuals?.matchup_result_1 ?? null),

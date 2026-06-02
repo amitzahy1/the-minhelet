@@ -341,10 +341,11 @@ export default function StandingsPage() {
             most_prolific_group: a.most_prolific_group ?? null,
             driest_group: a.driest_group ?? null,
             dirtiest_team: a.dirtiest_team ?? null,
-            // tournament_actuals stores per-matchup result (3 fixtures); the
-            // scorer compares against a single `matchup_winner` — use the first
-            // configured result as the canonical value (legacy default).
-            matchup_winner: a.matchup_result_1 ?? null,
+            // tournament_actuals stores one result per duel (3 fixtures); the
+            // scorer scores each independently at SCORING.specials.matchup.
+            matchup_result_1: a.matchup_result_1 ?? null,
+            matchup_result_2: a.matchup_result_2 ?? null,
+            matchup_result_3: a.matchup_result_3 ?? null,
             penalties_over_under: a.penalties_over_under ?? null,
           });
         }

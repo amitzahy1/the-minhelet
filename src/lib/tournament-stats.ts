@@ -80,6 +80,12 @@ interface DemoResultRow {
 
 // ---------- Helpers ----------
 
+// NOTE: yellowCards/redCards are not yet populated here — the demo_match_results
+// query doesn't fetch card columns, so the "dirtiest" live ranking reads 0 on
+// real data until cards are wired in. When wiring them, apply the canonical
+// counting rule (see rules page → הנבחרת הכסחנית): a second yellow in the same
+// match counts as ONE red (the two yellows are absorbed, NOT counted separately),
+// while a genuine yellow + direct red counts as both. Weighting: yellow=1, red=3.
 export function aggregateTeamStats(rows: DemoResultRow[]): TeamGoalStats[] {
   const map = new Map<string, TeamGoalStats>();
   const ensure = (code: string) => {

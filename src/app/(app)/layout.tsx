@@ -408,15 +408,15 @@ function BettingSubNav({ pathname }: { pathname: string }) {
     if (sb.winner) count++;
     if (sb.finalist1) count++;
     if (sb.finalist2) count++;
-    count += sb.quarterfinalists.filter(Boolean).length;
-    count += sb.semifinalists.filter(Boolean).length;
+    count += (sb.quarterfinalists ?? []).filter(Boolean).length;
+    count += (sb.semifinalists ?? []).filter(Boolean).length;
     if (sb.topScorerPlayer) count++;
     if (sb.topAssistsPlayer) count++;
     if (sb.bestAttack) count++;
     if (sb.dirtiestTeam) count++;
     if (sb.prolificGroup) count++;
     if (sb.driestGroup) count++;
-    count += sb.matchups.filter(Boolean).length;
+    count += (sb.matchups ?? []).filter(Boolean).length;
     if (sb.penaltiesOverUnder) count++;
     return count;
   });

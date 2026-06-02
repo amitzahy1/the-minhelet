@@ -256,8 +256,8 @@ export default function SpecialBetsPage() {
   }, [sb.topScorerPlayer, sb.topAssistsPlayer, sb.topScorerTeam, sb.topAssistsTeam]);
 
   // Mismatch detection (team sets — order doesn't matter)
-  const sameSet = (a: string[], b: string[]) => {
-    const A = a.filter(Boolean), B = b.filter(Boolean);
+  const sameSet = (a: string[] | undefined, b: string[] | undefined) => {
+    const A = (a ?? []).filter(Boolean), B = (b ?? []).filter(Boolean);
     if (A.length === 0 || B.length === 0) return true;
     if (A.length !== B.length) return false;
     const as = new Set(A);
@@ -268,16 +268,16 @@ export default function SpecialBetsPage() {
     ? `לפי העץ שלך הזוכה היא ${expected.winner}` : "";
   const finalsMismatch = !sameSet([sb.finalist1, sb.finalist2], [expected.finalist1, expected.finalist2])
     ? `לפי העץ שלך: ${[expected.finalist1, expected.finalist2].filter(Boolean).join(", ")}` : "";
-  const sfMismatch = !sameSet(sb.semifinalists, expected.semifinalists)
+  const sfMismatch = !sameSet(paddedSemis, expected.semifinalists)
     ? `לפי העץ שלך: ${expected.semifinalists.filter(Boolean).join(", ")}` : "";
-  const qfMismatch = !sameSet(sb.quarterfinalists, expected.quarterfinalists)
+  const qfMismatch = !sameSet(paddedQuarters, expected.quarterfinalists)
     ? `לפי העץ שלך: ${expected.quarterfinalists.filter(Boolean).join(", ")}` : "";
-  const r16Mismatch = !sameSet(sb.roundOf16, expected.roundOf16)
+  const r16Mismatch = !sameSet(paddedR16, expected.roundOf16)
     ? `לפי העץ שלך: ${expected.roundOf16.filter(Boolean).join(", ")}` : "";
 
-  const filledCount = [sb.winner, sb.finalist1, sb.finalist2, ...sb.semifinalists, ...sb.quarterfinalists,
+  const filledCount = [sb.winner, sb.finalist1, sb.finalist2, ...paddedSemis, ...paddedQuarters,
     sb.topScorerPlayer, sb.topAssistsPlayer, sb.bestAttack, sb.prolificGroup, sb.driestGroup,
-    sb.dirtiestTeam, ...sb.matchups, sb.penaltiesOverUnder].filter(Boolean).length;
+    sb.dirtiestTeam, ...(sb.matchups ?? []), sb.penaltiesOverUnder].filter(Boolean).length;
 
   // Celebrate every time the user transitions from <25 to 25 filled bets
   const fireConfetti = useConfetti();

@@ -85,19 +85,19 @@ export function clearTeamFromSpecialBets(
 
   // R32 change → team can't reach the round of 16.
   if (idx <= 0) {
-    sb.roundOf16 = sb.roundOf16.map((s) => {
+    sb.roundOf16 = (sb.roundOf16 ?? []).map((s) => {
       if (s === teamCode) { cleared++; return ""; }
       return s;
     });
   }
   if (idx <= 1) {
-    sb.quarterfinalists = sb.quarterfinalists.map((s) => {
+    sb.quarterfinalists = (sb.quarterfinalists ?? []).map((s) => {
       if (s === teamCode) { cleared++; return ""; }
       return s;
     });
   }
   if (idx <= 2) {
-    sb.semifinalists = sb.semifinalists.map((s) => {
+    sb.semifinalists = (sb.semifinalists ?? []).map((s) => {
       if (s === teamCode) { cleared++; return ""; }
       return s;
     });
@@ -123,7 +123,10 @@ export function syncAdvancementPicks(
     knockout.r32r_0?.winner, knockout.r32r_1?.winner, knockout.r32r_2?.winner, knockout.r32r_3?.winner,
     knockout.r32r_4?.winner, knockout.r32r_5?.winner, knockout.r32r_6?.winner, knockout.r32r_7?.winner,
   ];
-  sb.roundOf16 = sb.roundOf16.map((v, i) => r16[i] || v);
+  // Map over the canonical-length tree array (r16), so an undefined/short
+  // sb.roundOf16 (e.g. from pre-roundOf16 persisted state) can't throw and the
+  // result is always the right length. Tree winner wins; else keep existing.
+  sb.roundOf16 = r16.map((w, i) => w || sb.roundOf16?.[i] || "");
 
   const qf = [
     knockout.r16l_0?.winner, knockout.r16l_1?.winner,
@@ -131,13 +134,13 @@ export function syncAdvancementPicks(
     knockout.r16r_0?.winner, knockout.r16r_1?.winner,
     knockout.r16r_2?.winner, knockout.r16r_3?.winner,
   ];
-  sb.quarterfinalists = sb.quarterfinalists.map((v, i) => qf[i] || v);
+  sb.quarterfinalists = qf.map((w, i) => w || sb.quarterfinalists?.[i] || "");
 
   const sf = [
     knockout.qfl_0?.winner, knockout.qfl_1?.winner,
     knockout.qfr_0?.winner, knockout.qfr_1?.winner,
   ];
-  sb.semifinalists = sb.semifinalists.map((v, i) => sf[i] || v);
+  sb.semifinalists = sf.map((w, i) => w || sb.semifinalists?.[i] || "");
 
   const f1 = knockout.sfl_0?.winner;
   const f2 = knockout.sfr_0?.winner;

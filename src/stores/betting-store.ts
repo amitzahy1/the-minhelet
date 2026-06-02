@@ -517,6 +517,26 @@ export const useBettingStore = create<BettingState & BettingActions>()(
         bracketLocked: false,
         lastUpdated: null,
       }),
+      // Repair the persisted shape on rehydrate. zustand persist shallow-merges
+      // the stored object over the initial state, so `specialBets` is REPLACED
+      // wholesale — any array field added after a user last saved (e.g.
+      // roundOf16) comes back `undefined` and crashes every consumer that calls
+      // .filter / .map / spread on it. Deep-default specialBets from
+      // initialSpecialBets and pad every array to its canonical length.
+      merge: (persisted, current) => {
+        const p = (persisted ?? {}) as Partial<BettingState>;
+        const padArr = (v: unknown, n: number): string[] => {
+          const a = Array.isArray(v) ? (v as string[]).slice(0, n) : [];
+          while (a.length < n) a.push("");
+          return a;
+        };
+        const sb: SpecialBetsState = { ...initialSpecialBets, ...(p.specialBets ?? {}) };
+        sb.semifinalists = padArr(sb.semifinalists, 4);
+        sb.quarterfinalists = padArr(sb.quarterfinalists, 8);
+        sb.roundOf16 = padArr(sb.roundOf16, 16);
+        sb.matchups = padArr(sb.matchups, 3);
+        return { ...current, ...p, specialBets: sb } as BettingState & BettingActions;
+      },
       skipHydration: true,
       onRehydrateStorage: () => {
         return (state) => {

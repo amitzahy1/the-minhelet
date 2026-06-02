@@ -733,14 +733,14 @@ for (const name of SIM_BETTORS) {
 
 // Mock bettor special bets
 const SPECIAL_CATS = [
-  { key: "topScorer", label: "מלך שערים", pts: 9 },
-  { key: "topAssists", label: "מלך בישולים", pts: 7 },
-  { key: "bestAttack", label: "התקפה הכי טובה", pts: 6 },
-  { key: "dirtiestTeam", label: "הכי כסחנית", pts: 5 },
-  { key: "prolificGroup", label: "בית פורה", pts: 5 },
-  { key: "driestGroup", label: "בית יבש", pts: 5 },
-  { key: "matchup", label: "מאצ׳אפ", pts: 5 },
-  { key: "penalties", label: "פנדלים", pts: 5 },
+  { key: "topScorer", label: "מלך שערים", pts: 12 },
+  { key: "topAssists", label: "מלך בישולים", pts: 9 },
+  { key: "bestAttack", label: "התקפה הכי טובה", pts: 8 },
+  { key: "dirtiestTeam", label: "הכי כסחנית", pts: 6 },
+  { key: "prolificGroup", label: "בית פורה", pts: 6 },
+  { key: "driestGroup", label: "בית יבש", pts: 6 },
+  { key: "matchup", label: "מאצ׳אפ", pts: 6 },
+  { key: "penalties", label: "פנדלים", pts: 6 },
 ] as const;
 
 const MOCK_BETTOR_SPECIALS: Record<string, Record<string, string>> = {

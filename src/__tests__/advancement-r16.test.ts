@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { scoreAdvancementForUser } from "@/lib/scoring/advancement-scorer";
+import { SCORING } from "@/types";
 import type { SlotState } from "@/lib/scoring/knockout-resolver";
 import type { BettorAdvancement } from "@/lib/supabase/shared-data";
 
@@ -19,12 +20,12 @@ const slots: Record<string, SlotState> = {
   r16l_1: r16Slot("r16l_1", "ESP", "FRA"),
 };
 
-describe("R16 advancement scoring (2 pts per correctly-predicted last-16 team)", () => {
-  it("awards 2 per predicted team that actually reached R16, 0 for the rest", () => {
+describe("R16 advancement scoring (SCORING.advancement.r16 pts per correctly-predicted last-16 team)", () => {
+  it("awards r16 pts per predicted team that actually reached R16, 0 for the rest", () => {
     // Predicted BRA, ESP (reached) + ARG (did not).
     const b = scoreAdvancementForUser(advWithR16(["BRA", "ESP", "ARG"]), {}, new Set(), slots, null);
-    expect(b.r16Pts).toBe(4); // BRA + ESP
-    expect(b.total).toBe(4);
+    expect(b.r16Pts).toBe(2 * SCORING.advancement.r16); // BRA + ESP
+    expect(b.total).toBe(2 * SCORING.advancement.r16);
     expect(b.lines.filter((l) => l.reason === "ADVANCE_R16")).toHaveLength(2);
   });
 

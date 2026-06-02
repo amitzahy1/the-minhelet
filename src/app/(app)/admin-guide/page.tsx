@@ -84,14 +84,14 @@ export default function AdminGuidePage() {
         <h3 className="font-bold text-gray-800 mb-2">הימורי עולות (מבעוד מועד)</h3>
         <ul className="space-y-1 text-gray-700 mb-4">
           <li>• עולה מדויקת מהבית: <strong>5 נק׳</strong> · עולה לא מדויקת: <strong>3 נק׳</strong></li>
-          <li>• עולה לרבע: <strong>4</strong> · חצי: <strong>6</strong> · גמר: <strong>8</strong> · זוכה: <strong>12</strong></li>
+          <li>• עולה לשמינית: <strong>1</strong> · רבע: <strong>3</strong> · חצי: <strong>6</strong> · גמר: <strong>10</strong> · זוכה: <strong>16</strong></li>
         </ul>
 
         <h3 className="font-bold text-gray-800 mb-2">הימורים מיוחדים</h3>
         <ul className="space-y-1 text-gray-700 mb-4">
-          <li>• מלך שערים: <strong>9</strong> (מוחלט) / <strong>5</strong> (יחסי, מינימום 3 שערים)</li>
-          <li>• מלך בישולים: <strong>7</strong> / <strong>4</strong> (מינימום 2 בישולים)</li>
-          <li>• שאר המיוחדים: <strong>5-6</strong> נקודות כל אחד</li>
+          <li>• מלך שערים: <strong>12</strong> (מוחלט) / <strong>7</strong> (יחסי, מינימום 3 שערים)</li>
+          <li>• מלך בישולים: <strong>9</strong> / <strong>5</strong> (מינימום 2 בישולים)</li>
+          <li>• התקפה הכי טובה: <strong>8</strong> · שאר המיוחדים: <strong>6</strong> נקודות כל אחד</li>
         </ul>
 
         <h3 className="font-bold text-gray-800 mb-2">שובר שוויון (בסדר)</h3>

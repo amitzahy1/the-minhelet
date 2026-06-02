@@ -317,25 +317,25 @@ export const SCORING = {
     group_exact: 5, // Correct team in correct position
     group_partial: 3, // Correct team but wrong position (1st↔2nd swap)
     group_as_3rd: 2, // Correct team advanced past groups, but as a best-3rd qualifier
-    r16: 2, // Per team reaching the Round of 16 (last 16) — i.e. an R32 winner
-    qf: 4, // Per team reaching QF
+    r16: 1, // Per team reaching the Round of 16 (last 16) — i.e. an R32 winner
+    qf: 3, // Per team reaching QF
     sf: 6, // Per team reaching SF
-    final: 8, // Per team reaching Final
-    winner: 12, // Champion
+    final: 10, // Per team reaching Final
+    winner: 16, // Champion
   },
 
   // Special bets
   specials: {
-    top_scorer_exact: 9,
-    top_scorer_relative: 5,
-    top_assists_exact: 7,
-    top_assists_relative: 4,
-    best_attack: 6,
-    prolific_group: 5,
-    driest_group: 5,
-    dirtiest_team: 5,
-    matchup: 5,
-    penalties_over_under: 5,
+    top_scorer_exact: 12,
+    top_scorer_relative: 7,
+    top_assists_exact: 9,
+    top_assists_relative: 5,
+    best_attack: 8,
+    prolific_group: 6,
+    driest_group: 6,
+    dirtiest_team: 6,
+    matchup: 6,
+    penalties_over_under: 6,
   },
 
   // Minimum thresholds for "relative" picks

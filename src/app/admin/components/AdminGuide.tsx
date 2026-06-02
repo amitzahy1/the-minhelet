@@ -58,13 +58,13 @@ export function AdminGuide() {
         <h4 className="font-bold mb-2">הימורי עולות (מבעוד מועד)</h4>
         <ul className="space-y-1 mb-4">
           <li>• עולה מדויקת מהבית: <strong>5 נק׳</strong> · עולה לא מדויקת: <strong>3 נק׳</strong></li>
-          <li>• שמינית: <strong>2</strong> · רבע: <strong>4</strong> · חצי: <strong>6</strong> · גמר: <strong>8</strong> · זוכה: <strong>12</strong></li>
+          <li>• שמינית: <strong>1</strong> · רבע: <strong>3</strong> · חצי: <strong>6</strong> · גמר: <strong>10</strong> · זוכה: <strong>16</strong></li>
         </ul>
         <h4 className="font-bold mb-2">הימורים מיוחדים</h4>
         <ul className="space-y-1 mb-4">
-          <li>• מלך שערים: <strong>9</strong> (מוחלט) / <strong>5</strong> (יחסי)</li>
-          <li>• מלך בישולים: <strong>7</strong> / <strong>4</strong></li>
-          <li>• התקפה, כסחנית, בית פורה/יבש, מאצ׳אפ, פנדלים: <strong>5-6</strong> כ״א</li>
+          <li>• מלך שערים: <strong>12</strong> (מוחלט) / <strong>7</strong> (יחסי)</li>
+          <li>• מלך בישולים: <strong>9</strong> / <strong>5</strong></li>
+          <li>• התקפה: <strong>8</strong> · כסחנית, בית פורה/יבש, מאצ׳אפ, פנדלים: <strong>6</strong> כ״א</li>
         </ul>
         <h4 className="font-bold mb-2">שובר שוויון</h4>
         <ol className="space-y-0.5">

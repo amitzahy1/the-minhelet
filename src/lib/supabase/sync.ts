@@ -272,8 +272,13 @@ export async function saveLiveKnockout(
   lockAtISO: string | null,
   leagueId?: string,
 ): Promise<{ success: boolean; error?: string }> {
-  // Client-side guard (server re-validates authoritatively).
-  if (lockAtISO && new Date() > new Date(lockAtISO)) {
+  // Client-side guard for instant feedback — FAIL CLOSED: an unknown lock means
+  // the slot isn't open for editing. The server (save_live_knockout) is now the
+  // authority: it reads the lock from prediction_locks and ignores p_lock_at.
+  if (!lockAtISO) {
+    return { success: false, error: "המשחק עדיין לא פתוח לעריכה" };
+  }
+  if (new Date() > new Date(lockAtISO)) {
     return { success: false, error: "המשחק ננעל — לא ניתן לעדכן (פחות משעה לפתיחה)" };
   }
 
@@ -293,7 +298,7 @@ export async function saveLiveKnockout(
     p_league_id: lid,
     p_slot_key: slotKey,
     p_slot: slot,
-    p_lock_at: lockAtISO,
+    p_lock_at: null, // server reads the authoritative lock; this is ignored
   });
 
   if (rpcError && /LOCKED/.test(rpcError.message || "")) {
@@ -327,6 +332,107 @@ export async function saveLiveKnockout(
         { user_id: user.id, league_id: lid, knockout_tree_live: merged, updated_at: new Date().toISOString() },
         { onConflict: "user_id,league_id" },
       );
+    if (error) return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+// ── Group-stage scores — live (during-tournament) per-match-day save ─────────
+
+export interface LiveGroupScore {
+  home: number | null;
+  away: number | null;
+}
+
+/**
+ * Save ONE group-stage score prediction DURING the tournament. Unlike the
+ * June-10 global lock used by saveBetsToSupabase, this has a PER-MATCH-DAY lock:
+ * a score is editable until 30 minutes before its match-day's FIRST kickoff.
+ * `lockAtISO` is derived by the caller from /api/matches via group-live-state
+ * (dayLockAtForKickoff). The server (save_live_group_score, migration 023)
+ * re-validates and updates ONLY group_predictions[group].scores[pairIdx] in
+ * place — the frozen `order` / advancement picks are never touched.
+ *
+ * Falls back to a read-merge-write update when the RPC isn't installed (local
+ * dev only); the fallback likewise mutates only the one score, preserving order.
+ */
+export async function saveLiveGroupScore(
+  group: string,
+  pairIdx: number,
+  score: LiveGroupScore,
+  lockAtISO: string | null,
+  leagueId?: string,
+): Promise<{ success: boolean; error?: string }> {
+  // Client-side guard for instant feedback — FAIL CLOSED: an unknown lock (e.g.
+  // the schedule hasn't loaded) blocks the save rather than letting it through.
+  // The server (save_live_group_score) is the authority: it reads the lock from
+  // prediction_locks and ignores p_lock_at.
+  if (!lockAtISO) {
+    return { success: false, error: "זמני הנעילה עדיין נטענים — נסו שוב בעוד רגע" };
+  }
+  if (new Date() > new Date(lockAtISO)) {
+    return { success: false, error: "יום המשחקים ננעל — לא ניתן לעדכן תוצאות" };
+  }
+
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: "Not logged in" };
+
+  let lid = leagueId;
+  if (!lid) {
+    const { data: league } = await supabase.from("leagues").select("id").limit(1).single();
+    lid = league?.id;
+    if (!lid) return { success: false, error: "No league found in database" };
+  }
+
+  const { error: rpcError } = await supabase.rpc("save_live_group_score", {
+    p_user_id: user.id,
+    p_league_id: lid,
+    p_group: group,
+    p_pair_idx: pairIdx,
+    p_score: score,
+    p_lock_at: null, // server reads the authoritative lock; this is ignored
+  });
+
+  if (rpcError && /LOCKED/.test(rpcError.message || "")) {
+    return { success: false, error: "יום המשחקים ננעל — לא ניתן לעדכן תוצאות" };
+  }
+
+  const rpcUnavailable =
+    rpcError &&
+    (/function .* does not exist/i.test(rpcError.message || "") ||
+      /in the schema cache/i.test(rpcError.message || "") ||
+      /could not find the function/i.test(rpcError.message || ""));
+
+  if (rpcError && !rpcUnavailable) {
+    console.error("Failed to save live group score:", rpcError);
+    return { success: false, error: rpcError.message };
+  }
+
+  if (rpcUnavailable) {
+    // Read-merge-write fallback (NOT atomic vs concurrent edits — only used
+    // when the RPC isn't installed, i.e. local dev). Mutates only this score.
+    const { data: row } = await supabase
+      .from("user_brackets")
+      .select("group_predictions")
+      .eq("user_id", user.id)
+      .eq("league_id", lid)
+      .single();
+    const gp = (row?.group_predictions || {}) as Record<
+      string,
+      { order?: number[]; scores?: LiveGroupScore[] }
+    >;
+    const grp = gp[group];
+    if (!grp || !Array.isArray(grp.scores) || grp.scores.length <= pairIdx) {
+      return { success: false, error: "No frozen group prediction to update" };
+    }
+    grp.scores[pairIdx] = score;
+    const { error } = await supabase
+      .from("user_brackets")
+      .update({ group_predictions: gp, updated_at: new Date().toISOString() })
+      .eq("user_id", user.id)
+      .eq("league_id", lid);
     if (error) return { success: false, error: error.message };
   }
 

@@ -1,18 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useBettingStore } from "@/stores/betting-store";
+import { useToastStore } from "@/stores/toast-store";
 import { GROUPS as GROUPS_RAW, getTeamByCode } from "@/lib/tournament/groups";
 import { calculateStandings } from "@/lib/tournament/standings";
 import { rankBestThirds, type ThirdsInputRow } from "@/lib/tournament/thirds-ranker";
 import { FLAGS as __FLAGS } from "@/lib/flags";
-import { loadRealFixtures, groupFixtureInfo, pairKey, type FixtureInfo } from "@/lib/fixtures-client";
-import { toIsraelDate } from "@/lib/timezone";
+import { loadRealFixtures, groupFixtureInfo, pairKey, type RealFixture } from "@/lib/fixtures-client";
+import { toIsraelDate, toIsraelTimeShort } from "@/lib/timezone";
+import { computeMatchDays, dayLockAtForKickoff, groupMatchStatus } from "@/lib/tournament/group-live-state";
+import { saveLiveGroupScore } from "@/lib/supabase/sync";
+import { classifyHit, type HitKind } from "@/lib/results-hits";
 import { SwipeableGroups } from "@/components/shared/SwipeableGroups";
 import { SlotMachineScore } from "@/components/shared/SlotMachineScore";
 import { SaveAndContinue } from "@/components/shared/SaveAndContinue";
-import { formatLockDeadline } from "@/lib/constants";
+import { formatLockDeadline, isLocked } from "@/lib/constants";
 import type { GroupMatchPrediction } from "@/types";
 
 // Groups data from tournament config
@@ -23,16 +27,16 @@ function generateMatchups(codes: string[]) {
   return [{ h: a, a: b }, { h: c, a: d }, { h: a, a: c }, { h: d, a: b }, { h: d, a: a }, { h: b, a: c }];
 }
 
-function ScoreStepper({ value, onChange }: { value: number | null; onChange: (v: number) => void }) {
+function ScoreStepper({ value, onChange, disabled }: { value: number | null; onChange: (v: number) => void; disabled?: boolean }) {
   return (
-    <div className="flex items-center gap-0 rounded border border-gray-200 overflow-hidden">
-      <button onClick={() => onChange(Math.max(0, (value ?? 0) - 1))} aria-label="הפחת"
-        className="w-9 h-10 flex items-center justify-center bg-gray-50 text-gray-400 text-sm font-bold hover:bg-gray-100 active:bg-gray-200">−</button>
+    <div className={`flex items-center gap-0 rounded border overflow-hidden ${disabled ? "border-gray-200 bg-gray-50/80" : "border-gray-200"}`}>
+      <button disabled={disabled} onClick={() => onChange(Math.max(0, (value ?? 0) - 1))} aria-label="הפחת"
+        className="w-9 h-10 flex items-center justify-center bg-gray-50 text-gray-400 text-sm font-bold hover:bg-gray-100 active:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-gray-50">−</button>
       <span className="w-7 h-8 flex items-center justify-center font-bold text-base tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>
         {value !== null ? <SlotMachineScore value={value ?? 0} /> : <span className="text-gray-300 text-sm">-</span>}
       </span>
-      <button onClick={() => onChange((value ?? -1) + 1)} aria-label="הוסף"
-        className="w-9 h-10 flex items-center justify-center bg-gray-50 text-gray-400 text-sm font-bold hover:bg-gray-100 active:bg-gray-200">+</button>
+      <button disabled={disabled} onClick={() => onChange((value ?? -1) + 1)} aria-label="הוסף"
+        className="w-9 h-10 flex items-center justify-center bg-gray-50 text-gray-400 text-sm font-bold hover:bg-gray-100 active:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-gray-50">+</button>
     </div>
   );
 }
@@ -50,22 +54,45 @@ function GroupView({ groupId }: { groupId: string }) {
   const setGroupScore = useBettingStore((s) => s.setGroupScore);
   const setGroupOrder = useBettingStore((s) => s.setGroupOrder);
 
-  const codes = teams.map(t => t.code);
-  const matchups = useMemo(() => generateMatchups(codes), [codes.join(",")]);
+  // After the June-10 global lock we enter "live mode": the qualification table
+  // (group.order) and advancement bets are FROZEN; only match scores stay
+  // editable, locking per match-day (30 min before the day's first kickoff).
+  const liveMode = isLocked();
 
-  // The synthetic matchup order above does NOT match the real FIFA matchday
-  // order (the team array in groups.ts isn't in seeded-position order). Sort the
-  // DISPLAY by real kickoff dates from /api/matches — same source as the
-  // schedule page — so every page shows matches in identical chronological
-  // order. Store indices (`i`) are untouched, so saved predictions are safe.
-  const [fixtureInfo, setFixtureInfo] = useState<Record<string, FixtureInfo>>({});
+  // `teams` is a stable reference (GROUPS_RAW[groupId] from a module constant),
+  // so memoizing off it keeps `codes`/`matchups` stable without the React
+  // Compiler flagging a manually-memoized derived array.
+  const codes = useMemo(() => teams.map(t => t.code), [teams]);
+  const matchups = useMemo(() => generateMatchups(codes), [codes]);
+
+  // Real fixtures. We keep the FULL cross-group list (needed to cluster
+  // match-days for the per-day lock) and derive this group's per-pair info
+  // (date / status / result) from it. In live mode we refetch periodically so
+  // locks flip and finished results land without a manual refresh. The
+  // synthetic matchup order does NOT match the real FIFA matchday order, so we
+  // sort the DISPLAY by real kickoff dates (store indices `i` are untouched, so
+  // saved predictions stay correct).
+  const [allFixtures, setAllFixtures] = useState<RealFixture[]>([]);
   useEffect(() => {
     let active = true;
-    loadRealFixtures().then(matches => {
-      if (active) setFixtureInfo(groupFixtureInfo(matches, groupId));
-    });
-    return () => { active = false; };
-  }, [groupId]);
+    // Initial load uses the shared 2-min cache (cheap across group switches);
+    // the live-mode interval force-refreshes so locks flip and results land.
+    const load = (force: boolean) => loadRealFixtures(force).then(matches => { if (active) setAllFixtures(matches); });
+    load(false);
+    const id = liveMode ? setInterval(() => load(true), 90_000) : null;
+    return () => { active = false; if (id) clearInterval(id); };
+  }, [liveMode]);
+
+  const fixtureInfo = useMemo(() => groupFixtureInfo(allFixtures, groupId), [allFixtures, groupId]);
+  const matchDays = useMemo(() => computeMatchDays(allFixtures), [allFixtures]);
+
+  // Tick "now" so per-match-day locks flip without a refetch (live mode only).
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!liveMode) return;
+    const id = setInterval(() => setNow(Date.now()), 60_000);
+    return () => clearInterval(id);
+  }, [liveMode]);
 
   const orderedIdx = useMemo(() => {
     const idx = matchups.map((_, i) => i);
@@ -79,7 +106,7 @@ function GroupView({ groupId }: { groupId: string }) {
     );
   }, [matchups, fixtureInfo]);
 
-  // Calculate standings from current scores
+  // Calculate standings from current scores (pre-tournament predicted table).
   const standings = useMemo(() => {
     const predictions: GroupMatchPrediction[] = matchups.map((m, i) => ({
       match_id: i,
@@ -96,12 +123,13 @@ function GroupView({ groupId }: { groupId: string }) {
     );
   }, [groupState.scores, matchups, teams]);
 
-  // CRITICAL: write the computed standings back into `group.order` so the
-  // bracket page (which reads order[0..2] for winner/runner-up/3rd) shows
-  // the teams the user actually predicted to advance, not the default
-  // [0,1,2,3] index order. Without this, entering group scores does not
-  // flow through to the R32 matchups at all.
+  // PRE-TOURNAMENT ONLY: write the computed standings back into `group.order`
+  // so the bracket page reads the predicted qualifiers. In LIVE mode the order
+  // is the FROZEN qualification bet (locked June 10) — never recompute it from
+  // the now-editable scores, or editing a result would silently move who the
+  // user predicted to advance.
   useEffect(() => {
+    if (liveMode) return;
     if (!standings) return;
     const teamIdxByCode: Record<string, number> = {};
     teams.forEach((t, i) => { teamIdxByCode[t.code] = i; });
@@ -111,90 +139,140 @@ function GroupView({ groupId }: { groupId: string }) {
     if (newOrder.length !== 4) return;
     const sameAsCurrent = newOrder.every((v, i) => v === groupState.order[i]);
     if (!sameAsCurrent) setGroupOrder(groupId, newOrder);
-  }, [standings, groupId, groupState.order, setGroupOrder, teams]);
+  }, [standings, groupId, groupState.order, setGroupOrder, teams, liveMode]);
 
   const filledCount = groupState.scores.filter(s => s.home !== null && s.away !== null).length;
   const isComplete = filledCount === 6;
 
-  const handleScore = useCallback((matchIdx: number, side: "home" | "away", value: number) => {
+  // Live mode: persist each edited score per match-day (debounced). The server
+  // (save_live_group_score) enforces the lock; surface a toast on rejection.
+  const saveTimers = useRef<Record<number, ReturnType<typeof setTimeout>>>({});
+  const scheduleGroupSave = (pairIdx: number) => {
+    if (saveTimers.current[pairIdx]) clearTimeout(saveTimers.current[pairIdx]);
+    saveTimers.current[pairIdx] = setTimeout(async () => {
+      const mm = matchups[pairIdx];
+      const info = fixtureInfo[pairKey(mm.h, mm.a)];
+      const lockAt = dayLockAtForKickoff(info?.date, matchDays);
+      const sc = useBettingStore.getState().groups[groupId]?.scores?.[pairIdx];
+      if (!sc) return;
+      const res = await saveLiveGroupScore(groupId, pairIdx, { home: sc.home, away: sc.away }, lockAt);
+      if (!res.success && typeof window !== "undefined") {
+        useToastStore.getState().push(res.error || "שמירת התוצאה נכשלה", "error", 4000);
+      }
+    }, 800);
+  };
+
+  const handleScore = (matchIdx: number, side: "home" | "away", value: number) => {
     setGroupScore(groupId, matchIdx, side, value);
-  }, [groupId, setGroupScore]);
+    if (liveMode) scheduleGroupSave(matchIdx);
+  };
 
   const getTeam = (code: string) => teams.find(t => t.code === code)!;
-  const getFlag = (code: string) => {
-    const FLAGS = __FLAGS;
-    return FLAGS[code] || "🏳️";
-  };
+  const getFlag = (code: string) => __FLAGS[code] || "🏳️";
 
   return (
     <div className="max-w-6xl mx-auto">
-      {/* Progress */}
-      <div className="flex items-center gap-2 mb-4">
-        <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-          <div className={`h-full rounded-full transition-all ${isComplete ? "bg-green-500" : "bg-blue-500"}`} style={{ width: `${(filledCount / 6) * 100}%` }}></div>
+      {/* Progress — pre-tournament only (in live mode scores aren't a completion task) */}
+      {!liveMode && (
+        <div className="flex items-center gap-2 mb-4">
+          <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+            <div className={`h-full rounded-full transition-all ${isComplete ? "bg-green-500" : "bg-blue-500"}`} style={{ width: `${(filledCount / 6) * 100}%` }}></div>
+          </div>
+          <span className="text-xs text-gray-400" style={{ fontFamily: "var(--font-inter)" }}>{filledCount}/6</span>
         </div>
-        <span className="text-xs text-gray-400" style={{ fontFamily: "var(--font-inter)" }}>{filledCount}/6</span>
-      </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* RIGHT — Table (mobile: appears below the bets) */}
         <div className="order-2 lg:order-1">
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-            <div className="px-5 py-3 bg-gray-800 flex items-center justify-between">
-              <div>
-                <p className="text-base font-bold text-white">הטבלה החזויה שלך</p>
-                <p className="text-sm text-gray-300">מחושבת מההימורים שלך (לא מתוצאות אמת)</p>
+          {liveMode ? (
+            /* LIVE: the qualification table is the FROZEN June-10 order, read-only.
+               We deliberately do NOT show per-team stats here — those would reflect
+               the now-editable scores and contradict "the table is locked". */
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+              <div className="px-5 py-3 bg-gray-800">
+                <p className="text-base font-bold text-white">הטבלה החזויה שלך — נעולה 🔒</p>
+                <p className="text-sm text-gray-300">הימור העלייה ננעל לפני הטורניר · עכשיו ניתן לעדכן רק תוצאות</p>
               </div>
-              {isComplete && <span className="text-sm text-green-300 font-medium bg-green-900/40 px-3 py-1 rounded-full border border-green-600/30">סופי</span>}
-            </div>
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-gray-500 bg-gray-50 text-xs font-semibold">
-                  <th className="py-2.5 ps-4 text-start w-8">#</th>
-                  <th className="py-2.5 text-start">קבוצה</th>
-                  <th className="py-2.5 text-center w-8">מש</th>
-                  <th className="py-2.5 text-center w-8">נצ</th>
-                  <th className="py-2.5 text-center w-8">תק</th>
-                  <th className="py-2.5 text-center w-8">הפ</th>
-                  <th className="py-2.5 text-center w-12">שערים</th>
-                  <th className="py-2.5 text-center w-12">הפרש</th>
-                  <th className="py-2.5 pe-4 text-center w-12 font-bold">נקודות</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(standings || teams.map(t => ({
-                  team_code: t.code, position: 0, played: 0, won: 0, drawn: 0, lost: 0,
-                  goals_for: 0, goals_against: 0, goal_difference: 0, points: 0, team_id: t.id, fair_play_score: 0,
-                }))).map((row, i, arr) => {
-                  const prev = i > 0 ? arr[i - 1] : null;
-                  const tbLabel = prev && standings ? tiebreakerLabel(row, prev) : null;
+              <ul>
+                {groupState.order.map((teamIdx, pos) => {
+                  const t = teams[teamIdx];
+                  if (!t) return null;
                   return (
-                  <tr key={row.team_code} className={`border-t border-gray-100 ${standings && i < 2 ? "bg-green-50/40" : standings && i === 2 ? "bg-amber-50/30" : ""}`}>
-                    <td className="py-3 ps-4 font-bold text-gray-300 text-base">
-                      <span>{i + 1}</span>
-                      {tbLabel && (
-                        <span className="block text-[9px] font-bold text-amber-600 bg-amber-100 rounded px-1 mt-0.5 leading-tight">{tbLabel}</span>
-                      )}
-                    </td>
-                    <td className="py-3">
-                      <span className="flex items-center gap-2">
-                        <span className="text-lg">{getFlag(row.team_code)}</span>
-                        <span className="font-bold text-gray-900">{getTeam(row.team_code).name_he}</span>
-                      </span>
-                    </td>
-                    <td className="text-center text-gray-600 font-medium" style={{ fontFamily: "var(--font-inter)" }}>{row.played}</td>
-                    <td className="text-center text-gray-600 font-medium" style={{ fontFamily: "var(--font-inter)" }}>{row.won}</td>
-                    <td className="text-center text-gray-600 font-medium" style={{ fontFamily: "var(--font-inter)" }}>{row.drawn}</td>
-                    <td className="text-center text-gray-600 font-medium" style={{ fontFamily: "var(--font-inter)" }}>{row.lost}</td>
-                    <td className="text-center text-gray-600 font-medium" style={{ fontFamily: "var(--font-inter)" }}>{row.goals_for}:{row.goals_against}</td>
-                    <td className="text-center text-gray-600 font-semibold" style={{ fontFamily: "var(--font-inter)" }}>{row.goal_difference > 0 ? `+${row.goal_difference}` : row.goal_difference}</td>
-                    <td className="pe-4 text-center font-black text-gray-900 text-base" style={{ fontFamily: "var(--font-inter)" }}>{row.points}</td>
-                  </tr>
+                    <li key={t.code} className={`flex items-center gap-2 px-4 py-2.5 border-t border-gray-100 ${pos < 2 ? "bg-green-50/40" : pos === 2 ? "bg-amber-50/30" : ""}`}>
+                      <span className="w-5 text-center font-black text-gray-300 text-base" style={{ fontFamily: "var(--font-inter)" }}>{pos + 1}</span>
+                      <span className="text-lg">{getFlag(t.code)}</span>
+                      <span className="font-bold text-gray-900 flex-1">{t.name_he}</span>
+                      {pos < 2 && <span className="text-[10px] font-bold text-green-700 bg-green-100 rounded px-1.5 py-0.5">עולה</span>}
+                      {pos === 2 && <span className="text-[10px] font-bold text-amber-700 bg-amber-100 rounded px-1.5 py-0.5">מקום 3</span>}
+                    </li>
                   );
                 })}
-              </tbody>
-            </table>
-          </div>
+              </ul>
+              <div className="px-4 py-2.5 border-t border-gray-100 bg-gray-50/60">
+                <p className="text-[12px] text-gray-500 leading-snug">
+                  מי עולה מהבית ננעל לפני הטורניר ולא משתנה. עדכון תוצאה משפיע רק על ניקוד התוצאה (טוטו/מדויקת) — לא על ההימור מי עולה.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+              <div className="px-5 py-3 bg-gray-800 flex items-center justify-between">
+                <div>
+                  <p className="text-base font-bold text-white">הטבלה החזויה שלך</p>
+                  <p className="text-sm text-gray-300">מחושבת מההימורים שלך (לא מתוצאות אמת)</p>
+                </div>
+                {isComplete && <span className="text-sm text-green-300 font-medium bg-green-900/40 px-3 py-1 rounded-full border border-green-600/30">סופי</span>}
+              </div>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-gray-500 bg-gray-50 text-xs font-semibold">
+                    <th className="py-2.5 ps-4 text-start w-8">#</th>
+                    <th className="py-2.5 text-start">קבוצה</th>
+                    <th className="py-2.5 text-center w-8">מש</th>
+                    <th className="py-2.5 text-center w-8">נצ</th>
+                    <th className="py-2.5 text-center w-8">תק</th>
+                    <th className="py-2.5 text-center w-8">הפ</th>
+                    <th className="py-2.5 text-center w-12">שערים</th>
+                    <th className="py-2.5 text-center w-12">הפרש</th>
+                    <th className="py-2.5 pe-4 text-center w-12 font-bold">נקודות</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(standings || teams.map(t => ({
+                    team_code: t.code, position: 0, played: 0, won: 0, drawn: 0, lost: 0,
+                    goals_for: 0, goals_against: 0, goal_difference: 0, points: 0, team_id: t.id, fair_play_score: 0,
+                  }))).map((row, i, arr) => {
+                    const prev = i > 0 ? arr[i - 1] : null;
+                    const tbLabel = prev && standings ? tiebreakerLabel(row, prev) : null;
+                    return (
+                    <tr key={row.team_code} className={`border-t border-gray-100 ${standings && i < 2 ? "bg-green-50/40" : standings && i === 2 ? "bg-amber-50/30" : ""}`}>
+                      <td className="py-3 ps-4 font-bold text-gray-300 text-base">
+                        <span>{i + 1}</span>
+                        {tbLabel && (
+                          <span className="block text-[9px] font-bold text-amber-600 bg-amber-100 rounded px-1 mt-0.5 leading-tight">{tbLabel}</span>
+                        )}
+                      </td>
+                      <td className="py-3">
+                        <span className="flex items-center gap-2">
+                          <span className="text-lg">{getFlag(row.team_code)}</span>
+                          <span className="font-bold text-gray-900">{getTeam(row.team_code).name_he}</span>
+                        </span>
+                      </td>
+                      <td className="text-center text-gray-600 font-medium" style={{ fontFamily: "var(--font-inter)" }}>{row.played}</td>
+                      <td className="text-center text-gray-600 font-medium" style={{ fontFamily: "var(--font-inter)" }}>{row.won}</td>
+                      <td className="text-center text-gray-600 font-medium" style={{ fontFamily: "var(--font-inter)" }}>{row.drawn}</td>
+                      <td className="text-center text-gray-600 font-medium" style={{ fontFamily: "var(--font-inter)" }}>{row.lost}</td>
+                      <td className="text-center text-gray-600 font-medium" style={{ fontFamily: "var(--font-inter)" }}>{row.goals_for}:{row.goals_against}</td>
+                      <td className="text-center text-gray-600 font-semibold" style={{ fontFamily: "var(--font-inter)" }}>{row.goal_difference > 0 ? `+${row.goal_difference}` : row.goal_difference}</td>
+                      <td className="pe-4 text-center font-black text-gray-900 text-base" style={{ fontFamily: "var(--font-inter)" }}>{row.points}</td>
+                    </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
 
         </div>
 
@@ -204,7 +282,7 @@ function GroupView({ groupId }: { groupId: string }) {
             <div className="px-5 py-3 bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/40 border-b border-blue-100/50 flex items-center justify-between">
               <div>
                 <p className="text-base font-bold text-gray-800">הימורי תוצאות</p>
-                <p className="text-sm text-gray-500">הזינו תוצאה מדויקת לכל משחק</p>
+                <p className="text-sm text-gray-500">{liveMode ? "עדכנו תוצאות · כל יום משחקים ננעל 30 ד׳ לפני המשחק הראשון שלו" : "הזינו תוצאה מדויקת לכל משחק"}</p>
               </div>
               <div className="text-sm text-gray-500 text-end leading-relaxed" style={{ fontFamily: "var(--font-inter)" }}>
                 <span className="block">טוטו: <strong className="text-blue-600">2 נק׳</strong></span>
@@ -232,31 +310,89 @@ function GroupView({ groupId }: { groupId: string }) {
                 // dead rubber). Headers only render when real dates are loaded.
                 const showHeader = !!info && pos % 2 === 0;
                 const matchday = Math.floor(pos / 2) + 1;
+
+                // Live mode: per-match-day lock + finished result vs the pick.
+                // Until the schedule has loaded we show a neutral "loading" state
+                // (not "open") so editing never appears available before we know
+                // the lock — the server enforces the real lock regardless.
+                const scheduleReady = matchDays.length > 0;
+                const dayLockAt = liveMode && scheduleReady ? dayLockAtForKickoff(info?.date, matchDays) : null;
+                const status: "open" | "locked" | "finished" | "loading" = !liveMode
+                  ? "open"
+                  : !scheduleReady
+                    ? "loading"
+                    : groupMatchStatus(info?.status, dayLockAt, now);
+                const editable = !liveMode || status === "open";
+                let hit: HitKind | null = null;
+                let realRight: number | null = null;
+                let realLeft: number | null = null;
+                if (liveMode && status === "finished" && info && info.homeGoals != null && info.awayGoals != null) {
+                  // rightTeam is always the real home team → right = homeGoals.
+                  realRight = info.homeGoals;
+                  realLeft = info.awayGoals;
+                  const predForPair = { home: groupState.scores[i].home, away: groupState.scores[i].away };
+                  const actualForPair = info.home === m.h
+                    ? { home: info.homeGoals, away: info.awayGoals }
+                    : { home: info.awayGoals, away: info.homeGoals };
+                  hit = classifyHit(predForPair, actualForPair);
+                }
+                const rowClass = !liveMode
+                  ? (isFilled ? "bg-green-50/30 border-green-200" : "bg-gray-50/50 border-gray-100")
+                  : status === "finished"
+                    ? (hit === "exact" ? "bg-green-50 border-green-300" : hit === "toto" ? "bg-blue-50/50 border-blue-200" : hit === "miss" ? "bg-red-50/40 border-red-200" : "bg-gray-50/50 border-gray-100")
+                    : (status === "locked" || status === "loading")
+                      ? "bg-gray-100/70 border-gray-200"
+                      : (isFilled ? "bg-green-50/30 border-green-200" : "bg-gray-50/50 border-gray-100");
                 return (
                   <Fragment key={i}>
                     {showHeader && (
                       <div className="flex items-center gap-2 pt-2 first:pt-0">
                         <span className="text-[11px] font-black text-gray-500 shrink-0">מחזור {matchday}</span>
-                        <span className="text-[11px] text-gray-400 shrink-0">· {toIsraelDate(info.date)}</span>
+                        <span className="text-[11px] text-gray-400 shrink-0">· {info ? toIsraelDate(info.date) : ""}</span>
                         <span className="flex-1 h-px bg-gray-100" />
                       </div>
                     )}
-                    <div className={`flex items-center rounded-lg border px-3 py-2 transition-colors ${
-                      isFilled ? "bg-green-50/30 border-green-200" : "bg-gray-50/50 border-gray-100"
-                    }`}>
-                      <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                        <span className="text-lg shrink-0">{getFlag(rightTeam.code)}</span>
-                        <span className="text-xs sm:text-sm font-bold text-gray-900 truncate">{rightTeam.name_he}</span>
+                    <div className={`rounded-lg border transition-colors ${rowClass}`}>
+                      <div className="flex items-center px-3 py-2">
+                        <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                          <span className="text-lg shrink-0">{getFlag(rightTeam.code)}</span>
+                          <span className="text-xs sm:text-sm font-bold text-gray-900 truncate">{rightTeam.name_he}</span>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0 mx-1 sm:mx-2">
+                          <ScoreStepper value={groupState.scores[i][rightKey]} onChange={(v) => handleScore(i, rightKey, v)} disabled={!editable} />
+                          <span className="text-gray-300 text-sm">:</span>
+                          <ScoreStepper value={groupState.scores[i][leftKey]} onChange={(v) => handleScore(i, leftKey, v)} disabled={!editable} />
+                        </div>
+                        <div className="flex items-center gap-1.5 flex-1 min-w-0 justify-end">
+                          <span className="text-xs sm:text-sm font-bold text-gray-900 truncate">{leftTeam.name_he}</span>
+                          <span className="text-lg shrink-0">{getFlag(leftTeam.code)}</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1 shrink-0 mx-1 sm:mx-2">
-                        <ScoreStepper value={groupState.scores[i][rightKey]} onChange={(v) => handleScore(i, rightKey, v)} />
-                        <span className="text-gray-300 text-sm">:</span>
-                        <ScoreStepper value={groupState.scores[i][leftKey]} onChange={(v) => handleScore(i, leftKey, v)} />
-                      </div>
-                      <div className="flex items-center gap-1.5 flex-1 min-w-0 justify-end">
-                        <span className="text-xs sm:text-sm font-bold text-gray-900 truncate">{leftTeam.name_he}</span>
-                        <span className="text-lg shrink-0">{getFlag(leftTeam.code)}</span>
-                      </div>
+                      {liveMode && (
+                        <div className="px-3 pb-1.5 -mt-0.5 flex items-center justify-center gap-1.5 text-[11px]">
+                          {status === "loading" && (
+                            <span className="text-gray-400 font-semibold">טוען זמני נעילה…</span>
+                          )}
+                          {status === "open" && (
+                            <span className="text-blue-600 font-semibold">
+                              🔓 ניתן לעדכן{dayLockAt ? ` · ננעל ב-${toIsraelTimeShort(dayLockAt)}` : ""}
+                            </span>
+                          )}
+                          {status === "locked" && (
+                            <span className="text-gray-500 font-semibold">🔒 ננעל — יום המשחקים התחיל</span>
+                          )}
+                          {status === "finished" && (
+                            <span className="font-semibold text-gray-700">
+                              תוצאה: <span style={{ fontFamily: "var(--font-inter)" }}>{realRight}–{realLeft}</span>
+                              {" · "}
+                              {hit === "exact" ? <span className="text-green-700">✓ מדויקת (+3)</span>
+                                : hit === "toto" ? <span className="text-blue-700">טוטו (2)</span>
+                                : hit === "miss" ? <span className="text-red-600">לא קלעת</span>
+                                : <span className="text-gray-400">לא ניחשת</span>}
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </Fragment>
                 );
@@ -416,15 +552,25 @@ export default function GroupsPage() {
   );
   const groupId = GROUP_LETTERS[currentGroupIndex];
 
+  // After the June-10 lock: tournament "live mode" — only match scores stay
+  // editable (per match-day), and all the pre-tournament chrome (qualification
+  // helpers, completion CTAs, the full-bracket Save button) is hidden.
+  const liveMode = isLocked();
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-6 pb-24">
       {/* Header */}
       <div className="mb-4">
         <h1 className="text-3xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>שלב הבתים</h1>
-        <p className="text-base text-gray-600 mt-1">סדרו את הקבוצות, הזינו תוצאות — הטבלה מתעדכנת אוטומטית לפי חוקי FIFA</p>
+        <p className="text-base text-gray-600 mt-1">
+          {liveMode
+            ? "הטורניר בעיצומו — עדכנו תוצאות משחקים. הימור העלייה (מי מהבית) ננעל ולא משתנה."
+            : "סדרו את הקבוצות, הזינו תוצאות — הטבלה מתעדכנת אוטומטית לפי חוקי FIFA"}
+        </p>
       </div>
 
-      {/* Advancement scoring rule (Model B — lenient) */}
+      {/* Advancement scoring rule (Model B — lenient) — pre-tournament only */}
+      {!liveMode && (
       <details className="mb-4 rounded-xl border border-blue-200 bg-blue-50/60 px-4 py-3 text-sm">
         <summary className="cursor-pointer font-bold text-blue-900 flex items-center gap-2 list-none">
           <span>ℹ️ איך נספרות עולות מהבית?</span>
@@ -438,7 +584,7 @@ export default function GroupsPage() {
             1-2 מכל בית (24 נבחרות) + 8 המקומות השלישיים הטובים ביותר (מתוך 12).
           </p>
           <p className="font-bold">
-            ✓ כל נבחרת שהיגיעה לשלב 32 הגדולות נחשבת "עולה" — גם אם עלתה ממקום שלישי.
+            ✓ כל נבחרת שהיגיעה לשלב 32 הגדולות נחשבת &quot;עולה&quot; — גם אם עלתה ממקום שלישי.
           </p>
           <p className="text-blue-800/90">
             אם הימרת שקבוצה X תעלה מהבית והיא באמת הגיעה ל-32 הגדולות (בכל מסלול), תקבל/י ניקוד:
@@ -446,9 +592,10 @@ export default function GroupsPage() {
           </p>
         </div>
       </details>
+      )}
 
-      {/* Peer pressure — who hasn't finished? */}
-      {completedGroups < 12 && (
+      {/* Peer pressure — who hasn't finished? (pre-tournament only) */}
+      {!liveMode && completedGroups < 12 && (
         <div className="mb-4 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-center gap-2">
           <span className="text-lg">⚡</span>
           <p className="text-sm font-bold text-amber-800">
@@ -459,8 +606,8 @@ export default function GroupsPage() {
         </div>
       )}
 
-      {/* All-groups-complete CTA → next step */}
-      {completedGroups === 12 && (
+      {/* All-groups-complete CTA → next step (pre-tournament only) */}
+      {!liveMode && completedGroups === 12 && (
         <Link
           href="/knockout"
           className="mb-4 bg-gradient-to-l from-green-500 to-emerald-600 text-white rounded-xl px-5 py-4 flex items-center justify-between gap-3 shadow-lg shadow-green-500/20 hover:shadow-green-500/30 hover:scale-[1.01] transition-all"
@@ -503,24 +650,33 @@ export default function GroupsPage() {
               </button>
             );
           })}
-          {/* Best-thirds view — appended after the group letters */}
-          <button onClick={() => setShowThirds(true)}
-            title="המקומות השלישיים הטובים"
-            className={`shrink-0 h-10 sm:h-11 px-3 rounded-lg text-base sm:text-lg font-black transition-all ${
-              showThirds ? "bg-gray-900 text-white shadow-md scale-105" : "bg-amber-50 text-amber-700 border border-amber-200"
-            }`} style={{ fontFamily: "var(--font-inter)" }}>
-            🥉
-          </button>
+          {/* Best-thirds view — pre-tournament only (recomputes from scores) */}
+          {!liveMode && (
+            <button onClick={() => setShowThirds(true)}
+              title="המקומות השלישיים הטובים"
+              className={`shrink-0 h-10 sm:h-11 px-3 rounded-lg text-base sm:text-lg font-black transition-all ${
+                showThirds ? "bg-gray-900 text-white shadow-md scale-105" : "bg-amber-50 text-amber-700 border border-amber-200"
+              }`} style={{ fontFamily: "var(--font-inter)" }}>
+              🥉
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Lock */}
-      <div className="mb-5 flex items-center gap-3 rounded-xl bg-gradient-to-l from-blue-50 to-white border border-blue-200 px-4 py-3">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-500 shrink-0"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        <p className="text-sm font-medium text-gray-700">ננעל ב-{formatLockDeadline()} (שעון ישראל) · ניתן לשנות עד אז</p>
-      </div>
+      {/* Lock notice */}
+      {liveMode ? (
+        <div className="mb-5 flex items-center gap-3 rounded-xl bg-gradient-to-l from-amber-50 to-white border border-amber-200 px-4 py-3">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-amber-500 shrink-0"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <p className="text-sm font-medium text-gray-700">הטורניר בעיצומו · ניתן לעדכן תוצאות עד <strong>30 דק׳ לפני המשחק הראשון</strong> של כל יום משחקים · הימור העלייה נעול</p>
+        </div>
+      ) : (
+        <div className="mb-5 flex items-center gap-3 rounded-xl bg-gradient-to-l from-blue-50 to-white border border-blue-200 px-4 py-3">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-500 shrink-0"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <p className="text-sm font-medium text-gray-700">ננעל ב-{formatLockDeadline()} (שעון ישראל) · ניתן לשנות עד אז</p>
+        </div>
+      )}
 
-      {showThirds ? (
+      {showThirds && !liveMode ? (
         <BestThirdsPredicted />
       ) : (
         <>
@@ -548,7 +704,8 @@ export default function GroupsPage() {
             <GroupView groupId={groupId} />
           </SwipeableGroups>
 
-          {/* Next button — after the last group, point to the best-thirds view */}
+          {/* Next button — after the last group, point to the best-thirds view.
+              In live mode there's no best-thirds view, so just stop at the last group. */}
           {currentGroupIndex < 11 ? (
             <div className="mt-6 text-center">
               <button onClick={() => setCurrentGroupIndex(currentGroupIndex + 1)}
@@ -556,7 +713,7 @@ export default function GroupsPage() {
                 ← המשך לבית {GROUP_LETTERS[currentGroupIndex + 1]}
               </button>
             </div>
-          ) : (
+          ) : liveMode ? null : (
             <div className="mt-6 text-center">
               <button onClick={() => setShowThirds(true)}
                 className="px-8 py-3 rounded-xl bg-amber-500 text-white font-medium text-sm hover:bg-amber-600 transition-colors shadow-sm">
@@ -567,13 +724,17 @@ export default function GroupsPage() {
         </>
       )}
 
-      {/* Explicit save button — always visible so partial progress persists */}
-      <SaveAndContinue
-        label={completedGroups === 12 ? "💾 שמור והמשך לעץ הטורניר" : "💾 שמור הימורים עד כה"}
-        nextHref="/knockout"
-        nextLabel="המשך לעץ הטורניר →"
-        completion={Math.round((totalFilled / 72) * 100)}
-      />
+      {/* Explicit save button — pre-tournament only. In live mode each score
+          saves itself per match-day (saveLiveGroupScore); the full-bracket save
+          is rejected after the lock, so showing it here would only mislead. */}
+      {!liveMode && (
+        <SaveAndContinue
+          label={completedGroups === 12 ? "💾 שמור והמשך לעץ הטורניר" : "💾 שמור הימורים עד כה"}
+          nextHref="/knockout"
+          nextLabel="המשך לעץ הטורניר →"
+          completion={Math.round((totalFilled / 72) * 100)}
+        />
+      )}
     </div>
   );
 }

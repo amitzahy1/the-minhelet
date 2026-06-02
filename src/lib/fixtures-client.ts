@@ -60,6 +60,13 @@ export interface FixtureInfo {
   home: string;
   /** The real away team TLA. */
   away: string;
+  /** Real match id (when known). */
+  id?: number;
+  /** SCHEDULED | IN_PLAY | PAUSED | FINISHED … — drives the live-mode lock state. */
+  status?: string | null;
+  /** Real result (regulation + ET), present once the match has been scored. */
+  homeGoals?: number | null;
+  awayGoals?: number | null;
 }
 
 /**
@@ -77,7 +84,15 @@ export function groupFixtureInfo(
     const g = (m.group || "").replace("GROUP_", "");
     if (g !== groupLetter) continue;
     if (!m.homeTla || !m.awayTla) continue;
-    out[pairKey(m.homeTla, m.awayTla)] = { date: m.date, home: m.homeTla, away: m.awayTla };
+    out[pairKey(m.homeTla, m.awayTla)] = {
+      date: m.date,
+      home: m.homeTla,
+      away: m.awayTla,
+      id: m.id,
+      status: m.status ?? null,
+      homeGoals: m.homeGoals ?? null,
+      awayGoals: m.awayGoals ?? null,
+    };
   }
   return out;
 }

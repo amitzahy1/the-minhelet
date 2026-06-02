@@ -8,7 +8,7 @@ import {
   type KoSlotKey,
   type ScheduleMatch,
 } from "@/lib/scoring/knockout-resolver";
-import type { FinishedMatch } from "@/lib/results-hits";
+import { matchPairIndex, normalizeGroupLetter, type FinishedMatch } from "@/lib/results-hits";
 
 const LOCK_DEADLINE = new Date("2026-06-10T14:00:00Z");
 
@@ -27,19 +27,11 @@ interface RawMatch {
  * so this is display-only. On any failure we hide ALL others' live picks (safe
  * default). `origin` is used to reach /api/matches server-side.
  */
-async function redactLiveKnockout(
+function redactLiveKnockout(
   brackets: Array<Record<string, unknown>>,
   currentUserId: string,
-  origin: string,
-): Promise<void> {
-  let matches: RawMatch[] = [];
-  try {
-    const res = await fetch(`${origin}/api/matches`, { cache: "no-store" });
-    const json = await res.json();
-    matches = (json.matches as RawMatch[]) || [];
-  } catch {
-    matches = [];
-  }
+  matches: RawMatch[],
+): void {
   const scored: FinishedMatch[] = matches
     .filter((m) => m.homeGoals != null && m.awayGoals != null)
     .map((m) => ({
@@ -68,6 +60,53 @@ async function redactLiveKnockout(
     const kept: Record<string, unknown> = {};
     for (const k of Object.keys(live)) if (revealed.has(k)) kept[k] = live[k];
     b.knockout_tree_live = kept;
+  }
+}
+
+/**
+ * Redact OTHER users' GROUP-STAGE score predictions for matches that haven't
+ * kicked off yet. Group scores stay editable during the tournament (per
+ * match-day), so an upcoming score must stay secret — otherwise a bettor could
+ * copy a rival's injury-informed last-minute pick. Revealed at the match's own
+ * kickoff (same semantics as the Tree-2 redaction above). The frozen `order`
+ * (the qualification bet) is NOT redacted — it's meant to be visible post-lock.
+ * Display-only: scoring/recompute use the un-redacted service-role data, and
+ * only finished (already-kicked-off → revealed) matches are ever scored. On any
+ * failure (no matches), every score stays hidden — the safe default.
+ */
+function redactLiveGroupScores(
+  brackets: Array<Record<string, unknown>>,
+  currentUserId: string,
+  matches: RawMatch[],
+): void {
+  const now = Date.now();
+  // For each group letter, the set of canonical pair indices whose real match
+  // has already kicked off (→ safe to reveal).
+  const kickedOff: Record<string, Set<number>> = {};
+  for (const m of matches) {
+    const letter = normalizeGroupLetter(m.group);
+    if (!letter || !m.homeTla || !m.awayTla) continue;
+    if (new Date(m.date).getTime() > now) continue; // not started yet
+    const pair = matchPairIndex(letter, m.homeTla, m.awayTla);
+    if (!pair) continue;
+    if (!kickedOff[letter]) kickedOff[letter] = new Set();
+    kickedOff[letter].add(pair.pairIdx);
+  }
+
+  for (const b of brackets) {
+    if (b.user_id === currentUserId) continue;
+    const gp = (b.group_predictions || {}) as Record<
+      string,
+      { order?: number[]; scores?: Array<{ home: number | null; away: number | null }> }
+    >;
+    for (const [letter, g] of Object.entries(gp)) {
+      if (!g || !Array.isArray(g.scores)) continue;
+      const revealed = kickedOff[letter] ?? new Set<number>();
+      g.scores = g.scores.map((s, idx) =>
+        revealed.has(idx) ? s : { home: null, away: null },
+      );
+    }
+    b.group_predictions = gp;
   }
 }
 
@@ -147,12 +186,23 @@ export async function GET() {
       .eq("league_id", leagueId),
   ]);
 
-  // Hide other users' not-yet-kicked-off Tree-2 picks (display-only redaction).
+  // Hide other users' not-yet-kicked-off predictions (display-only redaction):
+  // both Tree-2 knockout picks AND group-stage scores are revealed only once
+  // their real match kicks off. Fetch the schedule once and feed both redactors.
+  // Scoring/recompute use the un-redacted service-role data above.
   const proto = headersList.get("x-forwarded-proto") || "https";
   const host = headersList.get("host") || "";
   const bracketsList = (brackets || []) as Array<Record<string, unknown>>;
   if (host) {
-    await redactLiveKnockout(bracketsList, user.id, `${proto}://${host}`);
+    let rawMatches: RawMatch[] = [];
+    try {
+      const res = await fetch(`${proto}://${host}/api/matches`, { cache: "no-store" });
+      rawMatches = ((await res.json()).matches as RawMatch[]) || [];
+    } catch {
+      rawMatches = [];
+    }
+    redactLiveKnockout(bracketsList, user.id, rawMatches);
+    redactLiveGroupScores(bracketsList, user.id, rawMatches);
   }
 
   return NextResponse.json({

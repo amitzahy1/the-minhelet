@@ -91,7 +91,7 @@ export default function AdminGuidePage() {
         <ul className="space-y-1 text-gray-700 mb-4">
           <li>• מלך שערים: <strong>12</strong> (מוחלט) / <strong>7</strong> (יחסי, מינימום 3 שערים)</li>
           <li>• מלך בישולים: <strong>9</strong> / <strong>5</strong> (מינימום 2 בישולים)</li>
-          <li>• התקפה הכי טובה: <strong>8</strong> · שאר המיוחדים: <strong>6</strong> נקודות כל אחד</li>
+          <li>• התקפה הכי טובה: <strong>8</strong> · בית פורה/יבש, כסחנית, פנדלים: <strong>6</strong> כ״א · מאצ׳אפ: <strong>5</strong> לכל דו-קרב (×3 = 15)</li>
         </ul>
 
         <h3 className="font-bold text-gray-800 mb-2">שובר שוויון (בסדר)</h3>

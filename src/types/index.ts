@@ -334,7 +334,7 @@ export const SCORING = {
     prolific_group: 6,
     driest_group: 6,
     dirtiest_team: 6,
-    matchup: 6,
+    matchup: 5, // per duel — 3 duels = 15 max
     penalties_over_under: 6,
   },
 

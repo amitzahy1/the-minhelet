@@ -1,6 +1,7 @@
 "use client";
 
 import { PageTransition } from "@/components/shared/PageTransition";
+import { PENALTIES_LINE } from "@/lib/constants";
 
 export default function RulesPage() {
   return (
@@ -108,9 +109,9 @@ export default function RulesPage() {
                   ["התקפה טובה", "8", "הנבחרת עם הכי הרבה שערים בטורניר"],
                   ["בית פורה", "6", "הכי הרבה שערים בשלב הבתים"],
                   ["בית יבש", "6", "הכי מעט שערים בשלב הבתים"],
-                  ["כסחנית", "6", "צהוב=1, אדום=3 נק׳ כסחנות"],
-                  ["מאצ׳אפ", "6", "שערים + בישולים — בכל הטורניר"],
-                  ["פנדלים", "6", "אובר/אנדר קו שנקבע"],
+                  ["כסחנית", "6", "צהוב=1, אדום=3 · צהוב שני באותו משחק = אדום אחד (פירוט למטה)"],
+                  ["מאצ׳אפ", "5 ×3", "5 נק׳ לכל דו-קרב (3 דו-קרבות = 15) · שערים + בישולים בכל הטורניר"],
+                  ["פנדלים", "6", `אובר/אנדר ${PENALTIES_LINE} · כולל הארכות, ללא דו-קרב פנדלים`],
                 ].map(([bet, pts, note]) => (
                   <tr key={bet} className="border-b border-gray-50">
                     <td className="py-2.5 font-bold text-gray-800">{bet}</td>
@@ -120,7 +121,32 @@ export default function RulesPage() {
                 ))}
               </tbody>
             </table>
-            <div className="mt-5 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-xs text-amber-900 leading-relaxed">
+
+            <div className="mt-5 rounded-xl bg-blue-50 border border-blue-200 px-4 py-3 text-xs text-blue-900 leading-relaxed">
+              <p className="font-bold mb-1 text-blue-950">📋 איך נספרים שערים, בישולים ופנדלים</p>
+              <ul className="space-y-1.5 list-disc pr-4">
+                <li>
+                  <strong>שערים ובישולים</strong> (מלך שערים, מלך בישולים, ההתקפה
+                  הטובה ביותר, מאצ׳אפים): נספרים כל שערי ובישולי הטורניר
+                  <strong> כולל זמן הארכה</strong>. שערים שהובקעו ב<strong>דו-קרב
+                  פנדלים</strong> (אחרי ההארכה) <strong>אינם נספרים</strong> — בהתאם
+                  לסטטיסטיקה הרשמית של FIFA.
+                </li>
+                <li>
+                  <strong>מאצ׳אפים:</strong> 3 דו-קרבות שחקנים קבועים
+                  (מסי–רונאלדו · רפיניה–ויניסיוס · אמבפה–קיין). הזוכה בכל דו-קרב
+                  נקבע לפי סך <strong>שערים + בישולים</strong> בכל הטורניר. בוחרים
+                  1 / X (שווה) / 2 בכל דו-קרב.
+                </li>
+                <li>
+                  <strong>פנדלים (אובר/אנדר {PENALTIES_LINE}):</strong> נספרים
+                  פנדלים שנפסקו ב-90 הדקות + ההארכה. <strong>דו-קרב פנדלים</strong>
+                  שאחרי ההארכה <strong>אינו נספר</strong>.
+                </li>
+              </ul>
+            </div>
+
+            <div className="mt-3 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-xs text-amber-900 leading-relaxed">
               <p className="font-bold mb-1">⏱ ניקוד זמני במהלך הטורניר</p>
               <p>
                 כל עוד האלוף הסופי לא הוכרז, מלך שערים ומלך בישולים מחושבים
@@ -131,6 +157,30 @@ export default function RulesPage() {
                 מספר בישולים גבוה יותר, ואז מספר דקות נמוך יותר —
                 בדומה לכלל FIFA Golden Boot.
               </p>
+            </div>
+
+            <div className="mt-3 rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-xs text-slate-700 leading-relaxed">
+              <p className="font-bold mb-1 text-slate-900">🟨🟥 ספירת כרטיסים — הנבחרת הכסחנית</p>
+              <p className="mb-2">
+                הכסחנית היא הנבחרת עם הכי הרבה נקודות כסחנות בטורניר:
+                <strong> כרטיס צהוב = 1 נק׳, כרטיס אדום = 3 נק׳</strong>.
+              </p>
+              <ul className="space-y-1.5 list-disc pr-4">
+                <li>
+                  <strong>כל שלבי המשחק:</strong> נספר כל כרטיס שנשלף, לא משנה מתי
+                  — כולל זמן הארכה. (אין שלב &quot;דו-קרב פנדלים&quot; עם כרטיסים.)
+                </li>
+                <li>
+                  <strong>צהוב שני = אדום:</strong> שני כרטיסים צהובים לאותו שחקן
+                  באותו משחק נספרים ככרטיס אדום אחד בלבד (3 נק׳). שני הצהובים
+                  אינם נספרים בנפרד — אין ספירה כפולה.
+                </li>
+                <li>
+                  <strong>צהוב + אדום ישיר:</strong> שחקן שקיבל כרטיס צהוב
+                  &quot;רגיל&quot;, ובהמשך אותו משחק כרטיס אדום ישיר (שתי עבירות
+                  נפרדות) — שני הכרטיסים נספרים (1 + 3 = 4 נק׳).
+                </li>
+              </ul>
             </div>
           </div>
         </section>

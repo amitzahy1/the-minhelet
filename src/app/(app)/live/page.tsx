@@ -823,7 +823,7 @@ function SimulationTab() {
       {/* Header */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-5 text-center">
         <h2 className="text-lg font-black text-gray-900 mb-1">סימולטור ניקוד — הזינו תוצאות ותראו איך הטבלה משתנה</h2>
-        <p className="text-xs text-gray-500 mb-3">בתים: טוטו={TOTO_PTS} מדויקת=+{EXACT_PTS} · נוק-אאוט: 3-4 · מיוחדים: 5-9 נק׳</p>
+        <p className="text-xs text-gray-500 mb-3">בתים: טוטו={TOTO_PTS} מדויקת=+{EXACT_PTS} · נוק-אאוט: 3-4 · מיוחדים: 5-12 נק׳</p>
         {/* Progress indicator */}
         <div className="flex items-center justify-center gap-3">
           <span className="text-sm font-bold text-gray-700">מילאתם {filledCount}/{totalMatches} משחקים</span>

@@ -531,38 +531,38 @@ export default function SpecialBetsPage() {
           <div><h2 className="text-xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>הימורים מיוחדים</h2><p className="text-sm text-gray-500">שחקנים, נבחרות וסטטיסטיקות</p></div>
         </div>
 
-        <SectionCard title="מלך שערים" subtitle="בחרו נבחרת ואז שחקן" points="9 / 5 נק׳">
+        <SectionCard title="מלך שערים" subtitle="בחרו נבחרת ואז שחקן" points="12 / 7 נק׳">
           <div className="grid grid-cols-2 gap-3 max-w-md">
             <TeamSelect value={sb.topScorerTeam} onChange={(v) => { set("topScorerTeam", v); set("topScorerPlayer", ""); }} label="נבחרת" />
             <PlayerSelect team={sb.topScorerTeam} value={sb.topScorerPlayer} onChange={(v) => set("topScorerPlayer", v)} label="שחקן" />
           </div>
         </SectionCard>
 
-        <SectionCard title="מלך בישולים" subtitle="בחרו נבחרת ואז שחקן" points="7 / 4 נק׳">
+        <SectionCard title="מלך בישולים" subtitle="בחרו נבחרת ואז שחקן" points="9 / 5 נק׳">
           <div className="grid grid-cols-2 gap-3 max-w-md">
             <TeamSelect value={sb.topAssistsTeam} onChange={(v) => { set("topAssistsTeam", v); set("topAssistsPlayer", ""); }} label="נבחרת" />
             <PlayerSelect team={sb.topAssistsTeam} value={sb.topAssistsPlayer} onChange={(v) => set("topAssistsPlayer", v)} label="שחקן" />
           </div>
         </SectionCard>
 
-        <SectionCard title="ההתקפה הטובה ביותר" subtitle="הנבחרת עם הכי הרבה שערים בטורניר" points="6 נק׳">
+        <SectionCard title="ההתקפה הטובה ביותר" subtitle="הכי הרבה שערים בטורניר · כולל הארכות, ללא דו-קרב פנדלים" points="8 נק׳">
           <div className="max-w-xs"><TeamSelect value={sb.bestAttack} onChange={(v) => set("bestAttack", v)} label="נבחרת" /></div>
         </SectionCard>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <SectionCard title="הבית הכי פורה" subtitle="הכי הרבה שערים בבתים" points="5 נק׳">
+          <SectionCard title="הבית הכי פורה" subtitle="הכי הרבה שערים בבתים" points="6 נק׳">
             <select value={sb.prolificGroup} onChange={e => set("prolificGroup", e.target.value)} className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option value="">בחרו בית...</option>{GROUP_LETTERS.map(g => <option key={g} value={g}>{groupLabel(g)}</option>)}
             </select>
           </SectionCard>
-          <SectionCard title="הבית הכי יבש" subtitle="הכי מעט שערים בבתים" points="5 נק׳">
+          <SectionCard title="הבית הכי יבש" subtitle="הכי מעט שערים בבתים" points="6 נק׳">
             <select value={sb.driestGroup} onChange={e => set("driestGroup", e.target.value)} className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option value="">בחרו בית...</option>{GROUP_LETTERS.filter(g => g !== sb.prolificGroup).map(g => <option key={g} value={g}>{groupLabel(g)}</option>)}
             </select>
           </SectionCard>
         </div>
 
-        <SectionCard title="הנבחרת הכסחנית" subtitle="צהוב=1, אדום=3 נק׳ כסחנות" points="5 נק׳">
+        <SectionCard title="הנבחרת הכסחנית" subtitle="צהוב=1, אדום=3 · צהוב שני באותו משחק = אדום אחד" points="6 נק׳">
           <div className="max-w-xs"><TeamSelect value={sb.dirtiestTeam} onChange={(v) => set("dirtiestTeam", v)} label="נבחרת" /></div>
         </SectionCard>
 
@@ -584,7 +584,7 @@ export default function SpecialBetsPage() {
           </SectionCard>
         ))}
 
-        <SectionCard title="סה״כ פנדלים בטורניר" subtitle={`אובר / אנדר ${PENALTIES_LINE} · כולל הארכות, ללא דו-קרב פנדלים`} points="5 נק׳">
+        <SectionCard title="סה״כ פנדלים בטורניר" subtitle={`אובר / אנדר ${PENALTIES_LINE} · כולל הארכות, ללא דו-קרב פנדלים`} points="6 נק׳">
           <div className="flex gap-3">
             {[{ val: "OVER", label: `מעל ${PENALTIES_LINE}` }, { val: "UNDER", label: `מתחת ${PENALTIES_LINE}` }].map(opt => (
               <button key={opt.val} onClick={() => set("penaltiesOverUnder", opt.val)}

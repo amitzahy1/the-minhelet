@@ -27,7 +27,9 @@ const noActuals: TournamentActuals = {
   most_prolific_group: null,
   driest_group: null,
   dirtiest_team: null,
-  matchup_winner: null,
+  matchup_result_1: null,
+  matchup_result_2: null,
+  matchup_result_3: null,
   penalties_over_under: null,
 };
 
@@ -132,13 +134,13 @@ describe("scoreSpecialBetsForUser — final outcome path", () => {
     { name: "Pulisic", goals: 1, assists: 0 },
   ];
 
-  it("exact top-scorer pick awards 9", () => {
+  it("exact top-scorer pick awards top_scorer_exact (12)", () => {
     const r = scoreSpecialBetsForUser(baseBet({ topScorerPlayer: "Mbappé" }), actuals, stats);
     expect(r.total).toBe(SCORING.specials.top_scorer_exact);
     expect(r.hasInterim).toBe(false);
   });
 
-  it("relative top-scorer pick (≥3 goals) awards 5", () => {
+  it("relative top-scorer pick (≥3 goals) awards top_scorer_relative (7)", () => {
     const r = scoreSpecialBetsForUser(baseBet({ topScorerPlayer: "Haaland" }), actuals, stats);
     expect(r.total).toBe(SCORING.specials.top_scorer_relative);
   });
@@ -148,9 +150,42 @@ describe("scoreSpecialBetsForUser — final outcome path", () => {
     expect(r.total).toBe(0);
   });
 
-  it("best-attack exact awards 6", () => {
+  it("best-attack exact awards best_attack (8)", () => {
     const r = scoreSpecialBetsForUser(baseBet({ bestAttackTeam: "BRA" }), actuals, stats);
     expect(r.total).toBe(SCORING.specials.best_attack);
+  });
+});
+
+describe("scoreSpecialBetsForUser — matchups (3 duels, scored independently)", () => {
+  // matchupPick is stored as a comma-joined "1,X,2" string (slot 0..2 = duel 1..3).
+  it("all three duels correct → 3 × matchup points", () => {
+    const r = scoreSpecialBetsForUser(
+      baseBet({ matchupPick: "1,X,2" }),
+      { ...noActuals, matchup_result_1: "1", matchup_result_2: "X", matchup_result_3: "2" },
+    );
+    expect(r.total).toBe(SCORING.specials.matchup * 3);
+    expect(r.lines.filter((l) => l.reason === "MATCHUP")).toHaveLength(3);
+  });
+
+  it("only the matching duels score (partial credit)", () => {
+    const r = scoreSpecialBetsForUser(
+      baseBet({ matchupPick: "1,X,2" }),
+      { ...noActuals, matchup_result_1: "1", matchup_result_2: "1", matchup_result_3: "1" },
+    );
+    expect(r.total).toBe(SCORING.specials.matchup); // only duel 1 matches
+  });
+
+  it("a single-duel pick does not bleed into other duels", () => {
+    const r = scoreSpecialBetsForUser(
+      baseBet({ matchupPick: "1" }), // only duel 1 picked
+      { ...noActuals, matchup_result_1: "1", matchup_result_2: "1", matchup_result_3: "1" },
+    );
+    expect(r.total).toBe(SCORING.specials.matchup);
+  });
+
+  it("no actuals entered → zero (exact-only, no live tentative)", () => {
+    const r = scoreSpecialBetsForUser(baseBet({ matchupPick: "1,X,2" }), noActuals);
+    expect(r.total).toBe(0);
   });
 });
 

@@ -23,6 +23,7 @@
 
 import { SCORING, type ScoreReason } from "@/types";
 import type { BettorSpecialBets } from "@/lib/supabase/shared-data";
+import { MATCHUPS, parseMatchupPick } from "@/lib/matchups";
 
 /** Admin-entered tournament outcome (mirrors the `tournament_actuals` row). */
 export interface TournamentActuals {
@@ -32,7 +33,10 @@ export interface TournamentActuals {
   most_prolific_group: string | null;
   driest_group: string | null;
   dirtiest_team: string | null;
-  matchup_winner: "1" | "X" | "2" | null;
+  /** One result per player-duel matchup (3 fixtures). Each scored independently. */
+  matchup_result_1: "1" | "X" | "2" | null;
+  matchup_result_2: "1" | "X" | "2" | null;
+  matchup_result_3: "1" | "X" | "2" | null;
   penalties_over_under: "OVER" | "UNDER" | null;
 }
 
@@ -226,14 +230,28 @@ export function scoreSpecialBetsForUser(
     }
   }
 
-  // -- Matchup pick (1 / X / 2) --
-  if (bets.matchupPick && actuals?.matchup_winner && bets.matchupPick === actuals.matchup_winner) {
-    lines.push({
-      reason: "MATCHUP",
-      points: SCORING.specials.matchup,
-      interim: false,
-      pick: bets.matchupPick,
-    });
+  // -- Matchups (3 player duels) --
+  // The user's pick is stored as a comma-joined "1,X,2" string; the admin
+  // enters one result per duel (matchup_result_1..3). Each duel is scored
+  // independently at SCORING.specials.matchup. Exact-only (no live tentative).
+  const matchupPicks = parseMatchupPick(bets.matchupPick);
+  const matchupActuals = [
+    actuals?.matchup_result_1 ?? null,
+    actuals?.matchup_result_2 ?? null,
+    actuals?.matchup_result_3 ?? null,
+  ];
+  for (let i = 0; i < MATCHUPS.length; i++) {
+    const pick = matchupPicks[i];
+    const actual = matchupActuals[i];
+    if (pick && actual && pick === actual) {
+      const mu = MATCHUPS[i];
+      lines.push({
+        reason: "MATCHUP",
+        points: SCORING.specials.matchup,
+        interim: false,
+        pick: `${mu.p1Short} vs ${mu.p2Short}: ${pick}`,
+      });
+    }
   }
 
   // -- Penalties over/under --

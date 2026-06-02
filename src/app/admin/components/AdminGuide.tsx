@@ -58,7 +58,7 @@ export function AdminGuide() {
         <h4 className="font-bold mb-2">הימורי עולות (מבעוד מועד)</h4>
         <ul className="space-y-1 mb-4">
           <li>• עולה מדויקת מהבית: <strong>5 נק׳</strong> · עולה לא מדויקת: <strong>3 נק׳</strong></li>
-          <li>• רבע: <strong>4</strong> · חצי: <strong>6</strong> · גמר: <strong>8</strong> · זוכה: <strong>12</strong></li>
+          <li>• שמינית: <strong>2</strong> · רבע: <strong>4</strong> · חצי: <strong>6</strong> · גמר: <strong>8</strong> · זוכה: <strong>12</strong></li>
         </ul>
         <h4 className="font-bold mb-2">הימורים מיוחדים</h4>
         <ul className="space-y-1 mb-4">

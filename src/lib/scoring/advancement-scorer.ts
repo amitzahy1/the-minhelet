@@ -28,6 +28,7 @@ export interface AdvancementBreakdown {
   total: number;
   groupExactPts: number;
   groupPartialPts: number;
+  r16Pts: number;
   qfPts: number;
   sfPts: number;
   finalPts: number;
@@ -64,8 +65,11 @@ function teamsInFinal(slots: Record<string, SlotState>): Set<string> {
  * - actualGroupOrders: real per-group order, keyed by group letter
  *   (e.g. {"A": ["MEX", "RSA", "KOR", "CZE"]}) — group complete only.
  * - bestThirdsCodes: set of team codes that qualified as best-3rd.
- * - slots: full resolved KO tree (for QF/SF/Final reachers).
+ * - slots: full resolved KO tree (for R16/QF/SF/Final reachers).
  * - champion: the actual tournament winner (or null pre-final).
+ * - predictedR16: the user's predicted last-16 teams (their R32-match winners in
+ *   the simulation tree). Not stored separately — derived from the bracket by the
+ *   caller — since the last 16 ARE exactly the R32 winners the user already picks.
  */
 export function scoreAdvancementForUser(
   adv: BettorAdvancement,
@@ -73,11 +77,13 @@ export function scoreAdvancementForUser(
   bestThirdsCodes: Set<string>,
   slots: Record<string, SlotState>,
   champion: string | null,
+  predictedR16: string[] = [],
 ): AdvancementBreakdown {
   const breakdown: AdvancementBreakdown = {
     total: 0,
     groupExactPts: 0,
     groupPartialPts: 0,
+    r16Pts: 0,
     qfPts: 0,
     sfPts: 0,
     finalPts: 0,
@@ -123,11 +129,19 @@ export function scoreAdvancementForUser(
     if (pred2 && pred2 !== pred1) scoreSlot(pred2, 2);
   }
 
-  // --- QF / SF / Final reachers ---
+  // --- R16 / QF / SF / Final reachers ---
+  const reachedR16 = teamsReachingStage(slots, "R16");
   const reachedQF = teamsReachingStage(slots, "QF");
   const reachedSF = teamsReachingStage(slots, "SF");
   const reachedFinal = teamsInFinal(slots);
 
+  // R16 = the user's R32-match winners. De-dup so a team can't be double-counted.
+  for (const code of [...new Set(predictedR16)]) {
+    if (code && reachedR16.has(code)) {
+      breakdown.r16Pts += SCORING.advancement.r16;
+      breakdown.lines.push({ reason: "ADVANCE_R16", points: SCORING.advancement.r16, pick: code });
+    }
+  }
   for (const code of adv.advanceToQF || []) {
     if (code && reachedQF.has(code)) {
       breakdown.qfPts += SCORING.advancement.qf;
@@ -156,6 +170,7 @@ export function scoreAdvancementForUser(
   breakdown.total =
     breakdown.groupExactPts +
     breakdown.groupPartialPts +
+    breakdown.r16Pts +
     breakdown.qfPts +
     breakdown.sfPts +
     breakdown.finalPts +

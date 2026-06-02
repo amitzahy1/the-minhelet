@@ -481,6 +481,38 @@ export default function SpecialBetsPage() {
                   ))}
                 </div>
               </SectionCard>
+
+              <SectionCard
+                title="עולות לשמינית הגמר"
+                subtitle="16 הזוכות בשלב 32 — נגזר אוטומטית מעץ הסימולציה שלך"
+                points="2 נק׳ כ״א"
+              >
+                {(() => {
+                  const R32_KEYS = [
+                    "r32l_0","r32l_1","r32l_2","r32l_3","r32l_4","r32l_5","r32l_6","r32l_7",
+                    "r32r_0","r32r_1","r32r_2","r32r_3","r32r_4","r32r_5","r32r_6","r32r_7",
+                  ];
+                  const r16 = R32_KEYS.map((k) => knockout[k]?.winner).filter(Boolean) as string[];
+                  if (r16.length === 0) {
+                    return <p className="text-xs text-gray-400">בחרו מנצחות ב<Link href="/knockout" className="underline font-bold">עץ הסימולציה</Link> כדי לראות את ה-16 שעולות לשמינית.</p>;
+                  }
+                  return (
+                    <>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {r16.map((code, i) => (
+                          <div key={i} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 text-sm font-medium">
+                            <span className="text-lg">{getFlag(code)}</span>
+                            <span>{ALL_TEAMS.find((t) => t.code === code)?.name_he || code}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-xs text-gray-400 mt-2">
+                        נקבע אוטומטית לפי המנצחות שבחרת ב<Link href="/knockout" className="underline font-bold">עץ הסימולציה</Link> (שלב 32 → שמינית) — אין צורך לבחור כאן. {r16.length}/16 מולאו.
+                      </p>
+                    </>
+                  );
+                })()}
+              </SectionCard>
             </>
           );
         })()}

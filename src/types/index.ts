@@ -247,6 +247,7 @@ export type ScoreReason =
   | "GROUP_ADVANCE_EXACT"
   | "GROUP_ADVANCE_PARTIAL"
   | "GROUP_ADVANCE_AS_3RD"
+  | "ADVANCE_R16"
   | "ADVANCE_QF"
   | "ADVANCE_SF"
   | "ADVANCE_FINAL"
@@ -315,6 +316,7 @@ export const SCORING = {
     group_exact: 5, // Correct team in correct position
     group_partial: 3, // Correct team but wrong position (1st↔2nd swap)
     group_as_3rd: 2, // Correct team advanced past groups, but as a best-3rd qualifier
+    r16: 2, // Per team reaching the Round of 16 (last 16) — i.e. an R32 winner
     qf: 4, // Per team reaching QF
     sf: 6, // Per team reaching SF
     final: 8, // Per team reaching Final

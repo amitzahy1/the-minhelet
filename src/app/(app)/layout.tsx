@@ -10,6 +10,7 @@ import { DeadlineCountdown } from "@/components/shared/DeadlineCountdown";
 import { SaveIndicator } from "@/components/shared/SaveIndicator";
 import { ToastHost } from "@/components/shared/ToastHost";
 import { ConflictResolutionModal } from "@/components/shared/ConflictResolutionModal";
+import { VersionWatcher } from "@/components/shared/VersionWatcher";
 import { NavProgressBar } from "@/components/shared/NavProgressBar";
 import { Suspense } from "react";
 import { useSharedData } from "@/hooks/useSharedData";
@@ -170,6 +171,7 @@ function OnboardingWizard({ onDismiss, onStart }: { onDismiss: () => void; onSta
                   <div className="bg-purple-50 rounded-lg py-1.5 px-2.5 border border-purple-100 flex items-center justify-between"><span className="text-gray-700">עולה לגמר</span><span className="font-black text-purple-700" style={{ fontFamily: "var(--font-inter)" }}>8</span></div>
                   <div className="bg-purple-50 rounded-lg py-1.5 px-2.5 border border-purple-100 flex items-center justify-between"><span className="text-gray-700">עולה לחצי</span><span className="font-black text-purple-700" style={{ fontFamily: "var(--font-inter)" }}>6</span></div>
                   <div className="bg-purple-50 rounded-lg py-1.5 px-2.5 border border-purple-100 flex items-center justify-between"><span className="text-gray-700">עולה לרבע</span><span className="font-black text-purple-700" style={{ fontFamily: "var(--font-inter)" }}>4</span></div>
+                  <div className="bg-purple-50 rounded-lg py-1.5 px-2.5 border border-purple-100 flex items-center justify-between"><span className="text-gray-700">עולה לשמינית</span><span className="font-black text-purple-700" style={{ fontFamily: "var(--font-inter)" }}>2</span></div>
                   <div className="bg-purple-50 rounded-lg py-1.5 px-2.5 border border-purple-100 flex items-center justify-between col-span-2"><span className="text-gray-700">עולה מבית · מדויק / חלקי</span><span className="font-black text-purple-700" style={{ fontFamily: "var(--font-inter)" }}>5 / 3</span></div>
                 </div>
               </div>
@@ -916,6 +918,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <SaveIndicator />
       <ToastHost />
       <ConflictResolutionModal />
+      <VersionWatcher />
 
       {/* Floating help */}
       <button

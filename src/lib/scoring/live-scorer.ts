@@ -261,15 +261,26 @@ export function computeLiveScores(
     // Champion = winner of the final slot.
     const champion = slotTree["final"]?.winner ?? null;
 
+    // The user's predicted last-16 = their R32-match winners in the simulation
+    // tree (knockoutTree). Derived per user — not a separately-stored pick.
+    const R32_KEYS = [
+      "r32l_0", "r32l_1", "r32l_2", "r32l_3", "r32l_4", "r32l_5", "r32l_6", "r32l_7",
+      "r32r_0", "r32r_1", "r32r_2", "r32r_3", "r32r_4", "r32r_5", "r32r_6", "r32r_7",
+    ];
+    const bracketByUser = new Map(brackets.map((b) => [b.userId, b]));
+
     for (const adv of options.advancements) {
       const score = byUser[adv.userId];
       if (!score) continue;
+      const tree = bracketByUser.get(adv.userId)?.knockoutTree ?? {};
+      const predictedR16 = R32_KEYS.map((k) => tree[k]?.winner).filter(Boolean) as string[];
       const breakdown = scoreAdvancementForUser(
         adv,
         actualGroupOrders,
         bestThirdsCodes,
         slotTree as Record<string, SlotState>,
         champion,
+        predictedR16,
       );
       score.advPts = breakdown.total;
       score.advBreakdown = breakdown;

@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { DeadlineCountdown } from "@/components/shared/DeadlineCountdown";
 import { SaveIndicator } from "@/components/shared/SaveIndicator";
+import { SaveFlushOnNav } from "@/components/shared/SaveFlushOnNav";
 import { ToastHost } from "@/components/shared/ToastHost";
 import { ConflictResolutionModal } from "@/components/shared/ConflictResolutionModal";
 import { VersionWatcher } from "@/components/shared/VersionWatcher";
@@ -916,6 +917,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Pre-lock: floating save-status indicator (hidden by isLocked inside component) */}
       <SaveIndicator />
+      <SaveFlushOnNav />
       <ToastHost />
       <ConflictResolutionModal />
       <VersionWatcher />

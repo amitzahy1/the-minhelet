@@ -666,6 +666,18 @@ async function performSave(state: BettingState) {
   hasPendingChanges = false;
 }
 
+/** Persist any pending debounced save RIGHT NOW, skipping the debounce timer.
+ *  Called the instant the user leaves a betting page, backgrounds the tab, or
+ *  closes the app — so a freshly-made pick is never stranded in the 1–1.5s
+ *  debounce window (the cause of "I changed a bet, switched page, and it
+ *  wasn't saved"). No-op when nothing is pending. Returns the save promise so
+ *  callers (e.g. the Save button) can await it. */
+export async function flushPendingSave(): Promise<void> {
+  if (saveTimeout) { clearTimeout(saveTimeout); saveTimeout = null; }
+  if (!hasPendingChanges) return;
+  await performSave(useBettingStore.getState());
+}
+
 // Milestone tracking — we only auto-save when a stage transitions from
 // "partial" → "complete" (or when the user edits a bet while already at 100%).
 // Before that, the user must click the explicit "Save" button on each page.
@@ -816,34 +828,40 @@ if (typeof window !== "undefined") {
     // `shouldAutoSave` milestone flags now only shorten the debounce window;
     // the real-data knockout tree saves per-slot on its own page.
     if (saveTimeout) clearTimeout(saveTimeout);
-    const debounceMs = allDone ? 3000 : shouldAutoSave ? 700 : 1200;
+    const debounceMs = allDone ? 1500 : shouldAutoSave ? 600 : 1000;
     saveTimeout = setTimeout(() => performSave(state), debounceMs);
   });
 
-  // Force-save on page unload to prevent data loss
-  window.addEventListener("beforeunload", () => {
-    if (hasPendingChanges) {
-      const state = useBettingStore.getState();
-      // Synchronous localStorage save (best effort)
-      try {
-        const today = new Date().toISOString().split("T")[0];
-        localStorage.setItem(`wc2026-backup-${today}`, JSON.stringify({
-          exportedAt: new Date().toISOString(),
-          groups: state.groups,
-          knockout: state.knockout,
-          knockoutLive: state.knockoutLive,
-          specialBets: state.specialBets,
-        }));
-      } catch { /* ignore */ }
-      // Attempt async Supabase save via sendBeacon (fire-and-forget)
-      try {
-        navigator.sendBeacon("/api/sync-beacon", JSON.stringify({
-          groups: state.groups,
-          knockout: state.knockout,
-          knockoutLive: state.knockoutLive,
-          specialBets: state.specialBets,
-        }));
-      } catch { /* ignore */ }
+  // Force-save the instant the user leaves, so a pick is never lost to the
+  // debounce window. visibilitychange→hidden is the reliable signal on mobile
+  // (iOS fires it when the PWA is backgrounded or the screen locks, and it also
+  // precedes a desktop tab-close) — and the page is still alive enough to run
+  // the normal async Supabase save. pagehide/beforeunload are the desktop
+  // fallbacks; a synchronous localStorage backup runs regardless as a floor.
+  const backupToLocalStorage = () => {
+    const state = useBettingStore.getState();
+    try {
+      const today = new Date().toISOString().split("T")[0];
+      localStorage.setItem(`wc2026-backup-${today}`, JSON.stringify({
+        exportedAt: new Date().toISOString(),
+        groups: state.groups,
+        knockout: state.knockout,
+        knockoutLive: state.knockoutLive,
+        specialBets: state.specialBets,
+      }));
+    } catch { /* localStorage full or unavailable */ }
+  };
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden" && hasPendingChanges) {
+      backupToLocalStorage();
+      void flushPendingSave();
     }
+  });
+  window.addEventListener("pagehide", () => {
+    if (hasPendingChanges) { backupToLocalStorage(); void flushPendingSave(); }
+  });
+  window.addEventListener("beforeunload", () => {
+    if (hasPendingChanges) backupToLocalStorage();
   });
 }

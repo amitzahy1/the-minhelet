@@ -4,10 +4,17 @@ import { useEffect, useState } from "react";
 import { useSaveStatus } from "@/stores/save-status-store";
 
 /**
- * Floating pill that tells the user whether their last bet change has
- * actually been saved to the DB. Idle → hidden. Pending → "שינויים לא
- * נשמרו" (ambers). Saving → "שומר…" (gray). Saved → "✓ נשמר" (green,
- * auto-dismisses after 2.5s). Error → "שגיאה בשמירה" (red, sticky).
+ * Prominent save-status pill. Tells the user, on every bet change, whether it
+ * has reached the DB — so nobody navigates away thinking a pick is saved when
+ * it isn't.
+ *
+ *   pending → "שינויים נשמרים…" (amber, pulsing) — stays until saving starts
+ *   saving  → "שומר…" (blue, spinner)            — stays until done
+ *   saved   → "✓ נשמר" (green)                   — auto-dismisses after 2s
+ *   error   → "שמירה נכשלה — מנסה שוב" (red)      — sticky
+ *
+ * Centered above the bottom nav on mobile (where the thumb is), bottom-end on
+ * desktop. Pending/saving/error never auto-hide, so the signal is unmissable.
  */
 export function SaveIndicator() {
   const status = useSaveStatus((s) => s.status);
@@ -16,32 +23,48 @@ export function SaveIndicator() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (status === "idle") return;
+    if (status === "idle") {
+      setVisible(false);
+      return;
+    }
     setVisible(true);
     if (status === "saved") {
-      const t = setTimeout(() => setVisible(false), 2500);
+      const t = setTimeout(() => setVisible(false), 2000);
       return () => clearTimeout(t);
     }
   }, [status, lastSavedAt]);
 
   if (!visible || status === "idle") return null;
 
-  const styles: Record<Exclude<typeof status, "idle">, { bg: string; border: string; text: string; icon: string; label: string }> = {
-    pending: { bg: "bg-amber-50", border: "border-amber-300", text: "text-amber-800", icon: "💾", label: "שינויים נשמרים אוטומטית…" },
-    saving:  { bg: "bg-blue-50", border: "border-blue-200", text: "text-blue-700", icon: "💾", label: "שומר..." },
-    saved:   { bg: "bg-green-50", border: "border-green-300", text: "text-green-800", icon: "✓", label: "נשמר" },
-    error:   { bg: "bg-red-50", border: "border-red-300", text: "text-red-700", icon: "⚠", label: lastError ? `שגיאה: ${lastError}` : "שגיאה בשמירה" },
+  const isBusy = status === "pending" || status === "saving";
+  const styles: Record<Exclude<typeof status, "idle">, { bg: string; ring: string; text: string; label: string }> = {
+    pending: { bg: "bg-amber-100", ring: "ring-amber-300", text: "text-amber-900", label: "שינויים נשמרים…" },
+    saving:  { bg: "bg-blue-100", ring: "ring-blue-300", text: "text-blue-900", label: "שומר…" },
+    saved:   { bg: "bg-green-100", ring: "ring-green-400", text: "text-green-900", label: "נשמר" },
+    error:   { bg: "bg-red-100", ring: "ring-red-300", text: "text-red-900", label: lastError ? `שמירה נכשלה — ${lastError}` : "שמירה נכשלה — מנסה שוב" },
   };
-
   const s = styles[status];
 
   return (
     <div
-      className={`fixed bottom-20 sm:bottom-6 end-4 sm:end-6 z-40 rounded-full border shadow-md px-4 py-2 flex items-center gap-2 text-sm font-bold transition-all ${s.bg} ${s.border} ${s.text}`}
+      className="fixed z-50 bottom-20 sm:bottom-6 left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:end-6 pointer-events-none"
       aria-live="polite"
     >
-      <span className="text-base leading-none">{s.icon}</span>
-      <span>{s.label}</span>
+      <div
+        className={`flex items-center gap-2 rounded-full ${s.bg} ${s.text} ring-2 ${s.ring} shadow-lg px-5 py-2.5 text-sm font-black ${isBusy ? "animate-pulse" : ""}`}
+      >
+        {isBusy ? (
+          <svg className="animate-spin h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-90" fill="currentColor" d="M4 12a8 8 0 0 1 8-8V0C5.4 0 0 5.4 0 12h4z" />
+          </svg>
+        ) : status === "saved" ? (
+          <span className="text-base leading-none">✓</span>
+        ) : (
+          <span className="text-base leading-none">⚠</span>
+        )}
+        <span className="whitespace-nowrap">{s.label}</span>
+      </div>
     </div>
   );
 }

@@ -13,7 +13,7 @@ const SPECIAL_FIELDS = [
   "top_scorer_player", "top_scorer_team", "top_scorer_goals",
   "top_assists_player", "top_assists_team", "top_assists_count",
   "best_attack_team", "best_attack_goals",
-  "dirtiest_team", "dirtiest_team_cards",
+  "dirtiest_team", "dirtiest_team_cards", "dirtiest_board",
   "most_prolific_group", "most_prolific_goals",
   "driest_group", "driest_group_goals",
   "matchup_result_1", "matchup_result_2", "matchup_result_3",
@@ -109,9 +109,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, changed: 0, message: "אין שינויים" });
   }
 
-  const { error } = await supabase
+  let { error } = await supabase
     .from("tournament_actuals")
     .upsert(updates, { onConflict: "tournament_id" });
+  // Resilience: if migration 025 (dirtiest_board column) hasn't run yet, don't
+  // break the whole save — persist everything else and skip the new column.
+  if (error && "dirtiest_board" in updates && /dirtiest_board/i.test(error.message)) {
+    delete updates.dirtiest_board;
+    ({ error } = await supabase
+      .from("tournament_actuals")
+      .upsert(updates, { onConflict: "tournament_id" }));
+  }
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   // Single aggregate audit entry for the tournament-level change (target_user_id

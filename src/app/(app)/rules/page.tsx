@@ -168,7 +168,7 @@ export default function RulesPage() {
               <ul className="space-y-1.5 list-disc pr-4">
                 <li>
                   <strong>כל שלבי המשחק:</strong> נספר כל כרטיס שנשלף, לא משנה מתי
-                  — כולל זמן הארכה. (אין שלב &quot;דו-קרב פנדלים&quot; עם כרטיסים.)
+                  — כולל זמן הארכה.
                 </li>
                 <li>
                   <strong>צהוב שני = אדום:</strong> שני כרטיסים צהובים לאותו שחקן

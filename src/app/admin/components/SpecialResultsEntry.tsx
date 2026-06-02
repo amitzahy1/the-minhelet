@@ -10,6 +10,9 @@ import { getFlag } from "@/lib/flags";
 import { MATCHUPS } from "@/lib/matchups";
 import { PENALTIES_LINE, penaltiesResult } from "@/lib/constants";
 
+/** One row of the dirtiest-team leaderboard (admin-maintained, no auto feed). */
+type DirtyRow = { team: string; yellow: number; red: number };
+
 type Actuals = {
   top_scorer_player: string | null;
   top_scorer_team: string | null;
@@ -19,8 +22,11 @@ type Actuals = {
   top_assists_count: number | null;
   best_attack_team: string | null;
   best_attack_goals: number | null;
+  // dirtiest_team + dirtiest_team_cards are DERIVED from the top of dirtiest_board
+  // on save (kept for the scorer, which matches on dirtiest_team).
   dirtiest_team: string | null;
   dirtiest_team_cards: number | null;
+  dirtiest_board: DirtyRow[];
   most_prolific_group: string | null;
   most_prolific_goals: number | null;
   driest_group: string | null;
@@ -44,6 +50,7 @@ const EMPTY: Actuals = {
   best_attack_goals: null,
   dirtiest_team: null,
   dirtiest_team_cards: null,
+  dirtiest_board: [],
   most_prolific_group: null,
   most_prolific_goals: null,
   driest_group: null,
@@ -59,6 +66,12 @@ const EMPTY: Actuals = {
 const TEAMS_SORTED = [...ALL_TEAMS].sort((a, b) =>
   (a.name_he || a.code).localeCompare(b.name_he || b.code, "he")
 );
+const TEAM_NAME = new Map(ALL_TEAMS.map((t) => [t.code, t.name_he || t.code]));
+
+// Dirtiness weighting: yellow = 1, red = 3 (canonical — see rules page).
+const cardPoints = (r: { yellow: number; red: number }) => r.yellow * 1 + r.red * 3;
+const sortDirty = (board: DirtyRow[]) =>
+  [...board].sort((a, b) => cardPoints(b) - cardPoints(a));
 
 export function SpecialResultsEntry() {
   const [actuals, setActuals] = useState<Actuals>(EMPTY);
@@ -97,11 +110,21 @@ export function SpecialResultsEntry() {
   async function save() {
     setSaving(true);
     setMessage(null);
+    // Sort the dirtiest board high→low and derive the final winner from its top
+    // row, so the scorer (which matches on dirtiest_team) stays in sync.
+    const sortedBoard = sortDirty(actuals.dirtiest_board);
+    const top = sortedBoard[0];
+    const payload: Actuals = {
+      ...actuals,
+      dirtiest_board: sortedBoard,
+      dirtiest_team: top?.team || null,
+      dirtiest_team_cards: top ? cardPoints(top) : null,
+    };
     try {
       const res = await fetch("/api/admin/special-results", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(actuals),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -110,7 +133,8 @@ export function SpecialResultsEntry() {
         setMessage("אין שינויים");
       } else {
         setMessage(`נשמרו ${data.changed} שדות ✓`);
-        setBaseline(actuals);
+        setActuals(payload);
+        setBaseline(payload);
       }
     } catch (e) {
       setMessage("שגיאת רשת: " + String(e));
@@ -242,19 +266,17 @@ export function SpecialResultsEntry() {
                 dir="ltr"
               />
             </Field>
-            <Field label="נבחרת כסחנית (הכי הרבה כרטיסים)">
-              <TeamPicker value={actuals.dirtiest_team} onChange={(v) => set("dirtiest_team", v)} />
-            </Field>
-            <Field label="מס׳ כרטיסים">
-              <Input
-                type="number"
-                min={0}
-                value={actuals.dirtiest_team_cards ?? ""}
-                onChange={(e) => set("dirtiest_team_cards", e.target.value === "" ? null : Math.max(0, parseInt(e.target.value) || 0))}
-                dir="ltr"
-              />
-            </Field>
           </div>
+        </Section>
+
+        {/* Dirtiest-team leaderboard (admin-maintained — no automatic card feed) */}
+        <Section title="🟨🟥 טבלת הכסחנית">
+          <p className="text-xs text-gray-500 mb-2 leading-relaxed">
+            הזן צהובים ואדומים לכל נבחרת. הניקוד משוקלל אוטומטית (<strong>צהוב = 1, אדום = 3</strong>)
+            והטבלה מסתדרת מהגבוה לנמוך — הנבחרת בראש היא הכסחנית שתיקבע לניקוד.
+            <strong> צהוב שני באותו משחק = אדום אחד</strong> (לא לספור פעמיים). אין הזנה אוטומטית — עדכן ידנית במהלך הטורניר.
+          </p>
+          <DirtyBoard rows={actuals.dirtiest_board} onChange={(r) => set("dirtiest_board", r)} />
         </Section>
 
         {/* Groups */}
@@ -393,6 +415,70 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     <div className="space-y-1">
       <label className="text-xs text-gray-600 font-medium">{label}</label>
       {children}
+    </div>
+  );
+}
+
+function DirtyBoard({ rows, onChange }: { rows: DirtyRow[]; onChange: (rows: DirtyRow[]) => void }) {
+  const sorted = sortDirty(rows);
+  const used = new Set(rows.map((r) => r.team));
+  const available = TEAMS_SORTED.filter((t) => !used.has(t.code));
+  const setRow = (team: string, patch: Partial<DirtyRow>) =>
+    onChange(rows.map((r) => (r.team === team ? { ...r, ...patch } : r)));
+  const removeRow = (team: string) => onChange(rows.filter((r) => r.team !== team));
+  const addRow = (team: string) => {
+    if (team && !used.has(team)) onChange([...rows, { team, yellow: 0, red: 0 }]);
+  };
+  return (
+    <div className="space-y-2">
+      {sorted.length === 0 && (
+        <p className="text-xs text-gray-400">טרם הוזנו נבחרות — הוסף נבחרת למטה.</p>
+      )}
+      {sorted.map((r, i) => (
+        <div key={r.team} className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 bg-gray-50">
+          <span className="w-5 text-center text-xs font-black text-gray-400">{i + 1}</span>
+          <span className="flex-1 text-sm font-bold truncate">{getFlag(r.team)} {TEAM_NAME.get(r.team) || r.team}</span>
+          <label className="text-[10px] text-gray-500">צ׳</label>
+          <Input
+            type="number"
+            min={0}
+            className="w-14"
+            dir="ltr"
+            value={r.yellow}
+            onChange={(e) => setRow(r.team, { yellow: Math.max(0, parseInt(e.target.value) || 0) })}
+          />
+          <label className="text-[10px] text-gray-500">א׳</label>
+          <Input
+            type="number"
+            min={0}
+            className="w-14"
+            dir="ltr"
+            value={r.red}
+            onChange={(e) => setRow(r.team, { red: Math.max(0, parseInt(e.target.value) || 0) })}
+          />
+          <span className="w-10 text-center text-sm font-black text-blue-600" title="ניקוד כסחנות">{cardPoints(r)}</span>
+          <button
+            type="button"
+            onClick={() => removeRow(r.team)}
+            className="text-red-500 hover:text-red-700 text-sm px-1"
+            aria-label="הסר"
+          >
+            ✕
+          </button>
+        </div>
+      ))}
+      <select
+        className="rounded-lg border border-gray-300 px-3 py-2 text-sm bg-white w-full"
+        value=""
+        onChange={(e) => addRow(e.target.value)}
+      >
+        <option value="">➕ הוסף נבחרת לטבלה…</option>
+        {available.map((t) => (
+          <option key={t.code} value={t.code}>
+            {getFlag(t.code)} {t.name_he} ({t.code})
+          </option>
+        ))}
+      </select>
     </div>
   );
 }

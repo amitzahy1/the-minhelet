@@ -45,6 +45,8 @@ export interface TournamentActuals {
   best_attack_goals: number | null;
   dirtiest_team: string | null;
   dirtiest_team_cards: number | null;
+  /** Admin-maintained dirtiest leaderboard (no auto card feed). Weighting: yellow=1, red=3. */
+  dirtiest_board: Array<{ team: string; yellow: number; red: number }> | null;
   most_prolific_group: string | null;
   most_prolific_goals: number | null;
   driest_group: string | null;
@@ -80,12 +82,11 @@ interface DemoResultRow {
 
 // ---------- Helpers ----------
 
-// NOTE: yellowCards/redCards are not yet populated here — the demo_match_results
-// query doesn't fetch card columns, so the "dirtiest" live ranking reads 0 on
-// real data until cards are wired in. When wiring them, apply the canonical
-// counting rule (see rules page → הנבחרת הכסחנית): a second yellow in the same
-// match counts as ONE red (the two yellows are absorbed, NOT counted separately),
-// while a genuine yellow + direct red counts as both. Weighting: yellow=1, red=3.
+// NOTE: yellowCards/redCards stay at 0 here — there's no automatic card feed
+// (Football-Data free tier has no bookings). The "dirtiest team" live
+// leaderboard is instead driven by the admin-maintained `dirtiest_board` on
+// `tournament_actuals` (yellow=1, red=3; a 2nd yellow same match = one red).
+// See the admin "תוצאות מיוחדות" panel and SpecialTrackerView.
 export function aggregateTeamStats(rows: DemoResultRow[]): TeamGoalStats[] {
   const map = new Map<string, TeamGoalStats>();
   const ensure = (code: string) => {

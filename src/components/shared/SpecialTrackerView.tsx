@@ -464,8 +464,14 @@ export function SpecialTrackerView({
     const attackRanked = [...stats.teamStats].sort((a, b) => b.goalsFor - a.goalsFor)
       .map((t) => ({ key: t.code, label: flagName(t.code), value: `${t.goalsFor}` }));
     // Dirtiest: ranked by a weighted score (red counts triple). value2 = the
-    // weighted score (headline), value = the yellow/red breakdown.
-    const dirtyRanked = [...stats.teamStats].sort((a, b) => (b.yellowCards * YEL_W + b.redCards * RED_W) - (a.yellowCards * YEL_W + a.redCards * RED_W))
+    // weighted score (headline), value = the yellow/red breakdown. There's no
+    // automatic card feed, so the admin maintains `dirtiest_board`; fall back to
+    // teamStats (zeros) only if the board is empty.
+    const dirtyBoard = actuals?.dirtiest_board ?? [];
+    const dirtySource = dirtyBoard.length
+      ? dirtyBoard.map((r) => ({ code: r.team, yellowCards: r.yellow, redCards: r.red }))
+      : stats.teamStats.map((t) => ({ code: t.code, yellowCards: t.yellowCards, redCards: t.redCards }));
+    const dirtyRanked = [...dirtySource].sort((a, b) => (b.yellowCards * YEL_W + b.redCards * RED_W) - (a.yellowCards * YEL_W + a.redCards * RED_W))
       .map((t) => ({ key: t.code, label: flagName(t.code), value2: `${t.yellowCards * YEL_W + t.redCards * RED_W}`, value: cardVal(t.yellowCards, t.redCards) }));
     const prolificRanked = [...stats.groupStats].sort((a, b) => b.goals - a.goals)
       .map((g) => ({ key: g.letter, label: `בית ${g.letter}`, sub: groupTeams(g.letter), value: `${g.goals}` }));

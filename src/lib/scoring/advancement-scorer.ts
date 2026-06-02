@@ -67,9 +67,6 @@ function teamsInFinal(slots: Record<string, SlotState>): Set<string> {
  * - bestThirdsCodes: set of team codes that qualified as best-3rd.
  * - slots: full resolved KO tree (for R16/QF/SF/Final reachers).
  * - champion: the actual tournament winner (or null pre-final).
- * - predictedR16: the user's predicted last-16 teams (their R32-match winners in
- *   the simulation tree). Not stored separately — derived from the bracket by the
- *   caller — since the last 16 ARE exactly the R32 winners the user already picks.
  */
 export function scoreAdvancementForUser(
   adv: BettorAdvancement,
@@ -77,7 +74,6 @@ export function scoreAdvancementForUser(
   bestThirdsCodes: Set<string>,
   slots: Record<string, SlotState>,
   champion: string | null,
-  predictedR16: string[] = [],
 ): AdvancementBreakdown {
   const breakdown: AdvancementBreakdown = {
     total: 0,
@@ -135,8 +131,7 @@ export function scoreAdvancementForUser(
   const reachedSF = teamsReachingStage(slots, "SF");
   const reachedFinal = teamsInFinal(slots);
 
-  // R16 = the user's R32-match winners. De-dup so a team can't be double-counted.
-  for (const code of [...new Set(predictedR16)]) {
+  for (const code of adv.advanceToR16 || []) {
     if (code && reachedR16.has(code)) {
       breakdown.r16Pts += SCORING.advancement.r16;
       breakdown.lines.push({ reason: "ADVANCE_R16", points: SCORING.advancement.r16, pick: code });

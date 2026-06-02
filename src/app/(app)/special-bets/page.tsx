@@ -187,6 +187,7 @@ export default function SpecialBetsPage() {
   };
   const paddedSemis = pad(sb.semifinalists, 4);
   const paddedQuarters = pad(sb.quarterfinalists, 8);
+  const paddedR16 = pad(sb.roundOf16, 16);
 
   // Derive expected advances from the user's knockout tree
   const expected = useMemo(() => ({
@@ -209,6 +210,12 @@ export default function SpecialBetsPage() {
       knockout.r16r_2?.winner || "",
       knockout.r16r_3?.winner || "",
     ],
+    roundOf16: [
+      knockout.r32l_0?.winner || "", knockout.r32l_1?.winner || "", knockout.r32l_2?.winner || "", knockout.r32l_3?.winner || "",
+      knockout.r32l_4?.winner || "", knockout.r32l_5?.winner || "", knockout.r32l_6?.winner || "", knockout.r32l_7?.winner || "",
+      knockout.r32r_0?.winner || "", knockout.r32r_1?.winner || "", knockout.r32r_2?.winner || "", knockout.r32r_3?.winner || "",
+      knockout.r32r_4?.winner || "", knockout.r32r_5?.winner || "", knockout.r32r_6?.winner || "", knockout.r32r_7?.winner || "",
+    ],
   }), [knockout]);
 
   // Auto-fill EMPTY fields from the knockout tree (never overwrites user choices)
@@ -226,6 +233,10 @@ export default function SpecialBetsPage() {
 
     const qfMerged = current.quarterfinalists.map((v, i) => v || expected.quarterfinalists[i]);
     if (qfMerged.some((v, i) => v !== current.quarterfinalists[i])) setBet("quarterfinalists", qfMerged);
+
+    const r16Cur = current.roundOf16 ?? [];
+    const r16Merged = expected.roundOf16.map((e, i) => r16Cur[i] || e);
+    if (r16Merged.some((v, i) => v !== r16Cur[i])) setBet("roundOf16", r16Merged);
   }, [expected]);
 
   // Restore a scorer/assists TEAM from the saved player when only the player
@@ -261,6 +272,8 @@ export default function SpecialBetsPage() {
     ? `לפי העץ שלך: ${expected.semifinalists.filter(Boolean).join(", ")}` : "";
   const qfMismatch = !sameSet(sb.quarterfinalists, expected.quarterfinalists)
     ? `לפי העץ שלך: ${expected.quarterfinalists.filter(Boolean).join(", ")}` : "";
+  const r16Mismatch = !sameSet(sb.roundOf16, expected.roundOf16)
+    ? `לפי העץ שלך: ${expected.roundOf16.filter(Boolean).join(", ")}` : "";
 
   const filledCount = [sb.winner, sb.finalist1, sb.finalist2, ...sb.semifinalists, ...sb.quarterfinalists,
     sb.topScorerPlayer, sb.topAssistsPlayer, sb.bestAttack, sb.prolificGroup, sb.driestGroup,
@@ -385,10 +398,13 @@ export default function SpecialBetsPage() {
           // falls back to "all teams" so users can fill bottom-up too. If a
           // downstream pick becomes invalid after editing upstream, a yellow
           // warning shows above the section.
+          const filledR16 = paddedR16.filter(Boolean);
           const filledQuarters = paddedQuarters.filter(Boolean);
           const filledSemis = paddedSemis.filter(Boolean);
           const filledFinalists = [sb.finalist1, sb.finalist2].filter(Boolean);
 
+          const qfOutOfR16 = filledR16.length === 16
+            && filledQuarters.some((q) => !filledR16.includes(q));
           const semisOutOfQf = filledQuarters.length === 8
             && filledSemis.some((s) => !filledQuarters.includes(s));
           const finalsOutOfSemis = filledSemis.length === 4
@@ -473,45 +489,38 @@ export default function SpecialBetsPage() {
                 )}
               </SectionCard>
 
-              <SectionCard title="עולות לרבע גמר" subtitle="8 נבחרות" points="4 נק׳ כ״א" warning={qfMismatch}>
+              <SectionCard
+                title="עולות לרבע גמר"
+                subtitle="8 נבחרות — חייבות להיות מתוך 16 העולות לשמינית"
+                points="4 נק׳ כ״א"
+                warning={qfOutOfR16 ? "⚠️ אחת מהעולות לרבע אינה בשמינית — תקנו את השמינית או את הרבע" : qfMismatch}
+              >
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {paddedQuarters.map((v, i) => (
                     <TeamSelect key={i} value={v} onChange={(val) => { const n = [...paddedQuarters]; n[i] = val; set("quarterfinalists", n); }}
-                      label={`רבע ${i+1}`} excludeCodes={paddedQuarters.filter((s, j) => j !== i && s)} />
+                      label={`רבע ${i+1}`} excludeCodes={paddedQuarters.filter((s, j) => j !== i && s)} allowedCodes={filledR16} />
                   ))}
                 </div>
+                {filledR16.length === 0 && (
+                  <p className="text-xs text-gray-400 mt-2">בחרו קודם את 16 העולות לשמינית כדי לראות אפשרויות מצומצמות.</p>
+                )}
               </SectionCard>
 
               <SectionCard
                 title="עולות לשמינית הגמר"
-                subtitle="16 הזוכות בשלב 32 — נגזר אוטומטית מעץ הסימולציה שלך"
+                subtitle="16 נבחרות — מתמלא אוטומטית מעץ הסימולציה, וניתן לשנות ידנית"
                 points="2 נק׳ כ״א"
+                warning={r16Mismatch}
               >
-                {(() => {
-                  const R32_KEYS = [
-                    "r32l_0","r32l_1","r32l_2","r32l_3","r32l_4","r32l_5","r32l_6","r32l_7",
-                    "r32r_0","r32r_1","r32r_2","r32r_3","r32r_4","r32r_5","r32r_6","r32r_7",
-                  ];
-                  const r16 = R32_KEYS.map((k) => knockout[k]?.winner).filter(Boolean) as string[];
-                  if (r16.length === 0) {
-                    return <p className="text-xs text-gray-400">בחרו מנצחות ב<Link href="/knockout" className="underline font-bold">עץ הסימולציה</Link> כדי לראות את ה-16 שעולות לשמינית.</p>;
-                  }
-                  return (
-                    <>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                        {r16.map((code, i) => (
-                          <div key={i} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 text-sm font-medium">
-                            <span className="text-lg">{getFlag(code)}</span>
-                            <span>{ALL_TEAMS.find((t) => t.code === code)?.name_he || code}</span>
-                          </div>
-                        ))}
-                      </div>
-                      <p className="text-xs text-gray-400 mt-2">
-                        נקבע אוטומטית לפי המנצחות שבחרת ב<Link href="/knockout" className="underline font-bold">עץ הסימולציה</Link> (שלב 32 → שמינית) — אין צורך לבחור כאן. {r16.length}/16 מולאו.
-                      </p>
-                    </>
-                  );
-                })()}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {paddedR16.map((v, i) => (
+                    <TeamSelect key={i} value={v} onChange={(val) => { const n = [...paddedR16]; n[i] = val; set("roundOf16", n); }}
+                      label={`שמינית ${i + 1}`} excludeCodes={paddedR16.filter((s, j) => j !== i && s)} />
+                  ))}
+                </div>
+                <p className="text-xs text-gray-400 mt-2">
+                  מתמלא לפי המנצחות שבחרת ב<Link href="/knockout" className="underline font-bold">עץ הסימולציה</Link> (32 → שמינית). אפשר לשנות ידנית — זה הימור עצמאי כמו שאר העולות.
+                </p>
               </SectionCard>
             </>
           );

@@ -39,6 +39,7 @@ export interface SpecialBetsState {
   finalist2: string;
   semifinalists: string[];
   quarterfinalists: string[];
+  roundOf16: string[];
   topScorerTeam: string;
   topScorerPlayer: string;
   topAssistsTeam: string;
@@ -141,6 +142,8 @@ const initialSpecialBets: SpecialBetsState = {
   finalist2: "",
   semifinalists: ["", "", "", ""],
   quarterfinalists: ["", "", "", "", "", "", "", ""],
+  roundOf16: ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
+
   topScorerTeam: "",
   topScorerPlayer: "",
   topAssistsTeam: "",
@@ -349,6 +352,7 @@ export const useBettingStore = create<BettingState & BettingActions>()(
                 ...sb,
                 semifinalists: pad(sb.semifinalists, 4),
                 quarterfinalists: pad(sb.quarterfinalists, 8),
+                roundOf16: pad(sb.roundOf16, 16),
                 matchups: pad(sb.matchups, 3),
               };
             } else {

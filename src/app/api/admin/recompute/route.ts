@@ -114,7 +114,7 @@ export async function POST() {
     supabase.from("profiles").select("id, display_name"),
     supabase.from("user_brackets").select("user_id, group_predictions, knockout_tree, knockout_tree_live, champion, locked_at").eq("league_id", leagueId),
     supabase.from("special_bets").select("user_id, top_scorer_player, top_assists_player, best_attack_team, most_prolific_group, driest_group, dirtiest_team, matchup_pick, penalties_over_under").eq("league_id", leagueId),
-    supabase.from("advancement_picks").select("user_id, group_qualifiers, advance_to_qf, advance_to_sf, advance_to_final, winner").eq("league_id", leagueId),
+    supabase.from("advancement_picks").select("*").eq("league_id", leagueId),
     getTournamentStats(),
     loadFinishedMatches(),
   ]);
@@ -152,6 +152,7 @@ export async function POST() {
     userId: r.user_id as string,
     displayName: nameById[r.user_id as string] || "",
     groupQualifiers: (r.group_qualifiers || {}) as Record<string, string[]>,
+    advanceToR16: (r.advance_to_r16 || []) as string[],
     advanceToQF: (r.advance_to_qf || []) as string[],
     advanceToSF: (r.advance_to_sf || []) as string[],
     advanceToFinal: (r.advance_to_final || []) as string[],

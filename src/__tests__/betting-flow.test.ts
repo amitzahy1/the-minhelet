@@ -122,6 +122,7 @@ describe("Full betting flow integration", () => {
         finalist2: "",
         semifinalists: ["", "", "", ""],
         quarterfinalists: ["", "", "", "", "", "", "", ""],
+        roundOf16: ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
         topScorerTeam: "",
         topScorerPlayer: "",
         topAssistsTeam: "",

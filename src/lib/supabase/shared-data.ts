@@ -45,6 +45,7 @@ export interface BettorAdvancement {
   userId: string;
   displayName: string;
   groupQualifiers: Record<string, string[]>;
+  advanceToR16: string[];
   advanceToQF: string[];
   advanceToSF: string[];
   advanceToFinal: string[];
@@ -189,7 +190,8 @@ export async function loadAllAdvancements(): Promise<BettorAdvancement[]> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("advancement_picks")
-    .select("user_id, group_qualifiers, advance_to_qf, advance_to_sf, advance_to_final, winner, profiles(display_name)")
+    // select("*") so a not-yet-migrated advance_to_r16 column can't break the query
+    .select("*, profiles(display_name)")
     .eq("league_id", await getLeagueId());
 
   if (error) {
@@ -204,6 +206,7 @@ export async function loadAllAdvancements(): Promise<BettorAdvancement[]> {
       userId: d.user_id,
       displayName: (d.profiles as unknown as { display_name: string })?.display_name || "",
       groupQualifiers: d.group_qualifiers || {},
+      advanceToR16: d.advance_to_r16 || [],
       advanceToQF: d.advance_to_qf || [],
       advanceToSF: d.advance_to_sf || [],
       advanceToFinal: d.advance_to_final || [],
@@ -357,6 +360,7 @@ export async function loadAllBetsViaServer(): Promise<{
         userId: d.user_id,
         displayName: ((d.profiles as { display_name: string } | null)?.display_name) || "",
         groupQualifiers: d.group_qualifiers || {},
+        advanceToR16: d.advance_to_r16 || [],
         advanceToQF: d.advance_to_qf || [],
         advanceToSF: d.advance_to_sf || [],
         advanceToFinal: d.advance_to_final || [],

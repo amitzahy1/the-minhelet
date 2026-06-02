@@ -142,7 +142,8 @@ export async function GET() {
       .eq("league_id", leagueId),
     supabase
       .from("advancement_picks")
-      .select("user_id, group_qualifiers, advance_to_qf, advance_to_sf, advance_to_final, winner, profiles(display_name)")
+      // select("*") so a not-yet-migrated advance_to_r16 column can't break the query
+      .select("*, profiles(display_name)")
       .eq("league_id", leagueId),
   ]);
 

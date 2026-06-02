@@ -7,10 +7,11 @@ function r16Slot(key: string, t1: string, t2: string): SlotState {
   return { key: key as SlotState["key"], team1: t1, team2: t2, score1: null, score2: null, winner: null, stage: "R16", isThirdPlace: false };
 }
 
-const emptyAdv: BettorAdvancement = {
+const baseAdv: BettorAdvancement = {
   userId: "u", displayName: "", groupQualifiers: {},
-  advanceToQF: [], advanceToSF: [], advanceToFinal: [], winner: "",
+  advanceToR16: [], advanceToQF: [], advanceToSF: [], advanceToFinal: [], winner: "",
 };
+const advWithR16 = (r16: string[]): BettorAdvancement => ({ ...baseAdv, advanceToR16: r16 });
 
 // A real bracket where BRA, GER, ESP, FRA reached the last 16.
 const slots: Record<string, SlotState> = {
@@ -21,24 +22,19 @@ const slots: Record<string, SlotState> = {
 describe("R16 advancement scoring (2 pts per correctly-predicted last-16 team)", () => {
   it("awards 2 per predicted team that actually reached R16, 0 for the rest", () => {
     // Predicted BRA, ESP (reached) + ARG (did not).
-    const b = scoreAdvancementForUser(emptyAdv, {}, new Set(), slots, null, ["BRA", "ESP", "ARG"]);
+    const b = scoreAdvancementForUser(advWithR16(["BRA", "ESP", "ARG"]), {}, new Set(), slots, null);
     expect(b.r16Pts).toBe(4); // BRA + ESP
     expect(b.total).toBe(4);
     expect(b.lines.filter((l) => l.reason === "ADVANCE_R16")).toHaveLength(2);
   });
 
-  it("does not double-count a duplicated prediction", () => {
-    const b = scoreAdvancementForUser(emptyAdv, {}, new Set(), slots, null, ["GER", "GER"]);
-    expect(b.r16Pts).toBe(2); // GER once
-  });
-
   it("is 0 when no predicted team reached R16", () => {
-    const b = scoreAdvancementForUser(emptyAdv, {}, new Set(), slots, null, ["ARG", "ENG"]);
+    const b = scoreAdvancementForUser(advWithR16(["ARG", "ENG"]), {}, new Set(), slots, null);
     expect(b.r16Pts).toBe(0);
   });
 
-  it("defaults to 0 R16 points when no predictedR16 is passed (back-compat)", () => {
-    const b = scoreAdvancementForUser(emptyAdv, {}, new Set(), slots, null);
+  it("is 0 R16 points when no R16 picks are stored", () => {
+    const b = scoreAdvancementForUser(baseAdv, {}, new Set(), slots, null);
     expect(b.r16Pts).toBe(0);
   });
 });

@@ -159,6 +159,7 @@ export interface AdvancementPicks {
   league_id: string;
   /** Per-group top-2 picks, stored as [1st, 2nd] team codes. e.g. { A: ["ARG", "MEX"] }. */
   group_qualifiers: Record<string, string[]>;
+  advance_to_r16: string[]; // 16 team codes
   advance_to_qf: string[]; // 8 team codes
   advance_to_sf: string[]; // 4 team codes
   advance_to_final: string[]; // 2 team codes

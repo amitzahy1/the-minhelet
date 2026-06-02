@@ -20,6 +20,8 @@ export interface AdvancementBets {
   finalist2: string;
   semifinalists: string[];
   quarterfinalists: string[];
+  /** The 16 teams reaching the round of 16 (= the R32-match winners). */
+  roundOf16: string[];
 }
 
 /** Each match key → the downstream match it feeds. */
@@ -81,6 +83,13 @@ export function clearTeamFromSpecialBets(
   const idx = STAGES.indexOf(fromStage);
   let cleared = 0;
 
+  // R32 change → team can't reach the round of 16.
+  if (idx <= 0) {
+    sb.roundOf16 = sb.roundOf16.map((s) => {
+      if (s === teamCode) { cleared++; return ""; }
+      return s;
+    });
+  }
   if (idx <= 1) {
     sb.quarterfinalists = sb.quarterfinalists.map((s) => {
       if (s === teamCode) { cleared++; return ""; }
@@ -107,6 +116,15 @@ export function syncAdvancementPicks(
   knockout: Record<string, KoMatch>,
   sb: AdvancementBets,
 ): void {
+  // Round of 16 = the 16 R32-match winners (left bracket then right).
+  const r16 = [
+    knockout.r32l_0?.winner, knockout.r32l_1?.winner, knockout.r32l_2?.winner, knockout.r32l_3?.winner,
+    knockout.r32l_4?.winner, knockout.r32l_5?.winner, knockout.r32l_6?.winner, knockout.r32l_7?.winner,
+    knockout.r32r_0?.winner, knockout.r32r_1?.winner, knockout.r32r_2?.winner, knockout.r32r_3?.winner,
+    knockout.r32r_4?.winner, knockout.r32r_5?.winner, knockout.r32r_6?.winner, knockout.r32r_7?.winner,
+  ];
+  sb.roundOf16 = sb.roundOf16.map((v, i) => r16[i] || v);
+
   const qf = [
     knockout.r16l_0?.winner, knockout.r16l_1?.winner,
     knockout.r16l_2?.winner, knockout.r16l_3?.winner,

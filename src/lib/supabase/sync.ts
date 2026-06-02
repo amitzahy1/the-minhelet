@@ -95,6 +95,7 @@ export async function saveBetsToSupabase(
   };
   const advancementPayload = {
     group_qualifiers: groupQualifiers,
+    advance_to_r16: state.specialBets.roundOf16.filter(Boolean),
     advance_to_qf: state.specialBets.quarterfinalists.filter(Boolean),
     advance_to_sf: state.specialBets.semifinalists.filter(Boolean),
     advance_to_final: [state.specialBets.finalist1, state.specialBets.finalist2].filter(Boolean),
@@ -227,6 +228,7 @@ export async function loadBetsFromSupabase(
         // the "עולות לחצי גמר" / "עולות לרבע גמר" cards appear empty.
         semifinalists: Array.from({ length: 4 }, (_, i) => advancement?.advance_to_sf?.[i] ?? ""),
         quarterfinalists: Array.from({ length: 8 }, (_, i) => advancement?.advance_to_qf?.[i] ?? ""),
+        roundOf16: Array.from({ length: 16 }, (_, i) => advancement?.advance_to_r16?.[i] ?? ""),
         topScorerTeam: special?.top_scorer_team || "",
         topScorerPlayer: special?.top_scorer_player || "",
         topAssistsTeam: special?.top_assists_team || "",

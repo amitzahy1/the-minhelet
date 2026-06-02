@@ -31,6 +31,7 @@ function buildGroups(scores: Record<string, [number, number][]>) {
 const emptyAdvancement = () => ({
   winner: "", finalist1: "", finalist2: "",
   semifinalists: ["", "", "", ""], quarterfinalists: ["", "", "", "", "", "", "", ""],
+  roundOf16: ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
 });
 
 describe("revalidateTree1", () => {

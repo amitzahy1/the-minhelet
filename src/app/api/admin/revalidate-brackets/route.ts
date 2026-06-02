@@ -28,6 +28,7 @@ function getAdminClient() {
 const EMPTY_ADVANCEMENT = {
   winner: "", finalist1: "", finalist2: "",
   semifinalists: ["", "", "", ""], quarterfinalists: ["", "", "", "", "", "", "", ""],
+  roundOf16: ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
 };
 
 export async function GET() {

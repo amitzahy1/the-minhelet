@@ -109,9 +109,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, changed: 0, message: "אין שינויים" });
   }
 
-  const { error } = await supabase
+  let { error } = await supabase
     .from("tournament_actuals")
     .upsert(updates, { onConflict: "tournament_id" });
+  // Resilience: if migration 025 (dirtiest_board column) hasn't run yet, don't
+  // break the whole save — persist everything else and skip the new column.
+  if (error && "dirtiest_board" in updates && /dirtiest_board/i.test(error.message)) {
+    delete updates.dirtiest_board;
+    ({ error } = await supabase
+      .from("tournament_actuals")
+      .upsert(updates, { onConflict: "tournament_id" }));
+  }
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   // Single aggregate audit entry for the tournament-level change (target_user_id

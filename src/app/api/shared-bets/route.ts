@@ -112,15 +112,24 @@ export async function GET() {
   // Use service role to bypass RLS
   const supabase = createServiceClient(url, serviceKey);
 
-  // Get the user's league
+  // Get the user's league. Most users have a league_members row (created on
+  // join). But some accounts (admin/test-created, or anyone whose join predated
+  // the membership insert) have none — without a fallback they'd get a 404 here
+  // and see NO standings/comparison post-lock. When membership is missing AND
+  // the deployment has exactly one league, fall back to it so nobody is locked
+  // out. (Backfill + the join flow keep this rare; this is the safety net.)
   const { data: membership } = await supabase
     .from("league_members")
     .select("league_id")
     .eq("user_id", user.id)
     .limit(1)
-    .single();
+    .maybeSingle();
 
-  const leagueId = membership?.league_id;
+  let leagueId = membership?.league_id as string | undefined;
+  if (!leagueId) {
+    const { data: leagues } = await supabase.from("leagues").select("id").limit(2);
+    if (leagues?.length === 1) leagueId = leagues[0].id;
+  }
   if (!leagueId) {
     return NextResponse.json({ error: "No league found" }, { status: 404 });
   }

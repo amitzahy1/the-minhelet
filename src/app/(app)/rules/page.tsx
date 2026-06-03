@@ -2,8 +2,16 @@
 
 import { PageTransition } from "@/components/shared/PageTransition";
 import { PENALTIES_LINE } from "@/lib/constants";
+import { useScoring } from "@/hooks/useScoring";
+import type { MatchStage } from "@/types";
 
 export default function RulesPage() {
+  // Live point values from scoring_config (falls back to the SCORING constant),
+  // so the rules page always shows exactly what the scorer awards and what the
+  // admin set — never a stale hardcoded number.
+  const scoring = useScoring();
+  const sp = scoring.specials;
+  const rm = scoring.relative_minimums;
   return (
     <PageTransition>
     <div className="max-w-3xl mx-auto px-4 py-6 pb-24">
@@ -38,17 +46,21 @@ export default function RulesPage() {
                 </tr>
               </thead>
               <tbody className="font-medium">
-                {[
-                  ["בתים", 2, 1, 3], ["שלב 32 הגדולות", 3, 1, 4], ["שמינית גמר", 3, 1, 4], ["רבע גמר", 3, 1, 4],
-                  ["חצי גמר", 3, 2, 5], ["משחק מקום 3", 3, 1, 4], ["גמר", 4, 2, 6],
-                ].map(([stage, toto, exact, total]) => (
-                  <tr key={stage as string} className="border-b border-gray-50">
+                {([
+                  ["בתים", "GROUP"], ["שלב 32 הגדולות", "R32"], ["שמינית גמר", "R16"], ["רבע גמר", "QF"],
+                  ["חצי גמר", "SF"], ["משחק מקום 3", "THIRD"], ["גמר", "FINAL"],
+                ] as [string, MatchStage][]).map(([stage, key]) => {
+                  const toto = scoring.toto[key];
+                  const exact = scoring.exact[key];
+                  return (
+                  <tr key={stage} className="border-b border-gray-50">
                     <td className="py-2.5 font-bold text-gray-800">{stage}</td>
                     <td className="py-2.5 text-center text-blue-600 font-bold">{toto}</td>
                     <td className="py-2.5 text-center text-green-600 font-bold">+{exact}</td>
-                    <td className="py-2.5 text-center font-black text-gray-900">{total}</td>
+                    <td className="py-2.5 text-center font-black text-gray-900">{toto + exact}</td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -69,14 +81,14 @@ export default function RulesPage() {
               </thead>
               <tbody className="font-medium">
                 {[
-                  ["עולה מהבית — מיקום מדויק", "5 נק׳"],
-                  ["עולה מהבית — לא מדויק (1↔2)", "3 נק׳"],
-                  ["עולה מהבית — עלתה ממקום שלישי", "2 נק׳"],
-                  ["עולה לשמינית הגמר (16 נבחרות)", "1 נק׳ כל אחת"],
-                  ["עולה לרבע גמר (8 נבחרות)", "3 נק׳ כל אחת"],
-                  ["עולה לחצי גמר (4 נבחרות)", "6 נק׳ כל אחת"],
-                  ["עולה לגמר (2 נבחרות)", "10 נק׳ כל אחת"],
-                  ["זוכה הטורניר", "16 נק׳"],
+                  ["עולה מהבית — מיקום מדויק", `${scoring.advancement.group_exact} נק׳`],
+                  ["עולה מהבית — לא מדויק (1↔2)", `${scoring.advancement.group_partial} נק׳`],
+                  ["עולה מהבית — עלתה ממקום שלישי", `${scoring.advancement.group_as_3rd} נק׳`],
+                  ["עולה לשמינית הגמר (16 נבחרות)", `${scoring.advancement.r16} נק׳ כל אחת`],
+                  ["עולה לרבע גמר (8 נבחרות)", `${scoring.advancement.qf} נק׳ כל אחת`],
+                  ["עולה לחצי גמר (4 נבחרות)", `${scoring.advancement.sf} נק׳ כל אחת`],
+                  ["עולה לגמר (2 נבחרות)", `${scoring.advancement.final} נק׳ כל אחת`],
+                  ["זוכה הטורניר", `${scoring.advancement.winner} נק׳`],
                 ].map(([bet, pts]) => (
                   <tr key={bet} className="border-b border-gray-50">
                     <td className="py-2.5 text-gray-800">{bet}</td>
@@ -104,14 +116,14 @@ export default function RulesPage() {
               </thead>
               <tbody className="font-medium">
                 {[
-                  ["מלך שערים", "12 / 7", "מוחלט: 12 · יחסי: 7 (מינימום 3 שערים)"],
-                  ["מלך בישולים", "9 / 5", "מוחלט: 9 · יחסי: 5 (מינימום 2 בישולים)"],
-                  ["התקפה טובה", "8", "הנבחרת עם הכי הרבה שערים בטורניר"],
-                  ["בית פורה", "6", "הכי הרבה שערים בשלב הבתים"],
-                  ["בית יבש", "6", "הכי מעט שערים בשלב הבתים"],
-                  ["כסחנית", "6", "צהוב=1, אדום=3 · צהוב שני באותו משחק = אדום אחד (פירוט למטה)"],
-                  ["מאצ׳אפ", "5 ×3", "5 נק׳ לכל דו-קרב (3 דו-קרבות = 15) · שערים + בישולים בכל הטורניר"],
-                  ["פנדלים", "6", `אובר/אנדר ${PENALTIES_LINE} · כולל הארכות, ללא דו-קרב פנדלים`],
+                  ["מלך שערים", `${sp.top_scorer_exact} / ${sp.top_scorer_relative}`, `מוחלט: ${sp.top_scorer_exact} · יחסי: ${sp.top_scorer_relative} (מינימום ${rm.top_scorer_goals} שערים)`],
+                  ["מלך בישולים", `${sp.top_assists_exact} / ${sp.top_assists_relative}`, `מוחלט: ${sp.top_assists_exact} · יחסי: ${sp.top_assists_relative} (מינימום ${rm.top_assists} בישולים)`],
+                  ["התקפה טובה", `${sp.best_attack}`, "הנבחרת עם הכי הרבה שערים בטורניר"],
+                  ["בית פורה", `${sp.prolific_group}`, "הכי הרבה שערים בשלב הבתים"],
+                  ["בית יבש", `${sp.driest_group}`, "הכי מעט שערים בשלב הבתים"],
+                  ["כסחנית", `${sp.dirtiest_team}`, "צהוב=1, אדום=3 · צהוב שני באותו משחק = אדום אחד (פירוט למטה)"],
+                  ["מאצ׳אפ", `${sp.matchup} ×3`, `${sp.matchup} נק׳ לכל דו-קרב (3 דו-קרבות = ${sp.matchup * 3}) · שערים + בישולים בכל הטורניר`],
+                  ["פנדלים", `${sp.penalties_over_under}`, `אובר/אנדר ${PENALTIES_LINE} · כולל הארכות, ללא דו-קרב פנדלים`],
                 ].map(([bet, pts, note]) => (
                   <tr key={bet} className="border-b border-gray-50">
                     <td className="py-2.5 font-bold text-gray-800">{bet}</td>

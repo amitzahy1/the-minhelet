@@ -17,6 +17,8 @@ import {
   type ScoringEntry,
 } from "@/lib/supabase/shared-data";
 import { isLocked } from "@/lib/constants";
+import { SCORING, type ScoringValues } from "@/types";
+import { fetchScoringValues } from "./useScoring";
 
 interface SharedData {
   profiles: BettorProfile[];
@@ -25,6 +27,8 @@ interface SharedData {
   advancements: BettorAdvancement[];
   predictions: MatchPrediction[];
   scoringLog: ScoringEntry[];
+  /** Live scoring point values (from scoring_config), for both scoring and display. */
+  scoring: ScoringValues;
   currentUserId: string | null;
   loading: boolean;
   error: string | null;
@@ -39,6 +43,7 @@ let cache: {
   advancements?: BettorAdvancement[];
   predictions?: MatchPrediction[];
   scoringLog?: ScoringEntry[];
+  scoring?: ScoringValues;
   currentUserId?: string | null;
   timestamp?: number;
 } = {};
@@ -63,6 +68,7 @@ export function useSharedData(): SharedData {
     advancements: cache.advancements || [],
     predictions: cache.predictions || [],
     scoringLog: cache.scoringLog || [],
+    scoring: cache.scoring || SCORING,
     currentUserId: cache.currentUserId || null,
     loading: !isCacheValid(),
     error: null,
@@ -77,6 +83,7 @@ export function useSharedData(): SharedData {
         advancements: cache.advancements || [],
         predictions: cache.predictions || [],
         scoringLog: cache.scoringLog || [],
+        scoring: cache.scoring || SCORING,
         currentUserId: cache.currentUserId || null,
         loading: false,
         error: null,
@@ -87,11 +94,12 @@ export function useSharedData(): SharedData {
     setData((prev) => ({ ...prev, loading: true, error: null }));
 
     try {
-      // Always load profiles, predictions, and scoring log via client
-      const [profiles, predictions, scoringLog] = await Promise.all([
+      // Always load profiles, predictions, scoring log, and scoring config via client
+      const [profiles, predictions, scoringLog, scoring] = await Promise.all([
         loadAllProfiles(),
         loadAllMatchPredictions(),
         loadScoringLog(),
+        fetchScoringValues(),
       ]);
 
       let brackets: BettorBracket[];
@@ -124,9 +132,9 @@ export function useSharedData(): SharedData {
         ]);
       }
 
-      cache = { profiles, brackets, specialBets, advancements, predictions, scoringLog, currentUserId, timestamp: Date.now() };
+      cache = { profiles, brackets, specialBets, advancements, predictions, scoringLog, scoring, currentUserId, timestamp: Date.now() };
 
-      setData({ profiles, brackets, specialBets, advancements, predictions, scoringLog, currentUserId, loading: false, error: null });
+      setData({ profiles, brackets, specialBets, advancements, predictions, scoringLog, scoring, currentUserId, loading: false, error: null });
     } catch (e) {
       console.error("Failed to load shared data:", e);
       setData((prev) => ({ ...prev, loading: false, error: String(e) }));

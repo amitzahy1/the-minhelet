@@ -23,6 +23,7 @@ import {
 import { normalizeGroupLetter, type FinishedMatch } from "@/lib/results-hits";
 import type { BettorBracket, BettorAdvancement, BettorSpecialBets } from "@/lib/supabase/shared-data";
 import type { TournamentActuals, PlayerStat } from "@/lib/scoring/special-bets-scorer";
+import { scoringFromConfig, SCORING_CONFIG_COLUMNS, type ScoringConfigRow } from "@/lib/scoring/config";
 import { getTournamentStats } from "@/lib/tournament-stats";
 
 function getAdminClient() {
@@ -110,15 +111,20 @@ export async function POST() {
   if (!leagueId) return NextResponse.json({ error: "No league found" }, { status: 500 });
 
   // Pull all data sources in parallel.
-  const [profilesRes, bracketsRes, specialRes, advRes, stats, finished] = await Promise.all([
+  const [profilesRes, bracketsRes, specialRes, advRes, scoringCfgRes, stats, finished] = await Promise.all([
     supabase.from("profiles").select("id, display_name"),
     supabase.from("user_brackets").select("user_id, group_predictions, knockout_tree, knockout_tree_live, champion, locked_at").eq("league_id", leagueId),
     supabase.from("special_bets").select("user_id, top_scorer_player, top_assists_player, best_attack_team, most_prolific_group, driest_group, dirtiest_team, matchup_pick, penalties_over_under").eq("league_id", leagueId),
     supabase.from("advancement_picks").select("*").eq("league_id", leagueId),
+    supabase.from("scoring_config").select(SCORING_CONFIG_COLUMNS).limit(1).maybeSingle(),
     getTournamentStats(),
     loadFinishedMatches(),
   ]);
   if (profilesRes.error) return NextResponse.json({ error: profilesRes.error.message }, { status: 500 });
+
+  // Resolve scoring point values from the admin-editable config (falls back to
+  // the built-in SCORING constant if the row/columns aren't present).
+  const scoring = scoringFromConfig(scoringCfgRes.data as Partial<ScoringConfigRow> | null);
 
   const nameById: Record<string, string> = {};
   for (const p of (profilesRes.data || []) as { id: string; display_name: string }[]) nameById[p.id] = p.display_name;
@@ -185,6 +191,7 @@ export async function POST() {
     specialBets,
     tournamentActuals,
     playerStats,
+    scoring,
   });
 
   // Persist each user's score as a snapshot.

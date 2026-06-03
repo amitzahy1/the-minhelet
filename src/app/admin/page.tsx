@@ -28,8 +28,8 @@ interface ScoringConfig {
   toto_qf: number; toto_sf: number; toto_third: number; toto_final: number;
   exact_group: number; exact_r32: number; exact_r16: number;
   exact_qf: number; exact_sf: number; exact_third: number; exact_final: number;
-  group_advance_exact: number; group_advance_partial: number;
-  advance_qf: number; advance_sf: number; advance_final: number; advance_winner: number;
+  group_advance_exact: number; group_advance_partial: number; group_advance_as_3rd: number;
+  advance_r16: number; advance_qf: number; advance_sf: number; advance_final: number; advance_winner: number;
   top_scorer_exact: number; top_scorer_relative: number;
   top_assists_exact: number; top_assists_relative: number;
   best_attack: number; prolific_group: number; driest_group: number;
@@ -152,9 +152,10 @@ export default function AdminPage() {
 
                 <ScoringSection title="ניקוד עולות מבעוד מועד" fields={[
                   ["group_advance_exact", "עולה מדויקת מבית"], ["group_advance_partial", "עולה לא מדויקת"],
+                  ["group_advance_as_3rd", "עולה ממקום שלישי"], ["advance_r16", "עולה לשמינית"],
                   ["advance_qf", "עולה לרבע"], ["advance_sf", "עולה לחצי"],
                   ["advance_final", "עולה לגמר"], ["advance_winner", "זוכה"],
-                ]} config={scoringConfig} onChange={setScoringConfig} cols={3} />
+                ]} config={scoringConfig} onChange={setScoringConfig} cols={4} />
 
                 <Card>
                   <CardHeader><CardTitle className="text-base">ניקוד הימורים מיוחדים</CardTitle></CardHeader>

@@ -12,7 +12,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { isLocked } from "@/lib/constants";
 import { GROUPS } from "@/lib/tournament/groups";
 import { TodayMatches } from "@/components/shared/TodayMatches";
-import { computeLiveScores, computeTodayScores, computePlayerHistories, KO_STAGE_MAX_PTS, GROUP_TOTO_PTS, GROUP_EXACT_BONUS_PTS } from "@/lib/scoring/live-scorer";
+import { computeLiveScores, computeTodayScores, computePlayerHistories, koStageMaxPts } from "@/lib/scoring/live-scorer";
 import { normalizeGroupLetter, type FinishedMatch, GROUP_MATCH_PAIRS } from "@/lib/results-hits";
 
 // Mock completion data — in production this comes from Supabase
@@ -288,7 +288,7 @@ export default function StandingsPage() {
   const [activeTab, setActiveTab] = useState<SortKey>("total");
   const currentUserId = useCurrentUser();
   // Load real data from Supabase (falls back to empty arrays if not configured)
-  const { profiles, scoringLog, brackets, specialBets, advancements } = useSharedData();
+  const { profiles, scoringLog, brackets, specialBets, advancements, scoring } = useSharedData();
 
   // Load finished matches for live scoring
   const [finishedMatches, setFinishedMatches] = useState<FinishedMatch[]>([]);
@@ -371,6 +371,7 @@ export default function StandingsPage() {
   // Max possible scores: for each user, how many more points can they earn?
   const maxPossibleScores = useMemo(() => {
     const finishedIds = new Set(finishedMatches.map((m) => m.id));
+    const koMax = koStageMaxPts(scoring);
     const out: Record<string, number> = {};
     for (const b of brackets) {
       let max = 0;
@@ -393,7 +394,7 @@ export default function StandingsPage() {
         if (pairIdx < 0) continue;
         const pred = b.groupPredictions?.[groupLetter]?.scores?.[pairIdx];
         if (pred && (pred.home !== null || pred.away !== null)) {
-          max += GROUP_TOTO_PTS + GROUP_EXACT_BONUS_PTS;
+          max += scoring.toto.GROUP + scoring.exact.GROUP;
         }
       }
       // Knockout matches the user has filled in (all are unplayed until live)
@@ -401,13 +402,13 @@ export default function StandingsPage() {
         for (const [key, match] of Object.entries(b.knockoutTree || {})) {
           if (!match || match.winner === null) continue;
           const prefix = key.replace(/_\d+$/, "");
-          max += KO_STAGE_MAX_PTS[prefix] ?? 4;
+          max += koMax[prefix] ?? 4;
         }
       }
       out[b.userId] = max;
     }
     return out;
-  }, [brackets, allMatches, finishedMatches]);
+  }, [brackets, allMatches, finishedMatches, scoring]);
 
   // Live-computed scores (from finished matches + brackets + advancement +
   // special-bet picks + tournament actuals). Replaces the empty scoring_log.

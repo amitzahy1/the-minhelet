@@ -18,7 +18,7 @@ import { getFlag, getTeamNameHe } from "@/lib/flags";
 import { MATCHUPS } from "@/lib/matchups";
 import { GROUPS } from "@/lib/tournament/groups";
 import { PENALTIES_LINE } from "@/lib/constants";
-import { SCORING } from "@/types";
+import { useScoring } from "@/hooks/useScoring";
 import { DEMO_BETTORS, DEMO_STATS } from "./special-tracker-demo";
 import type {
   TournamentStatsPayload,
@@ -332,6 +332,7 @@ export function SpecialTrackerView({
   // Dev-only design preview: ?demo=1 swaps in fake bettors + tournament stats
   // so the full card design renders before any real data exists. Ignored in
   // production so real users never see fake data.
+  const scoring = useScoring();
   const isDemo = useMemo(
     () =>
       typeof window !== "undefined" &&
@@ -478,7 +479,7 @@ export function SpecialTrackerView({
     const driestRanked = [...stats.groupStats].sort((a, b) => a.goals - b.goals)
       .map((g) => ({ key: g.letter, label: `בית ${g.letter}`, sub: groupTeams(g.letter), value: `${g.goals}` }));
 
-    const sp = SCORING.specials;
+    const sp = scoring.specials;
     type RankList = { key: string; label: ReactNode; sub?: ReactNode; value2?: ReactNode; value?: ReactNode }[];
     const ranked = (o: {
       title: string; points: string; nameHeader: string; valueHeader?: string; valueHeader2?: string;
@@ -555,7 +556,7 @@ export function SpecialTrackerView({
         decidedLabel: actuals?.penalties_over_under ? (actuals.penalties_over_under === "OVER" ? `מעל ${PENALTIES_LINE}` : `מתחת ${PENALTIES_LINE}`) : undefined,
       },
     ];
-  }, [stats, normalizedBettors, isDemo, fetchedAt]);
+  }, [stats, normalizedBettors, isDemo, fetchedAt, scoring]);
 
   // Before the first match kicks off there's nothing to track — don't surface
   // anyone's picks (the demo preview bypasses this).

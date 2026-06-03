@@ -8,9 +8,11 @@ import { GROUPS } from "@/lib/tournament/groups";
 import { MatchReactions, MOCK_REACTIONS } from "@/components/shared/MatchReactions";
 import WhosAlive from "@/components/shared/WhosAlive";
 import { useSharedData } from "@/hooks/useSharedData";
+import { useScoring } from "@/hooks/useScoring";
 import { isLocked } from "@/lib/constants";
 import { LiveGroupsAndBracket } from "@/components/shared/LiveGroupsAndBracket";
 import type { MatchPrediction, BettorBracket, BettorAdvancement } from "@/lib/supabase/shared-data";
+import type { MatchStage, ScoringValues } from "@/types";
 
 // Live page — shows matches from last 24h and next 12h
 // In production: real-time updates from API-Football via Supabase Realtime
@@ -358,17 +360,13 @@ function LiveTab({ predictions }: { predictions: MatchPrediction[] }) {
   );
 }
 
-// Scoring config per stage (from migration defaults)
-function getScoringConfig(stage: string): { toto: number; exact: number } {
-  switch (stage) {
-    case "GROUP": return { toto: 2, exact: 1 };
-    case "R32": case "R16": return { toto: 3, exact: 1 };
-    case "QF": return { toto: 3, exact: 1 };
-    case "SF": return { toto: 3, exact: 2 };
-    case "THIRD": return { toto: 3, exact: 1 };
-    case "FINAL": return { toto: 4, exact: 2 };
-    default: return { toto: 2, exact: 1 };
-  }
+// Scoring per stage, read from the live scoring config (admin-editable).
+function getScoringConfig(stage: string, scoring: ScoringValues): { toto: number; exact: number } {
+  const key = (stage === "GROUP_STAGE" ? "GROUP" : stage) as MatchStage;
+  return {
+    toto: scoring.toto[key] ?? scoring.toto.GROUP,
+    exact: scoring.exact[key] ?? scoring.exact.GROUP,
+  };
 }
 
 function ScoreStepper({ value, onChange, label }: { value: number; onChange: (v: number) => void; label: string }) {
@@ -387,6 +385,7 @@ function ScoreStepper({ value, onChange, label }: { value: number; onChange: (v:
 }
 
 function WhatIfTab({ brackets }: { brackets: BettorBracket[] }) {
+  const scoring = useScoring();
   const [selectedMatch, setSelectedMatch] = useState(MOCK_WHATIF_MATCHES[0]);
   const [homeGoals, setHomeGoals] = useState<number>(0);
   const [awayGoals, setAwayGoals] = useState<number>(0);
@@ -425,7 +424,7 @@ function WhatIfTab({ brackets }: { brackets: BettorBracket[] }) {
   }, [homeGoals, awayGoals]);
 
   const impact = useMemo(() => {
-    const { toto: totoPoints, exact: exactPoints } = getScoringConfig(selectedMatch.stage);
+    const { toto: totoPoints, exact: exactPoints } = getScoringConfig(selectedMatch.stage, scoring);
     const simDir = homeGoals > awayGoals ? "1" : awayGoals > homeGoals ? "2" : "X";
     const simWinner = homeGoals > awayGoals ? selectedMatch.home : awayGoals > homeGoals ? selectedMatch.away : null;
     const isKnockout = selectedMatch.stage !== "GROUP";

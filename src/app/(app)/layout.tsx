@@ -16,6 +16,7 @@ import { VersionWatcher } from "@/components/shared/VersionWatcher";
 import { NavProgressBar } from "@/components/shared/NavProgressBar";
 import { Suspense } from "react";
 import { useSharedData } from "@/hooks/useSharedData";
+import { useScoring } from "@/hooks/useScoring";
 import { useRealKnockoutStatus } from "@/hooks/useRealKnockoutStatus";
 import { formatLockDeadline, isLocked, PENALTIES_LINE } from "@/lib/constants";
 
@@ -53,6 +54,9 @@ const TRACKING_ITEMS = [
 function OnboardingWizard({ onDismiss, onStart }: { onDismiss: () => void; onStart: () => void }) {
   const [page, setPage] = useState(0);
   const isLast = page === 3;
+  const scoring = useScoring();
+  const adv = scoring.advancement;
+  const sp = scoring.specials;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
@@ -151,13 +155,13 @@ function OnboardingWizard({ onDismiss, onStart }: { onDismiss: () => void; onSta
                     <tbody>
                       <tr className="border-t border-gray-100">
                         <td className="py-1.5 ps-4 font-bold text-[13px]">בתים</td>
-                        <td className="text-center font-black text-green-600" style={{ fontFamily: "var(--font-inter)" }}>3</td>
-                        <td className="py-1.5 pe-4 text-center font-black text-blue-600" style={{ fontFamily: "var(--font-inter)" }}>2</td>
+                        <td className="text-center font-black text-green-600" style={{ fontFamily: "var(--font-inter)" }}>{scoring.toto.GROUP + scoring.exact.GROUP}</td>
+                        <td className="py-1.5 pe-4 text-center font-black text-blue-600" style={{ fontFamily: "var(--font-inter)" }}>{scoring.toto.GROUP}</td>
                       </tr>
                       <tr className="border-t border-gray-100">
                         <td className="py-1.5 ps-4 font-bold text-[13px]">נוקאאוט · עץ אמת</td>
-                        <td className="text-center font-black text-green-600" style={{ fontFamily: "var(--font-inter)" }}>3</td>
-                        <td className="py-1.5 pe-4 text-center font-black text-blue-600" style={{ fontFamily: "var(--font-inter)" }}>2</td>
+                        <td className="text-center font-black text-green-600" style={{ fontFamily: "var(--font-inter)" }}>{scoring.toto.R16 + scoring.exact.R16}</td>
+                        <td className="py-1.5 pe-4 text-center font-black text-blue-600" style={{ fontFamily: "var(--font-inter)" }}>{scoring.toto.R16}</td>
                       </tr>
                     </tbody>
                   </table>
@@ -169,12 +173,12 @@ function OnboardingWizard({ onDismiss, onStart }: { onDismiss: () => void; onSta
               <div>
                 <p className="text-xs font-bold text-gray-700 mb-1.5">ניקוד עולות וזוכה</p>
                 <div className="grid grid-cols-2 gap-1.5 text-[12px]">
-                  <div className="bg-purple-50 rounded-lg py-1.5 px-2.5 border border-purple-100 flex items-center justify-between"><span className="text-gray-700">אלוף הטורניר</span><span className="font-black text-purple-700" style={{ fontFamily: "var(--font-inter)" }}>16</span></div>
-                  <div className="bg-purple-50 rounded-lg py-1.5 px-2.5 border border-purple-100 flex items-center justify-between"><span className="text-gray-700">עולה לגמר</span><span className="font-black text-purple-700" style={{ fontFamily: "var(--font-inter)" }}>10</span></div>
-                  <div className="bg-purple-50 rounded-lg py-1.5 px-2.5 border border-purple-100 flex items-center justify-between"><span className="text-gray-700">עולה לחצי</span><span className="font-black text-purple-700" style={{ fontFamily: "var(--font-inter)" }}>6</span></div>
-                  <div className="bg-purple-50 rounded-lg py-1.5 px-2.5 border border-purple-100 flex items-center justify-between"><span className="text-gray-700">עולה לרבע</span><span className="font-black text-purple-700" style={{ fontFamily: "var(--font-inter)" }}>3</span></div>
-                  <div className="bg-purple-50 rounded-lg py-1.5 px-2.5 border border-purple-100 flex items-center justify-between"><span className="text-gray-700">עולה לשמינית</span><span className="font-black text-purple-700" style={{ fontFamily: "var(--font-inter)" }}>1</span></div>
-                  <div className="bg-purple-50 rounded-lg py-1.5 px-2.5 border border-purple-100 flex items-center justify-between col-span-2"><span className="text-gray-700">עולה מבית · מדויק / חלקי</span><span className="font-black text-purple-700" style={{ fontFamily: "var(--font-inter)" }}>5 / 3</span></div>
+                  <div className="bg-purple-50 rounded-lg py-1.5 px-2.5 border border-purple-100 flex items-center justify-between"><span className="text-gray-700">אלוף הטורניר</span><span className="font-black text-purple-700" style={{ fontFamily: "var(--font-inter)" }}>{adv.winner}</span></div>
+                  <div className="bg-purple-50 rounded-lg py-1.5 px-2.5 border border-purple-100 flex items-center justify-between"><span className="text-gray-700">עולה לגמר</span><span className="font-black text-purple-700" style={{ fontFamily: "var(--font-inter)" }}>{adv.final}</span></div>
+                  <div className="bg-purple-50 rounded-lg py-1.5 px-2.5 border border-purple-100 flex items-center justify-between"><span className="text-gray-700">עולה לחצי</span><span className="font-black text-purple-700" style={{ fontFamily: "var(--font-inter)" }}>{adv.sf}</span></div>
+                  <div className="bg-purple-50 rounded-lg py-1.5 px-2.5 border border-purple-100 flex items-center justify-between"><span className="text-gray-700">עולה לרבע</span><span className="font-black text-purple-700" style={{ fontFamily: "var(--font-inter)" }}>{adv.qf}</span></div>
+                  <div className="bg-purple-50 rounded-lg py-1.5 px-2.5 border border-purple-100 flex items-center justify-between"><span className="text-gray-700">עולה לשמינית</span><span className="font-black text-purple-700" style={{ fontFamily: "var(--font-inter)" }}>{adv.r16}</span></div>
+                  <div className="bg-purple-50 rounded-lg py-1.5 px-2.5 border border-purple-100 flex items-center justify-between col-span-2"><span className="text-gray-700">עולה מבית · מדויק / חלקי</span><span className="font-black text-purple-700" style={{ fontFamily: "var(--font-inter)" }}>{adv.group_exact} / {adv.group_partial}</span></div>
                 </div>
               </div>
 
@@ -182,13 +186,13 @@ function OnboardingWizard({ onDismiss, onStart }: { onDismiss: () => void; onSta
               <div>
                 <p className="text-xs font-bold text-gray-700 mb-1.5">ניקוד הימורים מיוחדים</p>
                 <div className="grid grid-cols-2 gap-1.5 text-[12px]">
-                  <div className="bg-amber-50 rounded-lg py-1.5 px-2.5 border border-amber-100 flex items-center justify-between"><span className="text-gray-700">מלך שערים</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>12</span></div>
-                  <div className="bg-amber-50 rounded-lg py-1.5 px-2.5 border border-amber-100 flex items-center justify-between"><span className="text-gray-700">מלך בישולים</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>9</span></div>
-                  <div className="bg-amber-50 rounded-lg py-1.5 px-2.5 border border-amber-100 flex items-center justify-between"><span className="text-gray-700">התקפה הכי טובה</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>8</span></div>
-                  <div className="bg-amber-50 rounded-lg py-1.5 px-2.5 border border-amber-100 flex items-center justify-between"><span className="text-gray-700">בית פורה / יבש</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>6</span></div>
-                  <div className="bg-amber-50 rounded-lg py-1.5 px-2.5 border border-amber-100 flex items-center justify-between"><span className="text-gray-700">נבחרת כסחנית</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>6</span></div>
-                  <div className="bg-amber-50 rounded-lg py-1.5 px-2.5 border border-amber-100 flex items-center justify-between"><span className="text-gray-700">מאצ׳אפ נכון</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>6</span></div>
-                  <div className="bg-amber-50 rounded-lg py-1.5 px-2.5 border border-amber-100 flex items-center justify-between col-span-2"><span className="text-gray-700">סה״כ פנדלים (אובר/אנדר {PENALTIES_LINE})</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>6</span></div>
+                  <div className="bg-amber-50 rounded-lg py-1.5 px-2.5 border border-amber-100 flex items-center justify-between"><span className="text-gray-700">מלך שערים</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>{sp.top_scorer_exact}</span></div>
+                  <div className="bg-amber-50 rounded-lg py-1.5 px-2.5 border border-amber-100 flex items-center justify-between"><span className="text-gray-700">מלך בישולים</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>{sp.top_assists_exact}</span></div>
+                  <div className="bg-amber-50 rounded-lg py-1.5 px-2.5 border border-amber-100 flex items-center justify-between"><span className="text-gray-700">התקפה הכי טובה</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>{sp.best_attack}</span></div>
+                  <div className="bg-amber-50 rounded-lg py-1.5 px-2.5 border border-amber-100 flex items-center justify-between"><span className="text-gray-700">בית פורה / יבש</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>{sp.prolific_group}</span></div>
+                  <div className="bg-amber-50 rounded-lg py-1.5 px-2.5 border border-amber-100 flex items-center justify-between"><span className="text-gray-700">נבחרת כסחנית</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>{sp.dirtiest_team}</span></div>
+                  <div className="bg-amber-50 rounded-lg py-1.5 px-2.5 border border-amber-100 flex items-center justify-between"><span className="text-gray-700">מאצ׳אפ נכון</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>{sp.matchup}</span></div>
+                  <div className="bg-amber-50 rounded-lg py-1.5 px-2.5 border border-amber-100 flex items-center justify-between col-span-2"><span className="text-gray-700">סה״כ פנדלים (אובר/אנדר {PENALTIES_LINE})</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>{sp.penalties_over_under}</span></div>
                 </div>
               </div>
               <p className="text-[11px] text-gray-500 text-center bg-gray-50 rounded-lg py-2 border border-gray-100">

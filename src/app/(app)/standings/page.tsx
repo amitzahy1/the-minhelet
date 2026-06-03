@@ -280,6 +280,7 @@ interface MatchApi {
   awayGoals?: number | null;
   homePenalties?: number | null;
   awayPenalties?: number | null;
+  winner?: "HOME_TEAM" | "AWAY_TEAM" | "DRAW" | null;
 }
 
 export default function StandingsPage() {
@@ -328,6 +329,7 @@ export default function StandingsPage() {
             awayGoals: m.awayGoals as number,
             homePenalties: m.homePenalties ?? null,
             awayPenalties: m.awayPenalties ?? null,
+            winner: m.winner ?? null,
           }));
         setFinishedMatches(finished);
 

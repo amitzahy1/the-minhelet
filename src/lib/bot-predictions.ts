@@ -1,14 +1,25 @@
 // ============================================================================
-// WC2026 — Bot prediction engine (rule-based)
-// Generates a full set of predictions based on FIFA rankings of each team.
-// Used by /api/admin/bot to create a deterministic "Bot" bettor.
+// WC2026 — Bot prediction engine (rule-based, MODERATE surprises)
+//
+// Generates a full set of predictions seeded by FIFA rankings, but deliberately
+// NOT pure chalk: it plants plausible, bounded upsets so the bot looks like a
+// real (slightly contrarian) bettor rather than a ranking table.
+//
+//   • Champion = a TOP 5–8 team (a credible dark horse, never the #1 favourite),
+//     driven to win it all.
+//   • Groups: ≤1 upset per group, and ONLY between closely-ranked teams.
+//   • Knockout: favourites usually advance, but a few close early-round ties flip.
+//   • Scores: close games often draw or end 1-0; lopsided games stay lopsided.
+//
+// Fully DETERMINISTIC — every "random" choice comes from a string hash (no
+// Math.random), so regenerating the bot yields the identical bracket and the
+// rationale stays truthful.
 // ============================================================================
 
 import { GROUPS, GROUP_LETTERS, ALL_TEAMS, getTeamByCode } from "./tournament/groups";
 import {
   R32_MATCHUPS,
   LATER_FEEDERS,
-  ALL_KO_KEYS,
   resolveGroupSlot,
 } from "./tournament/knockout-derivation";
 import { joinMatchupPicks } from "./matchups";
@@ -19,7 +30,6 @@ export interface BotPrediction {
   knockout_tree: Record<string, { score1: number; score2: number; winner: string }>;
   third_place_qualifiers: string[];
   champion: string;
-  // Advancement (derived from knockout_tree)
   advancement: {
     group_qualifiers: Record<string, string[]>;
     advance_to_qf: string[];
@@ -27,7 +37,6 @@ export interface BotPrediction {
     advance_to_final: string[];
     winner: string;
   };
-  // Special bets (rule-based picks with rationale)
   special: {
     top_scorer_player: string;
     top_scorer_team: string;
@@ -40,39 +49,49 @@ export interface BotPrediction {
     matchup_pick: string;
     penalties_over_under: string;
   };
-  // Explanation of each pick (for display)
   rationale: string[];
 }
 
 // Group match pair order (same as the store)
 const GROUP_MATCH_PAIRS: Array<[number, number]> = [
-  [0, 1],
-  [2, 3],
-  [0, 2],
-  [1, 3],
-  [0, 3],
-  [1, 2],
+  [0, 1], [2, 3], [0, 2], [1, 3], [0, 3], [1, 2],
 ];
 
-/** Predict a single match score based on FIFA rank differential. */
-function predictMatchScore(rank1: number, rank2: number): { home: number; away: number } {
-  const diff = Math.abs(rank1 - rank2);
-  let strong = 2;
-  let weak = 1;
-  if (diff > 40) { strong = 3; weak = 0; }
-  else if (diff > 20) { strong = 2; weak = 0; }
-  else if (diff > 8)  { strong = 2; weak = 1; }
-  else                { strong = 1; weak = 1; }
-  if (rank1 < rank2) return { home: strong, away: weak };
-  if (rank2 < rank1) return { home: weak, away: strong };
-  return { home: 1, away: 1 };
+/** Deterministic [0,1) from a string seed (FNV-1a). No Math.random → the bot is
+ *  reproducible: same inputs → same bracket every regenerate. */
+function rand(seed: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < seed.length; i++) {
+    h ^= seed.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return (h >>> 0) / 4294967296;
 }
 
-function higherRanked(code1: string, code2: string): string {
-  const r1 = getTeamByCode(code1)?.fifa_ranking ?? 999;
-  const r2 = getTeamByCode(code2)?.fifa_ranking ?? 999;
-  return r1 <= r2 ? code1 : code2;
+/**
+ * MODERATE score model: favourite (lower FIFA rank) usually wins; close games
+ * (small rank gap) sometimes draw or flip to the underdog. Goals are oriented to
+ * (rank1 = home, rank2 = away). `key` makes the pick deterministic per match.
+ */
+function predictMatchScore(rank1: number, rank2: number, key: string): { home: number; away: number } {
+  const diff = Math.abs(rank1 - rank2);
+  const favHome = rank1 <= rank2;
+  const r = rand("sc:" + key);
+  const orient = (fav: number, dog: number) => (favHome ? { home: fav, away: dog } : { home: dog, away: fav });
+  if (diff > 30) return orient(3, r < 0.5 ? 0 : 1);
+  if (diff > 15) return orient(2, r < 0.6 ? 0 : 1);
+  if (diff > 6) {
+    if (r < 0.18) return { home: 1, away: 1 };  // draw
+    if (r < 0.32) return orient(1, 2);          // mild upset — underdog wins 2-1
+    return orient(2, 1);
+  }
+  // very close
+  if (r < 0.34) return { home: 1, away: 1 };    // draw
+  if (r < 0.62) return orient(1, 0);            // favourite edges it
+  return orient(0, 1);                          // upset — underdog 1-0
 }
+
+const rankOf = (code: string): number => getTeamByCode(code)?.fifa_ranking ?? 999;
 
 /** Players in each matchup and their team code — used to pick matchup winners. */
 const MATCHUP_PLAYERS = [
@@ -106,72 +125,119 @@ function teamFinalRound(
   code: string,
   knockout: Record<string, { winner: string }>
 ): { round: number; label: string } {
-  // champion? reached final & won
   if (knockout["final"]?.winner === code) return { round: 6, label: "אלוף" };
-  // made the final (lost in final)
   if (knockout["sfl_0"]?.winner === code || knockout["sfr_0"]?.winner === code) {
     return { round: 5, label: "גמר" };
   }
-  // made semi
   for (const k of ["qfl_0", "qfl_1", "qfr_0", "qfr_1"]) {
     if (knockout[k]?.winner === code) return { round: 4, label: "חצי גמר" };
   }
-  // made QF
   for (const k of ["r16l_0", "r16l_1", "r16l_2", "r16l_3", "r16r_0", "r16r_1", "r16r_2", "r16r_3"]) {
     if (knockout[k]?.winner === code) return { round: 3, label: "רבע גמר" };
   }
-  // made R16
   for (const k of Object.keys(R32_MATCHUPS)) {
     if (knockout[k]?.winner === code) return { round: 2, label: "שמינית גמר" };
   }
   return { round: 1, label: "בתים" };
 }
 
-/** Generate a complete bot prediction using team rankings. */
+const koStage = (key: string): "R32" | "R16" | "QF" | "SF" | "FINAL" => {
+  if (key.startsWith("r32")) return "R32";
+  if (key.startsWith("r16")) return "R16";
+  if (key.startsWith("qf")) return "QF";
+  if (key.startsWith("sf")) return "SF";
+  return "FINAL";
+};
+
+/** Generate a complete bot prediction with moderate, deterministic surprises. */
 export function generateBotPrediction(): BotPrediction {
   const rationale: string[] = [];
+
+  // Pick a credible dark-horse champion: the 5th–8th best team in the field
+  // (deterministic). The bot then drives this team to win the whole thing — a
+  // surprising-but-plausible winner, never the outright #1, never an absurd one.
+  const fieldByRank = [...ALL_TEAMS].sort((a, b) => a.fifa_ranking - b.fifa_ranking);
+  const championTarget = fieldByRank[4 + Math.floor(rand("champ") * 4)].code;
+  const championTeam0 = getTeamByCode(championTarget);
+  rationale.push(
+    `אלוף (הפתעה): ${championTeam0?.name_he ?? championTarget} (#${championTeam0?.fifa_ranking ?? "?"}) — לא הפייבוריטית מספר 1, אלא סוס שחור מהצמרת (מקום 5–8 בדירוג) שהבוט מוביל עד הזכייה.`
+  );
 
   // ---------- Groups ----------
   const groupPredictions: BotPrediction["group_predictions"] = {};
   for (const letter of GROUP_LETTERS) {
     const teams = GROUPS[letter];
-    // Order by FIFA rank (lower = better). order[0] is predicted 1st.
-    const sortedIdxs = teams
+    const byRank = teams
       .map((t, i) => ({ idx: i, rank: t.fifa_ranking }))
       .sort((a, b) => a.rank - b.rank)
       .map((x) => x.idx);
 
-    const scores = GROUP_MATCH_PAIRS.map(([i, j]) => {
-      const r1 = teams[i].fifa_ranking;
-      const r2 = teams[j].fifa_ranking;
-      return predictMatchScore(r1, r2);
-    });
+    let order = [...byRank];
+    const champIdx = teams.findIndex((t) => t.code === championTarget);
+    if (champIdx >= 0) {
+      // The champion-to-be wins its group.
+      order = [champIdx, ...byRank.filter((i) => i !== champIdx)];
+    } else {
+      const gap12 = teams[order[1]].fifa_ranking - teams[order[0]].fifa_ranking;
+      const gap23 = teams[order[2]].fifa_ranking - teams[order[1]].fifa_ranking;
+      if (gap12 <= 8 && rand("gw:" + letter) < 0.3) {
+        [order[0], order[1]] = [order[1], order[0]]; // runner-up wins the group
+      } else if (gap23 <= 9 && rand("g2:" + letter) < 0.55) {
+        [order[1], order[2]] = [order[2], order[1]]; // underdog grabs 2nd
+      }
+    }
 
-    groupPredictions[letter] = { order: sortedIdxs, scores };
+    const scores = GROUP_MATCH_PAIRS.map(([i, j]) =>
+      predictMatchScore(teams[i].fifa_ranking, teams[j].fifa_ranking, `${letter}:${i}:${j}`),
+    );
+    groupPredictions[letter] = { order, scores };
 
-    const top = teams[sortedIdxs[0]];
-    const second = teams[sortedIdxs[1]];
+    const top = teams[order[0]];
+    const second = teams[order[1]];
+    const upset = order[0] !== byRank[0] || order[1] !== byRank[1];
     rationale.push(
-      `בית ${letter}: ${top.name_he} (#${top.fifa_ranking}) עולה ראשון, ${second.name_he} (#${second.fifa_ranking}) שני — בהתאם לדירוג FIFA.`
+      `בית ${letter}: ${top.name_he} (#${top.fifa_ranking}) ראשון, ${second.name_he} (#${second.fifa_ranking}) שני${upset ? " — הפתעה קטנה: עקפו את הדירוג כי הפער קטן." : "."}`,
     );
   }
 
   // ---------- Knockout ----------
   const knockout: BotPrediction["knockout_tree"] = {};
+  let upsetBudget = 3; // bounded early-round dark-horse upsets
 
-  // R32: resolve each slot from group predictions
+  function koDecide(t1: string, t2: string, key: string): string {
+    if (t1 === championTarget) return t1;
+    if (t2 === championTarget) return t2;
+    const fav = rankOf(t1) <= rankOf(t2) ? t1 : t2;
+    const dog = fav === t1 ? t2 : t1;
+    const gap = Math.abs(rankOf(t1) - rankOf(t2));
+    const stage = koStage(key);
+    const early = stage === "R32" || stage === "R16";
+    if (early && upsetBudget > 0 && gap <= 10 && rand("ko:" + key) < 0.4) {
+      upsetBudget--;
+      return dog;
+    }
+    return fav;
+  }
+
+  function koScore(t1: string, winner: string, key: string): { score1: number; score2: number } {
+    // Cosmetic winner-consistent scoreline (Tree-1 simulation scores earn 0 pts;
+    // only the winner feeds advancement).
+    const margin = rand("kom:" + key) < 0.5 ? 1 : 2;
+    const loser = rand("kol:" + key) < 0.45 ? 1 : 0;
+    const wg = loser + margin;
+    return winner === t1 ? { score1: wg, score2: loser } : { score1: loser, score2: wg };
+  }
+
+  // R32: resolve each slot from group predictions, then decide the winner.
   for (const [key, { h, a }] of Object.entries(R32_MATCHUPS)) {
     const t1 = resolveGroupSlot(h, groupPredictions);
     const t2 = resolveGroupSlot(a, groupPredictions);
     if (!t1 || !t2) continue;
-    const r1 = getTeamByCode(t1)?.fifa_ranking ?? 999;
-    const r2 = getTeamByCode(t2)?.fifa_ranking ?? 999;
-    const score = predictMatchScore(r1, r2);
-    const winner = r1 <= r2 ? t1 : t2;
-    knockout[key] = { score1: score.home, score2: score.away, winner };
+    const winner = koDecide(t1, t2, key);
+    knockout[key] = { ...koScore(t1, winner, key), winner };
   }
 
-  // Later rounds: cascade winners
+  // Later rounds: cascade winners.
   const laterOrder = ["r16l_0", "r16l_1", "r16l_2", "r16l_3", "r16r_0", "r16r_1", "r16r_2", "r16r_3",
                       "qfl_0", "qfl_1", "qfr_0", "qfr_1",
                       "sfl_0", "sfr_0", "final"];
@@ -180,20 +246,14 @@ export function generateBotPrediction(): BotPrediction {
     const t1 = knockout[f1]?.winner;
     const t2 = knockout[f2]?.winner;
     if (!t1 || !t2) continue;
-    const r1 = getTeamByCode(t1)?.fifa_ranking ?? 999;
-    const r2 = getTeamByCode(t2)?.fifa_ranking ?? 999;
-    const score = predictMatchScore(r1, r2);
-    const winner = r1 <= r2 ? t1 : t2;
-    knockout[key] = { score1: score.home, score2: score.away, winner };
+    const winner = koDecide(t1, t2, key);
+    knockout[key] = { ...koScore(t1, winner, key), winner };
   }
 
-  const champion = knockout["final"]?.winner ?? "FRA";
+  const champion = knockout["final"]?.winner ?? championTarget;
   const championTeam = getTeamByCode(champion);
-  rationale.push(
-    `אלוף: ${championTeam?.name_he ?? champion} (#${championTeam?.fifa_ranking ?? "?"}) — הנבחרת הכי גבוהה בדירוג שהגיעה לגמר בסימולציה.`
-  );
 
-  // Third place qualifiers (take the 3rd of each of the 8 "best" groups by avg rank)
+  // Third place qualifiers (3rd of the 8 best-avg-rank groups).
   const groupsRanked = GROUP_LETTERS
     .map((l) => {
       const teams = GROUPS[l];
@@ -218,10 +278,9 @@ export function generateBotPrediction(): BotPrediction {
   }
 
   // ---------- Special bets ----------
-  // Pick top scorer / top assists by combining:
-  //   (a) how far their team actually reaches in OUR predicted bracket
-  //   (b) their known reputation score
-  // A forward on a team that exits in R32 has less upside than one whose team goes to the final.
+  // Top scorer / assists: combine how far the player's team reaches with star
+  // reputation, then pick the SECOND-best candidate (a less-obvious, still
+  // credible shout — a real bettor doesn't always take the chalk striker).
   const scorerCandidates = Object.entries(TEAM_STAR).map(([code, star]) => {
     const depth = teamFinalRound(code, knockout);
     return { code, player: star.scorer, rep: star.scorerRep, depth: depth.round, depthLabel: depth.label };
@@ -232,46 +291,34 @@ export function generateBotPrediction(): BotPrediction {
     return { code, player: star.assists, rep: star.assistsRep, depth: depth.round, depthLabel: depth.label };
   }).sort((a, b) => (b.depth * 30 + b.rep) - (a.depth * 30 + a.rep));
 
-  const topPick = scorerCandidates[0];
+  const topPick = scorerCandidates[1] ?? scorerCandidates[0];
   const topScorer = topPick.player;
   const topScorerTeam = topPick.code;
 
-  // Different player for assists (avoid same player for both)
-  const assistsPick = assistsCandidates.find((a) => a.player !== topPick.player) || assistsCandidates[0];
+  const assistsPick = assistsCandidates.find((a) => a.player !== topPick.player && a.code !== topPick.code)
+    ?? assistsCandidates[1] ?? assistsCandidates[0];
   const topAssists = assistsPick.player;
   const topAssistsTeam = assistsPick.code;
 
   rationale.push(
-    `מלך שערים: ${topScorer} (${topScorerTeam}) — ${getTeamByCode(topPick.code)?.name_he} מגיעה עד ${topPick.depthLabel} בסימולציה, ודירוג הכוכבים שלו ${topPick.rep}/100.`
+    `מלך שערים: ${topScorer} (${topScorerTeam}) — בחירה לא טריוויאלית: ${getTeamByCode(topPick.code)?.name_he} מגיעה עד ${topPick.depthLabel}, דירוג כוכב ${topPick.rep}/100.`,
   );
   rationale.push(
-    `מלך בישולים: ${topAssists} (${topAssistsTeam}) — ${getTeamByCode(assistsPick.code)?.name_he} מגיעה עד ${assistsPick.depthLabel}, ודירוג היצירתיות שלו ${assistsPick.rep}/100.`
+    `מלך בישולים: ${topAssists} (${topAssistsTeam}) — ${getTeamByCode(assistsPick.code)?.name_he} עד ${assistsPick.depthLabel}, יצירתיות ${assistsPick.rep}/100.`,
   );
 
-  // Best attack = champion (plays the most games + scores the most)
+  // Best attack = the dark-horse champion (most games + the run that surprised).
   const bestAttackTeam = champion;
-  rationale.push(
-    `התקפה הטובה: ${championTeam?.name_he} — 7 משחקים בדרך לאליפות = הכי הרבה הזדמנויות לשערים.`
-  );
+  rationale.push(`התקפה הטובה: ${championTeam?.name_he} — הריצה עד האליפות = הכי הרבה שערים בדרך.`);
 
-  // Most prolific group = group with best avg rank (more balanced strong teams = open matches)
   const mostProlificGroup = groupsRanked[0].letter;
-  // Driest group = group with worst avg rank (weaker teams = less goals)
   const driestGroup = groupsRanked[groupsRanked.length - 1].letter;
-  rationale.push(
-    `בית פורה: ${mostProlificGroup} — ממוצע דירוג ${groupsRanked[0].avg.toFixed(0)}, נבחרות איכותיות → יותר שערים.`
-  );
-  rationale.push(
-    `בית יבש: ${driestGroup} — ממוצע דירוג ${groupsRanked[groupsRanked.length - 1].avg.toFixed(0)}, נבחרות חלשות → מעט שערים, משחקים זהירים.`
-  );
+  rationale.push(`בית פורה: ${mostProlificGroup} (ממוצע דירוג ${groupsRanked[0].avg.toFixed(0)}); בית יבש: ${driestGroup} (${groupsRanked[groupsRanked.length - 1].avg.toFixed(0)}).`);
 
-  // Dirtiest team: historical data says South American sides (Uruguay, Argentina) lead in cards
   const dirtiest = "URU";
-  rationale.push(
-    `כסחנית: אורוגוואי — במונדיאל 2022 הייתה בין המובילות בכרטיסים, ובנבחרת יש שחקנים פיזיים (Giménez, Gómez).`
-  );
+  rationale.push(`כסחנית: אורוגוואי — נבחרת פיזית, מהמובילות בכרטיסים במונדיאל 2022.`);
 
-  // Matchups — decide based on each player's team's predicted depth
+  // Matchups — decide by each player's team's predicted depth.
   const matchupLogic = MATCHUP_PLAYERS.map((mu) => {
     const d1 = teamFinalRound(mu.team1, knockout);
     const d2 = teamFinalRound(mu.team2, knockout);
@@ -279,19 +326,18 @@ export function generateBotPrediction(): BotPrediction {
     let note: string;
     if (mu.team1 === mu.team2) {
       pick = "X";
-      note = `שניהם מ${getTeamByCode(mu.team1)?.name_he} — משחקים באותם משחקים, סביר לתיקו.`;
+      note = `שניהם מ${getTeamByCode(mu.team1)?.name_he} — סביר לתיקו.`;
     } else if (d1.round > d2.round) {
       pick = "1";
-      note = `${mu.p1} → ${d1.label}, ${mu.p2} → ${d2.label}. ${mu.p1} מקבל יותר משחקים.`;
+      note = `${mu.p1} → ${d1.label}, ${mu.p2} → ${d2.label}.`;
     } else if (d2.round > d1.round) {
       pick = "2";
-      note = `${mu.p2} → ${d2.label}, ${mu.p1} → ${d1.label}. ${mu.p2} מקבל יותר משחקים.`;
+      note = `${mu.p2} → ${d2.label}, ${mu.p1} → ${d1.label}.`;
     } else {
-      // Same depth — decide by player rep
       const rep1 = TEAM_STAR[mu.team1]?.scorerRep ?? 70;
       const rep2 = TEAM_STAR[mu.team2]?.scorerRep ?? 70;
       pick = rep1 >= rep2 ? "1" : "2";
-      note = `שתי הנבחרות מגיעות ל${d1.label}. ${pick === "1" ? mu.p1 : mu.p2} עם דירוג כוכב גבוה יותר (${pick === "1" ? rep1 : rep2} vs ${pick === "1" ? rep2 : rep1}).`;
+      note = `שתיהן ל${d1.label}; הוכרע לפי דירוג כוכב.`;
     }
     return { pick, note };
   });
@@ -299,11 +345,8 @@ export function generateBotPrediction(): BotPrediction {
   rationale.push("מאצ׳אפים:");
   matchupLogic.forEach((m, i) => rationale.push(`  ${i + 1}. ${m.note} → ${m.pick}`));
 
-  // Penalties over/under — champion runs typically accumulate many penalty kicks
   const penalties = "OVER";
-  rationale.push(
-    `פנדלים: מעל ${PENALTIES_LINE} — 104 משחקים זה הרבה, ובשלבי הנוקאאוט יש הרבה פנדלים (כולל הארכות, ללא דו-קרב פנדלים).`
-  );
+  rationale.push(`פנדלים: מעל ${PENALTIES_LINE} — 104 משחקים + שלבי נוקאאוט = הרבה פנדלים (כולל הארכות, ללא דו-קרב פנדלים).`);
 
   return {
     group_predictions: groupPredictions,

@@ -21,6 +21,7 @@ import {
   type PlayerScore,
 } from "@/lib/scoring/live-scorer";
 import { normalizeGroupLetter, type FinishedMatch } from "@/lib/results-hits";
+import { toAppCode } from "@/lib/fd-team-mapping";
 import type { BettorBracket, BettorAdvancement, BettorSpecialBets } from "@/lib/supabase/shared-data";
 import type { TournamentActuals, PlayerStat } from "@/lib/scoring/special-bets-scorer";
 import { scoringFromConfig, SCORING_CONFIG_COLUMNS, type ScoringConfigRow } from "@/lib/scoring/config";
@@ -41,7 +42,12 @@ interface FdMatch {
   group?: string;
   stage?: string;
   status?: string;
-  score?: { fullTime?: { home?: number; away?: number } };
+  score?: {
+    winner?: "HOME_TEAM" | "AWAY_TEAM" | "DRAW" | null;
+    fullTime?: { home?: number; away?: number };
+    regularTime?: { home?: number; away?: number };
+    penalties?: { home?: number; away?: number };
+  };
 }
 
 async function loadFinishedMatches(): Promise<FinishedMatch[]> {
@@ -69,6 +75,8 @@ async function loadFinishedMatches(): Promise<FinishedMatch[]> {
     away_team: string | null;
     home_goals: number | null;
     away_goals: number | null;
+    home_penalties?: number | null;
+    away_penalties?: number | null;
     status?: string;
     scheduled_at?: string | null;
   };
@@ -81,18 +89,24 @@ async function loadFinishedMatches(): Promise<FinishedMatch[]> {
     const demo = demoById.get(String(m.id));
     const status = demo?.status ?? m.status;
     if (status !== "FINISHED") continue;
-    const homeGoals = demo?.home_goals ?? m.score?.fullTime?.home;
-    const awayGoals = demo?.away_goals ?? m.score?.fullTime?.away;
+    // 90-minute score (regulation): prefer regularTime, else fullTime. Never raw
+    // fullTime alone — it aggregates the shootout for penalty matches.
+    const homeGoals = demo?.home_goals ?? m.score?.regularTime?.home ?? m.score?.fullTime?.home;
+    const awayGoals = demo?.away_goals ?? m.score?.regularTime?.away ?? m.score?.fullTime?.away;
     if (homeGoals == null || awayGoals == null) continue;
     finished.push({
       id: m.id,
+      // Normalise FD TLAs (URY→URU, CUW→CUR) so Uruguay/Curaçao match GROUPS.
+      homeTla: m.homeTeam?.tla ? toAppCode(m.homeTeam.tla) : (demo?.home_team || "").toUpperCase(),
+      awayTla: m.awayTeam?.tla ? toAppCode(m.awayTeam.tla) : (demo?.away_team || "").toUpperCase(),
       date: m.utcDate,
-      homeTla: (m.homeTeam?.tla || demo?.home_team || "").toUpperCase(),
-      awayTla: (m.awayTeam?.tla || demo?.away_team || "").toUpperCase(),
       group: normalizeGroupLetter(m.group),
       stage: m.stage || "GROUP_STAGE",
       homeGoals,
       awayGoals,
+      homePenalties: demo?.home_penalties ?? m.score?.penalties?.home ?? null,
+      awayPenalties: demo?.away_penalties ?? m.score?.penalties?.away ?? null,
+      winner: m.score?.winner ?? null,
     });
   }
   return finished;

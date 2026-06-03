@@ -9,10 +9,13 @@ import { syncMatchResults } from "@/lib/api-football-data";
  * pages and the scoring engine can read them.
  */
 
+// football-data WC2026 stage labels (verified live): GROUP_STAGE, LAST_32 (the
+// 48-team Round of 32), LAST_16 (Round of 16), QUARTER_FINALS, SEMI_FINALS,
+// THIRD_PLACE, FINAL. Map to our internal codes. Unknown stages pass through.
 const STAGE_MAP: Record<string, string> = {
   GROUP_STAGE: "GROUP",
-  LAST_16: "R32",
-  ROUND_OF_16: "R16",
+  LAST_32: "R32",
+  LAST_16: "R16",
   QUARTER_FINALS: "QF",
   SEMI_FINALS: "SF",
   THIRD_PLACE: "THIRD",
@@ -66,6 +69,11 @@ export async function GET() {
         away_team: m.awayTeam,
         home_goals: m.homeGoals,
         away_goals: m.awayGoals,
+        // Shootout score (knockouts decided on penalties) — kept separate from
+        // goals so it never pollutes the 90' scoreline; the resolver uses it +
+        // `winner` to advance the real qualifier.
+        home_penalties: m.homePenalties ?? null,
+        away_penalties: m.awayPenalties ?? null,
         status: "FINISHED",
         scheduled_at: m.date,
         entered_by: "football-data-sync",

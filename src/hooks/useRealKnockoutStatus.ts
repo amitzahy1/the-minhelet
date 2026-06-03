@@ -52,6 +52,7 @@ export function useRealKnockoutStatus(): RealKnockoutStatus {
         group: m.group ?? "", stage: m.stage ?? "",
         homeGoals: m.homeGoals as number, awayGoals: m.awayGoals as number,
         homePenalties: m.homePenalties ?? null, awayPenalties: m.awayPenalties ?? null,
+        winner: m.winner ?? null,
       }));
     const schedule: ScheduleMatch[] = fixtures.map((m) => ({ homeTla: m.homeTla, awayTla: m.awayTla, date: m.date, status: m.status ?? null }));
     const groupStageComplete = Object.keys(computeGroupOrders(scored)).length === 12;

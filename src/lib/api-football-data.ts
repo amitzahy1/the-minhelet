@@ -45,8 +45,17 @@ export interface MatchResult {
   awayTeam: { id: number; name: string; shortName: string; tla: string; crest: string };
   score: {
     winner: "HOME_TEAM" | "AWAY_TEAM" | "DRAW" | null;
+    duration?: "REGULAR" | "EXTRA_TIME" | "PENALTY_SHOOTOUT";
+    // `fullTime` is the AGGREGATE: for a shootout it INCLUDES the shootout
+    // (verified: a real penalty match returned fullTime 1–5 / regularTime 0–1).
+    // Use `regularTime` for the clean 90-minute score; `penalties` for the
+    // shootout. `regularTime`/`extraTime`/`penalties` only appear once a KO
+    // match passes 90'.
     fullTime: { home: number | null; away: number | null };
     halfTime: { home: number | null; away: number | null };
+    regularTime?: { home: number | null; away: number | null };
+    extraTime?: { home: number | null; away: number | null };
+    penalties?: { home: number | null; away: number | null };
   };
 }
 
@@ -176,8 +185,16 @@ export async function syncMatchResults() {
         id: m.id,
         homeTeam: m.homeTeam.tla,
         awayTeam: m.awayTeam.tla,
-        homeGoals: m.score.fullTime.home,
-        awayGoals: m.score.fullTime.away,
+        // 90-minute score only: prefer regularTime (present once a KO match goes
+        // past 90'); else fullTime (group + regulation-decided matches, where
+        // fullTime IS the 90' score). NEVER raw fullTime for shootouts — it
+        // aggregates the shootout. ET/shootout affect only `winner`/`penalties`.
+        homeGoals: m.score.regularTime?.home ?? m.score.fullTime.home,
+        awayGoals: m.score.regularTime?.away ?? m.score.fullTime.away,
+        homePenalties: m.score.penalties?.home ?? null,
+        awayPenalties: m.score.penalties?.away ?? null,
+        // True qualifier (incl. ET + shootout) — used for KO advancement, not goals.
+        winner: m.score.winner,
         status: m.status,
         date: m.utcDate,
         stage: m.stage,

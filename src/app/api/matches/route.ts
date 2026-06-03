@@ -53,7 +53,9 @@ interface FdRawMatch {
   stage?: string;
   status?: string;
   score?: {
+    winner?: "HOME_TEAM" | "AWAY_TEAM" | "DRAW" | null;
     fullTime?: { home?: number; away?: number };
+    regularTime?: { home?: number; away?: number };
     extraTime?: { home?: number; away?: number };
     penalties?: { home?: number; away?: number };
     duration?: string;
@@ -70,11 +72,14 @@ interface Match {
   group?: string;
   stage?: string;
   status?: string;
+  /** 90-minute score (regulation only). ET & shootout are NOT included here. */
   homeGoals?: number | null;
   awayGoals?: number | null;
   /** Shootout score, only present when the match was decided on penalties. */
   homePenalties?: number | null;
   awayPenalties?: number | null;
+  /** True match winner incl. ET + shootout — for KO advancement, not the score bet. */
+  winner?: "HOME_TEAM" | "AWAY_TEAM" | "DRAW" | null;
   /** Stadium + city for the match (populated by sync-fd-extras.ts). */
   venue?: string | null;
   referees?: { name: string; role: string; nationality: string | null }[];
@@ -156,14 +161,16 @@ export async function GET() {
       stage: m.stage,
       // Demo data wins — admin-entered scores are authoritative for the demo.
       status: demo?.status ?? m.status,
-      // Football-Data: `score.fullTime` is the end-of-match score INCLUDING
-      // extra time but EXCLUDING the shootout. Shootout goals live in
-      // `score.penalties` and are propagated separately so downstream code
-      // can derive the actual winner without contaminating goal totals.
-      homeGoals: demo?.home_goals ?? m.score?.fullTime?.home ?? null,
-      awayGoals: demo?.away_goals ?? m.score?.fullTime?.away ?? null,
+      // 90-MINUTE score only. football-data's `score.fullTime` AGGREGATES the
+      // shootout for penalty matches (verified: fullTime 1–5 vs regularTime 0–1),
+      // so we prefer `regularTime` (present once a match passes 90') and fall
+      // back to fullTime for group + regulation-decided matches (where they're
+      // equal). ET & shootout never enter the scoreline; they decide `winner`.
+      homeGoals: demo?.home_goals ?? m.score?.regularTime?.home ?? m.score?.fullTime?.home ?? null,
+      awayGoals: demo?.away_goals ?? m.score?.regularTime?.away ?? m.score?.fullTime?.away ?? null,
       homePenalties: demo?.home_penalties ?? m.score?.penalties?.home ?? null,
       awayPenalties: demo?.away_penalties ?? m.score?.penalties?.away ?? null,
+      winner: m.score?.winner ?? null,
       venue: detailFor(m.id, dynamicDetails)?.venue ?? null,
       referees: detailFor(m.id, dynamicDetails)?.referees ?? [],
     });

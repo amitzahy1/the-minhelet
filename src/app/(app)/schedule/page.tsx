@@ -2,7 +2,7 @@
 import { LoadingPage } from "@/components/shared/LoadingAnimation";
 import { useSharedData } from "@/hooks/useSharedData";
 import { useBettingStore } from "@/stores/betting-store";
-import { isLocked, formatLockDeadline } from "@/lib/constants";
+import { isLocked } from "@/lib/constants";
 import { getFlag, getTeamNameHe } from "@/lib/flags";
 import type { BettorSpecialBets, BettorAdvancement, BettorBracket } from "@/lib/supabase/shared-data";
 import { matchPairIndex, normalizeGroupLetter } from "@/lib/results-hits";
@@ -159,7 +159,7 @@ function MatchBetsPanel({ match, brackets, specialBets, advancements, matchDays 
         {!globalLocked && (
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-center">
             <p className="text-xs font-bold text-amber-700">
-              ההימורים ייחשפו אחרי הנעילה ({formatLockDeadline()}). ניחושי התוצאה של כל משחק ייחשפו רק עם נעילתו — חצי שעה לפני תחילת יום המשחקים שלו.
+              ניחושי התוצאה של כל משחק ייחשפו רק עם נעילתו — חצי שעה לפני תחילת יום המשחקים שלו.
             </p>
           </div>
         )}

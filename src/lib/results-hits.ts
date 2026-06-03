@@ -50,12 +50,17 @@ export interface FinishedMatch {
   awayTla: string;
   group: string; // letter A-L (normalized)
   stage: string;
-  /** Score at the END of the match (regulation + ET if played), excluding shootout. */
+  /** 90-MINUTE score (regulation only). ET & shootout are NOT included — the
+   *  exact/toto bet is judged on this. The true qualifier comes from `winner`. */
   homeGoals: number;
   awayGoals: number;
   /** Shootout-only goals, only present when the match was decided on penalties. */
   homePenalties?: number | null;
   awayPenalties?: number | null;
+  /** True match winner incl. ET + shootout (football-data `score.winner`). Lets
+   *  the KO resolver advance the real qualifier even when 90' was a draw
+   *  (extra-time-decided, no shootout). Absent → fall back to goals/penalties. */
+  winner?: "HOME_TEAM" | "AWAY_TEAM" | "DRAW" | null;
 }
 
 export function classifyHit(

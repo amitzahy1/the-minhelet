@@ -19,6 +19,8 @@ export interface RealFixture {
   awayGoals?: number | null;
   homePenalties?: number | null;
   awayPenalties?: number | null;
+  /** True winner incl. ET + shootout — KO resolution uses this, not the 90' goals. */
+  winner?: "HOME_TEAM" | "AWAY_TEAM" | "DRAW" | null;
 }
 
 let _cache: { ts: number; matches: RealFixture[] } | null = null;
@@ -41,6 +43,7 @@ export async function loadRealFixtures(force = false): Promise<RealFixture[]> {
       awayGoals: m.awayGoals ?? null,
       homePenalties: m.homePenalties ?? null,
       awayPenalties: m.awayPenalties ?? null,
+      winner: m.winner ?? null,
     }));
     _cache = { ts: Date.now(), matches };
     return matches;

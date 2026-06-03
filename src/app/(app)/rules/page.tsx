@@ -63,6 +63,10 @@ export default function RulesPage() {
                 })}
               </tbody>
             </table>
+            <p className="mt-3 text-xs text-gray-500 leading-relaxed">
+              ניחוש התוצאה נוגע ל<strong>90 הדקות בלבד</strong> — הארכה ודו-קרב פנדלים אינם נכללים בתוצאה.
+              (ההעפלה/המנצח בנוק-אאוט נקבעים לפי התוצאה בפועל, כולל הארכה ופנדלים.)
+            </p>
           </div>
         </section>
 

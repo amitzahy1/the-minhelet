@@ -151,12 +151,15 @@ function stageForKey(key: string): "R32" | "R16" | "QF" | "SF" | "FINAL" {
 
 /**
  * Find a FINISHED knockout match in the list matching the slot's team pair,
- * normalizing FIFA-vs-FD code aliases. Returns the regulation+ET goals
- * (excluding shootout) plus the computed winner — which on a regulation
- * draw is decided by the penalty-shootout score when present.
+ * normalizing FIFA-vs-FD code aliases. Returns the 90-MINUTE goals (the score
+ * the exact/toto bet is judged on) plus the true winner. When 90' was a draw
+ * (extra-time- or shootout-decided), the winner comes from the explicit feed
+ * `winner` first, then the penalty-shootout score — so the bracket advances the
+ * real qualifier even for an ET win with no shootout.
  *
- * Penalty-shootout goals are NEVER added to score1/score2 — that would
- * inflate the top-scorer / best-attack stats. They influence only `winner`.
+ * Neither ET nor shootout goals are EVER added to score1/score2 — that would
+ * corrupt the 90' scoreline and inflate top-scorer / best-attack stats. They
+ * influence only `winner`.
  */
 function findMatchForPair(
   team1: string,
@@ -175,11 +178,19 @@ function findMatchForPair(
   if (s1 > s2) winner = team1;
   else if (s2 > s1) winner = team2;
   else {
-    // Regulation+ET draw → derive from penalty shootout if recorded.
-    const p1 = m.homeTla === team1 ? (m.homePenalties ?? null) : (m.awayPenalties ?? null);
-    const p2 = m.homeTla === team1 ? (m.awayPenalties ?? null) : (m.homePenalties ?? null);
-    if (p1 !== null && p2 !== null && p1 !== p2) {
-      winner = p1 > p2 ? team1 : team2;
+    // 90' draw → decided in extra time or on penalties. Prefer the explicit feed
+    // winner (covers an ET win with NO shootout, where there's no penalty score
+    // to read); fall back to the recorded shootout score.
+    if (m.winner === "HOME_TEAM" || m.winner === "AWAY_TEAM") {
+      const wCode = m.winner === "HOME_TEAM" ? m.homeTla : m.awayTla;
+      winner = wCode === team1 ? team1 : wCode === team2 ? team2 : null;
+    }
+    if (!winner) {
+      const p1 = m.homeTla === team1 ? (m.homePenalties ?? null) : (m.awayPenalties ?? null);
+      const p2 = m.homeTla === team1 ? (m.awayPenalties ?? null) : (m.homePenalties ?? null);
+      if (p1 !== null && p2 !== null && p1 !== p2) {
+        winner = p1 > p2 ? team1 : team2;
+      }
     }
   }
   return { score1: s1, score2: s2, winner };

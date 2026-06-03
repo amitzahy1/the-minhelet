@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ALL_TEAMS, GROUP_LETTERS } from "@/lib/tournament/groups";
 import { getFlag } from "@/lib/flags";
+import { PlayerSelect } from "@/components/shared/PlayerSelect";
 import { MATCHUPS } from "@/lib/matchups";
 import { PENALTIES_LINE, penaltiesResult } from "@/lib/constants";
 
@@ -207,15 +208,15 @@ export function SpecialResultsEntry() {
         {/* Top scorer + assists */}
         <Section title="⚽ מלך שערים ומלך בישולים">
           <div className="grid sm:grid-cols-2 gap-3">
-            <Field label="מלך שערים — שם השחקן">
-              <Input
-                value={actuals.top_scorer_player || ""}
-                onChange={(e) => set("top_scorer_player", e.target.value)}
-                placeholder="Kylian Mbappé"
-              />
-            </Field>
             <Field label="מלך שערים — נבחרת">
               <TeamPicker value={actuals.top_scorer_team} onChange={(v) => set("top_scorer_team", v)} />
+            </Field>
+            <Field label="מלך שערים — שם השחקן">
+              <PlayerSelect
+                team={actuals.top_scorer_team || ""}
+                value={actuals.top_scorer_player || ""}
+                onChange={(v) => set("top_scorer_player", v)}
+              />
             </Field>
             <Field label="מלך שערים — מס׳ שערים (opt.)">
               <Input
@@ -228,15 +229,15 @@ export function SpecialResultsEntry() {
             </Field>
             <Field label=" "><div /></Field>
 
-            <Field label="מלך בישולים — שם השחקן">
-              <Input
-                value={actuals.top_assists_player || ""}
-                onChange={(e) => set("top_assists_player", e.target.value)}
-                placeholder="Lionel Messi"
-              />
-            </Field>
             <Field label="מלך בישולים — נבחרת">
               <TeamPicker value={actuals.top_assists_team} onChange={(v) => set("top_assists_team", v)} />
+            </Field>
+            <Field label="מלך בישולים — שם השחקן">
+              <PlayerSelect
+                team={actuals.top_assists_team || ""}
+                value={actuals.top_assists_player || ""}
+                onChange={(v) => set("top_assists_player", v)}
+              />
             </Field>
             <Field label="מלך בישולים — מס׳ בישולים (opt.)">
               <Input

@@ -289,6 +289,44 @@ export interface LeaderboardEntry {
 
 // --- Scoring Constants ---
 
+/**
+ * Structural shape of all scoring point values. The `SCORING` constant below
+ * is the built-in default; at runtime the same shape is hydrated from the
+ * `scoring_config` DB table (see src/lib/scoring/config.ts) so admins can tune
+ * values from the admin panel. Every scorer and every display reads this shape,
+ * so the admin panel, the live scoring, and the rules page can never disagree.
+ */
+export type ScoringValues = {
+  toto: Record<MatchStage, number>;
+  exact: Record<MatchStage, number>;
+  advancement: {
+    group_exact: number;
+    group_partial: number;
+    group_as_3rd: number;
+    r16: number;
+    qf: number;
+    sf: number;
+    final: number;
+    winner: number;
+  };
+  specials: {
+    top_scorer_exact: number;
+    top_scorer_relative: number;
+    top_assists_exact: number;
+    top_assists_relative: number;
+    best_attack: number;
+    prolific_group: number;
+    driest_group: number;
+    dirtiest_team: number;
+    matchup: number;
+    penalties_over_under: number;
+  };
+  relative_minimums: {
+    top_scorer_goals: number;
+    top_assists: number;
+  };
+};
+
 export const SCORING = {
   // Match predictions (toto = correct 1X2)
   toto: {
@@ -343,7 +381,7 @@ export const SCORING = {
     top_scorer_goals: 3,
     top_assists: 2,
   },
-} as const;
+} as const satisfies ScoringValues;
 
 // --- Tiebreaker Order ---
 export const TIEBREAKER_ORDER = [

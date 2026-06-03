@@ -21,7 +21,7 @@
 // for team/group bets yet — those resolve cleanly after group stage).
 // ============================================================================
 
-import { SCORING, type ScoreReason } from "@/types";
+import { SCORING, type ScoreReason, type ScoringValues } from "@/types";
 import type { BettorSpecialBets } from "@/lib/supabase/shared-data";
 import { MATCHUPS, parseMatchupPick } from "@/lib/matchups";
 
@@ -115,6 +115,7 @@ export function scoreSpecialBetsForUser(
   bets: BettorSpecialBets,
   actuals: TournamentActuals | null,
   playerStats: PlayerStat[] = [],
+  scoring: ScoringValues = SCORING,
 ): SpecialBetsBreakdown {
   const lines: SpecialBetLine[] = [];
   const leaders = computeLiveLeaders(playerStats);
@@ -127,16 +128,16 @@ export function scoreSpecialBetsForUser(
       if (bets.topScorerPlayer === finalScorer) {
         lines.push({
           reason: "TOP_SCORER_EXACT",
-          points: SCORING.specials.top_scorer_exact,
+          points: scoring.specials.top_scorer_exact,
           interim: false,
           pick: bets.topScorerPlayer,
         });
       } else {
         const stat = findStat(playerStats, bets.topScorerPlayer);
-        if (stat && stat.goals >= SCORING.relative_minimums.top_scorer_goals) {
+        if (stat && stat.goals >= scoring.relative_minimums.top_scorer_goals) {
           lines.push({
             reason: "TOP_SCORER_RELATIVE",
-            points: SCORING.specials.top_scorer_relative,
+            points: scoring.specials.top_scorer_relative,
             interim: false,
             pick: bets.topScorerPlayer,
           });
@@ -148,15 +149,15 @@ export function scoreSpecialBetsForUser(
       if (bets.topScorerPlayer === leaders.topScorer.name) {
         lines.push({
           reason: "TOP_SCORER_EXACT",
-          points: SCORING.specials.top_scorer_exact,
+          points: scoring.specials.top_scorer_exact,
           interim: true,
           liveLeader: leaders.topScorer.name,
           pick: bets.topScorerPlayer,
         });
-      } else if (stat && stat.goals >= SCORING.relative_minimums.top_scorer_goals) {
+      } else if (stat && stat.goals >= scoring.relative_minimums.top_scorer_goals) {
         lines.push({
           reason: "TOP_SCORER_RELATIVE",
-          points: SCORING.specials.top_scorer_relative,
+          points: scoring.specials.top_scorer_relative,
           interim: true,
           liveLeader: leaders.topScorer.name,
           pick: bets.topScorerPlayer,
@@ -172,16 +173,16 @@ export function scoreSpecialBetsForUser(
       if (bets.topAssistsPlayer === finalAssists) {
         lines.push({
           reason: "TOP_ASSISTS_EXACT",
-          points: SCORING.specials.top_assists_exact,
+          points: scoring.specials.top_assists_exact,
           interim: false,
           pick: bets.topAssistsPlayer,
         });
       } else {
         const stat = findStat(playerStats, bets.topAssistsPlayer);
-        if (stat && stat.assists >= SCORING.relative_minimums.top_assists) {
+        if (stat && stat.assists >= scoring.relative_minimums.top_assists) {
           lines.push({
             reason: "TOP_ASSISTS_RELATIVE",
-            points: SCORING.specials.top_assists_relative,
+            points: scoring.specials.top_assists_relative,
             interim: false,
             pick: bets.topAssistsPlayer,
           });
@@ -192,15 +193,15 @@ export function scoreSpecialBetsForUser(
       if (bets.topAssistsPlayer === leaders.topAssists.name) {
         lines.push({
           reason: "TOP_ASSISTS_EXACT",
-          points: SCORING.specials.top_assists_exact,
+          points: scoring.specials.top_assists_exact,
           interim: true,
           liveLeader: leaders.topAssists.name,
           pick: bets.topAssistsPlayer,
         });
-      } else if (stat && stat.assists >= SCORING.relative_minimums.top_assists) {
+      } else if (stat && stat.assists >= scoring.relative_minimums.top_assists) {
         lines.push({
           reason: "TOP_ASSISTS_RELATIVE",
-          points: SCORING.specials.top_assists_relative,
+          points: scoring.specials.top_assists_relative,
           interim: true,
           liveLeader: leaders.topAssists.name,
           pick: bets.topAssistsPlayer,
@@ -223,7 +224,7 @@ export function scoreSpecialBetsForUser(
     if (pick && actual && pick === actual) {
       lines.push({
         reason,
-        points: SCORING.specials[scoringField],
+        points: scoring.specials[scoringField],
         interim: false,
         pick,
       });
@@ -233,7 +234,7 @@ export function scoreSpecialBetsForUser(
   // -- Matchups (3 player duels) --
   // The user's pick is stored as a comma-joined "1,X,2" string; the admin
   // enters one result per duel (matchup_result_1..3). Each duel is scored
-  // independently at SCORING.specials.matchup. Exact-only (no live tentative).
+  // independently at scoring.specials.matchup. Exact-only (no live tentative).
   const matchupPicks = parseMatchupPick(bets.matchupPick);
   const matchupActuals = [
     actuals?.matchup_result_1 ?? null,
@@ -247,7 +248,7 @@ export function scoreSpecialBetsForUser(
       const mu = MATCHUPS[i];
       lines.push({
         reason: "MATCHUP",
-        points: SCORING.specials.matchup,
+        points: scoring.specials.matchup,
         interim: false,
         pick: `${mu.p1Short} vs ${mu.p2Short}: ${pick}`,
       });
@@ -262,7 +263,7 @@ export function scoreSpecialBetsForUser(
   ) {
     lines.push({
       reason: "PENALTIES_OVER_UNDER",
-      points: SCORING.specials.penalties_over_under,
+      points: scoring.specials.penalties_over_under,
       interim: false,
       pick: bets.penaltiesOverUnder,
     });

@@ -3,7 +3,7 @@
 // Implements the actual scoring rules from Qatar 2022 / Euro 2024
 // ============================================================================
 
-import { SCORING, type MatchStage, type ScoreReason } from "@/types";
+import { SCORING, type MatchStage, type ScoreReason, type ScoringValues } from "@/types";
 
 interface MatchResult {
   home_goals: number;
@@ -46,6 +46,7 @@ export function calculateKnockoutScore(
     /** Predicted advancer — implicitly the penalty pick when predicted scores are level. */
     winner: string | null;
   },
+  scoring: ScoringValues = SCORING,
 ): { toto: number; exact: number; total: number; reasons: { reason: ScoreReason; points: number }[] } {
   const reasons: { reason: ScoreReason; points: number }[] = [];
   let toto = 0;
@@ -62,7 +63,7 @@ export function calculateKnockoutScore(
 
   // Decisive (non-draw) regulation result: standard toto on result-type match.
   if (actualType !== "X" && predictedType === actualType) {
-    toto = SCORING.toto[stage];
+    toto = scoring.toto[stage];
     reasons.push({ reason: "TOTO", points: toto });
   }
   // Regulation draw on both sides → penalty pick determines toto credit.
@@ -73,7 +74,7 @@ export function calculateKnockoutScore(
       predictedPenaltyWinner &&
       predictedPenaltyWinner === actual.penaltyWinner
     ) {
-      toto = SCORING.toto[stage];
+      toto = scoring.toto[stage];
       reasons.push({ reason: "TOTO", points: toto });
     }
   }
@@ -83,7 +84,7 @@ export function calculateKnockoutScore(
     prediction.score1 === actual.homeGoals &&
     prediction.score2 === actual.awayGoals
   ) {
-    exact = SCORING.exact[stage];
+    exact = scoring.exact[stage];
     reasons.push({ reason: "EXACT_SCORE", points: exact });
   }
 
@@ -112,7 +113,8 @@ function getResultType(homeGoals: number, awayGoals: number): "1" | "X" | "2" {
 export function calculateMatchScore(
   stage: MatchStage,
   actual: MatchResult,
-  prediction: MatchPrediction
+  prediction: MatchPrediction,
+  scoring: ScoringValues = SCORING,
 ): ScoreBreakdown {
   const reasons: { reason: ScoreReason; points: number }[] = [];
 
@@ -128,7 +130,7 @@ export function calculateMatchScore(
 
   // Toto (correct 1X2)
   if (actualResult === predictedResult) {
-    totoPoints = SCORING.toto[stage];
+    totoPoints = scoring.toto[stage];
     reasons.push({ reason: "TOTO", points: totoPoints });
   }
 
@@ -137,7 +139,7 @@ export function calculateMatchScore(
     actual.home_goals === prediction.predicted_home_goals &&
     actual.away_goals === prediction.predicted_away_goals
   ) {
-    exactPoints = SCORING.exact[stage];
+    exactPoints = scoring.exact[stage];
     reasons.push({ reason: "EXACT_SCORE", points: exactPoints });
   }
 
@@ -154,10 +156,11 @@ export function calculateMatchScore(
  */
 export function calculateAdvancementScore(
   pickType: "group_exact" | "group_partial" | "group_as_3rd" | "qf" | "sf" | "final" | "winner",
-  isCorrect: boolean
+  isCorrect: boolean,
+  scoring: ScoringValues = SCORING,
 ): number {
   if (!isCorrect) return 0;
-  return SCORING.advancement[pickType];
+  return scoring.advancement[pickType];
 }
 
 /**
@@ -180,6 +183,7 @@ export function calculateGroupAdvancementScore(
   actualSecond: string,
   actualThird?: string | null,
   thirdQualified?: boolean,
+  scoring: ScoringValues = SCORING,
 ): { points: number; reasons: { reason: ScoreReason; points: number }[] } {
   const reasons: { reason: ScoreReason; points: number }[] = [];
   let points = 0;
@@ -192,15 +196,15 @@ export function calculateGroupAdvancementScore(
         (predicted === actualFirst && predicted === predictedFirst) ||
         (predicted === actualSecond && predicted === predictedSecond);
       if (exact) {
-        points += SCORING.advancement.group_exact;
-        reasons.push({ reason: "GROUP_ADVANCE_EXACT", points: SCORING.advancement.group_exact });
+        points += scoring.advancement.group_exact;
+        reasons.push({ reason: "GROUP_ADVANCE_EXACT", points: scoring.advancement.group_exact });
       } else {
-        points += SCORING.advancement.group_partial;
-        reasons.push({ reason: "GROUP_ADVANCE_PARTIAL", points: SCORING.advancement.group_partial });
+        points += scoring.advancement.group_partial;
+        reasons.push({ reason: "GROUP_ADVANCE_PARTIAL", points: scoring.advancement.group_partial });
       }
     } else if (thirdAdvanced && predicted === actualThird) {
-      points += SCORING.advancement.group_as_3rd;
-      reasons.push({ reason: "GROUP_ADVANCE_AS_3RD", points: SCORING.advancement.group_as_3rd });
+      points += scoring.advancement.group_as_3rd;
+      reasons.push({ reason: "GROUP_ADVANCE_AS_3RD", points: scoring.advancement.group_as_3rd });
     }
   };
 
@@ -219,15 +223,16 @@ export function calculateGroupAdvancementScore(
 export function calculateSpecialBetScore(
   betType: keyof typeof SCORING.specials,
   isExact: boolean,
-  isRelative: boolean = false
+  isRelative: boolean = false,
+  scoring: ScoringValues = SCORING,
 ): number {
-  if (isExact) return SCORING.specials[betType];
+  if (isExact) return scoring.specials[betType];
   if (isRelative) {
     // Only some bets have relative scoring
     if (betType === "top_scorer_exact" && isRelative)
-      return SCORING.specials.top_scorer_relative;
+      return scoring.specials.top_scorer_relative;
     if (betType === "top_assists_exact" && isRelative)
-      return SCORING.specials.top_assists_relative;
+      return scoring.specials.top_assists_relative;
   }
   return 0;
 }

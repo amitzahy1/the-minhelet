@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useBettingStore } from "@/stores/betting-store";
 import { ALL_TEAMS, GROUPS as GROUP_DATA } from "@/lib/tournament/groups";
-import { getSquad } from "@/lib/tournament/squads-data";
+import { getSquadPlayers } from "@/lib/tournament/squad-players";
 import { getFlag } from "@/lib/flags";
 import { PageTransition } from "@/components/shared/PageTransition";
 import { SaveAndContinue } from "@/components/shared/SaveAndContinue";
@@ -23,47 +23,9 @@ function groupLabel(g: string): string {
   return `בית ${g} · ${codes}`;
 }
 
-// Order: attackers first (FW → MID → DEF → GK). Top-scorer/top-assists candidates
-// usually sit at the top. Within each position, keep the squad order.
-const POS_ORDER: Record<string, number> = { FW: 0, MID: 1, DEF: 2, GK: 3 };
-
-import apiSquads from "@/lib/tournament/squads-api.json";
-import { OFFICIAL_ROSTERS } from "@/lib/tournament/official-rosters";
-
-type ApiSquads = Record<string, { players: { nameEn: string; pos: "GK" | "DEF" | "MID" | "FW" }[] }>;
-const API_SQUADS = apiSquads as ApiSquads;
-
-/**
- * Picker source priority: pick the SINGLE most complete source rather than
- * merging — different sources use different name formats ("L. Messi" /
- * "Lionel Messi" / "Messi") and a merge would surface confusing duplicates.
- *
- *   1. OFFICIAL_ROSTERS (Wikipedia 26-man squad, full names) — when announced.
- *   2. squads-api.json (api-football current call-up, ~25-35 names).
- *   3. getSquad().players (hand-curated starters subset, fallback).
- *
- * Before the fix the picker only used (3), so Mexico's dropdown showed
- * just 11 starters — impossible to pick a bench striker.
- */
-function getSquadPlayers(team: string): string[] {
-  const official = OFFICIAL_ROSTERS[team] || [];
-  if (official.length >= 20) {
-    return [...official]
-      .sort((a, b) => (POS_ORDER[a.pos] ?? 99) - (POS_ORDER[b.pos] ?? 99))
-      .map((p) => p.nameEn);
-  }
-  const apiList = API_SQUADS[team]?.players || [];
-  if (apiList.length >= 15) {
-    return [...apiList]
-      .sort((a, b) => (POS_ORDER[a.pos] ?? 99) - (POS_ORDER[b.pos] ?? 99))
-      .map((p) => p.nameEn);
-  }
-  const squad = getSquad(team);
-  if (!squad) return [];
-  return [...squad.players]
-    .sort((a, b) => (POS_ORDER[a.pos] ?? 99) - (POS_ORDER[b.pos] ?? 99))
-    .map((p) => p.nameEn);
-}
+// `getSquadPlayers` now lives in @/lib/tournament/squad-players (imported above)
+// so the admin results-entry screen picks players from the exact same list —
+// otherwise the admin's top-scorer/assists name could miss the bettors' names.
 
 // Reverse lookup: player name → team code, built from the SAME source as the
 // picker dropdowns. Lets us restore a scorer/assists team when only the player

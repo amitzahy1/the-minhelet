@@ -1,8 +1,13 @@
 "use client";
 
 import { PageTransition } from "@/components/shared/PageTransition";
+import { useScoring } from "@/hooks/useScoring";
 
 export default function AdminGuidePage() {
+  const scoring = useScoring();
+  const adv = scoring.advancement;
+  const sp = scoring.specials;
+  const rm = scoring.relative_minimums;
   return (
     <PageTransition>
     <div className="max-w-3xl mx-auto px-4 py-6 pb-24" dir="rtl">
@@ -75,23 +80,23 @@ export default function AdminGuidePage() {
         <table className="w-full text-sm border border-gray-200 rounded-lg overflow-hidden mb-4">
           <thead><tr className="bg-gray-100"><th className="py-2 px-3 text-start">שלב</th><th className="py-2 px-3 text-center">טוטו</th><th className="py-2 px-3 text-center">מדויקת</th></tr></thead>
           <tbody>
-            {[["בתים",2,1],["32 הגדולות / שמינית / רבע גמר",3,1],["חצי גמר",3,2],["גמר",4,2]].map(([s,t,e]) => (
-              <tr key={String(s)} className="border-t border-gray-100"><td className="py-2 px-3 font-medium">{s}</td><td className="py-2 px-3 text-center text-blue-600 font-bold">{t}</td><td className="py-2 px-3 text-center text-green-600 font-bold">+{e}</td></tr>
+            {([["בתים",scoring.toto.GROUP,scoring.exact.GROUP],["32 הגדולות / שמינית / רבע גמר",scoring.toto.R16,scoring.exact.R16],["חצי גמר",scoring.toto.SF,scoring.exact.SF],["גמר",scoring.toto.FINAL,scoring.exact.FINAL]] as [string,number,number][]).map(([s,t,e]) => (
+              <tr key={s} className="border-t border-gray-100"><td className="py-2 px-3 font-medium">{s}</td><td className="py-2 px-3 text-center text-blue-600 font-bold">{t}</td><td className="py-2 px-3 text-center text-green-600 font-bold">+{e}</td></tr>
             ))}
           </tbody>
         </table>
 
         <h3 className="font-bold text-gray-800 mb-2">הימורי עולות (מבעוד מועד)</h3>
         <ul className="space-y-1 text-gray-700 mb-4">
-          <li>• עולה מדויקת מהבית: <strong>5 נק׳</strong> · עולה לא מדויקת: <strong>3 נק׳</strong></li>
-          <li>• עולה לשמינית: <strong>1</strong> · רבע: <strong>3</strong> · חצי: <strong>6</strong> · גמר: <strong>10</strong> · זוכה: <strong>16</strong></li>
+          <li>• עולה מדויקת מהבית: <strong>{adv.group_exact} נק׳</strong> · עולה לא מדויקת: <strong>{adv.group_partial} נק׳</strong> · ממקום שלישי: <strong>{adv.group_as_3rd} נק׳</strong></li>
+          <li>• עולה לשמינית: <strong>{adv.r16}</strong> · רבע: <strong>{adv.qf}</strong> · חצי: <strong>{adv.sf}</strong> · גמר: <strong>{adv.final}</strong> · זוכה: <strong>{adv.winner}</strong></li>
         </ul>
 
         <h3 className="font-bold text-gray-800 mb-2">הימורים מיוחדים</h3>
         <ul className="space-y-1 text-gray-700 mb-4">
-          <li>• מלך שערים: <strong>12</strong> (מוחלט) / <strong>7</strong> (יחסי, מינימום 3 שערים)</li>
-          <li>• מלך בישולים: <strong>9</strong> / <strong>5</strong> (מינימום 2 בישולים)</li>
-          <li>• התקפה הכי טובה: <strong>8</strong> · בית פורה/יבש, כסחנית, פנדלים: <strong>6</strong> כ״א · מאצ׳אפ: <strong>5</strong> לכל דו-קרב (×3 = 15)</li>
+          <li>• מלך שערים: <strong>{sp.top_scorer_exact}</strong> (מוחלט) / <strong>{sp.top_scorer_relative}</strong> (יחסי, מינימום {rm.top_scorer_goals} שערים)</li>
+          <li>• מלך בישולים: <strong>{sp.top_assists_exact}</strong> / <strong>{sp.top_assists_relative}</strong> (מינימום {rm.top_assists} בישולים)</li>
+          <li>• התקפה הכי טובה: <strong>{sp.best_attack}</strong> · בית פורה/יבש, כסחנית, פנדלים: <strong>{sp.dirtiest_team}</strong> כ״א · מאצ׳אפ: <strong>{sp.matchup}</strong> לכל דו-קרב (×3 = {sp.matchup * 3})</li>
         </ul>
 
         <h3 className="font-bold text-gray-800 mb-2">שובר שוויון (בסדר)</h3>

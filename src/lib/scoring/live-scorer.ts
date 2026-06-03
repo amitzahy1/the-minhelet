@@ -26,17 +26,20 @@ import {
   type TournamentActuals,
   type PlayerStat,
 } from "./special-bets-scorer";
-import type { MatchStage } from "@/types";
+import { SCORING, type MatchStage, type ScoringValues } from "@/types";
 
-// Point values — mirror scoring_config defaults
-export const GROUP_TOTO_PTS = 2;
-export const GROUP_EXACT_BONUS_PTS = 1; // added on top of toto when exact
-export const KO_TOTO_PTS = 3; // R32/R16/QF
-export const KO_EXACT_BONUS_PTS = 1;
-export const SF_TOTO_PTS = 3;
-export const SF_EXACT_BONUS_PTS = 2;
-export const FINAL_TOTO_PTS = 4;
-export const FINAL_EXACT_BONUS_PTS = 2;
+// Built-in default point values — these MIRROR the SCORING constant and act as
+// the fallback when no scoring_config row is supplied. At runtime callers pass
+// the DB-resolved config via `LiveScoringOptions.scoring`, so admin edits flow
+// through here. These exported consts remain the defaults used by display code.
+export const GROUP_TOTO_PTS = SCORING.toto.GROUP;
+export const GROUP_EXACT_BONUS_PTS = SCORING.exact.GROUP; // added on top of toto when exact
+export const KO_TOTO_PTS = SCORING.toto.R16; // R32/R16/QF
+export const KO_EXACT_BONUS_PTS = SCORING.exact.R16;
+export const SF_TOTO_PTS = SCORING.toto.SF;
+export const SF_EXACT_BONUS_PTS = SCORING.exact.SF;
+export const FINAL_TOTO_PTS = SCORING.toto.FINAL;
+export const FINAL_EXACT_BONUS_PTS = SCORING.exact.FINAL;
 
 export interface PlayerScore {
   userId: string;
@@ -77,6 +80,12 @@ export interface LiveScoringOptions {
   playerStats?: PlayerStat[];
   /** Admin override for the best-thirds qualifier set, used by the bracket resolver. */
   bestThirdsOverride?: string[] | null;
+  /**
+   * Resolved scoring point values (from the `scoring_config` table via
+   * scoringFromConfig). Defaults to the built-in SCORING constant when omitted,
+   * so existing callers and tests keep their current behavior.
+   */
+  scoring?: ScoringValues;
 }
 
 function emptyScore(userId: string, displayName: string): PlayerScore {
@@ -136,6 +145,7 @@ export function computeLiveScores(
   matches: FinishedMatch[],
   options: LiveScoringOptions = {},
 ): Record<string, PlayerScore> {
+  const scoring = options.scoring ?? SCORING;
   const byUser: Record<string, PlayerScore> = {};
   for (const b of brackets) {
     byUser[b.userId] = emptyScore(b.userId, b.displayName || "ללא שם");
@@ -156,12 +166,12 @@ export function computeLiveScores(
       if (hit.hit === "miss") { score.missHits += 1; continue; }
       if (hit.hit === "toto") {
         score.totoHits += 1;
-        score.totoGroup += GROUP_TOTO_PTS;
+        score.totoGroup += scoring.toto.GROUP;
       } else if (hit.hit === "exact") {
         score.totoHits += 1;
         score.exactHits += 1;
-        score.totoGroup += GROUP_TOTO_PTS;
-        score.exactGroup += GROUP_EXACT_BONUS_PTS;
+        score.totoGroup += scoring.toto.GROUP;
+        score.exactGroup += scoring.exact.GROUP;
       }
     }
   }
@@ -195,6 +205,7 @@ export function computeLiveScores(
           team2: slot.team2,
         },
         pick,
+        scoring,
       );
       if (result.toto > 0) score.totoHits += 1;
       if (result.exact > 0) score.exactHits += 1;
@@ -226,6 +237,7 @@ export function computeLiveScores(
           team2: thirdPlace.team2,
         },
         pick,
+        scoring,
       );
       if (result.toto > 0) score.totoHits += 1;
       if (result.exact > 0) score.exactHits += 1;
@@ -270,6 +282,7 @@ export function computeLiveScores(
         bestThirdsCodes,
         slotTree as Record<string, SlotState>,
         champion,
+        scoring,
       );
       score.advPts = breakdown.total;
       score.advBreakdown = breakdown;
@@ -283,7 +296,7 @@ export function computeLiveScores(
     for (const bets of options.specialBets) {
       const score = byUser[bets.userId];
       if (!score) continue;
-      const breakdown = scoreSpecialBetsForUser(bets, actuals, stats);
+      const breakdown = scoreSpecialBetsForUser(bets, actuals, stats, scoring);
       score.specPts = breakdown.total;
       score.specBreakdown = breakdown;
       score.specHasInterim = breakdown.hasInterim;
@@ -301,7 +314,8 @@ export function computeLiveScores(
 /** Compute today's points only — for the "+X היום" indicator on the leaderboard. */
 export function computeTodayScores(
   brackets: BettorBracket[],
-  matches: FinishedMatch[]
+  matches: FinishedMatch[],
+  scoring: ScoringValues = SCORING,
 ): Record<string, number> {
   const todayIsrael = new Date().toLocaleDateString("he-IL");
   const todayMatches = matches.filter((m) => {
@@ -311,7 +325,7 @@ export function computeTodayScores(
       return false;
     }
   });
-  const scores = computeLiveScores(brackets, todayMatches);
+  const scores = computeLiveScores(brackets, todayMatches, { scoring });
   const out: Record<string, number> = {};
   for (const [uid, s] of Object.entries(scores)) out[uid] = s.total;
   return out;
@@ -326,7 +340,8 @@ export function computeTodayScores(
  */
 export function computePlayerHistories(
   brackets: BettorBracket[],
-  matches: FinishedMatch[]
+  matches: FinishedMatch[],
+  scoring: ScoringValues = SCORING,
 ): Record<string, number[]> {
   const sorted = [...matches].sort(
     (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
@@ -341,8 +356,8 @@ export function computePlayerHistories(
     const hits = computeGroupHits(match, brackets);
     const deltaByUser: Record<string, number> = {};
     for (const h of hits) {
-      if (h.hit === "exact") deltaByUser[h.userId] = GROUP_TOTO_PTS + GROUP_EXACT_BONUS_PTS;
-      else if (h.hit === "toto") deltaByUser[h.userId] = GROUP_TOTO_PTS;
+      if (h.hit === "exact") deltaByUser[h.userId] = scoring.toto.GROUP + scoring.exact.GROUP;
+      else if (h.hit === "toto") deltaByUser[h.userId] = scoring.toto.GROUP;
     }
     for (const uid of Object.keys(cumulative)) {
       const series = cumulative[uid];
@@ -358,7 +373,8 @@ export function computePlayerHistories(
   return cumulative;
 }
 
-// Max pts per knockout bracket key prefix
+// Max pts per knockout bracket key prefix (built-in defaults). Display code
+// that must reflect admin-edited values should call koStageMaxPts(scoring).
 export const KO_STAGE_MAX_PTS: Record<string, number> = {
   r32:   KO_TOTO_PTS + KO_EXACT_BONUS_PTS,        // 4
   r16l:  KO_TOTO_PTS + KO_EXACT_BONUS_PTS,         // 4
@@ -369,3 +385,17 @@ export const KO_STAGE_MAX_PTS: Record<string, number> = {
   sfr:   SF_TOTO_PTS + SF_EXACT_BONUS_PTS,          // 5
   final: FINAL_TOTO_PTS + FINAL_EXACT_BONUS_PTS,   // 6
 };
+
+/** Max pts per knockout bracket key prefix, from a resolved scoring config. */
+export function koStageMaxPts(scoring: ScoringValues = SCORING): Record<string, number> {
+  return {
+    r32:   scoring.toto.R32 + scoring.exact.R32,
+    r16l:  scoring.toto.R16 + scoring.exact.R16,
+    r16r:  scoring.toto.R16 + scoring.exact.R16,
+    qfl:   scoring.toto.QF + scoring.exact.QF,
+    qfr:   scoring.toto.QF + scoring.exact.QF,
+    sfl:   scoring.toto.SF + scoring.exact.SF,
+    sfr:   scoring.toto.SF + scoring.exact.SF,
+    final: scoring.toto.FINAL + scoring.exact.FINAL,
+  };
+}

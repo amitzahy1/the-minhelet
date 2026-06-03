@@ -1,5 +1,7 @@
 "use client";
 
+import { useScoring } from "@/hooks/useScoring";
+
 function GuideSection({ title, children, defaultOpen = false }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
   return (
     <details open={defaultOpen} className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
@@ -13,6 +15,10 @@ function GuideSection({ title, children, defaultOpen = false }: { title: string;
 }
 
 export function AdminGuide() {
+  const scoring = useScoring();
+  const adv = scoring.advancement;
+  const sp = scoring.specials;
+  const rm = scoring.relative_minimums;
   return (
     <div className="space-y-3" dir="rtl">
       <GuideSection title="סקירה כללית — מה זה The Minhelet?" defaultOpen>
@@ -50,21 +56,21 @@ export function AdminGuide() {
         <table className="w-full text-xs border border-gray-200 rounded-lg overflow-hidden mb-4">
           <thead><tr className="bg-gray-100"><th className="py-2 px-3 text-start">שלב</th><th className="py-2 px-3 text-center">טוטו</th><th className="py-2 px-3 text-center">מדויקת</th><th className="py-2 px-3 text-center">סה״כ</th></tr></thead>
           <tbody>
-            {[["בתים",2,1,3],["32 הגדולות / שמינית / רבע גמר",3,1,4],["חצי גמר",3,2,5],["גמר",4,2,6]].map(([s,t,e,tot]) => (
-              <tr key={String(s)} className="border-t border-gray-100"><td className="py-1.5 px-3">{s}</td><td className="py-1.5 px-3 text-center text-blue-600 font-bold">{t}</td><td className="py-1.5 px-3 text-center text-green-600 font-bold">+{e}</td><td className="py-1.5 px-3 text-center font-bold">{tot}</td></tr>
+            {([["בתים",scoring.toto.GROUP,scoring.exact.GROUP],["32 הגדולות / שמינית / רבע גמר",scoring.toto.R16,scoring.exact.R16],["חצי גמר",scoring.toto.SF,scoring.exact.SF],["גמר",scoring.toto.FINAL,scoring.exact.FINAL]] as [string,number,number][]).map(([s,t,e]) => (
+              <tr key={s} className="border-t border-gray-100"><td className="py-1.5 px-3">{s}</td><td className="py-1.5 px-3 text-center text-blue-600 font-bold">{t}</td><td className="py-1.5 px-3 text-center text-green-600 font-bold">+{e}</td><td className="py-1.5 px-3 text-center font-bold">{t + e}</td></tr>
             ))}
           </tbody>
         </table>
         <h4 className="font-bold mb-2">הימורי עולות (מבעוד מועד)</h4>
         <ul className="space-y-1 mb-4">
-          <li>• עולה מדויקת מהבית: <strong>5 נק׳</strong> · עולה לא מדויקת: <strong>3 נק׳</strong></li>
-          <li>• שמינית: <strong>1</strong> · רבע: <strong>3</strong> · חצי: <strong>6</strong> · גמר: <strong>10</strong> · זוכה: <strong>16</strong></li>
+          <li>• עולה מדויקת מהבית: <strong>{adv.group_exact} נק׳</strong> · עולה לא מדויקת: <strong>{adv.group_partial} נק׳</strong> · ממקום שלישי: <strong>{adv.group_as_3rd} נק׳</strong></li>
+          <li>• שמינית: <strong>{adv.r16}</strong> · רבע: <strong>{adv.qf}</strong> · חצי: <strong>{adv.sf}</strong> · גמר: <strong>{adv.final}</strong> · זוכה: <strong>{adv.winner}</strong></li>
         </ul>
         <h4 className="font-bold mb-2">הימורים מיוחדים</h4>
         <ul className="space-y-1 mb-4">
-          <li>• מלך שערים: <strong>12</strong> (מוחלט) / <strong>7</strong> (יחסי)</li>
-          <li>• מלך בישולים: <strong>9</strong> / <strong>5</strong></li>
-          <li>• התקפה: <strong>8</strong> · כסחנית, בית פורה/יבש, פנדלים: <strong>6</strong> כ״א · מאצ׳אפ: <strong>5</strong> לכל דו-קרב (×3 = 15)</li>
+          <li>• מלך שערים: <strong>{sp.top_scorer_exact}</strong> (מוחלט) / <strong>{sp.top_scorer_relative}</strong> (יחסי, מינ׳ {rm.top_scorer_goals})</li>
+          <li>• מלך בישולים: <strong>{sp.top_assists_exact}</strong> / <strong>{sp.top_assists_relative}</strong> (מינ׳ {rm.top_assists})</li>
+          <li>• התקפה: <strong>{sp.best_attack}</strong> · כסחנית, בית פורה/יבש, פנדלים: <strong>{sp.dirtiest_team}</strong> כ״א · מאצ׳אפ: <strong>{sp.matchup}</strong> לכל דו-קרב (×3 = {sp.matchup * 3})</li>
         </ul>
         <h4 className="font-bold mb-2">שובר שוויון</h4>
         <ol className="space-y-0.5">

@@ -14,7 +14,7 @@
 // reaches that stage; partial credit is not awarded here (vs the group ladder).
 // ============================================================================
 
-import { SCORING, type ScoreReason } from "@/types";
+import { SCORING, type ScoreReason, type ScoringValues } from "@/types";
 import type { BettorAdvancement } from "@/lib/supabase/shared-data";
 import type { SlotState } from "./knockout-resolver";
 
@@ -74,6 +74,7 @@ export function scoreAdvancementForUser(
   bestThirdsCodes: Set<string>,
   slots: Record<string, SlotState>,
   champion: string | null,
+  scoring: ScoringValues = SCORING,
 ): AdvancementBreakdown {
   const breakdown: AdvancementBreakdown = {
     total: 0,
@@ -109,14 +110,14 @@ export function scoreAdvancementForUser(
       const expected = slotOrdinal === 1 ? actual1st : actual2nd;
       const otherTop = slotOrdinal === 1 ? actual2nd : actual1st;
       if (pred === expected) {
-        breakdown.groupExactPts += SCORING.advancement.group_exact;
-        breakdown.lines.push({ reason: "GROUP_ADVANCE_EXACT", points: SCORING.advancement.group_exact, pick: pred });
+        breakdown.groupExactPts += scoring.advancement.group_exact;
+        breakdown.lines.push({ reason: "GROUP_ADVANCE_EXACT", points: scoring.advancement.group_exact, pick: pred });
       } else if (pred === otherTop) {
-        breakdown.groupPartialPts += SCORING.advancement.group_partial;
-        breakdown.lines.push({ reason: "GROUP_ADVANCE_PARTIAL", points: SCORING.advancement.group_partial, pick: pred });
+        breakdown.groupPartialPts += scoring.advancement.group_partial;
+        breakdown.lines.push({ reason: "GROUP_ADVANCE_PARTIAL", points: scoring.advancement.group_partial, pick: pred });
       } else if (thirdQualified && pred === actual3rd) {
-        breakdown.groupPartialPts += SCORING.advancement.group_as_3rd;
-        breakdown.lines.push({ reason: "GROUP_ADVANCE_AS_3RD", points: SCORING.advancement.group_as_3rd, pick: pred });
+        breakdown.groupPartialPts += scoring.advancement.group_as_3rd;
+        breakdown.lines.push({ reason: "GROUP_ADVANCE_AS_3RD", points: scoring.advancement.group_as_3rd, pick: pred });
       }
     };
 
@@ -133,33 +134,33 @@ export function scoreAdvancementForUser(
 
   for (const code of adv.advanceToR16 || []) {
     if (code && reachedR16.has(code)) {
-      breakdown.r16Pts += SCORING.advancement.r16;
-      breakdown.lines.push({ reason: "ADVANCE_R16", points: SCORING.advancement.r16, pick: code });
+      breakdown.r16Pts += scoring.advancement.r16;
+      breakdown.lines.push({ reason: "ADVANCE_R16", points: scoring.advancement.r16, pick: code });
     }
   }
   for (const code of adv.advanceToQF || []) {
     if (code && reachedQF.has(code)) {
-      breakdown.qfPts += SCORING.advancement.qf;
-      breakdown.lines.push({ reason: "ADVANCE_QF", points: SCORING.advancement.qf, pick: code });
+      breakdown.qfPts += scoring.advancement.qf;
+      breakdown.lines.push({ reason: "ADVANCE_QF", points: scoring.advancement.qf, pick: code });
     }
   }
   for (const code of adv.advanceToSF || []) {
     if (code && reachedSF.has(code)) {
-      breakdown.sfPts += SCORING.advancement.sf;
-      breakdown.lines.push({ reason: "ADVANCE_SF", points: SCORING.advancement.sf, pick: code });
+      breakdown.sfPts += scoring.advancement.sf;
+      breakdown.lines.push({ reason: "ADVANCE_SF", points: scoring.advancement.sf, pick: code });
     }
   }
   for (const code of adv.advanceToFinal || []) {
     if (code && reachedFinal.has(code)) {
-      breakdown.finalPts += SCORING.advancement.final;
-      breakdown.lines.push({ reason: "ADVANCE_FINAL", points: SCORING.advancement.final, pick: code });
+      breakdown.finalPts += scoring.advancement.final;
+      breakdown.lines.push({ reason: "ADVANCE_FINAL", points: scoring.advancement.final, pick: code });
     }
   }
 
   // --- Champion ---
   if (adv.winner && champion && adv.winner === champion) {
-    breakdown.winnerPts += SCORING.advancement.winner;
-    breakdown.lines.push({ reason: "WINNER", points: SCORING.advancement.winner, pick: adv.winner });
+    breakdown.winnerPts += scoring.advancement.winner;
+    breakdown.lines.push({ reason: "WINNER", points: scoring.advancement.winner, pick: adv.winner });
   }
 
   breakdown.total =

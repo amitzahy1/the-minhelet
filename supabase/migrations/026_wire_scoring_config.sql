@@ -70,7 +70,7 @@ UPDATE scoring_config SET
   prolific_group       = 6,
   driest_group         = 6,
   dirtiest_team        = 6,
-  matchup              = 6,
+  matchup              = 5,  -- per duel (3 duels = 15 max); set to 5 by d1f1035
   penalties_over_under = 6,
 
   -- Relative minimums

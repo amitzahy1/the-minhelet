@@ -56,7 +56,7 @@ export function TodayMatches() {
   const [heading, setHeading] = useState("משחקים קרובים");
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [showAll, setShowAll] = useState(false);
-  const { predictions, specialBets, brackets, profiles } = useSharedData();
+  const { specialBets, brackets } = useSharedData();
   const locked = isLocked();
 
   useEffect(() => {
@@ -164,8 +164,10 @@ export function TodayMatches() {
           const isLive = m.status === "IN_PLAY" || m.status === "PAUSED";
           const isExpanded = expandedId === m.id;
           const relatedBets = getRelatedBets(m.homeTla, m.awayTla);
-          const matchPredictions = locked ? predictions.filter(p => p.matchId === m.id) : [];
-          // For finished GROUP matches, also build per-bettor hit/miss from stored bracket picks.
+          // Score predictions are shown only for FINISHED group matches (below),
+          // built from the redacted bracket data — never from an un-lock-gated
+          // source, so an upcoming match's picks can't leak before it locks.
+          // For finished GROUP matches, build per-bettor hit/miss from stored bracket picks.
           const groupLetter = normalizeGroupLetter(m.group);
           const groupHits = (locked && isFinished && groupLetter && m.homeGoals !== null && m.awayGoals !== null)
             ? getGroupPredictions(m.homeTla, m.awayTla, groupLetter, m.homeGoals, m.awayGoals, m.id)
@@ -266,7 +268,7 @@ export function TodayMatches() {
                         <p className="text-[11px] text-amber-700 font-medium text-center py-1">
                           ההימורים ייחשפו אחרי הנעילה
                         </p>
-                      ) : matchPredictions.length === 0 && relatedBets.length === 0 && groupHits.length === 0 ? (
+                      ) : relatedBets.length === 0 && groupHits.length === 0 ? (
                         <p className="text-[11px] text-gray-400 text-center py-1">
                           אין הימורים למשחק הזה
                         </p>
@@ -312,23 +314,6 @@ export function TodayMatches() {
                                     </div>
                                   );
                                 })}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Score predictions */}
-                          {matchPredictions.length > 0 && (
-                            <div>
-                              <p className="text-[10px] font-bold text-gray-500 mb-1">ניחושי תוצאה (live)</p>
-                              <div className="grid grid-cols-2 gap-1">
-                                {matchPredictions.map((p, i) => (
-                                  <div key={i} className="flex items-center justify-between bg-white rounded-lg px-2 py-1 border border-gray-100">
-                                    <span className="text-[11px] font-bold text-gray-700 truncate">{p.displayName}</span>
-                                    <span className="text-[11px] font-black text-blue-600 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>
-                                      {p.predictedHomeGoals}-{p.predictedAwayGoals}
-                                    </span>
-                                  </div>
-                                ))}
                               </div>
                             </div>
                           )}

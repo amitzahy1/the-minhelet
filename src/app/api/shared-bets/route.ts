@@ -1,14 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { headers } from "next/headers";
-import {
-  resolveKnockoutTree,
-  findKickoffForSlot,
-  KO_SLOT_KEYS,
-  type KoSlotKey,
-  type ScheduleMatch,
-} from "@/lib/scoring/knockout-resolver";
-import { matchPairIndex, normalizeGroupLetter, type FinishedMatch } from "@/lib/results-hits";
+import { computePredictionLockRows } from "@/lib/scoring/compute-prediction-locks";
 
 const LOCK_DEADLINE = new Date("2026-06-10T14:00:00Z");
 
@@ -20,79 +13,46 @@ interface RawMatch {
 }
 
 /**
- * Redact OTHER users' Tree-2 (real-data) picks for matches that haven't kicked
- * off yet — they stay secret until the match actually starts (revealed at the
- * kickoff time, even though the pick locked 1h earlier). The viewer's own picks
- * are never redacted. Scoring/recompute use the un-redacted data (service role),
- * so this is display-only. On any failure we hide ALL others' live picks (safe
- * default). `origin` is used to reach /api/matches server-side.
+ * Redact OTHER users' Tree-2 (real-data) knockout picks for slots that have NOT
+ * LOCKED yet. A slot locks 60 min before its kickoff; once locked the pick is
+ * frozen, so revealing it can't help a rival — it's shown from the lock instant
+ * on (matching the rule "a pick is shown only once that match's bet is locked").
+ * The viewer's own picks are never redacted. `revealedSlots` is the set of slot
+ * keys whose lock instant has already passed; any key not in it is dropped. On
+ * any failure the caller passes an empty set → ALL others' live picks hidden
+ * (safe default). Display-only: scoring/recompute use the un-redacted data.
  */
 function redactLiveKnockout(
   brackets: Array<Record<string, unknown>>,
   currentUserId: string,
-  matches: RawMatch[],
+  revealedSlots: Set<string>,
 ): void {
-  const scored: FinishedMatch[] = matches
-    .filter((m) => m.homeGoals != null && m.awayGoals != null)
-    .map((m) => ({
-      id: m.id, date: m.date, homeTla: m.homeTla, awayTla: m.awayTla,
-      group: m.group ?? "", stage: m.stage ?? "",
-      homeGoals: m.homeGoals as number, awayGoals: m.awayGoals as number,
-      homePenalties: m.homePenalties ?? null, awayPenalties: m.awayPenalties ?? null,
-    }));
-  const schedule: ScheduleMatch[] = matches.map((m) => ({ homeTla: m.homeTla, awayTla: m.awayTla, date: m.date, status: m.status ?? null }));
-  const tree = resolveKnockoutTree(scored, null);
-  const now = Date.now();
-  // Third-place teams (so third_place picks can also be gated on its kickoff).
-  const thirdMatch = matches.find((m) => m.stage === "THIRD_PLACE" || m.stage === "THIRD");
-  const thirdTeams = thirdMatch ? { team1: thirdMatch.homeTla, team2: thirdMatch.awayTla } : null;
-
-  // Which slots are revealed (their match has kicked off)?
-  const revealed = new Set<string>();
-  for (const key of [...KO_SLOT_KEYS, "third_place"] as (KoSlotKey | "third_place")[]) {
-    const ko = findKickoffForSlot(key, tree, schedule, thirdTeams);
-    if (ko && new Date(ko.date).getTime() <= now) revealed.add(key);
-  }
-
   for (const b of brackets) {
     if (b.user_id === currentUserId) continue;
     const live = (b.knockout_tree_live || {}) as Record<string, unknown>;
     const kept: Record<string, unknown> = {};
-    for (const k of Object.keys(live)) if (revealed.has(k)) kept[k] = live[k];
+    for (const k of Object.keys(live)) if (revealedSlots.has(k)) kept[k] = live[k];
     b.knockout_tree_live = kept;
   }
 }
 
 /**
- * Redact OTHER users' GROUP-STAGE score predictions for matches that haven't
- * kicked off yet. Group scores stay editable during the tournament (per
- * match-day), so an upcoming score must stay secret — otherwise a bettor could
- * copy a rival's injury-informed last-minute pick. Revealed at the match's own
- * kickoff (same semantics as the Tree-2 redaction above). The frozen `order`
- * (the qualification bet) is NOT redacted — it's meant to be visible post-lock.
- * Display-only: scoring/recompute use the un-redacted service-role data, and
- * only finished (already-kicked-off → revealed) matches are ever scored. On any
- * failure (no matches), every score stays hidden — the safe default.
+ * Redact OTHER users' GROUP-STAGE score predictions for match-days that have NOT
+ * LOCKED yet. Group scores stay editable per match-day (the whole day locks 30
+ * min before its first kickoff); until then an upcoming score must stay secret —
+ * otherwise a bettor could copy a rival's injury-informed last-minute pick. Once
+ * a day locks, every score in it is frozen, so it's revealed from that instant.
+ * The frozen `order` (the qualification bet) is NOT redacted — it's meant to be
+ * visible post global lock. `revealedPairs` maps group letter → the set of pair
+ * indices whose match-day has locked; anything else is nulled. Empty map
+ * (failure) → every score hidden (safe). Display-only: scoring/recompute use the
+ * un-redacted service-role data above.
  */
 function redactLiveGroupScores(
   brackets: Array<Record<string, unknown>>,
   currentUserId: string,
-  matches: RawMatch[],
+  revealedPairs: Record<string, Set<number>>,
 ): void {
-  const now = Date.now();
-  // For each group letter, the set of canonical pair indices whose real match
-  // has already kicked off (→ safe to reveal).
-  const kickedOff: Record<string, Set<number>> = {};
-  for (const m of matches) {
-    const letter = normalizeGroupLetter(m.group);
-    if (!letter || !m.homeTla || !m.awayTla) continue;
-    if (new Date(m.date).getTime() > now) continue; // not started yet
-    const pair = matchPairIndex(letter, m.homeTla, m.awayTla);
-    if (!pair) continue;
-    if (!kickedOff[letter]) kickedOff[letter] = new Set();
-    kickedOff[letter].add(pair.pairIdx);
-  }
-
   for (const b of brackets) {
     if (b.user_id === currentUserId) continue;
     const gp = (b.group_predictions || {}) as Record<
@@ -101,7 +61,7 @@ function redactLiveGroupScores(
     >;
     for (const [letter, g] of Object.entries(gp)) {
       if (!g || !Array.isArray(g.scores)) continue;
-      const revealed = kickedOff[letter] ?? new Set<number>();
+      const revealed = revealedPairs[letter] ?? new Set<number>();
       g.scores = g.scores.map((s, idx) =>
         revealed.has(idx) ? s : { home: null, away: null },
       );
@@ -186,10 +146,13 @@ export async function GET() {
       .eq("league_id", leagueId),
   ]);
 
-  // Hide other users' not-yet-kicked-off predictions (display-only redaction):
-  // both Tree-2 knockout picks AND group-stage scores are revealed only once
-  // their real match kicks off. Fetch the schedule once and feed both redactors.
-  // Scoring/recompute use the un-redacted service-role data above.
+  // Hide other users' not-yet-LOCKED predictions (display-only redaction): a
+  // group score is revealed only once its match-day has locked (30 min before
+  // the day's first kickoff) and a Tree-2 knockout pick only once its slot has
+  // locked (60 min before kickoff) — the instant the bet freezes, matching the
+  // rule "a score is shown only when that match's bet is locked". Reuses the
+  // exact lock computation the save RPCs enforce, so reveal, save-gating, and
+  // scoring never disagree. Scoring/recompute use the un-redacted data above.
   const proto = headersList.get("x-forwarded-proto") || "https";
   const host = headersList.get("host") || "";
   const bracketsList = (brackets || []) as Array<Record<string, unknown>>;
@@ -201,8 +164,25 @@ export async function GET() {
     } catch {
       rawMatches = [];
     }
-    redactLiveKnockout(bracketsList, user.id, rawMatches);
-    redactLiveGroupScores(bracketsList, user.id, rawMatches);
+    // A prediction is revealed once its lock instant has passed. On any failure
+    // (no schedule) the sets stay empty → every live pick/score hidden (safe).
+    const nowMs = Date.now();
+    const revealedPairs: Record<string, Set<number>> = {};
+    const revealedSlots = new Set<string>();
+    for (const r of computePredictionLockRows(rawMatches)) {
+      if (Date.parse(r.lock_at) > nowMs) continue;
+      if (r.scope === "group") {
+        const [letter, idxStr] = r.lock_key.split(":");
+        const idx = Number(idxStr);
+        if (!letter || Number.isNaN(idx)) continue;
+        if (!revealedPairs[letter]) revealedPairs[letter] = new Set<number>();
+        revealedPairs[letter].add(idx);
+      } else {
+        revealedSlots.add(r.lock_key);
+      }
+    }
+    redactLiveKnockout(bracketsList, user.id, revealedSlots);
+    redactLiveGroupScores(bracketsList, user.id, revealedPairs);
   }
 
   return NextResponse.json({

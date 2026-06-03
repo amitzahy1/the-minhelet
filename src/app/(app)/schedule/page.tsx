@@ -4,55 +4,14 @@ import { useSharedData } from "@/hooks/useSharedData";
 import { useBettingStore } from "@/stores/betting-store";
 import { isLocked, formatLockDeadline } from "@/lib/constants";
 import { getFlag, getTeamNameHe } from "@/lib/flags";
-import type { BettorProfile, BettorSpecialBets, BettorAdvancement, MatchPrediction } from "@/lib/supabase/shared-data";
+import type { BettorSpecialBets, BettorAdvancement, BettorBracket } from "@/lib/supabase/shared-data";
+import { matchPairIndex, normalizeGroupLetter } from "@/lib/results-hits";
+import { computeMatchDays, dayLockAtForKickoff, type MatchDay } from "@/lib/tournament/group-live-state";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toIsraelTimeShort, toIsraelDate, toIsraelDateKey } from "@/lib/timezone";
 import { TeamLogo } from "@/components/shared/TeamLogo";
-
-// Mock bettor predictions — in production from Supabase
-const MOCK_PREDICTIONS: Record<string, Record<string, string>> = {
-  "דני": {},
-  "יוני": {},
-  "דור דסא": {},
-  "אמית": {},
-  "רון ב": {},
-  "רון ג": {},
-  "רועי": {},
-  "עידן": {},
-  "אוהד": {},
-  "אורי": {},
-};
-
-// Mock special bets per bettor
-const MOCK_SPECIAL_BETS: Record<string, {
-  winner: string;
-  topScorer: { team: string; player: string };
-  topAssists: { team: string; player: string };
-  bestAttack: string;
-  dirtiestTeam: string;
-}> = {
-  "דני": { winner: "ARG", topScorer: { team: "ARG", player: "Lautaro" }, topAssists: { team: "FRA", player: "Griezmann" }, bestAttack: "BRA", dirtiestTeam: "URU" },
-  "יוני": { winner: "FRA", topScorer: { team: "FRA", player: "Mbappé" }, topAssists: { team: "ESP", player: "Pedri" }, bestAttack: "ARG", dirtiestTeam: "MAR" },
-  "דור דסא": { winner: "ARG", topScorer: { team: "BRA", player: "Vinícius Jr." }, topAssists: { team: "GER", player: "Musiala" }, bestAttack: "FRA", dirtiestTeam: "KSA" },
-  "אמית": { winner: "ARG", topScorer: { team: "ARG", player: "Messi" }, topAssists: { team: "ARG", player: "Messi" }, bestAttack: "GER", dirtiestTeam: "MAR" },
-  "רון ב": { winner: "BRA", topScorer: { team: "ENG", player: "Kane" }, topAssists: { team: "BRA", player: "Rodrygo" }, bestAttack: "ESP", dirtiestTeam: "IRN" },
-  "רון ג": { winner: "FRA", topScorer: { team: "POR", player: "Ronaldo" }, topAssists: { team: "FRA", player: "Mbappé" }, bestAttack: "ARG", dirtiestTeam: "AUS" },
-  "רועי": { winner: "ESP", topScorer: { team: "ESP", player: "Morata" }, topAssists: { team: "ENG", player: "Bellingham" }, bestAttack: "FRA", dirtiestTeam: "URU" },
-  "עידן": { winner: "ARG", topScorer: { team: "ARG", player: "Álvarez" }, topAssists: { team: "POR", player: "B. Fernandes" }, bestAttack: "ARG", dirtiestTeam: "CRO" },
-  "אוהד": { winner: "BRA", topScorer: { team: "GER", player: "Havertz" }, topAssists: { team: "NED", player: "Gakpo" }, bestAttack: "BRA", dirtiestTeam: "SEN" },
-  "אורי": { winner: "ENG", topScorer: { team: "ENG", player: "Kane" }, topAssists: { team: "ENG", player: "Saka" }, bestAttack: "ENG", dirtiestTeam: "QAT" },
-};
-
-// Generate mock score predictions for each bettor per match
-function getMockPrediction(bettor: string, matchId: number, homeTla: string, awayTla: string): string {
-  // Deterministic pseudo-random based on bettor name + match id
-  const seed = bettor.charCodeAt(0) + matchId * 7;
-  const h = (seed % 4);
-  const a = ((seed * 3 + 1) % 3);
-  return `${h}-${a}`;
-}
 
 interface Referee { name: string; role: string; nationality: string | null }
 interface Match {
@@ -70,30 +29,45 @@ interface Match {
 
 interface MatchBetsPanelProps {
   match: Match;
-  profiles: BettorProfile[];
+  brackets: BettorBracket[];
   specialBets: BettorSpecialBets[];
   advancements: BettorAdvancement[];
-  predictions: MatchPrediction[];
+  matchDays: MatchDay[];
 }
 
-function MatchBetsPanel({ match, profiles, specialBets, advancements, predictions }: MatchBetsPanelProps) {
+function MatchBetsPanel({ match, brackets, specialBets, advancements, matchDays }: MatchBetsPanelProps) {
   const home = match.homeTla;
   const away = match.awayTla;
-  const groupLetter = match.group?.replace("GROUP_", "") || "";
-  const locked = isLocked();
+  const groupLetter = normalizeGroupLetter(match.group);
+  const globalLocked = isLocked();
 
-  // Real predictions for this match
-  const realPredictions = predictions.filter(p => p.matchId === match.id);
-  const hasPredictions = realPredictions.length > 0;
+  // Per-match score reveal: a group match's score predictions are shown only
+  // once its match-day has LOCKED (30 min before the day's first kickoff) — the
+  // same instant the bets freeze. Until then scores stay secret, even though
+  // advancement + special bets are already public (those lock at the global
+  // June-10 lock). Knockout score picks aren't shown on this page (they live on
+  // the live bracket); their own lock-gating is enforced in /api/shared-bets.
+  const scoreLockAt = groupLetter ? dayLockAtForKickoff(match.date, matchDays) : null;
+  const scoresRevealed = !!scoreLockAt && Date.now() >= new Date(scoreLockAt).getTime();
+
+  // Each bettor's stored score prediction for THIS group match, oriented to the
+  // displayed home/away. Built only once revealed; before that the redacted
+  // server payload carries nulls anyway, so this is defense-in-depth.
+  const pair = groupLetter ? matchPairIndex(groupLetter, home, away) : null;
+  const scorePredictions = scoresRevealed && pair
+    ? brackets.flatMap((b) => {
+        const stored = b.groupPredictions?.[groupLetter]?.scores?.[pair.pairIdx];
+        if (!stored || stored.home === null || stored.away === null) return [];
+        const p = pair.flipped
+          ? { home: stored.away as number, away: stored.home as number }
+          : { home: stored.home as number, away: stored.away as number };
+        return [{ userId: b.userId, name: b.displayName || "ללא שם", home: p.home, away: p.away }];
+      })
+    : [];
 
   // Real special bets available?
   const hasSpecialBets = specialBets.length > 0;
   const hasAdvancements = advancements.length > 0;
-
-  // Bettor list: only real profiles
-  const bettors = hasPredictions
-    ? realPredictions.map(p => p.displayName)
-    : [];
 
   // Find related special bets for this match's teams
   const relatedBets: { bettor: string; type: string; detail: string }[] = [];
@@ -182,37 +156,45 @@ function MatchBetsPanel({ match, profiles, specialBets, advancements, prediction
       className="overflow-hidden"
     >
       <div className="border-t border-gray-100 bg-gray-50/70 px-4 py-3 space-y-4">
-        {!locked && (
+        {!globalLocked && (
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-center">
-            <p className="text-xs font-bold text-amber-700">הניחושים ייחשפו אחרי נעילת ההימורים ({formatLockDeadline()})</p>
+            <p className="text-xs font-bold text-amber-700">
+              ההימורים ייחשפו אחרי הנעילה ({formatLockDeadline()}). ניחושי התוצאה של כל משחק ייחשפו רק עם נעילתו — חצי שעה לפני תחילת יום המשחקים שלו.
+            </p>
           </div>
         )}
-        {/* Score predictions — only after lock */}
-        {locked && <div>
-          <p className="text-xs font-bold text-gray-500 mb-2">ניחושי תוצאה</p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
-            {hasPredictions
-              ? realPredictions.map(p => (
-                <div key={p.userId} className="flex items-center justify-between px-2.5 py-1.5 bg-white rounded-lg border border-gray-200 text-xs">
-                  <span className="font-bold text-gray-800">{p.displayName}</span>
-                  <span className="font-black text-gray-900 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{p.predictedHomeGoals}-{p.predictedAwayGoals}</span>
-                </div>
-              ))
-              : bettors.map(bettor => {
-                const pred = getMockPrediction(bettor, match.id, home, away);
-                return (
-                  <div key={bettor} className="flex items-center justify-between px-2.5 py-1.5 bg-white rounded-lg border border-gray-200 text-xs">
-                    <span className="font-bold text-gray-800">{bettor}</span>
-                    <span className="font-black text-gray-900 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{pred}</span>
-                  </div>
-                );
-              })
-            }
-          </div>
-        </div>}
 
-        {/* Related special bets — only after lock */}
-        {locked && Object.keys(groupedBets).length > 0 && (
+        {/* Score predictions — revealed only once THIS match's bets lock (30 min
+            before its match-day). Group stage only; knockout score picks live on
+            the live bracket, and their reveal is gated in /api/shared-bets. */}
+        {globalLocked && groupLetter && (
+          scoresRevealed ? (
+            <div>
+              <p className="text-xs font-bold text-gray-500 mb-2">ניחושי תוצאה</p>
+              {scorePredictions.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                  {scorePredictions.map((p) => (
+                    <div key={p.userId} className="flex items-center justify-between px-2.5 py-1.5 bg-white rounded-lg border border-gray-200 text-xs">
+                      <span className="font-bold text-gray-800">{p.name}</span>
+                      <span className="font-black text-gray-900 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{p.home}-{p.away}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-gray-400">אף מהמר לא ניחש תוצאה למשחק זה.</p>
+              )}
+            </div>
+          ) : (
+            <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 text-center">
+              <p className="text-xs font-bold text-blue-700">
+                🔒 ניחושי התוצאה ייחשפו עם נעילת ההימורים למשחק זה{scoreLockAt ? ` — ${toIsraelTimeShort(scoreLockAt)}, ${toIsraelDate(scoreLockAt)}` : ""} (חצי שעה לפני תחילת יום המשחקים)
+              </p>
+            </div>
+          )
+        )}
+
+        {/* Related special bets — public after the global lock (they freeze then) */}
+        {globalLocked && Object.keys(groupedBets).length > 0 && (
           <div>
             <p className="text-xs font-bold text-gray-500 mb-2">הימורים מיוחדים הקשורים למשחק</p>
             <div className="space-y-2">
@@ -233,8 +215,8 @@ function MatchBetsPanel({ match, profiles, specialBets, advancements, prediction
           </div>
         )}
 
-        {/* Group info — only after lock, from real advancements */}
-        {locked && groupLetter && hasAdvancements && (
+        {/* Group advancement (עולות) — public after the global lock (allowed) */}
+        {globalLocked && groupLetter && hasAdvancements && (
           <div>
             <p className="text-xs font-bold text-gray-500 mb-2">הימורים על בית {groupLetter}</p>
             <div className="bg-white rounded-lg border border-gray-200 px-3 py-2">
@@ -271,23 +253,28 @@ export default function SchedulePage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("ALL");
   const [expandedMatch, setExpandedMatch] = useState<number | null>(null);
-  const { profiles, specialBets, advancements, predictions, loading: dataLoading } = useSharedData();
+  const { brackets, specialBets, advancements } = useSharedData();
 
   useEffect(() => {
-    fetchMatches();
+    (async () => {
+      try {
+        const res = await fetch("/api/matches");
+        const data = await res.json();
+        setMatches(data.matches || []);
+      } catch {
+        // Fallback — use static sample
+      }
+      setLoading(false);
+    })();
   }, []);
 
-  async function fetchMatches() {
-    try {
-      const res = await fetch("/api/matches");
-      const data = await res.json();
-      setMatches(data.matches || []);
-    } catch {
-      // Fallback — use static sample
-    }
-    setLoading(false);
-  }
 
+  // Per-match-day lock instants (group stage) — drive the per-match score reveal
+  // so a match's score predictions surface only once its day has locked.
+  const matchDays = useMemo(
+    () => computeMatchDays(matches.map((m) => ({ date: m.date, group: m.group, stage: m.stage }))),
+    [matches],
+  );
 
   // Group matches by date
   const grouped: Record<string, Match[]> = {};
@@ -387,10 +374,10 @@ export default function SchedulePage() {
                         {isExpanded && (
                           <MatchBetsPanel
                             match={m}
-                            profiles={profiles}
+                            brackets={brackets}
                             specialBets={specialBets}
                             advancements={advancements}
-                            predictions={predictions}
+                            matchDays={matchDays}
                           />
                         )}
                       </AnimatePresence>

@@ -75,6 +75,19 @@ export interface Match {
 
 // --- Group Stage Types ---
 
+/**
+ * Which criterion separated a team from the one ranked directly above it.
+ * `null` = not a tie (separated on points) or it's the 1st row. Order mirrors
+ * the FIFA WC2026 cascade in `calculateStandings`.
+ */
+export type TiebreakReason =
+  | "h2h" // head-to-head mini-table among the tied teams
+  | "overall_gd" // overall goal difference
+  | "overall_gf" // overall goals scored
+  | "fair_play" // disciplinary / conduct (cards)
+  | "fifa_rank" // FIFA world ranking (2026 final decider, replaced drawing of lots)
+  | "lots"; // team-code stand-in (unreachable while FIFA ranks are unique)
+
 export interface GroupStandingEntry {
   team_id: number;
   team_code: string;
@@ -88,6 +101,15 @@ export interface GroupStandingEntry {
   goal_difference: number;
   points: number;
   fair_play_score: number;
+  /** Why this team sits directly below the one above it. Set by calculateStandings. */
+  tiebreak_reason?: TiebreakReason | null;
+  /**
+   * True when the gap to the team above hinges on the fair-play (cards) step but
+   * no card data was supplied — the order then fell through to FIFA ranking.
+   * The /groups UI (user) and admin live view read this to prompt a deliberate
+   * tiebreak instead of a silent ranking-based one.
+   */
+  needs_card_data?: boolean;
 }
 
 export interface GroupPrediction {

@@ -33,7 +33,7 @@ interface Row {
   gf: number;
 }
 
-function computeGroupRows(groupLetter: string, matches: MatchApi[]): Row[] {
+function computeGroupRows(groupLetter: string, matches: MatchApi[], fairPlay?: Record<string, number>): Row[] {
   const teams = GROUPS[groupLetter] || [];
   // Delegate to the single FIFA standings engine so the 3rd-placed team picked
   // here matches the resolver and the user-facing predicted table.
@@ -50,7 +50,7 @@ function computeGroupRows(groupLetter: string, matches: MatchApi[]): Row[] {
       away_goals: m.awayGoals,
     });
   }
-  const entries = calculateStandings(teams.map((t) => ({ id: t.id, code: t.code })), preds);
+  const entries = calculateStandings(teams.map((t) => ({ id: t.id, code: t.code })), preds, fairPlay ? { fairPlay } : undefined);
   return entries.map((e) => ({
     code: e.team_code,
     group: groupLetter,
@@ -65,10 +65,10 @@ function computeGroupRows(groupLetter: string, matches: MatchApi[]): Row[] {
  * Extract each group's 3rd-placed team into the ranker's input shape.
  * Groups with fewer than 3 teams standing are skipped.
  */
-export function extractThirdsFromMatches(matches: MatchApi[]): ThirdsInputRow[] {
+export function extractThirdsFromMatches(matches: MatchApi[], fairPlay?: Record<string, number>): ThirdsInputRow[] {
   const out: ThirdsInputRow[] = [];
   for (const letter of GROUP_LETTERS) {
-    const rows = computeGroupRows(letter, matches);
+    const rows = computeGroupRows(letter, matches, fairPlay);
     const third = rows[2];
     if (!third) continue;
     out.push({
@@ -78,6 +78,9 @@ export function extractThirdsFromMatches(matches: MatchApi[]): ThirdsInputRow[] 
       points: third.pts,
       goal_difference: third.gd,
       goals_for: third.gf,
+      // Conduct (cards) ranks above FIFA ranking for best-thirds — feed it from
+      // the admin board so a card-decided 3rd-place cutoff ranks correctly.
+      fair_play_score: fairPlay?.[third.code] ?? 0,
       fifa_ranking: getTeamByCode(third.code)?.fifa_ranking,
     });
   }
@@ -91,10 +94,12 @@ interface Props {
    * When set, overrides the automatic top-8 selection.
    */
   overrideGroups?: string[] | null;
+  /** Per-team conduct (cards) for the fair-play tiebreaker; from the dirtiest board. */
+  fairPlay?: Record<string, number>;
 }
 
-export function BestThirdsPanel({ matches, overrideGroups }: Props) {
-  const thirds = useMemo(() => extractThirdsFromMatches(matches), [matches]);
+export function BestThirdsPanel({ matches, overrideGroups, fairPlay }: Props) {
+  const thirds = useMemo(() => extractThirdsFromMatches(matches, fairPlay), [matches, fairPlay]);
   const ranking = useMemo(() => rankBestThirds(thirds), [thirds]);
 
   const overrideSet = overrideGroups && overrideGroups.length === 8
@@ -185,7 +190,7 @@ export function BestThirdsPanel({ matches, overrideGroups }: Props) {
 
       <div className="px-4 py-2 bg-gray-50 border-t border-gray-100 text-[10px] text-gray-500 flex items-center justify-between">
         <span>{qualifiedCount}/8 שלישיים עולות</span>
-        <span>דירוג: נק׳ → הפרש → שערים → כרטיסים → הגרלה</span>
+        <span>דירוג: נק׳ → הפרש → שערים → כרטיסים → דירוג פיפ״א</span>
       </div>
     </div>
   );

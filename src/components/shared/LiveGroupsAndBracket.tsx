@@ -17,6 +17,7 @@ import {
 } from "@/lib/tournament/knockout-derivation";
 import { getThirdsAssignment, DEFAULT_ASSIGNMENT } from "@/lib/tournament/annex-c";
 import { calculateStandings } from "@/lib/tournament/standings";
+import { fairPlayFromBoard } from "@/lib/scoring/knockout-resolver";
 import type { GroupMatchPrediction } from "@/types";
 import { normalizeGroupLetter } from "@/lib/results-hits";
 import { BestThirdsPanel, extractThirdsFromMatches } from "./BestThirdsPanel";
@@ -50,7 +51,7 @@ interface GroupRow {
   pts: number;
 }
 
-function computeGroupStandings(groupLetter: string, matches: MatchApi[]): GroupRow[] {
+function computeGroupStandings(groupLetter: string, matches: MatchApi[], fairPlay?: Record<string, number>): GroupRow[] {
   const teams = GROUPS[groupLetter] || [];
   // Delegate ordering to the single FIFA standings engine so this live view, the
   // /groups predicted table and the knockout resolver always agree on 1st/2nd/3rd.
@@ -67,7 +68,7 @@ function computeGroupStandings(groupLetter: string, matches: MatchApi[]): GroupR
       away_goals: m.awayGoals,
     });
   }
-  const entries = calculateStandings(teams.map((t) => ({ id: t.id, code: t.code })), preds);
+  const entries = calculateStandings(teams.map((t) => ({ id: t.id, code: t.code })), preds, fairPlay ? { fairPlay } : undefined);
   return entries.map((e) => ({
     code: e.team_code,
     name: getTeamByCode(e.team_code)?.name_he ?? e.team_code,
@@ -82,8 +83,8 @@ function computeGroupStandings(groupLetter: string, matches: MatchApi[]): GroupR
   }));
 }
 
-function GroupCard({ letter, matches }: { letter: string; matches: MatchApi[] }) {
-  const standings = useMemo(() => computeGroupStandings(letter, matches), [letter, matches]);
+function GroupCard({ letter, matches, fairPlay }: { letter: string; matches: MatchApi[]; fairPlay?: Record<string, number> }) {
+  const standings = useMemo(() => computeGroupStandings(letter, matches, fairPlay), [letter, matches, fairPlay]);
   const totalPlayed = standings.reduce((s, r) => s + r.played, 0) / 2; // each match counted twice
 
   return (
@@ -162,10 +163,10 @@ interface KOKnown {
   winner: string | null;
 }
 
-function computeGroupOrdersFromStandings(matches: MatchApi[]): Record<string, number[]> {
+function computeGroupOrdersFromStandings(matches: MatchApi[], fairPlay?: Record<string, number>): Record<string, number[]> {
   const groupOrders: Record<string, number[]> = {};
   for (const letter of GROUP_LETTERS) {
-    const standings = computeGroupStandings(letter, matches);
+    const standings = computeGroupStandings(letter, matches, fairPlay);
     // Skip groups that haven't finished all 6 matches (each team plays 3).
     // Without final standings the slot positions (1st/2nd/3rd) are unknown,
     // so the bracket should render "ממתין..." rather than seeded-order teams.
@@ -279,6 +280,10 @@ export function LiveGroupsAndBracket() {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"groups" | "bracket" | "specials">("groups");
   const [thirdsOverride, setThirdsOverride] = useState<string[] | null>(null);
+  // Admin-maintained card tally (the only card source — no bookings feed), used
+  // for the group / best-thirds fair-play tiebreaker so this view agrees with
+  // the scored standings when a tie comes down to cards.
+  const [dirtyBoard, setDirtyBoard] = useState<Array<{ team: string; yellow: number; red: number }>>([]);
   // All bettors' special-bet picks → drives the "who currently holds each bet" view.
   const { specialBets, currentUserId } = useSharedData();
 
@@ -286,14 +291,17 @@ export function LiveGroupsAndBracket() {
     let alive = true;
     (async () => {
       try {
-        const [matchesRes, thirdsRes] = await Promise.all([
+        const [matchesRes, thirdsRes, statsRes] = await Promise.all([
           fetch("/api/matches").then((r) => r.json()).catch(() => ({ matches: [] })),
           fetch("/api/best-thirds").then((r) => r.json()).catch(() => ({ override: null })),
+          fetch("/api/tournament-stats").then((r) => r.json()).catch(() => null),
         ]);
         if (!alive) return;
         setMatches((matchesRes.matches as MatchApi[]) || []);
         const override = thirdsRes?.override;
         setThirdsOverride(Array.isArray(override) && override.length === 8 ? override : null);
+        const board = statsRes?.actuals?.dirtiest_board;
+        if (Array.isArray(board)) setDirtyBoard(board);
       } catch {
         /* keep empty */
       }
@@ -302,7 +310,8 @@ export function LiveGroupsAndBracket() {
     return () => { alive = false; };
   }, []);
 
-  const groupOrders = useMemo(() => computeGroupOrdersFromStandings(matches), [matches]);
+  const fairPlay = useMemo(() => fairPlayFromBoard(dirtyBoard), [dirtyBoard]);
+  const groupOrders = useMemo(() => computeGroupOrdersFromStandings(matches, fairPlay), [matches, fairPlay]);
 
   // Tournament has kicked off once any match is live or finished — used to gate
   // the special-bets tracker so picks aren't surfaced before there's anything
@@ -315,7 +324,7 @@ export function LiveGroupsAndBracket() {
   // Resolve the Annex C 3rd-place assignment from the live ranking + admin
   // override. Falls back to the hardcoded default when no scenario is known.
   const r32Matchups = useMemo(() => {
-    const thirds = extractThirdsFromMatches(matches);
+    const thirds = extractThirdsFromMatches(matches, fairPlay);
     const ranking = rankBestThirds(thirds);
     const qualifiers =
       thirdsOverride && thirdsOverride.length === 8
@@ -334,7 +343,7 @@ export function LiveGroupsAndBracket() {
     }
     const { assignment } = getThirdsAssignment(qualifiers);
     return buildR32Matchups(assignment ?? DEFAULT_ASSIGNMENT);
-  }, [matches, thirdsOverride]);
+  }, [matches, thirdsOverride, fairPlay]);
 
   // Compute KO progression: R32 first, then later rounds depend on previous winners.
   const knockoutWinners: Record<string, string | null> = useMemo(() => {
@@ -397,10 +406,10 @@ export function LiveGroupsAndBracket() {
         <div className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {GROUP_LETTERS.map((l) => (
-              <GroupCard key={l} letter={l} matches={matches} />
+              <GroupCard key={l} letter={l} matches={matches} fairPlay={fairPlay} />
             ))}
           </div>
-          <BestThirdsPanel matches={matches} overrideGroups={thirdsOverride} />
+          <BestThirdsPanel matches={matches} overrideGroups={thirdsOverride} fairPlay={fairPlay} />
           <FdStandingsCheck />
         </div>
       )}

@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { ALL_TEAMS, GROUP_LETTERS } from "@/lib/tournament/groups";
 import { getFlag } from "@/lib/flags";
 import { PlayerSelect } from "@/components/shared/PlayerSelect";
+import { CardTieAlert } from "./CardTieAlert";
 import { MATCHUPS } from "@/lib/matchups";
 import { PENALTIES_LINE, penaltiesResult } from "@/lib/constants";
 
@@ -277,6 +278,7 @@ export function SpecialResultsEntry() {
             והטבלה מסתדרת מהגבוה לנמוך — הנבחרת בראש היא הכסחנית שתיקבע לניקוד.
             <strong> צהוב שני באותו משחק = אדום אחד</strong> (לא לספור פעמיים). אין הזנה אוטומטית — עדכן ידנית במהלך הטורניר.
           </p>
+          <CardTieAlert board={actuals.dirtiest_board} />
           <DirtyBoard rows={actuals.dirtiest_board} onChange={(r) => set("dirtiest_board", r)} />
         </Section>
 

@@ -12,6 +12,7 @@ import {
   resolveKnockoutTree,
   computeGroupOrders,
   findThirdPlaceMatch,
+  fairPlayFromBoard,
   type SlotState,
 } from "./knockout-resolver";
 import { calculateKnockoutScore } from "./calculator";
@@ -146,6 +147,11 @@ export function computeLiveScores(
   options: LiveScoringOptions = {},
 ): Record<string, PlayerScore> {
   const scoring = options.scoring ?? SCORING;
+  // Per-team conduct (cards) for the group/3rd-place fair-play tiebreaker. The
+  // results API has no bookings, so this is the admin-maintained dirtiest board;
+  // undefined when none entered, in which case a card-decided tie falls to FIFA
+  // ranking (and the admin is alerted to enter the cards).
+  const fairPlay = fairPlayFromBoard(options.tournamentActuals?.dirtiest_board);
   const byUser: Record<string, PlayerScore> = {};
   for (const b of brackets) {
     byUser[b.userId] = emptyScore(b.userId, b.displayName || "ללא שם");
@@ -179,7 +185,7 @@ export function computeLiveScores(
   // -------- Knockout scoring --------
   // Resolve the real bracket state once; map each user's slot prediction to
   // the slot's actual outcome and award toto/exact (with penalty handling).
-  const slotTree = resolveKnockoutTree(matches, options.bestThirdsOverride ?? null);
+  const slotTree = resolveKnockoutTree(matches, options.bestThirdsOverride ?? null, fairPlay);
   const thirdPlace = findThirdPlaceMatch(matches);
 
   for (const slot of Object.values(slotTree)) {
@@ -249,7 +255,7 @@ export function computeLiveScores(
 
   // -------- Advancement scoring --------
   if (options.advancements && options.advancements.length > 0) {
-    const groupOrders = computeGroupOrders(matches);
+    const groupOrders = computeGroupOrders(matches, fairPlay);
     const actualGroupOrders = deriveActualGroupOrders(slotTree, groupOrders, GROUPS);
     // 3rd-place qualifiers = teams currently appearing as `?3` resolved slots
     // (their group is among the 8 best thirds). Derive from slotTree: any

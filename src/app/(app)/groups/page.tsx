@@ -17,7 +17,7 @@ import { SwipeableGroups } from "@/components/shared/SwipeableGroups";
 import { SlotMachineScore } from "@/components/shared/SlotMachineScore";
 import { SaveAndContinue } from "@/components/shared/SaveAndContinue";
 import { formatLockDeadline, isLocked } from "@/lib/constants";
-import type { GroupMatchPrediction } from "@/types";
+import type { GroupMatchPrediction, TiebreakReason } from "@/types";
 
 // Groups data from tournament config
 const GROUP_LETTERS = Object.keys(GROUPS_RAW);
@@ -41,11 +41,19 @@ function ScoreStepper({ value, onChange, disabled }: { value: number | null; onC
   );
 }
 
-function tiebreakerLabel(curr: { goal_difference: number; goals_for: number; points: number; team_code: string }, prev: { goal_difference: number; goals_for: number; points: number; team_code: string }): string | null {
-  if (curr.points !== prev.points) return null;
-  if (curr.goal_difference !== prev.goal_difference) return "הפרש שערים";
-  if (curr.goals_for !== prev.goals_for) return "שערי בית";
-  return "מפגש ישיר";
+// The deciding criterion now comes straight from the standings engine
+// (row.tiebreak_reason) — no re-guessing from the visible columns, which used to
+// mislabel FIFA-ranking / fair-play gaps as "מפגש ישיר".
+function tiebreakerLabel(reason: TiebreakReason | null | undefined): string | null {
+  switch (reason) {
+    case "h2h": return "מפגש ישיר";
+    case "overall_gd": return "הפרש שערים";
+    case "overall_gf": return "שערי בית";
+    case "fair_play": return "הוגנות (כרטיסים)";
+    case "fifa_rank": return "דירוג פיפ״א";
+    case "lots": return "הגרלה";
+    default: return null;
+  }
 }
 
 function GroupView({ groupId }: { groupId: string }) {
@@ -122,6 +130,19 @@ function GroupView({ groupId }: { groupId: string }) {
       predictions
     );
   }, [groupState.scores, matchups, teams]);
+
+  // Consequential card-decided ties in the predicted table. `needs_card_data`
+  // sits on the LOWER team of a gap that fell through to FIFA ranking because
+  // cards (which users can't predict) would be the next discriminator. We only
+  // surface the boundaries that matter: 1st↔2nd (bracket seeding) and 2nd↔3rd
+  // (advance vs out). 3rd↔4th is ignored — both are out anyway.
+  const cardTieWarnings = useMemo(() => {
+    if (!standings) return [] as { advancing: string; rival: string; boundary: "1-2" | "2-3" }[];
+    const out: { advancing: string; rival: string; boundary: "1-2" | "2-3" }[] = [];
+    if (standings[1]?.needs_card_data) out.push({ advancing: standings[0].team_code, rival: standings[1].team_code, boundary: "1-2" });
+    if (standings[2]?.needs_card_data) out.push({ advancing: standings[1].team_code, rival: standings[2].team_code, boundary: "2-3" });
+    return out;
+  }, [standings]);
 
   // PRE-TOURNAMENT ONLY: write the computed standings back into `group.order`
   // so the bracket page reads the predicted qualifiers. In LIVE mode the order
@@ -242,9 +263,9 @@ function GroupView({ groupId }: { groupId: string }) {
                   {(standings || teams.map(t => ({
                     team_code: t.code, position: 0, played: 0, won: 0, drawn: 0, lost: 0,
                     goals_for: 0, goals_against: 0, goal_difference: 0, points: 0, team_id: t.id, fair_play_score: 0,
-                  }))).map((row, i, arr) => {
-                    const prev = i > 0 ? arr[i - 1] : null;
-                    const tbLabel = prev && standings ? tiebreakerLabel(row, prev) : null;
+                    tiebreak_reason: null as TiebreakReason | null, needs_card_data: false,
+                  }))).map((row, i) => {
+                    const tbLabel = standings ? tiebreakerLabel(row.tiebreak_reason) : null;
                     return (
                     <tr key={row.team_code} className={`border-t border-gray-100 ${standings && i < 2 ? "bg-green-50/40" : standings && i === 2 ? "bg-amber-50/30" : ""}`}>
                       <td className="py-3 ps-4 font-bold text-gray-300 text-base">
@@ -272,6 +293,64 @@ function GroupView({ groupId }: { groupId: string }) {
                 </tbody>
               </table>
             </div>
+          )}
+
+          {/* Card-tie warning (pre-tournament only): the order hinges on cards,
+              which can't be predicted, so it fell to FIFA ranking. Non-blocking. */}
+          {!liveMode && cardTieWarnings.length > 0 && (
+            <div className="mt-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3">
+              <p className="text-sm font-bold text-amber-900">⚠️ שובר שוויון על כרטיסים</p>
+              {cardTieWarnings.map((w) => (
+                <p key={w.boundary} className="text-[13px] text-amber-800 mt-1 leading-snug">
+                  <strong>{getTeam(w.advancing).name_he}</strong> ו<strong>{getTeam(w.rival).name_he}</strong> שוות לגמרי בהימור שלך (נקודות, מפגש ישיר, הפרש שערים ושערים).{" "}
+                  {w.boundary === "2-3"
+                    ? <>מי שעולה ייקבע לפי כרטיסים — ואי אפשר להמר על כרטיסים. כרגע <strong>{getTeam(w.advancing).name_he}</strong> עולה לפי דירוג פיפ״א.</>
+                    : <>מקום 1 מול 2 ייקבע לפי כרטיסים. כרגע <strong>{getTeam(w.advancing).name_he}</strong> ראשונה לפי דירוג פיפ״א.</>}
+                </p>
+              ))}
+              <p className="text-[12px] text-amber-700 mt-1.5">רוצה לקבוע בעצמך? שנה תוצאה כך שלא יהיה תיקו מוחלט.</p>
+            </div>
+          )}
+
+          {/* How advancers from the group are counted (under the table, pre-tournament). */}
+          {!liveMode && (
+            <details className="mt-3 rounded-xl border border-blue-200 bg-blue-50/60 px-4 py-3 text-sm">
+              <summary className="cursor-pointer font-bold text-blue-900 flex items-center gap-2 list-none">
+                <span>ℹ️ איך נספרות עולות מהבית?</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="transition-transform">
+                  <path d="M6 9l6 6 6-6"/>
+                </svg>
+              </summary>
+              <div className="mt-2 space-y-1.5 text-blue-900 text-[13px] leading-relaxed">
+                <p>
+                  מונדיאל 2026 — 48 נבחרות, 12 בתים של 4. לשלב 32 הגדולות עולות 32 נבחרות:
+                  1-2 מכל בית (24 נבחרות) + 8 המקומות השלישיים הטובים ביותר (מתוך 12).
+                </p>
+                <p className="font-bold">
+                  ✓ כל נבחרת שהיגיעה לשלב 32 הגדולות נחשבת &quot;עולה&quot; — גם אם עלתה ממקום שלישי.
+                </p>
+                <p className="text-blue-800/90">
+                  אם הימרת שקבוצה X תעלה מהבית והיא באמת הגיעה ל-32 הגדולות (בכל מסלול), תקבל/י ניקוד:
+                  שתי הנבחרות שהימרת עליהן עלו → <b>עולה מדויקת</b>, אחת מהן עלתה → <b>חלקי</b>.
+                </p>
+              </div>
+            </details>
+          )}
+
+          {/* How ties are broken (FIFA 2026 order) — shown under the table. */}
+          {standings && (
+            <details className="mt-3 rounded-xl border border-gray-200 bg-gray-50/60 px-4 py-2.5">
+              <summary className="text-[13px] font-semibold text-gray-600 cursor-pointer">איך נקבע שובר השוויון בין קבוצות עם אותן נקודות?</summary>
+              <ol className="text-[12px] text-gray-600 mt-2 space-y-0.5 list-decimal pe-5">
+                <li>נקודות</li>
+                <li>מפגש ישיר — נקודות → הפרש שערים → שערים, רק במשחקים בין הקבוצות השוות</li>
+                <li>הפרש שערים כללי</li>
+                <li>שערים כללי</li>
+                <li>הוגנות — פחות כרטיסים (צהוב=1, אדום=3)</li>
+                <li>דירוג פיפ״א</li>
+              </ol>
+              <p className="text-[11px] text-gray-400 mt-1.5">לפי תקנון פיפ״א 2026 — המפגש הישיר קודם להפרש השערים. כרטיסים אינם ניתנים לחיזוי, ולכן תיקו שמגיע לשלב הכרטיסים מוכרע בהימור שלך לפי דירוג פיפ״א.</p>
+            </details>
           )}
 
         </div>
@@ -568,31 +647,6 @@ export default function GroupsPage() {
             : "סדרו את הקבוצות, הזינו תוצאות — הטבלה מתעדכנת אוטומטית לפי חוקי FIFA"}
         </p>
       </div>
-
-      {/* Advancement scoring rule (Model B — lenient) — pre-tournament only */}
-      {!liveMode && (
-      <details className="mb-4 rounded-xl border border-blue-200 bg-blue-50/60 px-4 py-3 text-sm">
-        <summary className="cursor-pointer font-bold text-blue-900 flex items-center gap-2 list-none">
-          <span>ℹ️ איך נספרות עולות מהבית?</span>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="transition-transform">
-            <path d="M6 9l6 6 6-6"/>
-          </svg>
-        </summary>
-        <div className="mt-2 space-y-1.5 text-blue-900 text-[13px] leading-relaxed">
-          <p>
-            מונדיאל 2026 — 48 נבחרות, 12 בתים של 4. לשלב 32 הגדולות עולות 32 נבחרות:
-            1-2 מכל בית (24 נבחרות) + 8 המקומות השלישיים הטובים ביותר (מתוך 12).
-          </p>
-          <p className="font-bold">
-            ✓ כל נבחרת שהיגיעה לשלב 32 הגדולות נחשבת &quot;עולה&quot; — גם אם עלתה ממקום שלישי.
-          </p>
-          <p className="text-blue-800/90">
-            אם הימרת שקבוצה X תעלה מהבית והיא באמת הגיעה ל-32 הגדולות (בכל מסלול), תקבל/י ניקוד:
-            שתי הנבחרות שהימרת עליהן עלו → <b>עולה מדויקת</b>, אחת מהן עלתה → <b>חלקי</b>.
-          </p>
-        </div>
-      </details>
-      )}
 
       {/* Peer pressure — who hasn't finished? (pre-tournament only) */}
       {!liveMode && completedGroups < 12 && (

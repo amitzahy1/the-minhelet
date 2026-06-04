@@ -78,6 +78,68 @@ describe("calculateStandings", () => {
     }
   });
 
+  it("ranks head-to-head ABOVE overall goal difference (FIFA 2026 order)", () => {
+    // BRA and ARG both finish on 6 pts. ARG has the far better OVERALL goal
+    // difference (+7 vs +1), but BRA won their head-to-head 1-0. Under the 2026
+    // rules H2H outranks overall GD, so BRA must finish above ARG. (Under the old
+    // 2022 order this would have put ARG first — that was the bug.)
+    const matches: GroupMatchPrediction[] = [
+      makeMatch("BRA", "ARG", 1, 0, 1), // BRA beat ARG (head-to-head)
+      makeMatch("GER", "BRA", 1, 0, 2), // BRA lost to GER
+      makeMatch("BRA", "JPN", 1, 0, 3),
+      makeMatch("ARG", "GER", 5, 0, 4), // ARG piles on GD
+      makeMatch("ARG", "JPN", 3, 0, 5),
+      makeMatch("GER", "JPN", 0, 0, 6),
+    ];
+    const s = calculateStandings(teams, matches);
+    expect(s[0].team_code).toBe("BRA");
+    expect(s[1].team_code).toBe("ARG");
+    expect(s[0].points).toBe(6);
+    expect(s[1].points).toBe(6);
+    expect(s[1].goal_difference).toBeGreaterThan(s[0].goal_difference); // ARG GD better, still 2nd
+    expect(s[1].tiebreak_reason).toBe("h2h");
+  });
+
+  it("flags needs_card_data when a dead-even tie falls through to FIFA ranking", () => {
+    // Group A all 0-0 → every team 3 pts, GD 0, GF 0, H2H level. With no card
+    // data the only remaining discriminator (fair play) can't be evaluated, so
+    // the order falls to FIFA ranking and each gap is flagged for a deliberate
+    // tiebreak. MEX(15) < KOR(25) < CZE(41) < RSA(60).
+    const a = [
+      { id: 769, code: "MEX" }, { id: 772, code: "KOR" },
+      { id: 798, code: "CZE" }, { id: 774, code: "RSA" },
+    ];
+    const draws: GroupMatchPrediction[] = [
+      makeMatch("MEX", "KOR", 0, 0, 1), makeMatch("CZE", "RSA", 0, 0, 2),
+      makeMatch("MEX", "CZE", 0, 0, 3), makeMatch("RSA", "KOR", 0, 0, 4),
+      makeMatch("RSA", "MEX", 0, 0, 5), makeMatch("KOR", "CZE", 0, 0, 6),
+    ];
+    const s = calculateStandings(a, draws);
+    expect(s.map((r) => r.team_code)).toEqual(["MEX", "KOR", "CZE", "RSA"]);
+    expect(s[0].needs_card_data).toBe(false); // 1st row, nothing above it
+    expect(s.slice(1).every((r) => r.needs_card_data === true)).toBe(true);
+    expect(s[1].tiebreak_reason).toBe("fifa_rank");
+  });
+
+  it("uses supplied fair-play scores BEFORE FIFA ranking (and clears needs_card_data)", () => {
+    const a = [
+      { id: 769, code: "MEX" }, { id: 772, code: "KOR" },
+      { id: 798, code: "CZE" }, { id: 774, code: "RSA" },
+    ];
+    const draws: GroupMatchPrediction[] = [
+      makeMatch("MEX", "KOR", 0, 0, 1), makeMatch("CZE", "RSA", 0, 0, 2),
+      makeMatch("MEX", "CZE", 0, 0, 3), makeMatch("RSA", "KOR", 0, 0, 4),
+      makeMatch("RSA", "MEX", 0, 0, 5), makeMatch("KOR", "CZE", 0, 0, 6),
+    ];
+    // MEX (best FIFA rank) picked up 2 conduct points — the others are clean. Fair
+    // play ranks above FIFA ranking, so MEX drops to last; the clean three sort
+    // among themselves by FIFA ranking.
+    const s = calculateStandings(a, draws, { fairPlay: { MEX: 2, KOR: 0, CZE: 0, RSA: 0 } });
+    expect(s.map((r) => r.team_code)).toEqual(["KOR", "CZE", "RSA", "MEX"]);
+    expect(s[3].tiebreak_reason).toBe("fair_play"); // MEX below RSA on cards
+    expect(s.every((r) => r.needs_card_data === false)).toBe(true);
+  });
+
   it("handles all draws correctly", () => {
     const matches: GroupMatchPrediction[] = [
       makeMatch("BRA", "ARG", 1, 1, 1),

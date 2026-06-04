@@ -19,6 +19,7 @@ import { useBettingStore } from "@/stores/betting-store";
 import {
   resolveKnockoutTree,
   computeGroupOrders,
+  fairPlayFromBoard,
   type KoSlotKey,
   type ScheduleMatch,
 } from "@/lib/scoring/knockout-resolver";
@@ -56,6 +57,7 @@ export default function KnockoutLivePage() {
 
   const [matches, setMatches] = useState<ApiMatch[]>([]);
   const [thirdsOverride, setThirdsOverride] = useState<string[] | null>(null);
+  const [dirtyBoard, setDirtyBoard] = useState<Array<{ team: string; yellow: number; red: number }>>([]);
   const [loading, setLoading] = useState(true);
   const [now, setNow] = useState(() => Date.now());
 
@@ -64,14 +66,17 @@ export default function KnockoutLivePage() {
   useEffect(() => {
     let alive = true;
     const load = async () => {
-      const [m, t] = await Promise.all([
+      const [m, t, s] = await Promise.all([
         fetch("/api/matches").then((r) => r.json()).catch(() => ({ matches: [] })),
         fetch("/api/best-thirds").then((r) => r.json()).catch(() => ({ override: null })),
+        fetch("/api/tournament-stats").then((r) => r.json()).catch(() => null),
       ]);
       if (!alive) return;
       setMatches((m.matches as ApiMatch[]) || []);
       const ov = t?.override;
       setThirdsOverride(Array.isArray(ov) && ov.length === 8 ? ov : null);
+      const board = s?.actuals?.dirtiest_board;
+      if (Array.isArray(board)) setDirtyBoard(board);
       setNow(Date.now());
       setLoading(false);
     };
@@ -114,8 +119,11 @@ export default function KnockoutLivePage() {
     [matches],
   );
 
-  const tree = useMemo(() => resolveKnockoutTree(scored, thirdsOverride), [scored, thirdsOverride]);
-  const groupStageComplete = useMemo(() => Object.keys(computeGroupOrders(scored)).length === 12, [scored]);
+  // Card data (admin dirtiest board) so a card-decided group tie seeds the real
+  // bracket the same way the scorer does. Undefined when none entered.
+  const fairPlay = useMemo(() => fairPlayFromBoard(dirtyBoard), [dirtyBoard]);
+  const tree = useMemo(() => resolveKnockoutTree(scored, thirdsOverride, fairPlay), [scored, thirdsOverride, fairPlay]);
+  const groupStageComplete = useMemo(() => Object.keys(computeGroupOrders(scored, fairPlay)).length === 12, [scored, fairPlay]);
   const champion = tree.final?.winner ?? knockoutLive.final?.winner ?? null;
   const filled = Object.values(knockoutLive).filter((m) => m.winner).length;
 

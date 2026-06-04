@@ -35,9 +35,27 @@ interface GroupRow {
   pts: number;
 }
 
+/**
+ * Per-team conduct score from the admin-maintained dirtiest board
+ * (yellow = 1, red = 3; lower = cleaner = better — matches the rules page and
+ * SpecialResultsEntry). Returns `undefined` for an empty/absent board so the
+ * standings engine treats fair play as "unknown" (and flags `needs_card_data`)
+ * rather than as a real 0-0 tie. The free-tier results API carries no bookings,
+ * so this admin board is the ONLY source of cards.
+ */
+export function fairPlayFromBoard(
+  board: Array<{ team: string; yellow: number; red: number }> | null | undefined,
+): Record<string, number> | undefined {
+  if (!board || board.length === 0) return undefined;
+  const out: Record<string, number> = {};
+  for (const r of board) out[r.team] = (r.yellow ?? 0) * 1 + (r.red ?? 0) * 3;
+  return out;
+}
+
 function computeGroupStandings(
   groupLetter: string,
   matches: FinishedMatch[],
+  fairPlay?: Record<string, number>,
 ): GroupRow[] {
   const teams = GROUPS[groupLetter] || [];
   // Delegate to the single FIFA standings engine (full tiebreakers incl. the
@@ -57,6 +75,7 @@ function computeGroupStandings(
   const entries = calculateStandings(
     teams.map((t) => ({ id: t.id, code: t.code })),
     preds,
+    fairPlay ? { fairPlay } : undefined,
   );
   return entries.map((e) => ({
     code: e.team_code,
@@ -72,10 +91,10 @@ function computeGroupStandings(
 }
 
 /** Each group's 3rd-placed team, formatted for the best-thirds ranker. */
-function extractThirds(matches: FinishedMatch[]): ThirdsInputRow[] {
+function extractThirds(matches: FinishedMatch[], fairPlay?: Record<string, number>): ThirdsInputRow[] {
   const out: ThirdsInputRow[] = [];
   for (const letter of GROUP_LETTERS) {
-    const standings = computeGroupStandings(letter, matches);
+    const standings = computeGroupStandings(letter, matches, fairPlay);
     const third = standings[2];
     if (!third) continue;
     out.push({
@@ -85,6 +104,9 @@ function extractThirds(matches: FinishedMatch[]): ThirdsInputRow[] {
       points: third.pts,
       goal_difference: third.gd,
       goals_for: third.gf,
+      // Best-thirds ranking uses conduct (cards) before FIFA ranking — feed it
+      // from the admin board so a card-decided 3rd-place cutoff ranks correctly.
+      fair_play_score: fairPlay?.[third.code] ?? 0,
       fifa_ranking: getTeamByCode(third.code)?.fifa_ranking,
     });
   }
@@ -96,10 +118,13 @@ function extractThirds(matches: FinishedMatch[]): ThirdsInputRow[] {
  * are all FINISHED (each team played 3). Groups with incomplete play are
  * omitted, so downstream slot resolution returns null for those positions.
  */
-export function computeGroupOrders(matches: FinishedMatch[]): Record<string, number[]> {
+export function computeGroupOrders(
+  matches: FinishedMatch[],
+  fairPlay?: Record<string, number>,
+): Record<string, number[]> {
   const out: Record<string, number[]> = {};
   for (const letter of GROUP_LETTERS) {
-    const standings = computeGroupStandings(letter, matches);
+    const standings = computeGroupStandings(letter, matches, fairPlay);
     const isComplete = standings.length === 4 && standings.every((r) => r.played === 3);
     if (!isComplete) continue;
     const idxByCode: Record<string, number> = {};
@@ -207,8 +232,9 @@ function findMatchForPair(
 export function resolveKnockoutTree(
   matches: FinishedMatch[],
   thirdsOverride?: string[] | null,
+  fairPlay?: Record<string, number>,
 ): Record<KoSlotKey, SlotState> {
-  const groupOrders = computeGroupOrders(matches);
+  const groupOrders = computeGroupOrders(matches, fairPlay);
   const groupState = asGroupState(groupOrders);
 
   // Decide on the third-place qualifier set.
@@ -216,7 +242,7 @@ export function resolveKnockoutTree(
   if (thirdsOverride && thirdsOverride.length === 8) {
     assignment = getThirdsAssignment(thirdsOverride).assignment ?? DEFAULT_ASSIGNMENT;
   } else {
-    const ranking = rankBestThirds(extractThirds(matches));
+    const ranking = rankBestThirds(extractThirds(matches, fairPlay));
     if (ranking.qualifiedGroups.length === 8) {
       assignment = getThirdsAssignment(ranking.qualifiedGroups).assignment ?? DEFAULT_ASSIGNMENT;
     } else {

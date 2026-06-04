@@ -343,6 +343,7 @@ export default function StandingsPage() {
             most_prolific_group: a.most_prolific_group ?? null,
             driest_group: a.driest_group ?? null,
             dirtiest_team: a.dirtiest_team ?? null,
+            dirtiest_board: a.dirtiest_board ?? null,
             // tournament_actuals stores one result per duel (3 fixtures); the
             // scorer scores each independently at SCORING.specials.matchup.
             matchup_result_1: a.matchup_result_1 ?? null,

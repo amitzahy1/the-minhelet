@@ -33,6 +33,12 @@ export interface TournamentActuals {
   most_prolific_group: string | null;
   driest_group: string | null;
   dirtiest_team: string | null;
+  /**
+   * Admin-maintained per-team card tally (yellow=1, red=3). Feeds the group /
+   * best-thirds fair-play tiebreaker via `fairPlayFromBoard` — the results API
+   * has no bookings, so this is the only card source. Optional/null when unset.
+   */
+  dirtiest_board?: Array<{ team: string; yellow: number; red: number }> | null;
   /** One result per player-duel matchup (3 fixtures). Each scored independently. */
   matchup_result_1: "1" | "X" | "2" | null;
   matchup_result_2: "1" | "X" | "2" | null;

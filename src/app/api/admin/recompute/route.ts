@@ -187,6 +187,7 @@ export async function POST() {
         most_prolific_group: stats.actuals.most_prolific_group,
         driest_group: stats.actuals.driest_group,
         dirtiest_team: stats.actuals.dirtiest_team,
+        dirtiest_board: stats.actuals.dirtiest_board ?? null,
         matchup_result_1: stats.actuals.matchup_result_1 ?? null,
         matchup_result_2: stats.actuals.matchup_result_2 ?? null,
         matchup_result_3: stats.actuals.matchup_result_3 ?? null,

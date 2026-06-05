@@ -188,7 +188,10 @@ export function BracketLayout({ getTeams, renderMatch, champion }: BracketLayout
           On mobile it overflows and scrolls horizontally rather than collapsing
           into a round-by-round list. */}
       <div className="overflow-x-auto pb-4" dir="ltr">
-        <div className="flex items-stretch justify-center gap-0 mx-auto" style={{ minHeight: "700px", minWidth: "1150px" }}>
+        {/* min-w-max: the row grows to fit the whole tree, so on narrow screens
+            it scrolls from the left edge instead of centering and clipping the
+            left side off-screen (which `mx-auto`/`justify-center` did). */}
+        <div className="flex items-stretch justify-center gap-0 min-w-max" style={{ minHeight: "700px" }}>
           <RoundCol label="R32" width="w-[120px]">{R32L.map((k) => cell(k, "sm"))}</RoundCol>
           <Connector />
           <RoundCol label="R16" width="w-[130px]">{R16L.map((k) => cell(k, "md"))}</RoundCol>

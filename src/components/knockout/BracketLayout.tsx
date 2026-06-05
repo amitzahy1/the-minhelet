@@ -13,7 +13,6 @@
 // ============================================================================
 
 import { memo } from "react";
-import { useState } from "react";
 import { getFlag } from "@/lib/flags";
 
 export type KOValue = { score1: number | null; score2: number | null; winner: string | null };
@@ -178,42 +177,17 @@ export interface BracketLayoutProps {
 
 /** Desktop full tree + mobile round tabs. Both trees share this. */
 export function BracketLayout({ getTeams, renderMatch, champion }: BracketLayoutProps) {
-  const [round, setRound] = useState("R32");
-  const rounds = ["R32", "R16", "QF", "SF", "Final"];
   const cell = (key: string, size: "sm" | "md") => renderMatch(key, getTeams(key), size);
 
   return (
     <>
-      {/* Mobile: round tabs */}
-      <div className="sm:hidden mb-4">
-        <div className="flex gap-1 mb-4 overflow-x-auto">
-          {rounds.map((r) => (
-            <button key={r} onClick={() => setRound(r)}
-              className={`px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap transition-all ${round === r ? "bg-gray-900 text-white shadow-md" : "bg-gray-100 text-gray-500"}`}>
-              {r === "Final" ? "גמר" : r}
-            </button>
-          ))}
-        </div>
-        <div className="space-y-2">
-          {round === "R32" && (<><p className="text-sm text-gray-500 mb-2">16 משחקים — שלב 32 הגדולות</p>{[...R32L, ...R32R].map((k) => cell(k, "md"))}</>)}
-          {round === "R16" && (<><p className="text-sm text-gray-500 mb-2">8 משחקים — שמינית גמר</p>{[...R16L, ...R16R].map((k) => cell(k, "md"))}</>)}
-          {round === "QF" && (<><p className="text-sm text-gray-500 mb-2">4 משחקים — רבע גמר</p>{[...QFL, ...QFR].map((k) => cell(k, "md"))}</>)}
-          {round === "SF" && (<><p className="text-sm text-gray-500 mb-2">2 משחקים — חצי גמר</p>{cell("sfl_0", "md")}{cell("sfr_0", "md")}</>)}
-          {round === "Final" && (
-            <><p className="text-sm text-gray-500 mb-2">גמר המונדיאל</p>{cell("final", "md")}
-              {champion && (
-                <div className="mt-4 rounded-xl border-2 border-amber-300 bg-amber-50 p-4 text-center">
-                  <p className="text-base text-amber-700 font-bold">אלוף העולם 2026</p>
-                  <p className="text-2xl font-black text-amber-900 mt-1">{getFlag(champion)} {champion}</p>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      </div>
+      {/* Mobile hint — the full tree is wide, so it scrolls sideways. */}
+      <p className="sm:hidden text-center text-xs text-gray-400 mb-2">← גללו לצדדים לראות את כל העץ →</p>
 
-      {/* Desktop: full bracket */}
-      <div className="hidden sm:block overflow-x-auto pb-4" dir="ltr">
+      {/* Full R32→Final bracket — same professional tree on every screen size.
+          On mobile it overflows and scrolls horizontally rather than collapsing
+          into a round-by-round list. */}
+      <div className="overflow-x-auto pb-4" dir="ltr">
         <div className="flex items-stretch justify-center gap-0 mx-auto" style={{ minHeight: "700px", minWidth: "1150px" }}>
           <RoundCol label="R32" width="w-[120px]">{R32L.map((k) => cell(k, "sm"))}</RoundCol>
           <Connector />

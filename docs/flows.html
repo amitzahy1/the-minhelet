@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מפת התהליכים — מונדיאל 2026</title>
+<style>
+  :root {
+    --bg: #0b1220;
+    --card: #131c2e;
+    --card2: #1a2640;
+    --line: #27344f;
+    --txt: #e7ecf5;
+    --muted: #9aa7c0;
+    --green: #34d399;
+    --amber: #fbbf24;
+    --red: #f87171;
+    --blue: #60a5fa;
+    --purple: #a78bfa;
+    --accent: #38bdf8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", "Heebo", Arial, sans-serif;
+    background: linear-gradient(180deg, #0b1220 0%, #0e1626 100%);
+    color: var(--txt);
+    line-height: 1.65;
+    padding: 0 0 80px;
+  }
+  header {
+    text-align: center;
+    padding: 48px 20px 28px;
+    background: radial-gradient(ellipse at top, #16243f 0%, transparent 70%);
+    border-bottom: 1px solid var(--line);
+  }
+  header h1 { margin: 0 0 8px; font-size: 2.1rem; letter-spacing: -0.5px; }
+  header p { margin: 0; color: var(--muted); font-size: 1.05rem; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+  section { margin-top: 44px; }
+  h2 {
+    font-size: 1.5rem;
+    margin: 0 0 18px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--line);
+    display: flex; align-items: center; gap: 10px;
+  }
+  h2 .num {
+    background: var(--accent); color: #06121f;
+    width: 30px; height: 30px; border-radius: 8px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 1rem; font-weight: 700; flex: 0 0 auto;
+  }
+  .lead { color: var(--muted); margin-top: -6px; margin-bottom: 18px; }
+
+  /* Status banner */
+  .banner {
+    background: linear-gradient(90deg, #1e293f, #16213a);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 20px 24px;
+    margin-top: 24px;
+    display: flex; flex-wrap: wrap; gap: 18px; align-items: center;
+  }
+  .banner .lock { font-size: 2rem; }
+  .banner b { color: var(--amber); }
+
+  /* Timeline */
+  .timeline { position: relative; padding-inline-start: 30px; margin-top: 10px; }
+  .timeline::before {
+    content: ""; position: absolute; inset-inline-start: 8px; top: 6px; bottom: 6px;
+    width: 2px; background: var(--line);
+  }
+  .tl-item { position: relative; margin-bottom: 24px; }
+  .tl-item::before {
+    content: ""; position: absolute; inset-inline-start: -28px; top: 6px;
+    width: 14px; height: 14px; border-radius: 50%;
+    background: var(--accent); border: 3px solid var(--bg);
+  }
+  .tl-item.open::before { background: var(--green); }
+  .tl-item.lock::before { background: var(--red); }
+  .tl-item.live::before { background: var(--amber); }
+  .tl-date { font-weight: 700; color: var(--accent); font-size: 0.95rem; }
+  .tl-item.lock .tl-date { color: var(--red); }
+  .tl-item.live .tl-date { color: var(--amber); }
+  .tl-body { color: var(--muted); }
+  .tl-body b { color: var(--txt); }
+
+  /* Cards grid */
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+  .card {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 14px; padding: 20px;
+  }
+  .card h3 { margin: 0 0 6px; font-size: 1.15rem; display: flex; align-items: center; gap: 8px; }
+  .card .tag {
+    display: inline-block; font-size: 0.72rem; padding: 3px 10px; border-radius: 999px;
+    font-weight: 700; margin-bottom: 10px;
+  }
+  .tag.pre { background: #1e3a5f; color: var(--blue); }
+  .tag.live { background: #4a3410; color: var(--amber); }
+  .tag.ko { background: #3b2a52; color: var(--purple); }
+  .card ul { margin: 8px 0 0; padding-inline-start: 18px; color: var(--muted); }
+  .card ul li { margin-bottom: 4px; }
+  .card .when { margin-top: 12px; font-size: 0.88rem; padding: 8px 12px; border-radius: 8px; }
+  .when.closes { background: #3a1d22; color: #fca5a5; }
+  .when.opens { background: #16331f; color: #86efac; }
+
+  /* Lock rules table */
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 0.93rem; }
+  th, td { text-align: right; padding: 11px 14px; border-bottom: 1px solid var(--line); }
+  th { color: var(--accent); font-weight: 700; background: var(--card2); }
+  tr:hover td { background: #16213a; }
+  td.ok { color: var(--green); font-weight: 600; }
+  td.no { color: var(--red); font-weight: 600; }
+
+  .pill { display:inline-block; padding:2px 9px; border-radius:999px; font-size:0.78rem; font-weight:700; }
+  .pill.green { background:#16331f; color: var(--green); }
+  .pill.red { background:#3a1d22; color: var(--red); }
+  .pill.amber { background:#3a2e10; color: var(--amber); }
+
+  .note {
+    background: var(--card2); border-inline-start: 4px solid var(--accent);
+    border-radius: 0 10px 10px 0; padding: 14px 18px; margin-top: 16px; color: var(--muted);
+  }
+  .note b { color: var(--txt); }
+  footer { text-align:center; color: var(--muted); margin-top: 60px; font-size: 0.85rem; }
+  code { background: #0a1322; padding: 1px 6px; border-radius: 5px; color: var(--accent); font-size: 0.85em; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⚽ מפת התהליכים של האתר — מונדיאל 2026</h1>
+  <p>מתי אפשר לערוך הימורים, מתי הם ננעלים, ומה השלבים</p>
+</header>
+
+<div class="wrap">
+
+  <!-- Key date banner -->
+  <div class="banner">
+    <span class="lock">🔒</span>
+    <div>
+      <div style="font-size:1.15rem;">הנעילה הגדולה (Global Lock)</div>
+      <div style="color:var(--muted);">כל ההימורים שלפני הטורניר ננעלים ב־<b>10.06.2026, 17:00</b> שעון ישראל (14:00 UTC).<br>
+      אחרי הרגע הזה אי אפשר לשנות אותם יותר — חוץ מתוצאות משחקי הבתים, שנערכות בהמשך.</div>
+    </div>
+  </div>
+
+  <!-- 1. Stages -->
+  <section>
+    <h2><span class="num">1</span> שלבי ההימורים</h2>
+    <p class="lead">באתר יש שלוש שכבות הימורים. כל שכבה נפתחת ונסגרת בזמן אחר.</p>
+
+    <div class="grid">
+      <div class="card">
+        <span class="tag pre">לפני הטורניר</span>
+        <h3>🏟️ שלב הבתים</h3>
+        <ul>
+          <li>ניחוש תוצאות לכל משחקי הבתים (12 בתים)</li>
+          <li>ניחוש הדירוג הסופי בכל בית (מי עולה)</li>
+        </ul>
+        <div class="when closes">נסגר בנעילה הגדולה · 10.06 17:00</div>
+      </div>
+
+      <div class="card">
+        <span class="tag pre">לפני הטורניר</span>
+        <h3>🌳 עץ הסימולציה (Bracket)</h3>
+        <ul>
+          <li>בחירת מנצחים לכל שלבי הנוקאאוט (31 בחירות)</li>
+          <li>מ־1/16 הגמר ועד הגמר + אלופה</li>
+          <li>מזין אוטומטית את הימורי העלייה</li>
+        </ul>
+        <div class="when closes">נסגר בנעילה הגדולה · 10.06 17:00</div>
+      </div>
+
+      <div class="card">
+        <span class="tag pre">לפני הטורניר</span>
+        <h3>📈 הימורי עלייה ואלופה</h3>
+        <ul>
+          <li>מי עולה מכל בית, ומי מגיע לכל שלב</li>
+          <li>1/8, רבע, חצי, גמר, ואלופה</li>
+          <li>נגזר אוטומטית מעץ הסימולציה</li>
+        </ul>
+        <div class="when closes">נסגר בנעילה הגדולה · 10.06 17:00</div>
+      </div>
+
+      <div class="card">
+        <span class="tag pre">לפני הטורניר</span>
+        <h3>⭐ הימורים מיוחדים</h3>
+        <ul>
+          <li>מלך שערים / בישולים, התקפה הכי טובה</li>
+          <li>בית הכי פורה / הכי יבש, קבוצה הכי גסה</li>
+          <li>הימורי 1X2 על מפגשים, ו־Over/Under פנדלים</li>
+        </ul>
+        <div class="when closes">נסגר בנעילה הגדולה · 10.06 17:00</div>
+      </div>
+
+      <div class="card">
+        <span class="tag live">במהלך הטורניר</span>
+        <h3>🔴 תוצאות משחקי הבתים (חי)</h3>
+        <ul>
+          <li>ההימור היחיד שנשאר פתוח אחרי הנעילה</li>
+          <li>עורכים תוצאות לכל יום משחקים</li>
+          <li>טבלת העלייה כבר קפואה — רק התוצאות נערכות</li>
+        </ul>
+        <div class="when opens">פתוח עד 30 דק' לפני המשחק הראשון של אותו יום</div>
+      </div>
+
+      <div class="card">
+        <span class="tag ko">בשלב הנוקאאוט</span>
+        <h3>🏆 עץ נתוני האמת (Knockout חי)</h3>
+        <ul>
+          <li>הימור על המפגשים האמיתיים (תוצאה + מנצח)</li>
+          <li>נפתח אחרי שכל שלב הבתים מסתיים</li>
+          <li>כל שלב נפתח כשהשלב שלפניו מסתיים</li>
+        </ul>
+        <div class="when opens">כל משחק פתוח עד 30 דק' לפני שריקת הפתיחה</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. When can you edit -->
+  <section>
+    <h2><span class="num">2</span> מתי אפשר לערוך — ומתי לא</h2>
+    <p class="lead">שלושה סוגי נעילה שונים פועלים באתר:</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>סוג ההימור</th>
+          <th>מתי אפשר לערוך</th>
+          <th>מתי ננעל</th>
+          <th>סוג הנעילה</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>שלב הבתים (ניחוש דירוג)</td>
+          <td class="ok">עד 10.06 17:00</td>
+          <td>בנעילה הגדולה</td>
+          <td><span class="pill red">גלובלית</span></td>
+        </tr>
+        <tr>
+          <td>עץ הסימולציה</td>
+          <td class="ok">עד 10.06 17:00</td>
+          <td>בנעילה הגדולה</td>
+          <td><span class="pill red">גלובלית</span></td>
+        </tr>
+        <tr>
+          <td>הימורי עלייה ואלופה</td>
+          <td class="ok">עד 10.06 17:00</td>
+          <td>בנעילה הגדולה</td>
+          <td><span class="pill red">גלובלית</span></td>
+        </tr>
+        <tr>
+          <td>הימורים מיוחדים</td>
+          <td class="ok">עד 10.06 17:00</td>
+          <td>בנעילה הגדולה</td>
+          <td><span class="pill red">גלובלית</span></td>
+        </tr>
+        <tr>
+          <td>תוצאות משחקי בתים (חי)</td>
+          <td class="ok">גם אחרי הנעילה</td>
+          <td>30 דק' לפני המשחק הראשון של אותו יום</td>
+          <td><span class="pill amber">לפי יום משחקים</span></td>
+        </tr>
+        <tr>
+          <td>עץ נתוני האמת (נוקאאוט)</td>
+          <td class="ok">משברור היריבות ועד 30 דק' לפני</td>
+          <td>30 דק' לפני שריקת הפתיחה של כל משחק</td>
+          <td><span class="pill amber">לפי משחק</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="note">
+      <b>חשוב לדעת:</b> טבלת העלייה מהבתים נקבעת בנעילה הגדולה ו<b>נשארת קפואה</b> — היא לא מתעדכנת לפי התוצאות החיות. במהלך הטורניר עורכים רק את ניחוש <b>התוצאות</b> של המשחקים, לא את הניחוש מי עולה.
+    </div>
+    <div class="note">
+      <b>נעילה "סוגרת לפי בטוח":</b> אם המערכת לא יודעת בוודאות את זמן הנעילה של משחק — היא חוסמת עריכה (מניחה שנעול). העריכה נאכפת גם בצד השרת, אז אי אפשר לעקוף אותה מהדפדפן.
+    </div>
+  </section>
+
+  <!-- 3. Timeline -->
+  <section>
+    <h2><span class="num">3</span> ציר הזמן של הטורניר</h2>
+    <div class="timeline">
+      <div class="tl-item open">
+        <div class="tl-date">עד 10.06.2026</div>
+        <div class="tl-body"><b>שלב ההכנה — הכול פתוח.</b> ממלאים את ארבע השכבות: בתים, עץ סימולציה, הימורי עלייה, והימורים מיוחדים. אפשר לערוך כמה שרוצים.</div>
+      </div>
+      <div class="tl-item lock">
+        <div class="tl-date">10.06.2026 · 17:00</div>
+        <div class="tl-body"><b>🔒 הנעילה הגדולה.</b> כל ההימורים שלפני הטורניר ננעלים וקופאים. מכאן ההימורים של כולם הופכים גלויים בטבלאות. מתחיל הניקוד.</div>
+      </div>
+      <div class="tl-item live">
+        <div class="tl-date">11.06 – 19.06</div>
+        <div class="tl-body"><b>🔴 שלב הבתים משוחק.</b> עורכים תוצאות משחקים לפי ימי משחקים — כל יום ננעל 30 דק' לפני המשחק הראשון שלו. הניקוד נצבר משחק־משחק.</div>
+      </div>
+      <div class="tl-item live">
+        <div class="tl-date">~19.06</div>
+        <div class="tl-body"><b>🏆 שלב הבתים הסתיים → עץ נתוני האמת נפתח.</b> מעכשיו מהמרים על המפגשים האמיתיים בנוקאאוט.</div>
+      </div>
+      <div class="tl-item live">
+        <div class="tl-date">19.06 – 19.07</div>
+        <div class="tl-body"><b>שלבי הנוקאאוט.</b> 1/16 ← 1/8 ← רבע ← חצי ← גמר. כל שלב נפתח להימור כשהשלב הקודם מסתיים, וכל משחק ננעל 30 דק' לפני הפתיחה.</div>
+      </div>
+      <div class="tl-item lock">
+        <div class="tl-date">19.07.2026</div>
+        <div class="tl-body"><b>הגמר — האלופה מוכתרת.</b> כל ההימורים נסגרים, הניקוד הסופי מחושב, והדירוג הסופי נקבע.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Scoring -->
+  <section>
+    <h2><span class="num">4</span> איך צוברים נקודות</h2>
+    <p class="lead">ככל שהשלב מתקדם יותר — שווה יותר.</p>
+
+    <h3 style="margin-bottom:6px;">ניחוש תוצאות משחקים</h3>
+    <table>
+      <thead><tr><th>שלב</th><th>כיוון נכון (טוטו)</th><th>תוצאה מדויקת (בונוס)</th></tr></thead>
+      <tbody>
+        <tr><td>שלב הבתים</td><td class="ok">2</td><td>1</td></tr>
+        <tr><td>1/16 גמר</td><td class="ok">3</td><td>1</td></tr>
+        <tr><td>1/8 גמר</td><td class="ok">3</td><td>1</td></tr>
+        <tr><td>רבע גמר</td><td class="ok">3</td><td>1</td></tr>
+        <tr><td>חצי גמר</td><td class="ok">3</td><td>2</td></tr>
+        <tr><td>משחק על מקום 3</td><td class="ok">3</td><td>1</td></tr>
+        <tr><td>גמר</td><td class="ok">4</td><td>2</td></tr>
+      </tbody>
+    </table>
+
+    <h3 style="margin:22px 0 6px;">הימורי עלייה (לכל קבוצה שמגיעה לשלב)</h3>
+    <table>
+      <thead><tr><th>הישג</th><th>נקודות</th></tr></thead>
+      <tbody>
+        <tr><td>עלייה מהבית במקום הנכון בדיוק</td><td class="ok">5</td></tr>
+        <tr><td>עלייה מהבית אך במקום הפוך (1↔2)</td><td class="ok">3</td></tr>
+        <tr><td>הגעה ל־1/8 הגמר</td><td class="ok">1</td></tr>
+        <tr><td>הגעה לרבע הגמר</td><td class="ok">3</td></tr>
+        <tr><td>הגעה לחצי הגמר</td><td class="ok">6</td></tr>
+        <tr><td>הגעה לגמר</td><td class="ok">10</td></tr>
+        <tr><td>זכייה באליפות 🏆</td><td class="ok">16</td></tr>
+      </tbody>
+    </table>
+
+    <h3 style="margin:22px 0 6px;">הימורים מיוחדים</h3>
+    <table>
+      <thead><tr><th>הימור</th><th>נקודות</th></tr></thead>
+      <tbody>
+        <tr><td>מלך שערים — מדויק</td><td class="ok">12</td></tr>
+        <tr><td>מלך בישולים — מדויק</td><td class="ok">9</td></tr>
+        <tr><td>התקפה הכי טובה</td><td class="ok">8</td></tr>
+        <tr><td>בית הכי פורה / הכי יבש</td><td class="ok">6 לכל אחד</td></tr>
+        <tr><td>קבוצה הכי גסה</td><td class="ok">6</td></tr>
+        <tr><td>מפגש 1X2</td><td class="ok">5 לכל מפגש</td></tr>
+        <tr><td>Over/Under פנדלים (קו 21.5)</td><td class="ok">6</td></tr>
+      </tbody>
+    </table>
+    <div class="note">
+      ערכי הניקוד נשלטים מתוך לוח הניהול (טאב "ניקוד") — אז לוח הניהול, הניקוד החי ודף החוקים תמיד מסונכרנים.
+    </div>
+  </section>
+
+  <!-- 5. Admin -->
+  <section>
+    <h2><span class="num">5</span> שליטות מנהל שמשפיעות על העריכה</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>⏰ הארכת הדדליין</h3>
+        <p style="color:var(--muted);margin:0;">דחיית או ביטול הנעילה הגלובלית — לכל המשתמשים יחד. שימושי כשמתגלה באג סמוך לנעילה וצריך עוד כמה דקות.</p>
+      </div>
+      <div class="card">
+        <h3>👤 נעילה/פתיחה למשתמש בודד</h3>
+        <p style="color:var(--muted);margin:0;">פתיחה זמנית של משתמש ששכח לשלוח, או נעילה ידנית — בלי להשפיע על השאר. הנעילה גם קובעת אם ההימורים שלו גלויים לאחרים.</p>
+      </div>
+      <div class="card">
+        <h3>🔄 סנכרון זמני נעילה</h3>
+        <p style="color:var(--muted);margin:0;">חישוב מחדש של זמני הנעילה לפי לוח המשחקים העדכני. נדרש אם פיפ"א מזיזה זמני משחקים — כדי שהנעילות יתעדכנו מיד.</p>
+      </div>
+      <div class="card">
+        <h3>🧮 חישוב ניקוד מחדש</h3>
+        <p style="color:var(--muted);margin:0;">הרצה מחדש של מנוע הניקוד מול התוצאות העדכניות, ובדיקה אילו משתמשים פוגעים בכללי המעבר (best-thirds).</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    מסמך זה מתאר את הלוגיקה כפי שמיושמת בקוד · מונדיאל 2026 · נוצר ב־07.06.2026
+  </footer>
+
+</div>
+</body>
+</html>

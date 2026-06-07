@@ -332,7 +332,7 @@ export interface ScheduleMatch {
  * or no scheduled match exists for the pair.
  *
  * The Tree-2 per-match lock is then `date − match_prediction_lock_before_minutes`
- * (default 60 → 1 hour before kickoff); the slot reveals to opponents at `date`.
+ * (default 30 → 30 min before kickoff); the slot reveals to opponents at`date`.
  */
 export function findKickoffForSlot(
   slotKey: KoSlotKey | "third_place",

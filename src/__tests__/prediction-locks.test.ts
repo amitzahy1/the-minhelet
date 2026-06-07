@@ -9,7 +9,7 @@ import {
 // never disagree: the save RPCs' enforcement, and — since the leak fix — the
 // /api/shared-bets DISPLAY reveal. A prediction is revealed to other bettors
 // exactly when its `lock_at` instant passes (group: 30 min before the
-// match-day's first kickoff; KO: 60 min before kickoff). These tests pin that
+// match-day's first kickoff; KO: 30 min before kickoff). These tests pin that
 // contract so the "a score is shown only once that match's bet is locked" rule
 // can't silently regress.
 // ============================================================================
@@ -58,7 +58,7 @@ describe("computePredictionLockRows — group reveal", () => {
 });
 
 describe("computePredictionLockRows — knockout reveal", () => {
-  it("locks the third-place play-off 60 min before its kickoff", () => {
+  it("locks the third-place play-off 30 min before its kickoff", () => {
     const rows = computePredictionLockRows([
       {
         id: 99,
@@ -72,6 +72,6 @@ describe("computePredictionLockRows — knockout reveal", () => {
     ]);
     const tp = rows.find((r) => r.lock_key === "third_place");
     expect(tp?.scope).toBe("ko");
-    expect(tp?.lock_at).toBe("2026-07-18T18:00:00.000Z");
+    expect(tp?.lock_at).toBe("2026-07-18T18:30:00.000Z");
   });
 });

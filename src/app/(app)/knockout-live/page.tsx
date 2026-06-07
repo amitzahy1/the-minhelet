@@ -6,7 +6,7 @@
 // Opens after the group stage. Pulls the real bracket from /api/matches +
 // /api/best-thirds via resolveKnockoutTree (the SAME resolver the scorer uses),
 // so the teams the bettor predicts against are exactly what scoring will use.
-// Each slot is editable until 1h before its real match kicks off; finished
+// Each slot is editable until 30 min before its real match kicks off; finished
 // matches show the result vs the user's pick. Predictions are scored for
 // knockout match-results (toto/exact).
 // ============================================================================
@@ -131,7 +131,7 @@ export default function KnockoutLivePage() {
   // finished), otherwise fall back to the winner the user PICKED in the feeding
   // match — so the bracket fills forward exactly like the simulation tree, and
   // tie-winners advance. As real results land, the real team replaces the
-  // predicted one and the user can re-edit (still editable until 1h pre-kickoff).
+  // predicted one and the user can re-edit (still editable until 30 min pre-kickoff).
   const getTeams = (key: string): SlotTeams => {
     const slot = tree[key as KoSlotKey];
     const feeders = LATER_FEEDERS[key];
@@ -200,7 +200,7 @@ export default function KnockoutLivePage() {
         </div>
 
         <div className="mb-4 rounded-xl border border-blue-200 bg-blue-50/70 px-4 py-2.5 text-[13px] text-blue-900">
-          ניקוד על <strong>טוטו ותוצאה מדויקת</strong> בלבד. כל משחק נעול שעה לפני שריקת הפתיחה, ונפתח אוטומטית בשלב הבא.
+          ניקוד על <strong>טוטו ותוצאה מדויקת</strong> בלבד. כל משחק נעול חצי שעה לפני שריקת הפתיחה, ונפתח אוטומטית בשלב הבא.
         </div>
 
         {!groupStageComplete ? (

@@ -24,7 +24,7 @@ export interface RealKnockoutStatus {
   loading: boolean;
   /** All 12 groups finished → the real R32 (incl. best-thirds) is determined. */
   groupStageComplete: boolean;
-  /** Slots currently editable (teams known, >1h before kickoff). */
+  /** Slots currently editable (teams known, >30 min before kickoff). */
   openCount: number;
   /** Open slots the user hasn't predicted a winner for yet. */
   unfilledOpenCount: number;

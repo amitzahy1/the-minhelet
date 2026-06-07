@@ -8,7 +8,7 @@
 // (the /api/sync-locks cron), reusing the SAME functions the browser uses for
 // display so the two never diverge:
 //   - groups:   matchPairIndex + computeMatchDays/dayLockAtForKickoff (−30 min)
-//   - knockout: resolveKnockoutTree + findKickoffForSlot / lockAtFor (−60 min)
+//   - knockout: resolveKnockoutTree + findKickoffForSlot / lockAtFor (−30 min)
 // ============================================================================
 
 import { matchPairIndex, normalizeGroupLetter, type FinishedMatch } from "@/lib/results-hits";
@@ -22,7 +22,7 @@ import {
 import { lockAtFor } from "@/lib/tournament/ko-live-state";
 
 /** Knockout per-match lock window (minutes before kickoff). Mirrors Tree 2. */
-const KO_LOCK_BEFORE_MIN = 60;
+const KO_LOCK_BEFORE_MIN = 30;
 
 /** Minimal match shape — exactly what /api/matches returns per match. */
 export interface LockSyncMatch {
@@ -84,7 +84,7 @@ export function computePredictionLockRows(
   }
 
   // ---- Knockout slots: resolve the bracket from finished results, then lock
-  //      each resolved slot 60 min before its real kickoff ----
+  //      each resolved slot 30 min before its real kickoff ----
   const finished: FinishedMatch[] = matches
     .filter((m) => m.homeGoals != null && m.awayGoals != null)
     .map((m) => ({
@@ -114,7 +114,7 @@ export function computePredictionLockRows(
   }
 
   // Third-place play-off (separate from the main slot tree): its match carries a
-  // fixed date in the schedule, so lock it directly 60 min before kickoff.
+  // fixed date in the schedule, so lock it directly 30 min before kickoff.
   const third = matches.find((m) => (m.stage || "").toUpperCase().startsWith("THIRD"));
   if (third?.date) {
     rows.push({

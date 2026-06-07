@@ -121,7 +121,7 @@ function OnboardingWizard({ onDismiss, onStart }: { onDismiss: () => void; onSta
                   <strong className="text-sm">עץ נתוני אמת — במהלך הטורניר</strong>
                 </div>
                 <p className="text-[13px] text-gray-600 leading-snug ps-7">
-                  בתום שלב הבתים נפתח עץ עם המשחקים <strong>האמיתיים</strong> (32 העולות, כולל 8 המקומות השלישיים הטובים). שם מנחשים תוצאה + מי עולה — וזהו העץ שנספר לניקוד תוצאות הנוק-אאוט. אין דד-ליין אחד: כל משחק ניתן לעדכון <strong>עד שעה לפני שריקת הפתיחה</strong>.
+                  בתום שלב הבתים נפתח עץ עם המשחקים <strong>האמיתיים</strong> (32 העולות, כולל 8 המקומות השלישיים הטובים). שם מנחשים תוצאה + מי עולה — וזהו העץ שנספר לניקוד תוצאות הנוק-אאוט. אין דד-ליין אחד: כל משחק ניתן לעדכון <strong>עד חצי שעה לפני שריקת הפתיחה</strong>.
                 </p>
               </div>
               <p className="text-[11px] text-gray-500 text-center bg-gray-50 rounded-lg py-2 border border-gray-100">
@@ -387,7 +387,7 @@ function KoLiveOpenModal({ onClose, onGo, openCount }: { onClose: () => void; on
         <h2 className="text-2xl font-black text-gray-900 mb-1" style={{ fontFamily: "var(--font-secular)" }}>שלב הבתים נגמר!</h2>
         <p className="text-gray-600 text-sm mb-5 leading-relaxed">
           נקבעו 32 העולות האמיתיות. נפתח <strong>עץ נתוני אמת</strong> — נחשו תוצאות על המשחקים האמיתיים (כולל מי עולה).
-          {openCount > 0 && <> כרגע פתוחים <strong>{openCount}</strong> משחקים להימור.</>} כל משחק ניתן לעדכון עד שעה לפני שריקת הפתיחה.
+          {openCount > 0 && <> כרגע פתוחים <strong>{openCount}</strong> משחקים להימור.</>} כל משחק ניתן לעדכון עד חצי שעה לפני שריקת הפתיחה.
         </p>
         <button onClick={onGo} className="w-full py-3 rounded-xl bg-emerald-600 text-white font-bold text-sm hover:bg-emerald-700 transition-colors mb-2">
           למילוי עץ נתוני אמת ←

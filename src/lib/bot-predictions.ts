@@ -278,33 +278,40 @@ export function generateBotPrediction(): BotPrediction {
   }
 
   // ---------- Special bets ----------
-  // Top scorer / assists: combine how far the player's team reaches with star
-  // reputation, then pick the SECOND-best candidate (a less-obvious, still
-  // credible shout — a real bettor doesn't always take the chalk striker).
-  const scorerCandidates = Object.entries(TEAM_STAR).map(([code, star]) => {
-    const depth = teamFinalRound(code, knockout);
-    return { code, player: star.scorer, rep: star.scorerRep, depth: depth.round, depthLabel: depth.label };
-  }).sort((a, b) => (b.depth * 30 + b.rep) - (a.depth * 30 + a.rep));
+  // Top scorer / assists — BOLD strategy: a daring bettor backs a Golden-Boot /
+  // playmaker WILDCARD from OUTSIDE the top-4 favourites (never the chalk
+  // superstar, never the tournament's #1 striker). Credible elite talents on
+  // non-favourite sides — high upside, low consensus. Pool members are verified
+  // squad names (getSquadPlayers) so the bet still scores against the official
+  // top scorer / top assists.
+  const top4Codes = new Set(fieldByRank.slice(0, 4).map((t) => t.code));
+  const BOLD_SCORERS = [
+    { player: "Erling Haaland", code: "NOR" },
+    { player: "Alexander Isak", code: "SWE" },
+    { player: "Mohamed Salah", code: "EGY" },
+    { player: "Darwin Núñez", code: "URU" },
+  ].filter((c) => !top4Codes.has(c.code));
+  const BOLD_ASSISTS = [
+    { player: "James Rodríguez", code: "COL" },
+    { player: "Martin Ødegaard", code: "NOR" },
+    { player: "Giorgian de Arrascaeta", code: "URU" },
+    { player: "Luka Modrić", code: "CRO" },
+  ].filter((c) => !top4Codes.has(c.code));
 
-  const assistsCandidates = Object.entries(TEAM_STAR).map(([code, star]) => {
-    const depth = teamFinalRound(code, knockout);
-    return { code, player: star.assists, rep: star.assistsRep, depth: depth.round, depthLabel: depth.label };
-  }).sort((a, b) => (b.depth * 30 + b.rep) - (a.depth * 30 + a.rep));
+  const scorerPick = BOLD_SCORERS[Math.floor(rand("bold-scorer") * BOLD_SCORERS.length)];
+  const topScorer = scorerPick.player;
+  const topScorerTeam = scorerPick.code;
 
-  const topPick = scorerCandidates[1] ?? scorerCandidates[0];
-  const topScorer = topPick.player;
-  const topScorerTeam = topPick.code;
-
-  const assistsPick = assistsCandidates.find((a) => a.player !== topPick.player && a.code !== topPick.code)
-    ?? assistsCandidates[1] ?? assistsCandidates[0];
+  const assistsPool = BOLD_ASSISTS.filter((a) => a.code !== topScorerTeam && a.player !== topScorer);
+  const assistsPick = assistsPool[Math.floor(rand("bold-assists") * assistsPool.length)] ?? BOLD_ASSISTS[0];
   const topAssists = assistsPick.player;
   const topAssistsTeam = assistsPick.code;
 
   rationale.push(
-    `מלך שערים: ${topScorer} (${topScorerTeam}) — בחירה לא טריוויאלית: ${getTeamByCode(topPick.code)?.name_he} מגיעה עד ${topPick.depthLabel}, דירוג כוכב ${topPick.rep}/100.`,
+    `מלך שערים (נועז): ${topScorer} (${getTeamByCode(topScorerTeam)?.name_he} #${getTeamByCode(topScorerTeam)?.fifa_ranking}) — לא הכוכב הצפוי מהצמרת אלא חוד החנית של נבחרת מחוץ לטופ 4. אפסייד גבוה, קונצנזוס נמוך.`,
   );
   rationale.push(
-    `מלך בישולים: ${topAssists} (${topAssistsTeam}) — ${getTeamByCode(assistsPick.code)?.name_he} עד ${assistsPick.depthLabel}, יצירתיות ${assistsPick.rep}/100.`,
+    `מלך בישולים (נועז): ${topAssists} (${getTeamByCode(topAssistsTeam)?.name_he} #${getTeamByCode(topAssistsTeam)?.fifa_ranking}) — יוצר משחק איכותי מנבחרת לא מסומנת. הימור ערך, לא קונצנזוס.`,
   );
 
   // Best attack = the dark-horse champion (most games + the run that surprised).

@@ -25,7 +25,7 @@ export type SlotStatus = "waiting" | "open" | "locked" | "finished";
 const LIVE_OR_DONE = new Set(["IN_PLAY", "PAUSED", "LIVE", "FINISHED"]);
 
 /** Default per-match lock window (minutes before kickoff). Mirrors league_config.match_prediction_lock_before_minutes. */
-export const LOCK_BEFORE_MIN = 60;
+export const LOCK_BEFORE_MIN = 30;
 
 export function slotStatus(
   slotKey: KoSlotKey,

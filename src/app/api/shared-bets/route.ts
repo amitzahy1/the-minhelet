@@ -14,7 +14,7 @@ interface RawMatch {
 
 /**
  * Redact OTHER users' Tree-2 (real-data) knockout picks for slots that have NOT
- * LOCKED yet. A slot locks 60 min before its kickoff; once locked the pick is
+ * LOCKED yet. A slot locks 30 min before its kickoff; once locked the pick is
  * frozen, so revealing it can't help a rival — it's shown from the lock instant
  * on (matching the rule "a pick is shown only once that match's bet is locked").
  * The viewer's own picks are never redacted. `revealedSlots` is the set of slot
@@ -158,7 +158,7 @@ export async function GET() {
   // Hide other users' not-yet-LOCKED predictions (display-only redaction): a
   // group score is revealed only once its match-day has locked (30 min before
   // the day's first kickoff) and a Tree-2 knockout pick only once its slot has
-  // locked (60 min before kickoff) — the instant the bet freezes, matching the
+  // locked (30 min before kickoff) — the instant the bet freezes, matching the
   // rule "a score is shown only when that match's bet is locked". Reuses the
   // exact lock computation the save RPCs enforce, so reveal, save-gating, and
   // scoring never disagree. Scoring/recompute use the un-redacted data above.

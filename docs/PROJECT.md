@@ -84,12 +84,11 @@ wc2026/
 
 ### Pre-Tournament
 1. Sign up (Google or Email) → Join league via invite code
-2. Build bracket:
-   - **Step 1:** Group Stage — drag teams to predicted order + enter all 6 match scores per group
-   - **Step 2:** Third Place — select 8 of 12 third-place teams to advance
-   - **Step 3:** Knockout — enter scores + winners from R32 to Final
-   - **Step 4:** Special Bets — top scorer, assists, best attack, etc.
-3. Lock bracket (auto-locks 1 hour before first match)
+2. Build predictions (3 stages):
+   - **Stage 1 — Group Stage:** order each group + enter all 6 match scores (predicted table auto-computed; best 8 of 12 third-place teams derived automatically)
+   - **Stage 2 — Knockout Simulation:** pick the winner of each tie from R32 to the Final (winner-only — no scores; feeds the advancement bets)
+   - **Stage 3 — Special Bets:** champion, finalists, top scorer, assists, best attack, etc.
+3. Predictions lock at the global deadline — 2026-06-10 17:00 Israel time (during the tournament, group results stay editable until 30 min before each match-day, and the real-data knockout tree until 30 min before each match)
 
 ### During Tournament
 1. Daily: enter score predictions for today's matches

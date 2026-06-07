@@ -258,7 +258,7 @@ export interface LiveKnockoutSlot {
 /**
  * Save ONE Tree-2 (real-data) knockout slot prediction. Unlike the June-10
  * global lock used by saveBetsToSupabase, Tree 2 has a PER-MATCH lock: a slot
- * is editable until 1 hour before its real match kicks off. `lockAtISO` is
+ * is editable until 30 minutes before its real match kicks off.`lockAtISO` is
  * derived by the caller from /api/matches via resolveKnockoutTree/findKickoffForSlot
  * (kickoff − match_prediction_lock_before_minutes). The server re-validates.
  *
@@ -279,7 +279,7 @@ export async function saveLiveKnockout(
     return { success: false, error: "המשחק עדיין לא פתוח לעריכה" };
   }
   if (new Date() > new Date(lockAtISO)) {
-    return { success: false, error: "המשחק ננעל — לא ניתן לעדכן (פחות משעה לפתיחה)" };
+    return { success: false, error: "המשחק ננעל — לא ניתן לעדכן (פחות מחצי שעה לפתיחה)" };
   }
 
   const supabase = createClient();
@@ -302,7 +302,7 @@ export async function saveLiveKnockout(
   });
 
   if (rpcError && /LOCKED/.test(rpcError.message || "")) {
-    return { success: false, error: "המשחק ננעל — לא ניתן לעדכן (פחות משעה לפתיחה)" };
+    return { success: false, error: "המשחק ננעל — לא ניתן לעדכן (פחות מחצי שעה לפתיחה)" };
   }
 
   const rpcUnavailable =

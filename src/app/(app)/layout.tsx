@@ -43,8 +43,11 @@ const TRACKING_ITEMS = [
   { href: "/standings", label: "ראשי", iconKey: "leaderboard" as const },
   { href: "/compare", label: "השוואה", iconKey: "compare" as const },
   { href: "/live", label: "לייב", iconKey: "live" as const },
-  { href: "/squads", label: "נבחרות", iconKey: "squads" as const },
+  // Order matters: נבחרות sits BETWEEN לו״ז and חוקים (desktop renders this
+  // array in RTL visual order; the mobile bottom nav below is hardcoded the
+  // same way).
   { href: "/schedule", label: "לו״ז", iconKey: "schedule" as const },
+  { href: "/squads", label: "נבחרות", iconKey: "squads" as const },
   { href: "/rules", label: "חוקים", iconKey: "rules" as const },
 ];
 
@@ -963,15 +966,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             {Icons.live(pathname === "/live")}
             <span className="text-[8px] font-bold">לייב</span>
           </Link>
-          <Link href="/squads"
-            className={`flex flex-col items-center gap-0.5 py-1 ${pathname === "/squads" ? "text-gray-900" : "text-gray-400"}`}>
-            {Icons.squads(pathname === "/squads")}
-            <span className="text-[8px] font-bold">נבחרות</span>
-          </Link>
           <Link href="/schedule"
             className={`flex flex-col items-center gap-0.5 py-1 ${pathname === "/schedule" ? "text-gray-900" : "text-gray-400"}`}>
             {Icons.schedule(pathname === "/schedule")}
             <span className="text-[8px] font-bold">לו״ז</span>
+          </Link>
+          <Link href="/squads"
+            className={`flex flex-col items-center gap-0.5 py-1 ${pathname === "/squads" ? "text-gray-900" : "text-gray-400"}`}>
+            {Icons.squads(pathname === "/squads")}
+            <span className="text-[8px] font-bold">נבחרות</span>
           </Link>
           <Link href="/rules"
             className={`flex flex-col items-center gap-0.5 py-1 ${pathname === "/rules" ? "text-gray-900" : "text-gray-400"}`}>

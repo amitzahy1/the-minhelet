@@ -44,6 +44,20 @@ export function AgreementMatrix({
   const minV = values.length ? Math.min(...values) : 0;
   const maxV = values.length ? Math.max(...values) : 100;
 
+  // Top-5 closest pairs — the matrix's headline finding, ranked.
+  const closestPairs = (() => {
+    const pairs: { a: string; b: string; pct: number }[] = [];
+    for (let i = 0; i < bettors.length; i++) {
+      for (let j = i + 1; j < bettors.length; j++) {
+        const v = matrix[i][j];
+        if (v !== null) {
+          pairs.push({ a: bettors[i].displayName || "ללא שם", b: bettors[j].displayName || "ללא שם", pct: v });
+        }
+      }
+    }
+    return pairs.sort((x, y) => y.pct - x.pct).slice(0, 5);
+  })();
+
   const shortName = (name: string) => {
     const n = (name || "ללא שם").trim();
     return n.length > 6 ? `${n.slice(0, 5)}…` : n;
@@ -59,6 +73,26 @@ export function AgreementMatrix({
           <span className="text-red-600 font-bold"> אדום = הפוכים</span>
         </p>
       </div>
+      {/* Top-5 closest pairs */}
+      {closestPairs.length > 0 && (
+        <div className="px-5 py-3 border-b border-gray-100 bg-gray-50/50">
+          <p className="text-xs font-bold text-gray-600 mb-2">🏅 חמשת הזוגות הכי קרובים</p>
+          <div className="space-y-1">
+            {closestPairs.map((p, i) => (
+              <div key={`${p.a}-${p.b}`} className="flex items-center gap-2 text-sm">
+                <span className="w-5 text-center font-black text-gray-400 text-xs" style={{ fontFamily: "var(--font-inter)" }}>{i + 1}</span>
+                <span className="font-bold text-gray-800">{p.a}</span>
+                <span className="text-gray-400">+</span>
+                <span className="font-bold text-gray-800">{p.b}</span>
+                <span className="ms-auto font-black tabular-nums text-green-700" style={{ fontFamily: "var(--font-inter)" }}>
+                  {Math.round(p.pct)}%
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="overflow-x-auto p-3">
         <table className="border-separate" style={{ borderSpacing: "3px" }}>
           <thead>

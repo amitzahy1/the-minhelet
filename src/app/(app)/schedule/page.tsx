@@ -2,7 +2,7 @@
 import { LoadingPage } from "@/components/shared/LoadingAnimation";
 import { useSharedData } from "@/hooks/useSharedData";
 import { useBettingStore } from "@/stores/betting-store";
-import { isLocked } from "@/lib/constants";
+import { isLocked, revealAtFor, LOCK_DEADLINE } from "@/lib/constants";
 import { getFlag, getTeamNameHe } from "@/lib/flags";
 import type { BettorSpecialBets, BettorAdvancement, BettorBracket } from "@/lib/supabase/shared-data";
 import { matchPairIndex, normalizeGroupLetter } from "@/lib/results-hits";
@@ -42,13 +42,17 @@ function MatchBetsPanel({ match, brackets, specialBets, advancements, matchDays 
   const globalLocked = isLocked();
 
   // Per-match score reveal: a group match's score predictions are shown only
-  // once its match-day has LOCKED (30 min before the day's first kickoff) — the
-  // same instant the bets freeze. Until then scores stay secret, even though
-  // advancement + special bets are already public (those lock at the global
-  // June-10 lock). Knockout score picks aren't shown on this page (they live on
-  // the live bracket); their own lock-gating is enforced in /api/shared-bets.
+  // once its match-day has LOCKED (30 min before the day's first kickoff) plus
+  // a 1-minute display grace (REVEAL_GRACE_MS) — saves are blocked at the lock
+  // itself; the minute absorbs clock skew + the 30s cache so the UI never
+  // claims "revealed" against still-redacted data. Until then scores stay
+  // secret, even though advancement + special bets are already public (those
+  // lock at the global June-10 lock). Knockout score picks aren't shown on
+  // this page (they live on the live bracket); their own lock-gating is
+  // enforced in /api/shared-bets.
   const scoreLockAt = groupLetter ? dayLockAtForKickoff(match.date, matchDays) : null;
-  const scoresRevealed = !!scoreLockAt && Date.now() >= new Date(scoreLockAt).getTime();
+  const scoreRevealAt = scoreLockAt ? revealAtFor(scoreLockAt) : null;
+  const scoresRevealed = !!scoreRevealAt && Date.now() >= scoreRevealAt.getTime();
 
   // Each bettor's stored score prediction for THIS group match, oriented to the
   // displayed home/away. Built only once revealed; before that the redacted
@@ -159,7 +163,7 @@ function MatchBetsPanel({ match, brackets, specialBets, advancements, matchDays 
         {!globalLocked && (
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-center">
             <p className="text-xs font-bold text-amber-700">
-              ניחושי התוצאה של כל משחק ייחשפו רק עם נעילתו — חצי שעה לפני תחילת יום המשחקים שלו.
+              ניחושי התוצאה של כל משחק ייחשפו דקה אחרי נעילתו — הנעילה חצי שעה לפני תחילת יום המשחקים שלו.
             </p>
           </div>
         )}
@@ -187,7 +191,7 @@ function MatchBetsPanel({ match, brackets, specialBets, advancements, matchDays 
           ) : (
             <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 text-center">
               <p className="text-xs font-bold text-blue-700">
-                🔒 ניחושי התוצאה ייחשפו עם נעילת ההימורים למשחק זה{scoreLockAt ? ` — ${toIsraelTimeShort(scoreLockAt)}, ${toIsraelDate(scoreLockAt)}` : ""} (חצי שעה לפני תחילת יום המשחקים)
+                🔒 ניחושי התוצאה ייחשפו ב-{scoreRevealAt ? `${toIsraelTimeShort(scoreRevealAt.toISOString())}, ${toIsraelDate(scoreRevealAt.toISOString())}` : "נעילת המשחק"} — דקה אחרי נעילת ההימורים ליום זה
               </p>
             </div>
           )
@@ -253,7 +257,7 @@ export default function SchedulePage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("ALL");
   const [expandedMatch, setExpandedMatch] = useState<number | null>(null);
-  const { brackets, specialBets, advancements } = useSharedData();
+  const { brackets, specialBets, advancements, refetch } = useSharedData();
 
   useEffect(() => {
     (async () => {
@@ -275,6 +279,28 @@ export default function SchedulePage() {
     () => computeMatchDays(matches.map((m) => ({ date: m.date, group: m.group, stage: m.stage }))),
     [matches],
   );
+
+  // When the next reveal boundary (global lock or a match-day lock, + the
+  // 1-min grace) passes while the page is open, force-refresh the shared data
+  // and re-render, so picks appear on time without a manual reload.
+  // `revealTick` re-arms the timer for the boundary after that.
+  const [revealTick, setRevealTick] = useState(0);
+  useEffect(() => {
+    const now = Date.now();
+    const boundaries = [
+      revealAtFor(LOCK_DEADLINE).getTime(),
+      ...matchDays.map((d) => revealAtFor(d.lockAtISO).getTime()),
+    ].filter((t) => t > now);
+    if (boundaries.length === 0) return;
+    const next = Math.min(...boundaries);
+    // Boundaries further than a day out are re-armed on the next page load.
+    if (next - now > 24 * 60 * 60 * 1000) return;
+    const id = setTimeout(() => {
+      refetch();
+      setRevealTick((t) => t + 1);
+    }, next - now + 1_000);
+    return () => clearTimeout(id);
+  }, [matchDays, refetch, revealTick]);
 
   // Group matches by date
   const grouped: Record<string, Match[]> = {};

@@ -7,6 +7,24 @@ export function isLocked(): boolean {
   return new Date() >= LOCK_DEADLINE;
 }
 
+/**
+ * Display-side reveal grace: other bettors' picks are SHOWN this long after
+ * their lock instant (e.g. day locks 21:30 → picks display from 21:31).
+ *
+ * Saves are already hard-blocked server-side at the lock itself
+ * (prediction_locks + save RPCs), so nothing can change in the extra minute —
+ * the grace only absorbs client clock skew and the 30s shared-data cache, so
+ * the UI never claims "revealed" while a fetch could still return redacted
+ * (pre-lock) data. Applies to DISPLAY gates only; never to save/lock
+ * enforcement.
+ */
+export const REVEAL_GRACE_MS = 60_000;
+
+/** A lock instant's display-reveal instant: lock + {@link REVEAL_GRACE_MS}. */
+export function revealAtFor(lockAt: string | Date): Date {
+  return new Date(new Date(lockAt).getTime() + REVEAL_GRACE_MS);
+}
+
 /** Formats LOCK_DEADLINE for display — e.g. "18.04.2026, 20:00".
  *  Single source of truth so the onboarding wizard, lock-notice strips,
  *  and save errors never drift apart across demo and main.

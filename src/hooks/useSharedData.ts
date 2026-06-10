@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   loadAllProfiles,
   loadAllBrackets,
@@ -74,8 +74,10 @@ export function useSharedData(): SharedData {
     error: null,
   });
 
-  const fetchAll = async () => {
-    if (isCacheValid()) {
+  // `force` bypasses the 30s cache — used by refetch() so reveal-boundary
+  // refreshes (e.g. 21:31 score reveal) can't be served a stale redacted copy.
+  const fetchAll = useCallback(async (force = false) => {
+    if (!force && isCacheValid()) {
       setData({
         profiles: cache.profiles || [],
         brackets: cache.brackets || [],
@@ -139,11 +141,16 @@ export function useSharedData(): SharedData {
       console.error("Failed to load shared data:", e);
       setData((prev) => ({ ...prev, loading: false, error: String(e) }));
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchAll();
-  }, []);
+  }, [fetchAll]);
 
-  return { ...data, refetch: fetchAll };
+  // Stable identity so callers can safely list it in effect deps.
+  const refetch = useCallback(() => {
+    void fetchAll(true);
+  }, [fetchAll]);
+
+  return { ...data, refetch };
 }

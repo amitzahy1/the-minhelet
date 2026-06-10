@@ -6,8 +6,9 @@ import { getFlag, getTeamNameHe } from "@/lib/flags";
 import { TeamLogo } from "@/components/shared/TeamLogo";
 import { toIsraelTimeShort, toIsraelDate, toIsraelDateKey, getTodayIsrael } from "@/lib/timezone";
 import { useSharedData } from "@/hooks/useSharedData";
-import { isLocked } from "@/lib/constants";
-import { computeGroupHits, hitCounts, normalizeGroupLetter } from "@/lib/results-hits";
+import { isLocked, revealAtFor, formatLockDeadline, LOCK_DEADLINE } from "@/lib/constants";
+import { computeGroupHits, hitCounts, normalizeGroupLetter, matchPairIndex, classifyHit, type HitKind } from "@/lib/results-hits";
+import { computeMatchDays, dayLockAtForKickoff, type MatchDay } from "@/lib/tournament/group-live-state";
 
 interface Match {
   id: number;
@@ -56,8 +57,32 @@ export function TodayMatches() {
   const [heading, setHeading] = useState("משחקים קרובים");
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [showAll, setShowAll] = useState(false);
-  const { specialBets, brackets } = useSharedData();
+  const [matchDays, setMatchDays] = useState<MatchDay[]>([]);
+  const { specialBets, brackets, refetch } = useSharedData();
   const locked = isLocked();
+
+  // State-backed "now" so reveal gates stay pure during render; bumped by the
+  // boundary timer below (and seeded once per mount).
+  const [now, setNow] = useState(() => Date.now());
+
+  // Re-render + force-refresh the shared data when the next reveal boundary
+  // (global lock or a match-day lock, + the 1-min grace) passes while the
+  // widget is on screen — picks appear on time without a manual reload.
+  useEffect(() => {
+    const boundaries = [
+      revealAtFor(LOCK_DEADLINE).getTime(),
+      ...matchDays.map((d) => revealAtFor(d.lockAtISO).getTime()),
+    ].filter((t) => t > now);
+    if (boundaries.length === 0) return;
+    const next = Math.min(...boundaries);
+    // Boundaries further than a day out are re-armed on the next page load.
+    if (next - now > 24 * 60 * 60 * 1000) return;
+    const id = setTimeout(() => {
+      refetch();
+      setNow(Date.now());
+    }, next - now + 1_000);
+    return () => clearTimeout(id);
+  }, [matchDays, refetch, now]);
 
   useEffect(() => {
     (async () => {
@@ -71,6 +96,10 @@ export function TodayMatches() {
         }
 
         const allMatches = data.matches as Match[];
+        // Match-day lock instants drive the per-match score reveal below.
+        setMatchDays(
+          computeMatchDays(allMatches.map((mm) => ({ date: mm.date, group: mm.group, stage: mm.stage, status: mm.status }))),
+        );
         const today = getTodayIsrael();
 
         // 1. Matches ON today (by calendar date) — show them all regardless of status.
@@ -177,6 +206,52 @@ export function TodayMatches() {
           const totoCount = counts.toto;
           const missCount = counts.miss;
 
+          // Upcoming/live group matches: everyone's raw picks, revealed once
+          // the match-day locks + 1-min grace. The server already redacts
+          // pre-lock scores; this client gate just keeps the display honest
+          // against clock skew and the 30s shared-data cache.
+          const dayLockISO = groupLetter ? dayLockAtForKickoff(m.date, matchDays) : null;
+          const revealAt = dayLockISO ? revealAtFor(dayLockISO) : null;
+          const scoresRevealed = locked && !!revealAt && now >= revealAt.getTime();
+          const pair = !isFinished && scoresRevealed && groupLetter
+            ? matchPairIndex(groupLetter, m.homeTla, m.awayTla)
+            : null;
+          const revealedPicks = pair
+            ? brackets.flatMap((b) => {
+                const stored = b.groupPredictions?.[groupLetter]?.scores?.[pair.pairIdx];
+                if (!stored || stored.home === null || stored.away === null) return [];
+                const p = pair.flipped
+                  ? { home: stored.away as number, away: stored.home as number }
+                  : { home: stored.home as number, away: stored.away as number };
+                return [{ userId: b.userId, name: b.displayName || "ללא שם", home: p.home, away: p.away }];
+              })
+            : [];
+          // During play, grade each pick against the CURRENT score.
+          const liveActual = isLive && m.homeGoals !== null && m.awayGoals !== null
+            ? { home: m.homeGoals, away: m.awayGoals }
+            : null;
+          const hitRank: Record<HitKind, number> = { exact: 0, toto: 1, miss: 2, empty: 3 };
+          revealedPicks.sort((a, b) =>
+            (liveActual
+              ? hitRank[classifyHit({ home: a.home, away: a.away }, liveActual)] -
+                hitRank[classifyHit({ home: b.home, away: b.away }, liveActual)]
+              : 0) || a.name.localeCompare(b.name, "he"),
+          );
+          // Consensus strip — "2-1 ×4 · 1-0 ×3"
+          const consensusLine = (() => {
+            if (revealedPicks.length < 2) return "";
+            const tally: Record<string, number> = {};
+            for (const p of revealedPicks) {
+              const k = `${p.home}-${p.away}`;
+              tally[k] = (tally[k] || 0) + 1;
+            }
+            return Object.entries(tally)
+              .sort((a, b) => b[1] - a[1])
+              .slice(0, 3)
+              .map(([k, n]) => (n > 1 ? `${k} ×${n}` : k))
+              .join(" · ");
+          })();
+
           return (
             <div key={m.id} className={`col-span-1${!showAll && idx === 3 ? " hidden md:block" : ""}`}>
               <div
@@ -266,14 +341,75 @@ export function TodayMatches() {
                     <div className="bg-gray-50 rounded-b-xl border border-t-0 border-gray-200 px-3 py-2.5 mt-[-4px]">
                       {!locked ? (
                         <p className="text-[11px] text-amber-700 font-medium text-center py-1">
-                          ההימורים ייחשפו אחרי הנעילה
-                        </p>
-                      ) : relatedBets.length === 0 && groupHits.length === 0 ? (
-                        <p className="text-[11px] text-gray-400 text-center py-1">
-                          אין הימורים למשחק הזה
+                          ההימורים ייחשפו אחרי הנעילה — {formatLockDeadline()}
                         </p>
                       ) : (
                         <div className="space-y-1.5">
+                          {/* Upcoming/live group match — everyone's picks (revealed at day-lock + 1 min) */}
+                          {!isFinished && groupLetter && scoresRevealed && (
+                            revealedPicks.length > 0 ? (
+                              <div>
+                                <p className="text-[10px] font-bold text-gray-500 mb-1">
+                                  ניחושי התוצאה
+                                  {liveActual && (
+                                    <>
+                                      <span className="mx-1.5">·</span>
+                                      <span className="text-blue-700">
+                                        לפי התוצאה כרגע (<span className="tabular-nums">{liveActual.home}-{liveActual.away}</span>)
+                                      </span>
+                                    </>
+                                  )}
+                                </p>
+                                {consensusLine && (
+                                  <p className="text-[10px] text-gray-500 mb-1">
+                                    הניחוש הנפוץ:{" "}
+                                    <span className="font-bold tabular-nums text-gray-700" style={{ fontFamily: "var(--font-inter)" }}>
+                                      {consensusLine}
+                                    </span>
+                                  </p>
+                                )}
+                                <div className="grid grid-cols-2 gap-1">
+                                  {revealedPicks.map((p) => {
+                                    const hit = liveActual ? classifyHit({ home: p.home, away: p.away }, liveActual) : null;
+                                    const bg =
+                                      hit === "exact"
+                                        ? "bg-green-50 border-green-300"
+                                        : hit === "toto"
+                                        ? "bg-amber-50 border-amber-300"
+                                        : hit === "miss"
+                                        ? "bg-red-50 border-red-200"
+                                        : "bg-white border-gray-200";
+                                    const icon = hit === "exact" ? "🎯" : hit === "toto" ? "✓" : hit === "miss" ? "✗" : "";
+                                    return (
+                                      <div
+                                        key={p.userId}
+                                        className={`flex items-center justify-between rounded-lg px-2 py-1 border ${bg}`}
+                                      >
+                                        <span className="text-[11px] font-bold text-gray-800 truncate">{p.name}</span>
+                                        <span className="flex items-center gap-1 shrink-0">
+                                          <span className="text-[11px] font-black tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>
+                                            {p.home}-{p.away}
+                                          </span>
+                                          {icon && <span className="text-xs">{icon}</span>}
+                                        </span>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            ) : (
+                              <p className="text-[11px] text-gray-400 text-center py-1">
+                                אף מהמר לא ניחש תוצאה למשחק זה
+                              </p>
+                            )
+                          )}
+
+                          {/* Group match whose day hasn't locked yet — explicit reveal time */}
+                          {!isFinished && groupLetter && !scoresRevealed && (
+                            <p className="text-[11px] text-blue-700 font-medium text-center py-1">
+                              🔒 ניחושי התוצאה ייחשפו ב-{revealAt ? toIsraelTimeShort(revealAt.toISOString()) : "—"} (דקה אחרי נעילת ההימורים)
+                            </p>
+                          )}
                           {/* Group-stage predictions vs actual result (only for FINISHED group matches) */}
                           {groupHits.length > 0 && (
                             <div>
@@ -331,6 +467,15 @@ export function TodayMatches() {
                                 </div>
                               ))}
                             </div>
+                          )}
+
+                          {/* Nothing to show at all — KO match with no related bets,
+                              or a finished group match nobody predicted. Upcoming
+                              group matches always render a reveal/lock section above. */}
+                          {relatedBets.length === 0 && groupHits.length === 0 && (isFinished || !groupLetter) && (
+                            <p className="text-[11px] text-gray-400 text-center py-1">
+                              אין הימורים למשחק הזה
+                            </p>
                           )}
                         </div>
                       )}

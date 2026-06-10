@@ -65,11 +65,15 @@ export function shareRank(userName: string, rank: number, total: number): string
 }
 
 /**
- * Open WhatsApp with pre-filled text
+ * Open WhatsApp with pre-filled text.
+ * Falls back to same-tab navigation when window.open returns null —
+ * iOS standalone PWAs and aggressive popup blockers do that even for
+ * user-gesture opens, which would otherwise make the button a silent no-op.
  */
 export function openWhatsApp(text: string) {
-  const encoded = encodeURIComponent(text);
-  window.open(`https://wa.me/?text=${encoded}`, "_blank");
+  const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+  const win = window.open(url, "_blank", "noopener,noreferrer");
+  if (!win) window.location.href = url;
 }
 
 /**

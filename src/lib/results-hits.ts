@@ -24,7 +24,7 @@ const TLA_ALIAS: Record<string, string> = {
   HRV: "CRO",   // Croatia
 };
 
-function normalizeTla(tla: string | null | undefined): string {
+export function normalizeTla(tla: string | null | undefined): string {
   if (!tla) return "";
   const upper = tla.toString().toUpperCase();
   return TLA_ALIAS[upper] ?? upper;

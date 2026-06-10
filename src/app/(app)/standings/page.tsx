@@ -14,6 +14,8 @@ import { GROUPS } from "@/lib/tournament/groups";
 import { TodayMatches } from "@/components/shared/TodayMatches";
 import { computeLiveScores, computeTodayScores, computePlayerHistories, koStageMaxPts } from "@/lib/scoring/live-scorer";
 import { normalizeGroupLetter, type FinishedMatch, GROUP_MATCH_PAIRS } from "@/lib/results-hits";
+import { computeLeagueTitles } from "@/lib/league-titles";
+import { LeagueTitles } from "@/components/shared/LeagueTitles";
 
 // Mock completion data — in production this comes from Supabase
 const MOCK_COMPLETION_DATA: PlayerCompletion[] = [
@@ -535,6 +537,22 @@ export default function StandingsPage() {
     return losers.length === 1 ? losers[0].id : null;
   })();
 
+  // "המניף?" — the UNIQUE first place, same rules. Half-joke, half-jinx:
+  // crowned cup-lifter before a single knockout ball was kicked.
+  const lifterId = (() => {
+    if (PLAYERS.length < 2) return null;
+    const maxTotal = Math.max(...PLAYERS.map((p) => p.total));
+    const tops = PLAYERS.filter((p) => p.total === maxTotal);
+    return tops.length === 1 ? tops[0].id : null;
+  })();
+
+  // 🏅 תארים — fun league titles (one clear holder only, with minimums).
+  // Only meaningful after the global lock: champion picks are secret before.
+  const titleAwards = useMemo(
+    () => (isLocked() ? computeLeagueTitles(brackets, finishedMatches, undefined, scoring) : []),
+    [brackets, finishedMatches, scoring],
+  );
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-6 pb-24">
       {/* Today's matches — auto-hides when no matches today */}
@@ -555,6 +573,7 @@ export default function StandingsPage() {
             const text = shareLeaderboard(
               [...PLAYERS].sort((a,b) => b.total - a.total).map((p,i) => ({ rank: i+1, name: p.name, total: p.total, today: p.today })),
               PLAYERS.find((p) => p.id === sheepId)?.name ?? null,
+              PLAYERS.find((p) => p.id === lifterId)?.name ?? null,
             );
             openWhatsApp(text);
           }} disabled={PLAYERS.length === 0} className="px-3 py-2 rounded-lg bg-green-500 text-white text-xs font-bold hover:bg-green-600 transition-colors flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed">
@@ -620,6 +639,7 @@ export default function StandingsPage() {
               <div className="me-3 flex-1 min-w-0 relative">
                 <span className="font-bold text-base text-gray-900 cursor-pointer hover:text-blue-600 transition-colors">{p.name}</span>
                 {p.isYou && <span className="text-xs text-blue-500 ms-1.5 bg-blue-100 rounded px-1.5 py-0.5 font-bold">אתה</span>}
+                {p.id === lifterId && <span className="text-xs text-amber-700 ms-1.5 bg-amber-100 border border-amber-200 rounded px-1.5 py-0.5 font-bold whitespace-nowrap">🏆 המניף?</span>}
                 {p.id === sheepId && <span className="text-xs text-gray-600 ms-1.5 bg-gray-100 border border-gray-200 rounded px-1.5 py-0.5 font-bold whitespace-nowrap">🐑 הכבש?</span>}
                 <PlayerTooltip player={p} visible={hoveredPlayer === p.id} onClose={() => setHoveredPlayer(null)} />
               </div>
@@ -648,6 +668,9 @@ export default function StandingsPage() {
           );
         })}
       </div>
+
+      {/* 🏅 תארים — fun league titles, post-lock only */}
+      {titleAwards.length > 0 && <LeagueTitles awards={titleAwards} />}
 
       {/* מצטיין היום / חולשת היום — only when real scoring data exists */}
       {PLAYERS.length >= 2 && PLAYERS[0]?.total > 0 && (() => {

@@ -73,23 +73,22 @@ export function AgreementMatrix({
           <span className="text-red-600 font-bold"> אדום = הפוכים</span>
         </p>
       </div>
-      {/* Top-5 closest pairs */}
+      {/* Top-5 closest pairs — one compact chip row (wraps on mobile) */}
       {closestPairs.length > 0 && (
-        <div className="px-5 py-3 border-b border-gray-100 bg-gray-50/50">
-          <p className="text-xs font-bold text-gray-600 mb-2">🏅 חמשת הזוגות הכי קרובים</p>
-          <div className="space-y-1">
-            {closestPairs.map((p, i) => (
-              <div key={`${p.a}-${p.b}`} className="flex items-center gap-2 text-sm">
-                <span className="w-5 text-center font-black text-gray-400 text-xs" style={{ fontFamily: "var(--font-inter)" }}>{i + 1}</span>
-                <span className="font-bold text-gray-800">{p.a}</span>
-                <span className="text-gray-400">+</span>
-                <span className="font-bold text-gray-800">{p.b}</span>
-                <span className="ms-auto font-black tabular-nums text-green-700" style={{ fontFamily: "var(--font-inter)" }}>
-                  {Math.round(p.pct)}%
-                </span>
-              </div>
-            ))}
-          </div>
+        <div className="px-5 py-2.5 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2 flex-wrap">
+          <p className="text-xs font-bold text-gray-600 shrink-0">🏅 הזוגות הכי קרובים:</p>
+          {closestPairs.map((p, i) => (
+            <span
+              key={`${p.a}-${p.b}`}
+              className="inline-flex items-center gap-1.5 bg-white border border-gray-200 rounded-full px-2.5 py-1 text-xs whitespace-nowrap"
+            >
+              <span className="font-black text-gray-400" style={{ fontFamily: "var(--font-inter)" }}>{i + 1}</span>
+              <span className="font-bold text-gray-800">{p.a} + {p.b}</span>
+              <span className="font-black text-green-700 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>
+                {Math.round(p.pct)}%
+              </span>
+            </span>
+          ))}
         </div>
       )}
 

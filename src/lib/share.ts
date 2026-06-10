@@ -4,15 +4,17 @@
 // ============================================================================
 
 /**
- * Share leaderboard standings to WhatsApp
+ * Share leaderboard standings to WhatsApp.
+ * `sheepName` — the unique last place ("הכבש?"), marked for the group chat.
  */
-export function shareLeaderboard(players: { rank: number; name: string; total: number; today: string }[]): string {
+export function shareLeaderboard(players: { rank: number; name: string; total: number; today: string }[], sheepName?: string | null): string {
   const lines = [
     "🏆 *The Minhelet — דירוג עדכני*",
     "━━━━━━━━━━━━━━━",
     ...players.slice(0, 10).map(p => {
       const medal = p.rank === 1 ? "🥇" : p.rank === 2 ? "🥈" : p.rank === 3 ? "🥉" : `${p.rank}.`;
-      return `${medal} *${p.name}* — ${p.total} נק׳ (${p.today} היום)`;
+      const sheep = sheepName && p.name === sheepName ? " 🐑 הכבש?" : "";
+      return `${medal} *${p.name}* — ${p.total} נק׳ (${p.today} היום)${sheep}`;
     }),
     "",
     "🔗 the-minhelet.vercel.app",

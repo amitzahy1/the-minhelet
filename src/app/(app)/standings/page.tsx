@@ -525,6 +525,16 @@ export default function StandingsPage() {
   const PLAYERS = realPlayers;
   const COMPLETION_DATA = MOCK_COMPLETION_DATA; // TODO: build from real data when available
 
+  // "הכבש?" — the UNIQUE last place by TOTAL points, independent of the
+  // current sort column. With ties (e.g. day zero, everyone on 0) nobody is
+  // marked: the title needs one clear loser, not half the league.
+  const sheepId = (() => {
+    if (PLAYERS.length < 2) return null;
+    const minTotal = Math.min(...PLAYERS.map((p) => p.total));
+    const losers = PLAYERS.filter((p) => p.total === minTotal);
+    return losers.length === 1 ? losers[0].id : null;
+  })();
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-6 pb-24">
       {/* Today's matches — auto-hides when no matches today */}
@@ -543,7 +553,8 @@ export default function StandingsPage() {
             // sharing then would send a headers-only message.
             if (PLAYERS.length === 0) return;
             const text = shareLeaderboard(
-              [...PLAYERS].sort((a,b) => b.total - a.total).map((p,i) => ({ rank: i+1, name: p.name, total: p.total, today: p.today }))
+              [...PLAYERS].sort((a,b) => b.total - a.total).map((p,i) => ({ rank: i+1, name: p.name, total: p.total, today: p.today })),
+              PLAYERS.find((p) => p.id === sheepId)?.name ?? null,
             );
             openWhatsApp(text);
           }} disabled={PLAYERS.length === 0} className="px-3 py-2 rounded-lg bg-green-500 text-white text-xs font-bold hover:bg-green-600 transition-colors flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed">
@@ -609,6 +620,7 @@ export default function StandingsPage() {
               <div className="me-3 flex-1 min-w-0 relative">
                 <span className="font-bold text-base text-gray-900 cursor-pointer hover:text-blue-600 transition-colors">{p.name}</span>
                 {p.isYou && <span className="text-xs text-blue-500 ms-1.5 bg-blue-100 rounded px-1.5 py-0.5 font-bold">אתה</span>}
+                {p.id === sheepId && <span className="text-xs text-gray-600 ms-1.5 bg-gray-100 border border-gray-200 rounded px-1.5 py-0.5 font-bold whitespace-nowrap">🐑 הכבש?</span>}
                 <PlayerTooltip player={p} visible={hoveredPlayer === p.id} onClose={() => setHoveredPlayer(null)} />
               </div>
               {/* Mobile: show only the active tab value */}

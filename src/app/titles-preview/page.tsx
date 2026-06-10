@@ -1,18 +1,27 @@
 "use client";
 
 // ============================================================================
-// /titles-preview — visual QA page for the league-titles feature.
+// /titles-preview — visual QA page: the PROPOSED home-page order, all 8
+// sections together, on mock data.
 //
-// Everything here is MOCK data, but the rendering REPLICATES THE REAL טבלה
-// PAGE 1:1: same page header + share button, same leaderboard card markup
-// (headers, columns, sparkline, "מקס"), and the real LeagueTitles component
-// mounted directly below the table — exactly where it sits in production.
-// The awards run through the REAL computeLeagueTitles, so the
-// no-award-on-tie and minimum-threshold rules shown here are the prod rules.
+// Rendering replicates the real טבלה page 1:1 — real components are imported
+// where they take props (LeagueTitles, HeroRoast, LeaderboardRace, TeamLogo);
+// sections whose components fetch live data internally (המשחקים הבאים, באנר
+// הימורים חסרים) are pixel-copies of their real markup. The title awards run
+// through the REAL computeLeagueTitles, so the no-award-on-tie and
+// minimum-threshold rules shown here are the prod rules.
+//
+// PROPOSED ORDER (pending league-owner approval):
+//   1 המשחקים הבאים · 2 באנר הימורים חסרים · 3 כותרת + שתף · 4 טבלת דירוג
+//   5 🏅 תארים · 6 השוואת כל המהמרים · 7 מצטיין/חולשת היום · 8 מירוץ הנקודות
 // ============================================================================
 
 import { computeLeagueTitles } from "@/lib/league-titles";
 import { LeagueTitles } from "@/components/shared/LeagueTitles";
+import { HeroRoast } from "@/components/shared/HeroRoast";
+import { LeaderboardRace } from "@/components/shared/LeaderboardRace";
+import { TeamLogo } from "@/components/shared/TeamLogo";
+import { getTeamNameHe } from "@/lib/flags";
 import { shareLeaderboard, openWhatsApp } from "@/lib/share";
 import type { BettorBracket } from "@/lib/supabase/shared-data";
 import type { FinishedMatch } from "@/lib/results-hits";
@@ -85,15 +94,12 @@ function mkMatch(id: number, date: string, letter: string, pairIdx: number, hg: 
 }
 
 const FINISHED: FinishedMatch[] = [
-  // Day 1 — pair indices 0 ([0,1]) and 1 ([2,3]) of each group
   mkMatch(9001, D1, "A", 0, 2, 1), mkMatch(9002, D1, "A", 1, 1, 0),
   mkMatch(9003, D1, "B", 0, 1, 0), mkMatch(9004, D1, "B", 1, 3, 1),
   mkMatch(9005, D1, "C", 0, 1, 0), mkMatch(9006, D1, "C", 1, 2, 1),
-  // Day 2 — pair indices 2 ([0,2]) and 3 ([1,3])
   mkMatch(9007, D2, "A", 2, 1, 1), mkMatch(9008, D2, "A", 3, 2, 0),
   mkMatch(9009, D2, "B", 2, 1, 1), mkMatch(9010, D2, "B", 3, 1, 1),
   mkMatch(9011, D2, "C", 2, 2, 2), mkMatch(9012, D2, "C", 3, 2, 2),
-  // Day 3 — pair indices 4 ([0,3]) and 5 ([1,2])
   mkMatch(9013, D3, "A", 4, 3, 0), mkMatch(9014, D3, "A", 5, 0, 1),
   mkMatch(9015, D3, "B", 4, 2, 0), mkMatch(9016, D3, "B", 5, 0, 2),
   mkMatch(9017, D3, "C", 4, 4, 0), mkMatch(9018, D3, "C", 5, 0, 1),
@@ -109,60 +115,37 @@ const TREE_VAR2 = ["FRA", "URU", "ARG", "BRA", "JPN", "POR", "NED", "ENG"];
 const TREE_OPP = ["MEX", "KOR", "RSA", "HAI", "QAT", "BIH", "CUR", "JOR"];
 
 const BRACKETS: BettorBracket[] = [
-  // דני — הצלף (4 exact hits) + half of the kissers pair
   mkBracket("u1", "דני", {
     champion: "ARG",
     tree: TREE_MAIN,
-    scores: {
-      A: { 0: [2, 1], 1: [1, 0], 2: [1, 1] },
-      B: { 0: [1, 0] },
-    },
+    scores: { A: { 0: [2, 1], 1: [1, 0], 2: [1, 1] }, B: { 0: [1, 0] } },
   }),
-  // רון ב — kissers: identical orders/tree/champion to דני, no score picks
   mkBracket("u2", "רון ב", { champion: "ARG", tree: TREE_MAIN }),
-  // יוני — זאב בודד (only NZL) + מלך הכמעט (5 off-by-one) + הסגן הנצחי
   mkBracket("u3", "יוני", {
     champion: "NZL",
     tree: TREE_VAR1,
-    scores: {
-      A: { 0: [1, 1], 1: [2, 0], 3: [1, 0] },
-      B: { 1: [3, 2], 4: [2, 1] },
-      C: { 2: [2, 2] },
-    },
+    scores: { A: { 0: [1, 1], 1: [2, 0], 3: [1, 0] }, B: { 1: [3, 2], 4: [2, 1] }, C: { 2: [2, 2] } },
   }),
-  // אמית — מלך התיקו (6 predicted draws, none 0-0)
   mkBracket("u4", "אמית", {
     champion: "FRA",
     tree: TREE_VAR2,
-    scores: {
-      A: { 1: [2, 2], 2: [2, 2] },
-      B: { 1: [2, 2], 2: [3, 3] },
-      C: { 0: [2, 2], 4: [2, 2] },
-    },
+    scores: { A: { 1: [2, 2], 2: [2, 2] }, B: { 1: [2, 2], 2: [3, 3] }, C: { 0: [2, 2], 4: [2, 2] } },
   }),
-  // רון ג — ההייטר (three 0-0 picks)
   mkBracket("u5", "רון ג", {
     champion: "FRA",
     tree: TREE_VAR1,
-    scores: {
-      A: { 3: [0, 0] },
-      B: { 3: [0, 0] },
-      C: { 5: [0, 0] },
-    },
+    scores: { A: { 3: [0, 0] }, B: { 3: [0, 0] }, C: { 5: [0, 0] } },
   }),
-  // דור דסא — מלך העולות (top-2 correct in all three finished groups)
   mkBracket("u6", "דור דסא", {
     champion: "FRA",
     tree: TREE_VAR2,
     orders: { A: [0, 2, 1, 3], B: [2, 0, 1, 3], C: [0, 2, 1, 3] },
   }),
-  // רועי — המנותק (scrambled orders + opposite tree)
   mkBracket("u7", "רועי", {
     champion: "ARG",
     tree: TREE_OPP,
     orders: Object.fromEntries(Object.keys(GROUPS).map((l) => [l, [0, 3, 2, 1]])),
   }),
-  // עידן — נביא הבתים (unique group winners in K and L)
   mkBracket("u8", "עידן", {
     champion: "ARG",
     tree: TREE_MAIN.slice(0, 6),
@@ -175,10 +158,10 @@ const BRACKETS: BettorBracket[] = [
 // ---------------------------------------------------------------------------
 
 const BRACKETS_TIED: BettorBracket[] = [
-  mkBracket("t1", "מהמר 1", { champion: "ARG", tree: TREE_MAIN, scores: { A: { 0: [2, 1], 1: [1, 0] } } }),
-  mkBracket("t2", "מהמר 2", { champion: "ARG", tree: TREE_MAIN, scores: { B: { 0: [1, 0], 1: [3, 1] } } }),
-  mkBracket("t3", "מהמר 3", { champion: "FRA", tree: TREE_OPP }),
-  mkBracket("t4", "מהמר 4", { champion: "FRA", tree: TREE_OPP }),
+  mkBracket("t1", "מהמר 1", { champion: "FRA", tree: TREE_MAIN, scores: { A: { 0: [2, 1], 1: [1, 0] } } }),
+  mkBracket("t2", "מהמר 2", { champion: "FRA", tree: TREE_MAIN, scores: { B: { 0: [1, 0], 1: [3, 1] } } }),
+  mkBracket("t3", "מהמר 3", { champion: "ESP", tree: TREE_OPP }),
+  mkBracket("t4", "מהמר 4", { champion: "ESP", tree: TREE_OPP }),
 ];
 
 // ---------------------------------------------------------------------------
@@ -187,14 +170,21 @@ const BRACKETS_TIED: BettorBracket[] = [
 // ---------------------------------------------------------------------------
 
 const ROWS = [
-  { id: "u1", name: "דני", matchPts: 16, advPts: 0, specPts: 0, total: 16, maxPossible: 64, today: "+4", history: [0, 4, 8, 12, 12, 16], isYou: false },
-  { id: "u3", name: "יוני", matchPts: 8, advPts: 0, specPts: 0, total: 8, maxPossible: 61, today: "+1", history: [0, 1, 2, 2, 7, 8], isYou: false },
-  { id: "u9", name: "אלכסנדר-מתתיהו שם-ארוך-במיוחד", matchPts: 4, advPts: 0, specPts: 0, total: 4, maxPossible: 58, today: "0", history: [0, 1, 2, 3, 4, 4], isYou: true },
-  { id: "u4", name: "אמית", matchPts: 2, advPts: 0, specPts: 0, total: 2, maxPossible: 55, today: "+2", history: [0, 0, 1, 1, 2, 2], isYou: false },
-  { id: "u7", name: "רועי", matchPts: 0, advPts: 0, specPts: 0, total: 0, maxPossible: 49, today: "0", history: [0, 0, 0, 0, 0, 0], isYou: false },
+  { id: "u1", name: "דני", matchPts: 16, advPts: 0, specPts: 0, total: 16, maxPossible: 64, today: "+4", history: [0, 4, 8, 12, 12, 16], isYou: false, toto: "64%", exact: 4, streak: 3, bestDay: "+12" },
+  { id: "u3", name: "יוני", matchPts: 8, advPts: 0, specPts: 0, total: 8, maxPossible: 61, today: "+1", history: [0, 1, 2, 2, 7, 8], isYou: false, toto: "58%", exact: 1, streak: 2, bestDay: "+5" },
+  { id: "u9", name: "אלכסנדר-מתתיהו שם-ארוך-במיוחד", matchPts: 4, advPts: 0, specPts: 0, total: 4, maxPossible: 58, today: "0", history: [0, 1, 2, 3, 4, 4], isYou: true, toto: "52%", exact: 0, streak: 0, bestDay: "+3" },
+  { id: "u4", name: "אמית", matchPts: 2, advPts: 0, specPts: 0, total: 2, maxPossible: 55, today: "+2", history: [0, 0, 1, 1, 2, 2], isYou: false, toto: "44%", exact: 0, streak: 1, bestDay: "+2" },
+  { id: "u7", name: "רועי", matchPts: 0, advPts: 0, specPts: 0, total: 0, maxPossible: 49, today: "0", history: [0, 0, 0, 0, 0, 0], isYou: false, toto: "31%", exact: 0, streak: 0, bestDay: "0" },
 ];
 const LIFTER_ID = "u1"; // unique first place
 const SHEEP_ID = "u7";  // unique last place
+
+// Mock upcoming/live/finished cards for the המשחקים הבאים replica
+const DEMO_TODAY = [
+  { id: 1, time: "22:00", status: "upcoming" as const, home: "MEX", away: "RSA", group: "A", score: null as null | [number, number] },
+  { id: 2, time: "", status: "live" as const, home: "KOR", away: "CZE", group: "A", score: [1, 0] as [number, number] },
+  { id: 3, time: "", status: "finished" as const, home: "CAN", away: "QAT", group: "B", score: [1, 0] as [number, number] },
+];
 
 // Identical copy of the standings-page Sparkline (it's file-local there).
 function Sparkline({ data, highlight }: { data: number[]; highlight?: boolean }) {
@@ -209,12 +199,13 @@ function Sparkline({ data, highlight }: { data: number[]; highlight?: boolean })
   );
 }
 
-function PreviewNote({ children }: { children: React.ReactNode }) {
+/** Small numbered marker above each section — preview-only, for the approval pass. */
+function SectionMark({ n, label }: { n: number; label: string }) {
   return (
-    <div className="my-6 flex items-center gap-2">
-      <span className="h-px flex-1 bg-blue-200" />
-      <p className="text-xs font-bold text-blue-600 bg-blue-50 border border-blue-200 rounded-full px-3 py-1">{children}</p>
-      <span className="h-px flex-1 bg-blue-200" />
+    <div className="flex items-center gap-2 mt-8 mb-2">
+      <span className="w-5 h-5 rounded-full bg-gray-900 text-white text-[11px] font-black flex items-center justify-center shrink-0">{n}</span>
+      <span className="text-xs font-bold text-gray-500">{label}</span>
+      <span className="h-px flex-1 bg-gray-200" />
     </div>
   );
 }
@@ -230,17 +221,109 @@ export default function TitlesPreviewPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6 pb-24" dir="rtl">
-      <div className="mb-6 bg-blue-50 border border-blue-200 rounded-2xl p-4">
-        <h1 className="text-2xl font-black text-gray-900">תצוגה מקדימה — תארים ותגיות</h1>
+      <div className="mb-2 bg-blue-50 border border-blue-200 rounded-2xl p-4">
+        <h1 className="text-2xl font-black text-gray-900">תצוגה מקדימה — הסדר המוצע לעמוד הראשי</h1>
         <p className="text-sm text-gray-600 mt-1">
-          נתוני דמה, אבל הרינדור זהה 1:1 לעמוד הטבלה האמיתי — אותו מרקאפ, אותם רכיבים, אותם חישובים
-          (כולל חוקי &quot;אין תואר בתיקו&quot; וספי המינימום). מה שרואים כאן זה מה שעולה לאוויר.
+          כל 8 הסקשנים ביחד, בסדר המוצע, על נתוני דמה. הרינדור זהה לאתר (אותם רכיבים ואותו מרקאפ);
+          המספרים השחורים הקטנים הם סימוני-תצוגה בלבד ולא יופיעו באתר.
         </p>
       </div>
 
-      <PreviewNote>מכאן ולמטה — העתק מדויק של עמוד הטבלה כפי שייראה אחרי כמה ימי משחקים</PreviewNote>
+      {/* ===== 1 · המשחקים הבאים (replica — the real component fetches live data) ===== */}
+      <SectionMark n={1} label="המשחקים הבאים (כמו היום)" />
+      <div className="mb-6">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
+          <h2 className="text-base font-bold text-gray-800">המשחקים היום</h2>
+          <span className="text-sm text-gray-400">3 משחקים</span>
+        </div>
+        <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
+          {DEMO_TODAY.map((m) => (
+            <div key={m.id} className="col-span-1">
+              <div className={`bg-white rounded-xl border shadow-sm p-3 text-center transition-all cursor-pointer ${
+                m.status === "live" ? "border-red-300 bg-red-50/30" :
+                m.status === "finished" ? "border-green-200" :
+                "border-gray-200 hover:border-gray-300 hover:shadow-md"
+              }`}>
+                <div className="mb-2">
+                  {m.status === "live" && (
+                    <span className="text-[10px] font-bold text-red-600 bg-red-100 rounded-full px-2 py-0.5 inline-flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />LIVE
+                    </span>
+                  )}
+                  {m.status === "finished" && <span className="text-[10px] font-bold text-green-600 bg-green-100 rounded-full px-2 py-0.5">הסתיים</span>}
+                  {m.status === "upcoming" && (
+                    <span className="text-xs font-bold text-gray-500" style={{ fontFamily: "var(--font-inter)" }}>{m.time}</span>
+                  )}
+                </div>
+                <div className="flex items-center justify-between gap-1">
+                  <div className="flex flex-col items-center gap-0.5 flex-1 min-w-0">
+                    <TeamLogo code={m.home} size="md" />
+                    <span className="text-[11px] font-bold text-gray-800 truncate max-w-full">{getTeamNameHe(m.home) || m.home}</span>
+                  </div>
+                  <div className="shrink-0 px-1">
+                    {m.score ? (
+                      <span className="text-lg font-black tabular-nums text-gray-900" style={{ fontFamily: "var(--font-inter)" }}>{m.score[0]}-{m.score[1]}</span>
+                    ) : (
+                      <span className="text-sm font-bold text-gray-300">vs</span>
+                    )}
+                  </div>
+                  <div className="flex flex-col items-center gap-0.5 flex-1 min-w-0">
+                    <TeamLogo code={m.away} size="md" />
+                    <span className="text-[11px] font-bold text-gray-800 truncate max-w-full">{getTeamNameHe(m.away) || m.away}</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-center gap-1 mt-1.5">
+                  <p className="text-[10px] text-gray-400">בית {m.group}</p>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-gray-300">
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
 
-      {/* === Page header — exact copy of the real טבלה header + share button === */}
+      {/* ===== 2 · באנר הימורים חסרים (replica — shows only to users with gaps) ===== */}
+      <SectionMark n={2} label="באנר הימורים חסרים (מוצג רק למי שחסר לו)" />
+      <div className="mb-5">
+        <div className="bg-gradient-to-l from-amber-50 to-orange-50 border-2 border-amber-300 rounded-2xl px-5 py-4 hover:shadow-md transition-shadow cursor-pointer">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">⚠️</span>
+              <p className="text-base font-black text-amber-900">חסרים לך הימורים!</p>
+            </div>
+            <span className="text-sm font-bold text-amber-700 bg-amber-100 rounded-full px-3 py-1">המשך למיוחדים ←</span>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            <div className="rounded-xl px-3 py-2 bg-green-100 border border-green-200">
+              <div className="flex items-baseline justify-between gap-1">
+                <p className="text-base font-black text-green-700" style={{ fontFamily: "var(--font-inter)" }}>✓</p>
+                <p className="text-[11px] font-bold text-green-700">משחקי בתים</p>
+              </div>
+            </div>
+            <div className="rounded-xl px-3 py-2 bg-green-100 border border-green-200">
+              <div className="flex items-baseline justify-between gap-1">
+                <p className="text-base font-black text-green-700" style={{ fontFamily: "var(--font-inter)" }}>✓</p>
+                <p className="text-[11px] font-bold text-green-700">נוקאאוט</p>
+              </div>
+            </div>
+            <div className="rounded-xl px-3 py-2 bg-white border border-amber-200">
+              <div className="flex items-baseline justify-between gap-1">
+                <p className="text-base font-black text-amber-900" style={{ fontFamily: "var(--font-inter)" }}>18/25</p>
+                <p className="text-[11px] font-bold text-amber-800">מיוחדים</p>
+              </div>
+              <div className="mt-1.5 h-1 bg-amber-100 rounded-full overflow-hidden">
+                <div className="h-full bg-amber-500 rounded-full" style={{ width: "72%" }} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ===== 3 · כותרת + שתף ===== */}
+      <SectionMark n={3} label="כותרת העמוד + כפתור שיתוף (חי — אפשר לנסות)" />
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>טבלה</h1>
@@ -254,7 +337,8 @@ export default function TitlesPreviewPage() {
         </div>
       </div>
 
-      {/* === Leaderboard card — exact copy of the real markup === */}
+      {/* ===== 4 · טבלת דירוג ===== */}
+      <SectionMark n={4} label="טבלת דירוג — עם תגיות מניף / הכבש?" />
       <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-visible hover:shadow-lg transition-all mb-6">
         <div className="px-5 py-3 bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/40 border-b border-blue-100/50">
           <h2 className="text-base font-bold text-gray-800">טבלת דירוג</h2>
@@ -302,12 +386,10 @@ export default function TitlesPreviewPage() {
             <div className="me-3 flex-1 min-w-0 relative">
               <span className="font-bold text-base text-gray-900 cursor-pointer hover:text-blue-600 transition-colors">{p.name}</span>
               {p.isYou && <span className="text-xs text-blue-500 ms-1.5 bg-blue-100 rounded px-1.5 py-0.5 font-bold">אתה</span>}
-              {p.id === LIFTER_ID && <span className="text-xs text-amber-700 ms-1.5 bg-amber-100 border border-amber-200 rounded px-1.5 py-0.5 font-bold whitespace-nowrap">🏆 המניף?</span>}
+              {p.id === LIFTER_ID && <span className="text-xs text-amber-700 ms-1.5 bg-amber-100 border border-amber-200 rounded px-1.5 py-0.5 font-bold whitespace-nowrap">🏆 מניף</span>}
               {p.id === SHEEP_ID && <span className="text-xs text-gray-600 ms-1.5 bg-gray-100 border border-gray-200 rounded px-1.5 py-0.5 font-bold whitespace-nowrap">🐑 הכבש?</span>}
             </div>
-            {/* Mobile: show only the active tab value */}
             <span className="w-12 text-center text-sm font-bold text-blue-600 sm:hidden" style={{ fontFamily: "var(--font-inter)" }}></span>
-            {/* Desktop: show all 3 + sparkline */}
             <span className="w-14 text-center text-sm font-medium hidden sm:block text-gray-600" style={{ fontFamily: "var(--font-inter)" }}>{p.matchPts}</span>
             <span className="w-14 text-center text-sm font-medium hidden sm:block text-gray-600" style={{ fontFamily: "var(--font-inter)" }}>{p.advPts}</span>
             <span className="w-14 text-center text-sm font-medium hidden sm:block text-gray-600" style={{ fontFamily: "var(--font-inter)" }}>{p.specPts}</span>
@@ -326,12 +408,78 @@ export default function TitlesPreviewPage() {
         ))}
       </div>
 
-      {/* === 🏅 תארים — the real component, in its real position (below the table) === */}
+      {/* ===== 5 · 🏅 תארים ===== */}
+      <SectionMark n={5} label="תארים — מחושב בלוגיקת הפרודקשן" />
       <LeagueTitles awards={awards} />
 
-      <PreviewNote>עד כאן העמוד האמיתי · מכאן בדיקות נוספות</PreviewNote>
+      {/* ===== 6 · השוואת כל המהמרים (moved up per the proposal) ===== */}
+      <SectionMark n={6} label="השוואת כל המהמרים — עולה למעלה, אחרי התארים" />
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden hover:shadow-lg transition-all mb-6">
+        <div className="px-5 py-4 bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/40 border-b border-blue-100/50">
+          <h2 className="text-lg font-bold text-gray-800">השוואת כל המהמרים</h2>
+          <p className="text-sm text-gray-500">מי הכי חזק בכל קטגוריה?</p>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-gray-50 text-xs text-gray-500 font-semibold border-b border-gray-200" style={{ fontFamily: "var(--font-inter)" }}>
+                <th className="py-3 px-4 text-start">שחקן</th>
+                <th className="py-3 px-3 text-center font-bold">סה״כ</th>
+                <th className="py-3 px-3 text-center">% טוטו</th>
+                <th className="py-3 px-3 text-center">מדויקות</th>
+                <th className="py-3 px-3 text-center">רצף</th>
+                <th className="py-3 px-3 text-center">יום טוב</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ROWS.map((p) => (
+                <tr key={p.id} className={`border-t border-gray-100 ${p.isYou ? "bg-blue-50/40" : "hover:bg-gray-50/30"}`}>
+                  <td className="py-3 px-4 font-bold text-gray-900">{p.name} {p.isYou && <span className="text-xs text-blue-500 bg-blue-100 rounded px-1">אתה</span>}</td>
+                  <td className="py-3 px-3 text-center font-black text-base" style={{ fontFamily: "var(--font-inter)" }}>{p.total}</td>
+                  <td className="py-3 px-3 text-center">
+                    <span className={`font-bold ${parseInt(p.toto) >= 60 ? "text-green-600" : parseInt(p.toto) >= 55 ? "text-amber-600" : "text-red-500"}`}>{p.toto}</span>
+                  </td>
+                  <td className="py-3 px-3 text-center font-medium" style={{ fontFamily: "var(--font-inter)" }}>{p.exact}</td>
+                  <td className="py-3 px-3 text-center text-amber-600 font-bold">{p.streak} 🔥</td>
+                  <td className="py-3 px-3 text-center text-green-600 font-bold" style={{ fontFamily: "var(--font-inter)" }}>{p.bestDay}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-      {/* === Edge cases: ties + below minimum === */}
+      {/* ===== 7 · מצטיין / חולשת היום (real component) ===== */}
+      <SectionMark n={7} label="מצטיין וחולשת היום" />
+      <HeroRoast
+        hero={{ name: "דני", points: 12, highlight: "3 תוצאות מדויקות!" }}
+        roast={{ name: "רועי", points: 0, highlight: "רק 0 — יום קשה" }}
+        matchday=""
+      />
+
+      {/* ===== 8 · מירוץ הנקודות (real component) ===== */}
+      <SectionMark n={8} label="מירוץ הנקודות" />
+      <div className="mb-6">
+        <h2 className="text-lg font-bold text-gray-900 mb-3">מירוץ הנקודות</h2>
+        <LeaderboardRace
+          data={[
+            { name: "דני", color: "#3B82F6", history: [0, 3, 6, 9, 12, 16] },
+            { name: "יוני", color: "#10B981", history: [0, 2, 3, 4, 7, 8] },
+            { name: "אלכסנדר-מתתיהו", color: "#F59E0B", history: [0, 1, 2, 3, 4, 4] },
+            { name: "אמית", color: "#8B5CF6", history: [0, 0, 1, 1, 2, 2] },
+            { name: "רועי", color: "#EF4444", history: [0, 0, 0, 0, 0, 0] },
+          ]}
+          matchdays={["יום 1", "יום 2", "יום 3", "יום 4", "יום 5", "יום 6"]}
+        />
+      </div>
+
+      {/* ===== Extra QA sections ===== */}
+      <div className="mt-12 mb-2 flex items-center gap-2">
+        <span className="h-px flex-1 bg-blue-200" />
+        <p className="text-xs font-bold text-blue-600 bg-blue-50 border border-blue-200 rounded-full px-3 py-1">עד כאן העמוד · מכאן בדיקות נוספות</p>
+        <span className="h-px flex-1 bg-blue-200" />
+      </div>
+
       <div className="mb-10">
         <h2 className="text-xl font-black text-gray-900 mb-1">מקרי קצה — תיקו וסף מינימום</h2>
         <p className="text-sm text-gray-500 mb-3">
@@ -341,11 +489,10 @@ export default function TitlesPreviewPage() {
         <LeagueTitles awards={awardsTied} />
       </div>
 
-      {/* === WhatsApp share text === */}
       <div className="mb-10">
         <h2 className="text-xl font-black text-gray-900 mb-1">הודעת השיתוף לוואטסאפ</h2>
         <p className="text-sm text-gray-500 mb-3">
-          מה שכפתור השיתוף למעלה באמת שולח — המניף והכבש מסומנים גם בקבוצה. הכפתור למעלה חי, אפשר לנסות.
+          ללא אימוג׳י מחוץ ל-BMP — אלה שנשברו ל-� בוואטסאפ דסקטופ. כל המהמרים נכללים (אין חיתוך ל-10).
         </p>
         <pre dir="rtl" className="bg-gray-900 text-gray-100 rounded-2xl p-4 text-sm leading-relaxed whitespace-pre-wrap" style={{ fontFamily: "var(--font-inter), monospace" }}>
           {shareText}

@@ -537,7 +537,7 @@ export default function StandingsPage() {
     return losers.length === 1 ? losers[0].id : null;
   })();
 
-  // "המניף?" — the UNIQUE first place, same rules. Half-joke, half-jinx:
+  // "מניף" — the UNIQUE first place, same rules. Half-joke, half-jinx:
   // crowned cup-lifter before a single knockout ball was kicked.
   const lifterId = (() => {
     if (PLAYERS.length < 2) return null;
@@ -549,8 +549,8 @@ export default function StandingsPage() {
   // 🏅 תארים — fun league titles (one clear holder only, with minimums).
   // Only meaningful after the global lock: champion picks are secret before.
   const titleAwards = useMemo(
-    () => (isLocked() ? computeLeagueTitles(brackets, finishedMatches, undefined, scoring) : []),
-    [brackets, finishedMatches, scoring],
+    () => (isLocked() ? computeLeagueTitles(brackets, finishedMatches) : []),
+    [brackets, finishedMatches],
   );
 
   return (
@@ -639,7 +639,7 @@ export default function StandingsPage() {
               <div className="me-3 flex-1 min-w-0 relative">
                 <span className="font-bold text-base text-gray-900 cursor-pointer hover:text-blue-600 transition-colors">{p.name}</span>
                 {p.isYou && <span className="text-xs text-blue-500 ms-1.5 bg-blue-100 rounded px-1.5 py-0.5 font-bold">אתה</span>}
-                {p.id === lifterId && <span className="text-xs text-amber-700 ms-1.5 bg-amber-100 border border-amber-200 rounded px-1.5 py-0.5 font-bold whitespace-nowrap">🏆 המניף?</span>}
+                {p.id === lifterId && <span className="text-xs text-amber-700 ms-1.5 bg-amber-100 border border-amber-200 rounded px-1.5 py-0.5 font-bold whitespace-nowrap">🏆 מניף</span>}
                 {p.id === sheepId && <span className="text-xs text-gray-600 ms-1.5 bg-gray-100 border border-gray-200 rounded px-1.5 py-0.5 font-bold whitespace-nowrap">🐑 הכבש?</span>}
                 <PlayerTooltip player={p} visible={hoveredPlayer === p.id} onClose={() => setHoveredPlayer(null)} />
               </div>

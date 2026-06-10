@@ -27,8 +27,7 @@ import { computeGroupHits, normalizeTla, type FinishedMatch } from "@/lib/result
 import { calculateStandings } from "@/lib/tournament/standings";
 import { GROUPS } from "@/lib/tournament/groups";
 import { getFlag, getTeamNameHe } from "@/lib/flags";
-import { toIsraelDateKey } from "@/lib/timezone";
-import { SCORING, type ScoringValues, type GroupMatchPrediction } from "@/types";
+import type { GroupMatchPrediction } from "@/types";
 
 export interface TitleAward {
   key: string;
@@ -52,8 +51,6 @@ export interface TitleThresholds {
   hater: number;
   /** מלך התיקו — minimum predicted draws among finished matches. */
   draws: number;
-  /** הסגן הנצחי — minimum match-days finished in 2nd place. */
-  runnerUpDays: number;
   /** נביא הבתים — minimum group winners nobody else picked. */
   prophet: number;
 }
@@ -64,7 +61,6 @@ export const DEFAULT_TITLE_THRESHOLDS: TitleThresholds = {
   qualifiers: 5,
   hater: 3,
   draws: 4,
-  runnerUpDays: 3,
   prophet: 2,
 };
 
@@ -180,7 +176,6 @@ export function computeLeagueTitles(
   brackets: BettorBracket[],
   finished: FinishedMatch[],
   thresholds: TitleThresholds = DEFAULT_TITLE_THRESHOLDS,
-  scoring: ScoringValues = SCORING,
 ): TitleAward[] {
   const awards: TitleAward[] = [];
   const bettors = brackets.filter((b) => b.userId);
@@ -200,7 +195,7 @@ export function computeLeagueTitles(
       kind: "reveal",
       holder: top ? flagTeam(top.id) : null,
       detail: top
-        ? `${top.count} מתוך ${bettors.length} הימרו עליה`
+        ? `${top.count} מתוך ${bettors.length} הימרו עליה כאלופה`
         : "אין אלופה מוסכמת — תיקו בצמרת",
     });
   }
@@ -220,7 +215,7 @@ export function computeLeagueTitles(
       kind: "reveal",
       holder: wolf ? nameOf(wolf) : null,
       detail: wolf
-        ? `היחיד שהלך על ${flagTeam(wolf.champion!)}`
+        ? `היחיד שהימר על ${flagTeam(wolf.champion!)} כאלופה`
         : wolves.length > 1
         ? `${wolves.length} זאבים בודדים — אין תואר`
         : "אין הימור אלופה ייחודי",
@@ -258,7 +253,7 @@ export function computeLeagueTitles(
       holder: bestPair && !bestTied ? `${nameOf(bestPair.a)} + ${nameOf(bestPair.b)}` : null,
       detail:
         bestPair && !bestTied
-          ? `מסכימים על ${Math.round(bestPair.pct)}% מההימורים`
+          ? `${Math.round(bestPair.pct)}% מההימורים שלהם זהים`
           : "אין זוג בולט מספיק",
     });
 
@@ -272,8 +267,29 @@ export function computeLeagueTitles(
       kind: "reveal",
       holder: loner ? names.get(loner.id) || null : null,
       detail: loner
-        ? `מסכים עם שאר הליגה על ${Math.round(loner.value)}% בלבד`
+        ? `רק ${Math.round(loner.value)}% מההימורים שלו תואמים את השאר`
         : "אף אחד לא מנותק מספיק",
+    });
+  }
+
+  // ---------- 🧠 המבין — didn't bet on France/Spain as champion ----------
+  {
+    const OBVIOUS = new Set(["FRA", "ESP"]);
+    const wise = bettors.filter((b) => b.champion && !OBVIOUS.has(b.champion));
+    // The joke needs a contrast: award only when SOME picked the obvious
+    // favorites and some didn't.
+    const awarded = wise.length > 0 && wise.length < bettors.length;
+    awards.push({
+      key: "connoisseur",
+      emoji: "🧠",
+      title: "המבין",
+      kind: "reveal",
+      holder: awarded ? wise.map(nameOf).join(" · ") : null,
+      detail: awarded
+        ? "לא הימרו על צרפת או ספרד כאלופה"
+        : wise.length === 0
+        ? "כולם הימרו על צרפת או ספרד"
+        : "אף אחד לא הימר על צרפת או ספרד",
     });
   }
 
@@ -310,8 +326,8 @@ export function computeLeagueTitles(
       kind: "reveal",
       holder: top ? names.get(top.id) || null : null,
       detail: top
-        ? `לבדו על ${top.count} מנצחות בתים: ${picks.map((c) => getFlag(c)).join(" ")}`
-        : `דרושות ≥${thresholds.prophet} מנצחות בתים ייחודיות`,
+        ? `היחיד שהימר על ${picks.map((c) => getFlag(c)).join(" ")} כמנצחות בית`
+        : `דרושות ≥${thresholds.prophet} מנצחות בתים שאף אחד אחר לא בחר`,
     });
   }
 
@@ -352,8 +368,8 @@ export function computeLeagueTitles(
       kind: "performance",
       holder: top ? names.get(top.id) || null : null,
       detail: top
-        ? `${top.count} תוצאות מדויקות`
-        : `דרושות ≥${thresholds.sniper} מדויקות (בלי תיקו בצמרת)`,
+        ? `פגע ב-${top.count} תוצאות מדויקות`
+        : `דרושות ≥${thresholds.sniper} תוצאות מדויקות`,
     });
   }
   {
@@ -365,8 +381,8 @@ export function computeLeagueTitles(
       kind: "performance",
       holder: top ? names.get(top.id) || null : null,
       detail: top
-        ? `${top.count} פעמים שער אחד מתוצאה מדויקת`
-        : `דרושים ≥${thresholds.almost} "כמעט" (פספוס בשער אחד)`,
+        ? `${top.count} פעמים היה שער אחד ממדויק`
+        : `דרושים ≥${thresholds.almost} פספוסים בשער אחד`,
     });
   }
   {
@@ -378,7 +394,7 @@ export function computeLeagueTitles(
       kind: "performance",
       holder: top ? names.get(top.id) || null : null,
       detail: top
-        ? `הימר 0-0 ${top.count} פעמים`
+        ? `הימר 0-0 ב-${top.count} משחקים`
         : `דרושים ≥${thresholds.hater} הימורי 0-0`,
     });
   }
@@ -391,7 +407,7 @@ export function computeLeagueTitles(
       kind: "performance",
       holder: top ? names.get(top.id) || null : null,
       detail: top
-        ? `${top.count} הימורי תיקו — אמיץ`
+        ? `הימר תיקו ב-${top.count} משחקים`
         : `דרושים ≥${thresholds.draws} הימורי תיקו`,
     });
   }
@@ -422,56 +438,8 @@ export function computeLeagueTitles(
       kind: "performance",
       holder: top ? names.get(top.id) || null : null,
       detail: top
-        ? `${top.count} עולות נכונות מהבתים`
+        ? `פגע ב-${top.count} נבחרות שעלו מהבית`
         : `דרושות ≥${thresholds.qualifiers} עולות נכונות (בתים שהסתיימו)`,
-    });
-  }
-
-  // ---------- 🥈 הסגן הנצחי — most match-days finished in 2nd place ----------
-  // Ranked by cumulative MATCH points (group stage), same engine as the
-  // leaderboard sparkline — advancement/special points don't move day ranks.
-  {
-    const byDay = new Map<string, FinishedMatch[]>();
-    for (const m of groupFinished) {
-      const key = toIsraelDateKey(m.date);
-      if (!byDay.has(key)) byDay.set(key, []);
-      byDay.get(key)!.push(m);
-    }
-    const totals = new Map<string, number>();
-    const daysAtSecond = new Map<string, number>();
-    for (const b of bettors) {
-      totals.set(b.userId, 0);
-      daysAtSecond.set(b.userId, 0);
-    }
-    for (const [, ms] of [...byDay.entries()].sort(([a], [b]) => a.localeCompare(b))) {
-      for (const m of ms) {
-        for (const h of computeGroupHits(m, bettors)) {
-          const pts =
-            h.hit === "exact"
-              ? scoring.toto.GROUP + scoring.exact.GROUP
-              : h.hit === "toto"
-              ? scoring.toto.GROUP
-              : 0;
-          if (pts) totals.set(h.userId, (totals.get(h.userId) || 0) + pts);
-        }
-      }
-      // Day over — who is 2nd right now?
-      const vals = [...totals.entries()];
-      for (const [uid, total] of vals) {
-        const above = vals.filter(([, t]) => t > total).length;
-        if (above === 1) daysAtSecond.set(uid, (daysAtSecond.get(uid) || 0) + 1);
-      }
-    }
-    const top = strictTop(daysAtSecond, thresholds.runnerUpDays);
-    awards.push({
-      key: "runner-up",
-      emoji: "🥈",
-      title: "הסגן הנצחי",
-      kind: "performance",
-      holder: top ? names.get(top.id) || null : null,
-      detail: top
-        ? `${top.count} ימי משחקים סיים במקום השני`
-        : `דרושים ≥${thresholds.runnerUpDays} ימים במקום השני`,
     });
   }
 

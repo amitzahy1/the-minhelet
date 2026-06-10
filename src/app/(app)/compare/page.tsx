@@ -8,6 +8,7 @@ import { MATCHUPS } from "@/lib/matchups";
 import { computeGroupHits, hitCounts, normalizeGroupLetter, type BettorHit, type FinishedMatch } from "@/lib/results-hits";
 import { getFlag, getTeamNameHe } from "@/lib/flags";
 import { SpecialTrackerView } from "@/components/shared/SpecialTrackerView";
+import { AgreementMatrix } from "@/components/shared/AgreementMatrix";
 import WhosAlive from "@/components/shared/WhosAlive";
 import type { BettorAdvancement } from "@/lib/supabase/shared-data";
 import { formatLockDeadline } from "@/lib/constants";
@@ -55,6 +56,7 @@ function getValueColor(value: string, colorMap: Record<string, string>): string 
 }
 
 interface Bettor {
+  userId: string;
   name: string;
   winner: string;
   finalist1: string;
@@ -83,7 +85,7 @@ const F: Record<string,string> = {
   KSA:"🇸🇦",DEN:"🇩🇰",
 };
 
-type View = "results" | "advancement" | "specials" | "groups" | "whatif" | "alive" | "sim" | "heatmap";
+type View = "results" | "advancement" | "specials" | "groups" | "whatif" | "alive" | "sim" | "heatmap" | "matrix";
 
 interface MatchApi {
   id: number;
@@ -190,6 +192,7 @@ export default function ComparePage() {
       const qf = advToQF.length > 0 ? advToQF.slice(0, 8) : [];
 
       return {
+        userId: bracket.userId,
         name: bracket.displayName,
         winner: champion,
         finalist1,
@@ -213,6 +216,23 @@ export default function ComparePage() {
   }, [brackets, specialBets, advancements, currentUserId]);
 
   const BETTORS = realBettors;
+
+  // Bettor filter — empty set = show everyone. Applied at the DATA level so
+  // every tab (advancement, specials, groups, results, matrix, alive) shows
+  // only the selected bettors without per-tab logic.
+  const [filterIds, setFilterIds] = useState<Set<string>>(new Set());
+  const filterActive = filterIds.size > 0;
+  const fBettors = filterActive ? BETTORS.filter((b) => filterIds.has(b.userId)) : BETTORS;
+  const fBrackets = filterActive ? brackets.filter((b) => filterIds.has(b.userId)) : brackets;
+  const fSpecialBets = filterActive ? specialBets.filter((s) => filterIds.has(s.userId)) : specialBets;
+  const fAdvancements = filterActive ? advancements.filter((a) => filterIds.has(a.userId)) : advancements;
+  const toggleFilter = (userId: string) =>
+    setFilterIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(userId)) next.delete(userId);
+      else next.add(userId);
+      return next;
+    });
 
   // Build color maps for each category
   const advColors = useMemo(() => buildColorMap([
@@ -274,6 +294,7 @@ export default function ComparePage() {
           { key: "advancement" as View, label: "עולות + זוכה" },
           { key: "specials" as View, label: "הימורים מיוחדים" },
           { key: "groups" as View, label: "עולות מהבתים" },
+          { key: "matrix" as View, label: "מטריצה" },
           { key: "whatif" as View, label: "מה אם...?" },
           { key: "alive" as View, label: "מי חי?" },
           { key: "sim" as View, label: "סימולציה" },
@@ -288,22 +309,67 @@ export default function ComparePage() {
         ))}
       </div>}
 
+      {/* Bettor filter — applies to every tab's data */}
+      {isLocked && !loading && BETTORS.length > 0 && (
+        <div className="mb-5 flex items-center gap-1.5 flex-wrap">
+          <span className="text-xs font-bold text-gray-500 me-1">מהמרים:</span>
+          <button
+            onClick={() => setFilterIds(new Set())}
+            className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${
+              !filterActive ? "bg-blue-600 text-white border-blue-600" : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"
+            }`}
+          >
+            הכל
+          </button>
+          {currentUserId && (
+            <button
+              onClick={() => setFilterIds(new Set([currentUserId]))}
+              className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${
+                filterActive && filterIds.size === 1 && filterIds.has(currentUserId)
+                  ? "bg-blue-600 text-white border-blue-600"
+                  : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"
+              }`}
+            >
+              רק אני
+            </button>
+          )}
+          {BETTORS.map((b) => (
+            <button
+              key={b.userId}
+              onClick={() => toggleFilter(b.userId)}
+              className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${
+                filterIds.has(b.userId)
+                  ? "bg-gray-900 text-white border-gray-900"
+                  : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+              }`}
+            >
+              {b.name}
+            </button>
+          ))}
+        </div>
+      )}
+
       {isLocked && !loading && BETTORS.length > 0 && <>
       {/* === RESULTS VIEW === per-match who-hit-what */}
       {view === "results" && (
         <ResultsView
           matches={finishedGroupMatches}
-          brackets={brackets}
+          brackets={fBrackets}
           currentUserId={currentUserId}
           loading={loadingMatches}
         />
+      )}
+
+      {/* === MATRIX VIEW === pairwise agreement heatmap */}
+      {view === "matrix" && (
+        <AgreementMatrix brackets={fBrackets} currentUserId={currentUserId} />
       )}
 
       {/* === ADVANCEMENT VIEW === transposed: bettors as columns, bet rows */}
       {view === "advancement" && (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
           <TransposedBetTable
-            bettors={BETTORS}
+            bettors={fBettors}
             colorMap={advColors}
             rows={[
               { label: "זוכה", render: (b) => ({ val: b.winner, node: <span className="font-bold text-amber-700">{F[b.winner]} {b.winner}</span> }), highlight: true },
@@ -321,9 +387,9 @@ export default function ComparePage() {
               const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
               return top ? { value: top[0], count: top[1] } : null;
             }
-            const topWinner = topPick(BETTORS.map(b => b.winner));
-            const topFinalist = topPick(BETTORS.flatMap(b => [b.finalist1, b.finalist2]));
-            const topScorer = topPick(BETTORS.map(b => b.topScorer));
+            const topWinner = topPick(fBettors.map(b => b.winner));
+            const topFinalist = topPick(fBettors.flatMap(b => [b.finalist1, b.finalist2]));
+            const topScorer = topPick(fBettors.map(b => b.topScorer));
             if (!topWinner && !topFinalist && !topScorer) return null;
             return (
               <div className="px-5 py-3 bg-gray-50 border-t border-gray-200">
@@ -343,7 +409,7 @@ export default function ComparePage() {
           actual leaders from /api/tournament-stats + per-bettor on-track badges */}
       {view === "specials" && (
         <SpecialTrackerView
-          specialBets={specialBets}
+          specialBets={fSpecialBets}
           currentUserId={currentUserId}
         />
       )}
@@ -366,7 +432,7 @@ export default function ComparePage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {BETTORS.map(b => {
+                  {fBettors.map(b => {
                     const picks = b.groups[groupId as keyof typeof b.groups];
                     if (!picks) return null;
                     return (
@@ -408,7 +474,7 @@ export default function ComparePage() {
             <p className="text-xs text-gray-500 mt-0.5">הנבחרות שכל מהמר ניחש שיעלו — כמה עדיין בטורניר וכמה יצאו</p>
           </div>
           <div className="p-4">
-            <WhosAliveFromAdvancements advancements={advancements} />
+            <WhosAliveFromAdvancements advancements={fAdvancements} />
           </div>
         </div>
       )}

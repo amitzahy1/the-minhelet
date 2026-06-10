@@ -117,7 +117,9 @@ export async function GET() {
     token
       ? fetch(`${BASE_URL}/competitions/WC/matches?season=2026`, {
           headers: { "X-Auth-Token": token },
-          next: { revalidate: 300 },
+          // 60s: live scores must move during the nightly play window
+          // (clients poll every 60s too). FD tier allows 10 req/min — safe.
+          next: { revalidate: 60 },
         })
           .then(async (r) => (r.ok ? (await r.json()) : { matches: [], error: `API error: ${r.status}` }))
           .catch((e) => ({ matches: [], error: String(e) }))

@@ -106,8 +106,10 @@ const flagTeam = (code: string) => `${getFlag(code)} ${getTeamNameHe(code) || co
  * Pick-agreement between two bettors over never-redacted fields: group order
  * positions, Tree-1 knockout winners, champion. Returns null when there's too
  * little overlap to call it a percentage.
+ * Exported for the compare-page agreement matrix (same metric as the
+ * מתנשקים/המנותק titles, so the heatmap and the titles can't disagree).
  */
-function agreementPct(a: BettorBracket, b: BettorBracket): number | null {
+export function agreementPct(a: BettorBracket, b: BettorBracket): number | null {
   let same = 0;
   let total = 0;
   for (const letter of Object.keys(GROUPS)) {

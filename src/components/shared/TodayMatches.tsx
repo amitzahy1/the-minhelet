@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getFlag, getTeamNameHe } from "@/lib/flags";
 import { TeamLogo } from "@/components/shared/TeamLogo";
@@ -84,8 +84,7 @@ export function TodayMatches() {
     return () => clearTimeout(id);
   }, [matchDays, refetch, now]);
 
-  useEffect(() => {
-    (async () => {
+  const loadMatches = useCallback(async () => {
       try {
         const res = await fetch("/api/matches");
         const data = await res.json();
@@ -137,8 +136,28 @@ export function TodayMatches() {
         setMatches(DEMO_MATCHES);
         setHeading("משחקים קרובים — תצוגה מקדימה");
       }
-    })();
   }, []);
+
+  useEffect(() => {
+    loadMatches();
+  }, [loadMatches]);
+
+  // Live refresh: while any displayed match is in its play window, re-pull
+  // the schedule every 60s so scores/statuses move without a manual reload.
+  // (The FD fetch behind /api/matches revalidates every 60s too.)
+  useEffect(() => {
+    if (matches.length === 0) return;
+    const nowMs = Date.now();
+    const inWindow = matches.some((m) => {
+      if (m.status === "IN_PLAY" || m.status === "PAUSED") return true;
+      if (m.status === "FINISHED") return false;
+      const ko = new Date(m.date).getTime();
+      return nowMs >= ko - 15 * 60_000 && nowMs <= ko + 150 * 60_000;
+    });
+    if (!inWindow) return;
+    const id = setInterval(loadMatches, 60_000);
+    return () => clearInterval(id);
+  }, [matches, loadMatches]);
 
   if (matches.length === 0) return null;
 

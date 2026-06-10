@@ -11,6 +11,7 @@ import { useSharedData } from "@/hooks/useSharedData";
 import { useScoring } from "@/hooks/useScoring";
 import { isLocked } from "@/lib/constants";
 import { LiveGroupsAndBracket } from "@/components/shared/LiveGroupsAndBracket";
+import { TodayMatches } from "@/components/shared/TodayMatches";
 import type { MatchPrediction, BettorBracket, BettorAdvancement } from "@/lib/supabase/shared-data";
 import type { MatchStage, ScoringValues } from "@/types";
 
@@ -94,13 +95,12 @@ export default function LivePage() {
         <h1 className="text-3xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>לייב</h1>
       </div>
 
-      {/* Live matches first — what users come here for */}
+      {/* Live matches first — the real TodayMatches widget (live scores,
+          statuses, everyone's picks). The old LiveTab ticker read hardcoded
+          empty mock arrays, so it permanently showed "הטורניר עוד לא התחיל"
+          — even during live play. */}
       <div className="mb-8">
-        <h2 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-          משחקים חיים
-        </h2>
-        <LiveTab predictions={predictions} />
+        <TodayMatches />
       </div>
 
       {/* Live tournament state (group tables + bracket) below */}

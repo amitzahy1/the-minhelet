@@ -1,5 +1,8 @@
 "use client";
 
+import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+
 // ============================================================================
 // /titles-preview — visual QA page: the PROPOSED home-page order, all 8
 // sections together, on mock data.
@@ -24,7 +27,7 @@ import { TeamLogo } from "@/components/shared/TeamLogo";
 import { getTeamNameHe } from "@/lib/flags";
 import { shareLeaderboard, openWhatsApp } from "@/lib/share";
 import type { BettorBracket } from "@/lib/supabase/shared-data";
-import type { FinishedMatch } from "@/lib/results-hits";
+import { classifyHit, type FinishedMatch, type HitKind } from "@/lib/results-hits";
 import { GROUPS } from "@/lib/tournament/groups";
 
 // ---------------------------------------------------------------------------
@@ -179,12 +182,68 @@ const ROWS = [
 const LIFTER_ID = "u1"; // unique first place
 const SHEEP_ID = "u7";  // unique last place
 
-// Mock upcoming/live/finished cards for the המשחקים הבאים replica
+// Mock cards for the המשחקים הבאים replica — one per expanded-panel state:
+// upcoming+revealed (post-21:31), upcoming+locked (pre-reveal), live, finished.
 const DEMO_TODAY = [
-  { id: 1, time: "22:00", status: "upcoming" as const, home: "MEX", away: "RSA", group: "A", score: null as null | [number, number] },
-  { id: 2, time: "", status: "live" as const, home: "KOR", away: "CZE", group: "A", score: [1, 0] as [number, number] },
-  { id: 3, time: "", status: "finished" as const, home: "CAN", away: "QAT", group: "B", score: [1, 0] as [number, number] },
+  { id: 1, time: "22:00", status: "upcoming" as const, home: "MEX", away: "RSA", group: "A", score: null as null | [number, number], panel: "revealed" as const },
+  { id: 2, time: "22:00", status: "upcoming" as const, home: "FRA", away: "IRQ", group: "I", score: null as null | [number, number], panel: "locked" as const },
+  { id: 3, time: "", status: "live" as const, home: "KOR", away: "CZE", group: "A", score: [1, 0] as [number, number], panel: "live" as const },
+  { id: 4, time: "", status: "finished" as const, home: "CAN", away: "QAT", group: "B", score: [1, 0] as [number, number], panel: "finished" as const },
 ];
+
+// Everyone's score picks per demo match (what the expanded panel lists)
+const DEMO_PICKS: Record<number, { name: string; home: number; away: number }[]> = {
+  1: [
+    { name: "דני", home: 2, away: 1 }, { name: "רון ב", home: 1, away: 0 },
+    { name: "יוני", home: 1, away: 1 }, { name: "אמית", home: 2, away: 2 },
+    { name: "רון ג", home: 0, away: 0 }, { name: "דור דסא", home: 2, away: 0 },
+    { name: "רועי", home: 1, away: 0 }, { name: "עידן", home: 3, away: 1 },
+  ],
+  3: [
+    { name: "דני", home: 1, away: 0 }, { name: "רון ב", home: 2, away: 0 },
+    { name: "יוני", home: 1, away: 1 }, { name: "אמית", home: 0, away: 0 },
+    { name: "רון ג", home: 0, away: 2 }, { name: "דור דסא", home: 2, away: 1 },
+    { name: "רועי", home: 3, away: 1 }, { name: "עידן", home: 0, away: 1 },
+  ],
+  4: [
+    { name: "דני", home: 1, away: 0 }, { name: "רון ב", home: 1, away: 0 },
+    { name: "יוני", home: 2, away: 0 }, { name: "אמית", home: 2, away: 1 },
+    { name: "רון ג", home: 1, away: 1 }, { name: "דור דסא", home: 3, away: 0 },
+    { name: "רועי", home: 0, away: 1 }, { name: "עידן", home: 0, away: 0 },
+  ],
+};
+
+// Related special bets shown under the picks (as on the real card)
+const DEMO_SPECIALS: Record<number, { name: string; type: string; detail: string }[]> = {
+  1: [
+    { name: "דני", type: "כסחנית", detail: "🇿🇦" },
+    { name: "עידן", type: "התקפה", detail: "🇲🇽" },
+  ],
+  4: [{ name: "רון ב", type: "התקפה", detail: "🇨🇦" }],
+};
+
+const HIT_RANK: Record<HitKind, number> = { exact: 0, toto: 1, miss: 2, empty: 3 };
+
+/** Exact copy of the real expanded-panel pick chip. */
+function PickChip({ name, home, away, hit }: { name: string; home: number; away: number; hit: HitKind | null }) {
+  const bg =
+    hit === "exact" ? "bg-green-50 border-green-300"
+    : hit === "toto" ? "bg-amber-50 border-amber-300"
+    : hit === "miss" ? "bg-red-50 border-red-200"
+    : "bg-white border-gray-200";
+  const icon = hit === "exact" ? "🎯" : hit === "toto" ? "✓" : hit === "miss" ? "✗" : "";
+  return (
+    <div className={`flex items-center justify-between rounded-lg px-2 py-1 border ${bg}`}>
+      <span className="text-[11px] font-bold text-gray-800 truncate">{name}</span>
+      <span className="flex items-center gap-1 shrink-0">
+        <span className="text-[11px] font-black tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>
+          {home}-{away}
+        </span>
+        {icon && <span className="text-xs">{icon}</span>}
+      </span>
+    </div>
+  );
+}
 
 // Identical copy of the standings-page Sparkline (it's file-local there).
 function Sparkline({ data, highlight }: { data: number[]; highlight?: boolean }) {
@@ -211,6 +270,7 @@ function SectionMark({ n, label }: { n: number; label: string }) {
 }
 
 export default function TitlesPreviewPage() {
+  const [expandedId, setExpandedId] = useState<number | null>(null);
   const awards = computeLeagueTitles(BRACKETS, FINISHED);
   const awardsTied = computeLeagueTitles(BRACKETS_TIED, FINISHED.slice(0, 4));
   const shareText = shareLeaderboard(
@@ -230,95 +290,209 @@ export default function TitlesPreviewPage() {
       </div>
 
       {/* ===== 1 · המשחקים הבאים (replica — the real component fetches live data) ===== */}
-      <SectionMark n={1} label="המשחקים הבאים (כמו היום)" />
+      <SectionMark n={1} label="המשחקים הבאים — לחצו על משחק לפתיחת ההימורים (4 מצבים: לפני חשיפה, אחרי חשיפה, לייב, הסתיים)" />
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-3">
           <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
           <h2 className="text-base font-bold text-gray-800">המשחקים היום</h2>
-          <span className="text-sm text-gray-400">3 משחקים</span>
+          <span className="text-sm text-gray-400">4 משחקים</span>
         </div>
-        <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
-          {DEMO_TODAY.map((m) => (
-            <div key={m.id} className="col-span-1">
-              <div className={`bg-white rounded-xl border shadow-sm p-3 text-center transition-all cursor-pointer ${
-                m.status === "live" ? "border-red-300 bg-red-50/30" :
-                m.status === "finished" ? "border-green-200" :
-                "border-gray-200 hover:border-gray-300 hover:shadow-md"
-              }`}>
-                <div className="mb-2">
-                  {m.status === "live" && (
-                    <span className="text-[10px] font-bold text-red-600 bg-red-100 rounded-full px-2 py-0.5 inline-flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />LIVE
-                    </span>
-                  )}
-                  {m.status === "finished" && <span className="text-[10px] font-bold text-green-600 bg-green-100 rounded-full px-2 py-0.5">הסתיים</span>}
-                  {m.status === "upcoming" && (
-                    <span className="text-xs font-bold text-gray-500" style={{ fontFamily: "var(--font-inter)" }}>{m.time}</span>
-                  )}
-                </div>
-                <div className="flex items-center justify-between gap-1">
-                  <div className="flex flex-col items-center gap-0.5 flex-1 min-w-0">
-                    <TeamLogo code={m.home} size="md" />
-                    <span className="text-[11px] font-bold text-gray-800 truncate max-w-full">{getTeamNameHe(m.home) || m.home}</span>
-                  </div>
-                  <div className="shrink-0 px-1">
-                    {m.score ? (
-                      <span className="text-lg font-black tabular-nums text-gray-900" style={{ fontFamily: "var(--font-inter)" }}>{m.score[0]}-{m.score[1]}</span>
-                    ) : (
-                      <span className="text-sm font-bold text-gray-300">vs</span>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 items-start">
+          {DEMO_TODAY.map((m) => {
+            const isExpanded = expandedId === m.id;
+            const actual = m.score ? { home: m.score[0], away: m.score[1] } : null;
+            const picks = [...(DEMO_PICKS[m.id] ?? [])].sort((a, b) =>
+              (actual
+                ? HIT_RANK[classifyHit({ home: a.home, away: a.away }, actual)] -
+                  HIT_RANK[classifyHit({ home: b.home, away: b.away }, actual)]
+                : 0) || a.name.localeCompare(b.name, "he"),
+            );
+            const specials = DEMO_SPECIALS[m.id] ?? [];
+            // Consensus strip — same tally as the real widget
+            const consensusLine = (() => {
+              if (m.panel !== "revealed" || picks.length < 2) return "";
+              const tally: Record<string, number> = {};
+              for (const p of picks) {
+                const k = `${p.home}-${p.away}`;
+                tally[k] = (tally[k] || 0) + 1;
+              }
+              return Object.entries(tally)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 3)
+                .map(([k, n]) => (n > 1 ? `${k} ×${n}` : k))
+                .join(" · ");
+            })();
+            const counts = actual
+              ? picks.reduce(
+                  (acc, p) => {
+                    const h = classifyHit({ home: p.home, away: p.away }, actual);
+                    if (h === "exact") acc.exact++;
+                    else if (h === "toto") acc.toto++;
+                    else acc.miss++;
+                    return acc;
+                  },
+                  { exact: 0, toto: 0, miss: 0 },
+                )
+              : null;
+            return (
+              <div key={m.id} className="col-span-1">
+                <div
+                  onClick={() => setExpandedId(isExpanded ? null : m.id)}
+                  className={`bg-white rounded-xl border shadow-sm p-3 text-center transition-all cursor-pointer ${
+                    m.status === "live" ? "border-red-300 bg-red-50/30" :
+                    m.status === "finished" ? "border-green-200" :
+                    isExpanded ? "border-blue-300 shadow-md" :
+                    "border-gray-200 hover:border-gray-300 hover:shadow-md"
+                  }`}
+                >
+                  <div className="mb-2">
+                    {m.status === "live" && (
+                      <span className="text-[10px] font-bold text-red-600 bg-red-100 rounded-full px-2 py-0.5 inline-flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />LIVE
+                      </span>
+                    )}
+                    {m.status === "finished" && <span className="text-[10px] font-bold text-green-600 bg-green-100 rounded-full px-2 py-0.5">הסתיים</span>}
+                    {m.status === "upcoming" && (
+                      <span className="text-xs font-bold text-gray-500" style={{ fontFamily: "var(--font-inter)" }}>{m.time}</span>
                     )}
                   </div>
-                  <div className="flex flex-col items-center gap-0.5 flex-1 min-w-0">
-                    <TeamLogo code={m.away} size="md" />
-                    <span className="text-[11px] font-bold text-gray-800 truncate max-w-full">{getTeamNameHe(m.away) || m.away}</span>
+                  <div className="flex items-center justify-between gap-1">
+                    <div className="flex flex-col items-center gap-0.5 flex-1 min-w-0">
+                      <TeamLogo code={m.home} size="md" />
+                      <span className="text-[11px] font-bold text-gray-800 truncate max-w-full">{getTeamNameHe(m.home) || m.home}</span>
+                    </div>
+                    <div className="shrink-0 px-1">
+                      {m.score ? (
+                        <span className="text-lg font-black tabular-nums text-gray-900" style={{ fontFamily: "var(--font-inter)" }}>{m.score[0]}-{m.score[1]}</span>
+                      ) : (
+                        <span className="text-sm font-bold text-gray-300">vs</span>
+                      )}
+                    </div>
+                    <div className="flex flex-col items-center gap-0.5 flex-1 min-w-0">
+                      <TeamLogo code={m.away} size="md" />
+                      <span className="text-[11px] font-bold text-gray-800 truncate max-w-full">{getTeamNameHe(m.away) || m.away}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-center gap-1 mt-1.5">
+                    <p className="text-[10px] text-gray-400">בית {m.group}</p>
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+                      className={`text-gray-300 transition-transform ${isExpanded ? "rotate-180" : ""}`}>
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
                   </div>
                 </div>
-                <div className="flex items-center justify-center gap-1 mt-1.5">
-                  <p className="text-[10px] text-gray-400">בית {m.group}</p>
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-gray-300">
-                    <polyline points="6 9 12 15 18 9" />
-                  </svg>
-                </div>
+
+                {/* Expanded panel — identical structure to the real widget */}
+                <AnimatePresence>
+                  {isExpanded && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="bg-gray-50 rounded-b-xl border border-t-0 border-gray-200 px-3 py-2.5 mt-[-4px]">
+                        <div className="space-y-1.5">
+                          {/* Pre-reveal: explicit reveal time */}
+                          {m.panel === "locked" && (
+                            <p className="text-[11px] text-blue-700 font-medium text-center py-1">
+                              🔒 ניחושי התוצאה ייחשפו ב-21:31 (דקה אחרי נעילת ההימורים)
+                            </p>
+                          )}
+
+                          {/* Post-reveal, before kickoff: everyone's picks + consensus */}
+                          {m.panel === "revealed" && (
+                            <div>
+                              <p className="text-[10px] font-bold text-gray-500 mb-1">ניחושי התוצאה</p>
+                              {consensusLine && (
+                                <p className="text-[10px] text-gray-500 mb-1">
+                                  הניחוש הנפוץ:{" "}
+                                  <span className="font-bold tabular-nums text-gray-700" style={{ fontFamily: "var(--font-inter)" }}>{consensusLine}</span>
+                                </p>
+                              )}
+                              <div className="grid grid-cols-2 gap-1">
+                                {picks.map((p) => (
+                                  <PickChip key={p.name} name={p.name} home={p.home} away={p.away} hit={null} />
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Live: graded against the current score */}
+                          {m.panel === "live" && actual && (
+                            <div>
+                              <p className="text-[10px] font-bold text-gray-500 mb-1">
+                                ניחושי התוצאה
+                                <span className="mx-1.5">·</span>
+                                <span className="text-blue-700">לפי התוצאה כרגע (<span className="tabular-nums">{actual.home}-{actual.away}</span>)</span>
+                              </p>
+                              <div className="grid grid-cols-2 gap-1">
+                                {picks.map((p) => (
+                                  <PickChip key={p.name} name={p.name} home={p.home} away={p.away} hit={classifyHit({ home: p.home, away: p.away }, actual)} />
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Finished: result header + graded grid */}
+                          {m.panel === "finished" && actual && counts && (
+                            <div>
+                              <p className="text-[10px] font-bold text-gray-500 mb-1">
+                                תוצאה: <span className="tabular-nums text-gray-700">{actual.home}-{actual.away}</span>
+                                <span className="mx-1.5">·</span>
+                                <span className="text-green-700">🎯 {counts.exact} תפסו תוצאה</span>
+                                <span className="mx-1">·</span>
+                                <span className="text-amber-700">✓ {counts.toto} תפסו טוטו</span>
+                                {counts.miss > 0 && (
+                                  <>
+                                    <span className="mx-1">·</span>
+                                    <span className="text-red-600">✗ {counts.miss} פספסו</span>
+                                  </>
+                                )}
+                              </p>
+                              <div className="grid grid-cols-2 gap-1">
+                                {picks.map((p) => (
+                                  <PickChip key={p.name} name={p.name} home={p.home} away={p.away} hit={classifyHit({ home: p.home, away: p.away }, actual)} />
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Related special bets */}
+                          {specials.length > 0 && (
+                            <div>
+                              <p className="text-[10px] font-bold text-gray-500 mb-1">הימורים מיוחדים</p>
+                              {specials.map((b, i) => (
+                                <div key={i} className="flex items-center gap-1 text-[11px] text-gray-600">
+                                  <span className="font-bold">{b.name}</span>
+                                  <span className="text-gray-400">·</span>
+                                  <span>{b.type}</span>
+                                  <span className="text-gray-400">{b.detail}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
-      {/* ===== 2 · באנר הימורים חסרים (replica — shows only to users with gaps) ===== */}
-      <SectionMark n={2} label="באנר הימורים חסרים (מוצג רק למי שחסר לו)" />
+      {/* ===== 2 · באנר הימורים חסרים — the compact POST-LOCK variant ===== */}
+      <SectionMark n={2} label="באנר הימורים חסרים — מהנעילה הוא עוקב רק אחרי מה שעוד פתוח (ניחושי יום המשחקים הקרוב)" />
       <div className="mb-5">
-        <div className="bg-gradient-to-l from-amber-50 to-orange-50 border-2 border-amber-300 rounded-2xl px-5 py-4 hover:shadow-md transition-shadow cursor-pointer">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <span className="text-xl">⚠️</span>
-              <p className="text-base font-black text-amber-900">חסרים לך הימורים!</p>
-            </div>
-            <span className="text-sm font-bold text-amber-700 bg-amber-100 rounded-full px-3 py-1">המשך למיוחדים ←</span>
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            <div className="rounded-xl px-3 py-2 bg-green-100 border border-green-200">
-              <div className="flex items-baseline justify-between gap-1">
-                <p className="text-base font-black text-green-700" style={{ fontFamily: "var(--font-inter)" }}>✓</p>
-                <p className="text-[11px] font-bold text-green-700">משחקי בתים</p>
-              </div>
-            </div>
-            <div className="rounded-xl px-3 py-2 bg-green-100 border border-green-200">
-              <div className="flex items-baseline justify-between gap-1">
-                <p className="text-base font-black text-green-700" style={{ fontFamily: "var(--font-inter)" }}>✓</p>
-                <p className="text-[11px] font-bold text-green-700">נוקאאוט</p>
-              </div>
-            </div>
-            <div className="rounded-xl px-3 py-2 bg-white border border-amber-200">
-              <div className="flex items-baseline justify-between gap-1">
-                <p className="text-base font-black text-amber-900" style={{ fontFamily: "var(--font-inter)" }}>18/25</p>
-                <p className="text-[11px] font-bold text-amber-800">מיוחדים</p>
-              </div>
-              <div className="mt-1.5 h-1 bg-amber-100 rounded-full overflow-hidden">
-                <div className="h-full bg-amber-500 rounded-full" style={{ width: "72%" }} />
-              </div>
-            </div>
-          </div>
+        <div className="bg-gradient-to-l from-amber-50 to-orange-50 border border-amber-300 rounded-xl px-4 py-2.5 hover:shadow-md transition-shadow cursor-pointer flex items-center justify-between gap-2">
+          <p className="text-sm font-bold text-amber-900 min-w-0">
+            ⚠️ חסרים לך 2 ניחושי תוצאה ליום המשחקים הקרוב
+            <span className="font-medium text-amber-700"> · נעילה ב-21:30</span>
+          </p>
+          <span className="text-xs font-bold text-amber-700 bg-amber-100 rounded-full px-2.5 py-1 whitespace-nowrap shrink-0">השלם ←</span>
         </div>
       </div>
 
@@ -412,8 +586,16 @@ export default function TitlesPreviewPage() {
       <SectionMark n={5} label="תארים — מחושב בלוגיקת הפרודקשן" />
       <LeagueTitles awards={awards} />
 
-      {/* ===== 6 · השוואת כל המהמרים (moved up per the proposal) ===== */}
-      <SectionMark n={6} label="השוואת כל המהמרים — עולה למעלה, אחרי התארים" />
+      {/* ===== 6 · מצטיין / חולשת היום (real component) ===== */}
+      <SectionMark n={6} label="מצטיין וחולשת היום" />
+      <HeroRoast
+        hero={{ name: "דני", points: 12, highlight: "3 תוצאות מדויקות!" }}
+        roast={{ name: "רועי", points: 0, highlight: "רק 0 — יום קשה" }}
+        matchday=""
+      />
+
+      {/* ===== 7 · השוואת כל המהמרים (moved up per the proposal) ===== */}
+      <SectionMark n={7} label="השוואת כל המהמרים" />
       <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden hover:shadow-lg transition-all mb-6">
         <div className="px-5 py-4 bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/40 border-b border-blue-100/50">
           <h2 className="text-lg font-bold text-gray-800">השוואת כל המהמרים</h2>
@@ -448,14 +630,6 @@ export default function TitlesPreviewPage() {
           </table>
         </div>
       </div>
-
-      {/* ===== 7 · מצטיין / חולשת היום (real component) ===== */}
-      <SectionMark n={7} label="מצטיין וחולשת היום" />
-      <HeroRoast
-        hero={{ name: "דני", points: 12, highlight: "3 תוצאות מדויקות!" }}
-        roast={{ name: "רועי", points: 0, highlight: "רק 0 — יום קשה" }}
-        matchday=""
-      />
 
       {/* ===== 8 · מירוץ הנקודות (real component) ===== */}
       <SectionMark n={8} label="מירוץ הנקודות" />

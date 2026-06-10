@@ -13,7 +13,9 @@ import { isLocked } from "@/lib/constants";
 import { GROUPS } from "@/lib/tournament/groups";
 import { TodayMatches } from "@/components/shared/TodayMatches";
 import { computeLiveScores, computeTodayScores, computePlayerHistories, koStageMaxPts } from "@/lib/scoring/live-scorer";
-import { normalizeGroupLetter, type FinishedMatch, GROUP_MATCH_PAIRS } from "@/lib/results-hits";
+import { normalizeGroupLetter, matchPairIndex, type FinishedMatch, GROUP_MATCH_PAIRS } from "@/lib/results-hits";
+import { computeMatchDays, dayLockAtForKickoff } from "@/lib/tournament/group-live-state";
+import { toIsraelTimeShort } from "@/lib/timezone";
 import { computeLeagueTitles } from "@/lib/league-titles";
 import { LeagueTitles } from "@/components/shared/LeagueTitles";
 
@@ -54,15 +56,50 @@ const MOCK_PLAYERS = [
 // ============================================================================
 // Missing-bets awareness banner — shows what the current user still needs to fill
 // ============================================================================
-function MissingBetsBanner() {
+function MissingBetsBanner({ matches }: { matches: { date: string; group?: string; stage?: string; status?: string; homeTla: string; awayTla: string }[] }) {
   // Match-level progress — same semantics as /groups: X/72 individual
   // matches, with completed-groups (X/12) shown as a sub-line for context.
   // Using match count avoids the confusion of "I filled 3 bets but the
   // banner says 0/12".
+  const groups = useBettingStore((s) => s.groups);
   const groupMatchesFilled = useBettingStore((s) => s.getTotalFilledGroups());
   const completedGroups = useBettingStore((s) => s.getCompletedGroupsCount());
   const knockoutFilled = useBettingStore((s) => s.getKnockoutFilledCount());
   const specialsFilled = useBettingStore((s) => s.getSpecialsFilledCount());
+
+  // Post-lock the three pre-lock categories are FROZEN — nagging about them
+  // is noise. The only thing still fillable in the group stage is the NEXT
+  // match-day's score picks (editable until 30 min before its first
+  // kickoff), so that's what the banner tracks from the lock on.
+  if (isLocked()) {
+    const groupMs = matches.filter((m) => (m.stage || "").toUpperCase().includes("GROUP"));
+    const days = computeMatchDays(groupMs);
+    const nextDay = days.find((d) => new Date(d.lockAtISO).getTime() > Date.now());
+    if (!nextDay) return null;
+    let missing = 0;
+    for (const m of groupMs) {
+      if (dayLockAtForKickoff(m.date, days) !== nextDay.lockAtISO) continue;
+      const letter = normalizeGroupLetter(m.group);
+      const pair = letter ? matchPairIndex(letter, m.homeTla, m.awayTla) : null;
+      if (!pair) continue;
+      const s = groups[letter]?.scores?.[pair.pairIdx];
+      if (!s || s.home === null || s.away === null) missing++;
+    }
+    if (missing === 0) return null;
+    return (
+      <div className="mb-5">
+        <Link href="/groups" className="block">
+          <div className="bg-gradient-to-l from-amber-50 to-orange-50 border border-amber-300 rounded-xl px-4 py-2.5 hover:shadow-md transition-shadow flex items-center justify-between gap-2">
+            <p className="text-sm font-bold text-amber-900 min-w-0">
+              ⚠️ {missing === 1 ? "חסר לך ניחוש תוצאה אחד" : `חסרים לך ${missing} ניחושי תוצאה`} ליום המשחקים הקרוב
+              <span className="font-medium text-amber-700"> · נעילה ב-{toIsraelTimeShort(nextDay.lockAtISO)}</span>
+            </p>
+            <span className="text-xs font-bold text-amber-700 bg-amber-100 rounded-full px-2.5 py-1 whitespace-nowrap shrink-0">השלם ←</span>
+          </div>
+        </Link>
+      </div>
+    );
+  }
 
   const groupsDone = groupMatchesFilled === 72;
   const knockoutDone = knockoutFilled === 31;
@@ -90,37 +127,37 @@ function MissingBetsBanner() {
   return (
     <div className="mb-5">
       <Link href={nextPage} className="block">
-        <div className="bg-gradient-to-l from-amber-50 to-orange-50 border-2 border-amber-300 rounded-2xl px-5 py-4 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-3">
+        <div className="bg-gradient-to-l from-amber-50 to-orange-50 border border-amber-300 rounded-xl px-4 py-3 hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
-              <span className="text-xl">⚠️</span>
-              <p className="text-base font-black text-amber-900">חסרים לך הימורים!</p>
+              <span className="text-base">⚠️</span>
+              <p className="text-sm font-black text-amber-900">חסרים לך הימורים!</p>
             </div>
-            <span className="text-sm font-bold text-amber-700 bg-amber-100 rounded-full px-3 py-1">
+            <span className="text-xs font-bold text-amber-700 bg-amber-100 rounded-full px-2.5 py-1">
               המשך ל{nextLabel} ←
             </span>
           </div>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-1.5">
             {stages.map((stage) => {
               const pct = (stage.done / stage.total) * 100;
               return (
                 <div
                   key={stage.key}
-                  className={`rounded-xl px-3 py-2 ${stage.isDone ? "bg-green-100 border border-green-200" : "bg-white border border-amber-200"}`}
+                  className={`rounded-lg px-2.5 py-1.5 ${stage.isDone ? "bg-green-100 border border-green-200" : "bg-white border border-amber-200"}`}
                 >
                   <div className="flex items-baseline justify-between gap-1">
-                    <p className={`text-base font-black ${stage.isDone ? "text-green-700" : "text-amber-900"}`} style={{ fontFamily: "var(--font-inter)" }}>
+                    <p className={`text-sm font-black ${stage.isDone ? "text-green-700" : "text-amber-900"}`} style={{ fontFamily: "var(--font-inter)" }}>
                       {stage.isDone ? "✓" : `${stage.done}/${stage.total}`}
                     </p>
                     <p className={`text-[11px] font-bold ${stage.isDone ? "text-green-700" : "text-amber-800"}`}>{stage.label}</p>
                   </div>
                   {!stage.isDone && (
-                    <div className="mt-1.5 h-1 bg-amber-100 rounded-full overflow-hidden">
+                    <div className="mt-1 h-1 bg-amber-100 rounded-full overflow-hidden">
                       <div className="h-full bg-amber-500 rounded-full transition-all" style={{ width: `${pct}%` }} />
                     </div>
                   )}
                   {stage.extra && !stage.isDone && (
-                    <p className="mt-1 text-[10px] text-amber-700 font-medium truncate">{stage.extra}</p>
+                    <p className="mt-0.5 text-[10px] text-amber-700 font-medium truncate">{stage.extra}</p>
                   )}
                 </div>
               );
@@ -559,7 +596,7 @@ export default function StandingsPage() {
       <TodayMatches />
 
       {/* Smart missing-bets banner */}
-      <MissingBetsBanner />
+      <MissingBetsBanner matches={allMatches} />
 
       <div className="mb-6 flex items-center justify-between">
         <div>

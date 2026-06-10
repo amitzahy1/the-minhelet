@@ -398,7 +398,7 @@ export default function TitlesPreviewPage() {
                           {/* Pre-reveal: explicit reveal time */}
                           {m.panel === "locked" && (
                             <p className="text-[11px] text-blue-700 font-medium text-center py-1">
-                              🔒 ניחושי התוצאה ייחשפו ב-21:31 (דקה אחרי נעילת ההימורים)
+                              🔒 ניחושי התוצאה ייחשפו ב-11.6 בשעה 21:31 (דקה אחרי נעילת ההימורים)
                             </p>
                           )}
 
@@ -557,7 +557,7 @@ export default function TitlesPreviewPage() {
               i === 0 ? "bg-amber-100 text-amber-700 ring-2 ring-amber-300" :
               i === 1 ? "bg-gray-200 text-gray-600" :
               i === 2 ? "bg-orange-100 text-orange-700" : "bg-gray-100 text-gray-500"
-            }`}>{p.name?.[0] || "?"}</div>
+            }`}>{Array.from(p.name?.trim() || "?")[0]}</div>
             <div className="me-3 flex-1 min-w-0 relative">
               <span className="font-bold text-base text-gray-900 cursor-pointer hover:text-blue-600 transition-colors">{p.name}</span>
               {p.isYou && <span className="text-xs text-blue-500 ms-1.5 bg-blue-100 rounded px-1.5 py-0.5 font-bold">אתה</span>}

@@ -712,7 +712,8 @@ export default function StandingsPage() {
                 i === 0 ? "bg-amber-100 text-amber-700 ring-2 ring-amber-300" :
                 i === 1 ? "bg-gray-200 text-gray-600" :
                 i === 2 ? "bg-orange-100 text-orange-700" : "bg-gray-100 text-gray-500"
-              }`}>{p.name?.[0] || "?"}</div>
+              }`}>{/* Array.from = full code point; name[0] on an emoji-led name (🤖 בוט) is half a surrogate pair → � */}
+                {Array.from(p.name?.trim() || "?")[0]}</div>
               <div className="me-3 flex-1 min-w-0 relative">
                 <span className="font-bold text-base text-gray-900 cursor-pointer hover:text-blue-600 transition-colors">{p.name}</span>
                 {p.isYou && <span className="text-xs text-blue-500 ms-1.5 bg-blue-100 rounded px-1.5 py-0.5 font-bold">אתה</span>}

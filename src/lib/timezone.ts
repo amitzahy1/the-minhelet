@@ -17,6 +17,16 @@ export function toIsraelDate(utcDate: string): string {
   });
 }
 
+/** Short Israel date — "11.6" — for tight notices where the full weekday
+ *  form doesn't fit but a time alone is ambiguous. */
+export function toIsraelDateShort(utcDate: string): string {
+  return new Date(utcDate).toLocaleString("he-IL", {
+    timeZone: "Asia/Jerusalem",
+    day: "numeric",
+    month: "numeric",
+  });
+}
+
 /** Returns YYYY-MM-DD in Israel timezone for a given UTC date string */
 export function toIsraelDateKey(utcDate: string): string {
   const d = new Date(utcDate);

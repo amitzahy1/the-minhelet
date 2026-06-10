@@ -282,6 +282,9 @@ function buildRankedRows(opts: {
       bettors: picks.filter((q) => eq(q.pick, p.pick)).map((q) => chip(q.b, q.pick)).sort(pinYouFirst),
     });
   }
+  // League owner's ordering: most-picked option first; the actual-standings
+  // order is preserved as the tiebreaker (stable sort).
+  rows.sort((a, b) => b.bettors.length - a.bettors.length);
   return { rows, notBet };
 }
 
@@ -311,6 +314,8 @@ function buildChoiceRows(opts: {
       }))
       .sort(pinYouFirst),
   }));
+  // Most-picked option first (stable: fixed option order breaks ties).
+  rows.sort((a, b) => b.bettors.length - a.bettors.length);
   return { rows, notBet: bettors.length - picks.length };
 }
 

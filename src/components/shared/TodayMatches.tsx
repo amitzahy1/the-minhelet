@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getFlag, getTeamNameHe } from "@/lib/flags";
 import { TeamLogo } from "@/components/shared/TeamLogo";
-import { toIsraelTimeShort, toIsraelDate, toIsraelDateKey, getTodayIsrael } from "@/lib/timezone";
+import { toIsraelTimeShort, toIsraelDate, toIsraelDateShort, toIsraelDateKey, getTodayIsrael } from "@/lib/timezone";
 import { useSharedData } from "@/hooks/useSharedData";
 import { isLocked, revealAtFor, formatLockDeadline, LOCK_DEADLINE } from "@/lib/constants";
 import { computeGroupHits, hitCounts, normalizeGroupLetter, matchPairIndex, classifyHit, type HitKind } from "@/lib/results-hits";
@@ -407,10 +407,10 @@ export function TodayMatches() {
                             )
                           )}
 
-                          {/* Group match whose day hasn't locked yet — explicit reveal time */}
+                          {/* Group match whose day hasn't locked yet — explicit reveal date+time */}
                           {!isFinished && groupLetter && !scoresRevealed && (
                             <p className="text-[11px] text-blue-700 font-medium text-center py-1">
-                              🔒 ניחושי התוצאה ייחשפו ב-{revealAt ? toIsraelTimeShort(revealAt.toISOString()) : "—"} (דקה אחרי נעילת ההימורים)
+                              🔒 ניחושי התוצאה ייחשפו ב-{revealAt ? `${toIsraelDateShort(revealAt.toISOString())} בשעה ${toIsraelTimeShort(revealAt.toISOString())}` : "—"} (דקה אחרי נעילת ההימורים)
                             </p>
                           )}
                           {/* Group-stage predictions vs actual result (only for FINISHED group matches) */}

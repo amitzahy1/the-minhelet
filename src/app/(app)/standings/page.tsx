@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { useBettingStore } from "@/stores/betting-store";
 import { shareLeaderboard, openWhatsApp } from "@/lib/share";
+import { shareLeaderboardImage } from "@/lib/share-image";
 import { CompletionTracker, type PlayerCompletion } from "@/components/shared/CompletionTracker";
 import { HeroRoast } from "@/components/shared/HeroRoast";
 import { LeaderboardRace } from "@/components/shared/LeaderboardRace";
@@ -325,6 +326,7 @@ interface MatchApi {
 export default function StandingsPage() {
   const totalFilled = useBettingStore((s) => s.getTotalFilledMatches());
   const [hoveredPlayer, setHoveredPlayer] = useState<string | null>(null);
+  const [shareHint, setShareHint] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<SortKey>("total");
   const currentUserId = useCurrentUser();
   // Load real data from Supabase (falls back to empty arrays if not configured)
@@ -602,10 +604,14 @@ export default function StandingsPage() {
         <div>
           <h1 className="text-3xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>טבלה</h1>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
+          {shareHint && (
+            <span className="text-[11px] font-bold text-green-700 bg-green-50 border border-green-200 rounded-full px-2.5 py-1">
+              {shareHint}
+            </span>
+          )}
           <button onClick={() => {
-            // Guard: while profiles/scores are still loading PLAYERS is empty —
-            // sharing then would send a headers-only message.
+            // Text fallback share — for whoever prefers copy-pasteable text.
             if (PLAYERS.length === 0) return;
             const text = shareLeaderboard(
               [...PLAYERS].sort((a,b) => b.total - a.total).map((p,i) => ({ rank: i+1, name: p.name, total: p.total, today: p.today })),
@@ -613,6 +619,40 @@ export default function StandingsPage() {
               PLAYERS.find((p) => p.id === lifterId)?.name ?? null,
             );
             openWhatsApp(text);
+          }} disabled={PLAYERS.length === 0} className="px-2.5 py-2 rounded-lg bg-white border border-gray-200 text-xs font-bold text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            טקסט
+          </button>
+          <button onClick={async () => {
+            // Primary share: render the table to a PNG. Emojis live inside
+            // the image, so WhatsApp's URL-text mangling can't touch them.
+            if (PLAYERS.length === 0) return;
+            const sorted = [...PLAYERS].sort((a, b) => b.total - a.total);
+            const dateLabel = new Intl.DateTimeFormat("he-IL", { day: "2-digit", month: "2-digit", timeZone: "Asia/Jerusalem" }).format(new Date());
+            try {
+              const outcome = await shareLeaderboardImage(
+                sorted.map((p, i) => ({
+                  rank: i + 1,
+                  name: p.name,
+                  total: p.total,
+                  today: p.today,
+                  isLifter: p.id === lifterId,
+                  isSheep: p.id === sheepId,
+                })),
+                dateLabel,
+              );
+              if (outcome === "copied") setShareHint("התמונה הועתקה — הדביקו בקבוצה 📋");
+              else if (outcome === "downloaded") setShareHint("התמונה ירדה — שתפו אותה מההורדות");
+              else setShareHint(null);
+            } catch {
+              // Canvas/share failed — fall back to the text share
+              const text = shareLeaderboard(
+                sorted.map((p, i) => ({ rank: i + 1, name: p.name, total: p.total, today: p.today })),
+                PLAYERS.find((p) => p.id === sheepId)?.name ?? null,
+                PLAYERS.find((p) => p.id === lifterId)?.name ?? null,
+              );
+              openWhatsApp(text);
+            }
+            window.setTimeout(() => setShareHint(null), 6000);
           }} disabled={PLAYERS.length === 0} className="px-3 py-2 rounded-lg bg-green-500 text-white text-xs font-bold hover:bg-green-600 transition-colors flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492l4.625-1.464A11.96 11.96 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.487 0-4.774-.846-6.592-2.266l-.46-.345-2.741.868.91-2.666-.38-.503A9.96 9.96 0 0 1 2 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>
             שתף

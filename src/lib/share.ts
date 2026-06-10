@@ -4,14 +4,14 @@
 // ============================================================================
 
 /**
- * Share leaderboard standings to WhatsApp — ALL players, no cap.
+ * Share leaderboard standings to WhatsApp as TEXT — ALL players, no cap.
+ * This is the fallback path; the primary share is the rendered PNG
+ * (src/lib/share-image.ts), where emojis are safe.
  *
- * IMPORTANT: only BMP-safe characters in this text (⚽ ★ ━). Astral-plane
- * emoji (🏆 🥇 🐑 …) arrive as � when the text travels through a wa.me URL
- * into WhatsApp desktop. The UI chips keep the fancy emojis; the share text
- * trades them for symbols that survive everywhere.
- * `sheepName` — unique last place ("הכבש?"); `lifterName` — unique first
- * place ("מניף").
+ * Text rules learned the hard way (WhatsApp desktop + wa.me URLs):
+ *   - NO emoji at all — even BMP ⚽ arrives as �.
+ *   - Every rank rendered the same way ("1." … "12.") — a symbol prefix
+ *     (★) gets bidi-reordered on RTL lines and breaks the *bold* pair.
  */
 export function shareLeaderboard(
   players: { rank: number; name: string; total: number; today: string }[],
@@ -19,14 +19,13 @@ export function shareLeaderboard(
   lifterName?: string | null,
 ): string {
   const lines = [
-    "⚽ *The Minhelet — דירוג עדכני*",
+    "*The Minhelet — דירוג עדכני*",
     "━━━━━━━━━━━━━━━",
     ...players.map(p => {
-      const medal = p.rank === 1 ? "★" : `${p.rank}.`;
       const mark =
         lifterName && p.name === lifterName ? " · מניף" :
         sheepName && p.name === sheepName ? " · הכבש?" : "";
-      return `${medal} *${p.name}* — ${p.total} נק׳ (${p.today} היום)${mark}`;
+      return `${p.rank}. *${p.name}* — ${p.total} נק׳ (${p.today} היום)${mark}`;
     }),
     "",
     "the-minhelet.vercel.app",

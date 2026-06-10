@@ -21,13 +21,13 @@ function TitleCard({ award }: { award: TitleAward }) {
       <div className={`text-2xl leading-none mb-1.5 ${awarded ? "" : "grayscale opacity-60"}`}>
         {award.emoji}
       </div>
-      <p className="text-xs font-bold text-gray-800">{award.title}</p>
+      <p className="text-xs font-bold text-gray-500">{award.title}</p>
       {awarded ? (
-        <p className="text-sm font-black text-gray-900 mt-0.5 truncate" title={award.holder!}>
+        <p className="text-lg font-black text-gray-900 mt-0.5 truncate" style={{ fontFamily: "var(--font-secular)" }} title={award.holder!}>
           {award.holder}
         </p>
       ) : (
-        <p className="text-sm font-black text-gray-300 mt-0.5">—</p>
+        <p className="text-lg font-black text-gray-300 mt-0.5">—</p>
       )}
       <p className={`text-[10px] leading-tight mt-1 ${awarded ? "text-gray-500" : "text-gray-400"}`}>
         {award.detail}

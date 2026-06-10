@@ -74,12 +74,25 @@ export function shareRank(userName: string, rank: number, total: number): string
 }
 
 /**
- * Open WhatsApp with pre-filled text.
- * Falls back to same-tab navigation when window.open returns null —
- * iOS standalone PWAs and aggressive popup blockers do that even for
- * user-gesture opens, which would otherwise make the button a silent no-op.
+ * Share pre-filled text to WhatsApp.
+ *
+ * Native share sheet first: some WhatsApp desktop builds mangle astral-plane
+ * characters (🏆 🥇 🐑 → �) when fed through a wa.me URL, and navigator.share
+ * hands the text over directly so emojis survive; on mobile it also lets the
+ * user pick the group in one tap. URL fallback for browsers without the Web
+ * Share API, with same-tab navigation when window.open is blocked (iOS
+ * standalone PWAs, popup blockers).
  */
-export function openWhatsApp(text: string) {
+export async function openWhatsApp(text: string) {
+  if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+    try {
+      await navigator.share({ text });
+      return;
+    } catch (e) {
+      if ((e as Error)?.name === "AbortError") return; // user closed the sheet
+      // else fall through to the URL approach
+    }
+  }
   const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
   const win = window.open(url, "_blank", "noopener,noreferrer");
   if (!win) window.location.href = url;

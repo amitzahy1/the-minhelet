@@ -632,12 +632,14 @@ interface TransposedRow {
   section?: "winner" | "final" | "semi" | "quarter";
 }
 
-/** Per-stage visual identity for the advancement table. */
-const SECTION_META: Record<NonNullable<TransposedRow["section"]>, { title: string; bandCls: string; labelCls: string }> = {
-  winner:  { title: "🏆 הזוכה",      bandCls: "bg-amber-100/80 text-amber-900",   labelCls: "bg-amber-50/90 text-amber-900" },
-  final:   { title: "🥇 עולות לגמר", bandCls: "bg-blue-100/80 text-blue-900",     labelCls: "bg-blue-50/80 text-blue-900" },
-  semi:    { title: "🔥 חצי גמר",    bandCls: "bg-emerald-100/80 text-emerald-900", labelCls: "bg-emerald-50/80 text-emerald-900" },
-  quarter: { title: "🎯 רבע גמר",    bandCls: "bg-purple-100/80 text-purple-900", labelCls: "bg-purple-50/80 text-purple-900" },
+/** Stage titles for the advancement table. The divider design is NEUTRAL
+ *  (uniform dark-gray band) — colored bands competed with the pick colors
+ *  in the cells and read as data instead of structure. */
+const SECTION_META: Record<NonNullable<TransposedRow["section"]>, { title: string }> = {
+  winner:  { title: "🏆 הזוכה" },
+  final:   { title: "עולות לגמר" },
+  semi:    { title: "חצי גמר" },
+  quarter: { title: "רבע גמר" },
 };
 
 function TransposedBetTable({
@@ -682,27 +684,23 @@ function TransposedBetTable({
         <tbody>
           {rows.map((row, rowIdx) => (
             <Fragment key={row.label}>
-              {/* Stage divider — rendered when this row starts a new section */}
+              {/* Stage divider — uniform neutral band when a new section starts */}
               {row.section && rows[rowIdx - 1]?.section !== row.section && (
                 <tr>
                   <td
                     colSpan={bettors.length + 1}
-                    className={`py-1 px-3 text-[10px] font-black tracking-wide ${SECTION_META[row.section].bandCls}`}
+                    className="py-1.5 px-3 text-[10px] font-black tracking-wider bg-gray-700 text-white"
                   >
                     {SECTION_META[row.section].title}
                   </td>
                 </tr>
               )}
             <tr
-              className={`border-t border-gray-100 ${
-                row.highlight ? "bg-amber-50/40" : rowIdx % 2 ? "bg-gray-50/40" : ""
-              }`}
+              className={`border-t border-gray-100 ${rowIdx % 2 ? "bg-gray-50/40" : ""}`}
             >
               <th
                 scope="row"
-                className={`py-1.5 px-3 text-start font-bold text-[11px] sticky start-0 z-10 border-e border-gray-100 whitespace-nowrap ${
-                  row.section ? SECTION_META[row.section].labelCls : row.highlight ? "bg-amber-50/90 text-amber-900" : "bg-white text-gray-700"
-                }`}
+                className="py-1.5 px-3 text-start font-bold text-[11px] sticky start-0 z-10 border-e border-gray-100 whitespace-nowrap bg-white text-gray-600"
               >
                 {row.label}
               </th>

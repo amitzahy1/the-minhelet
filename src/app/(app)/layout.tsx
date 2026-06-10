@@ -43,8 +43,8 @@ const TRACKING_ITEMS = [
   { href: "/standings", label: "ראשי", iconKey: "leaderboard" as const },
   { href: "/compare", label: "השוואה", iconKey: "compare" as const },
   { href: "/live", label: "לייב", iconKey: "live" as const },
-  { href: "/schedule", label: "לו״ז", iconKey: "schedule" as const },
   { href: "/squads", label: "נבחרות", iconKey: "squads" as const },
+  { href: "/schedule", label: "לו״ז", iconKey: "schedule" as const },
   { href: "/rules", label: "חוקים", iconKey: "rules" as const },
 ];
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { Fragment, useState, useMemo, useEffect } from "react";
 import { PredictionHeatmap } from "@/components/shared/PredictionHeatmap";
 import { useSharedData } from "@/hooks/useSharedData";
 import { GROUPS } from "@/lib/tournament/groups";
@@ -372,11 +372,11 @@ export default function ComparePage() {
             bettors={fBettors}
             colorMap={advColors}
             rows={[
-              { label: "זוכה", render: (b) => ({ val: b.winner, node: <span className="font-bold text-amber-700">{F[b.winner]} {b.winner}</span> }), highlight: true },
-              { label: "גמר 1", render: (b) => ({ val: b.finalist1, node: <span className="text-gray-700">{F[b.finalist1]} {b.finalist1}</span> }) },
-              { label: "גמר 2", render: (b) => ({ val: b.finalist2, node: <span className="text-gray-700">{F[b.finalist2]} {b.finalist2}</span> }) },
-              ...[0, 1, 2, 3].map((i) => ({ label: `חצי ${i + 1}`, render: (b: Bettor) => ({ val: b.sf[i] || "", node: <span className="text-gray-700">{F[b.sf[i]]} {b.sf[i]}</span> }) })),
-              ...[0, 1, 2, 3, 4, 5, 6, 7].map((i) => ({ label: `רבע ${i + 1}`, render: (b: Bettor) => ({ val: b.qf[i] || "", node: <span className="text-gray-700">{F[b.qf[i]]} {b.qf[i]}</span> }) })),
+              { label: "זוכה", section: "winner" as const, render: (b) => ({ val: b.winner, node: <span className="font-bold text-amber-700">{F[b.winner]} {b.winner}</span> }), highlight: true },
+              { label: "גמר 1", section: "final" as const, render: (b) => ({ val: b.finalist1, node: <span className="text-gray-700">{F[b.finalist1]} {b.finalist1}</span> }) },
+              { label: "גמר 2", section: "final" as const, render: (b) => ({ val: b.finalist2, node: <span className="text-gray-700">{F[b.finalist2]} {b.finalist2}</span> }) },
+              ...[0, 1, 2, 3].map((i) => ({ label: `חצי ${i + 1}`, section: "semi" as const, render: (b: Bettor) => ({ val: b.sf[i] || "", node: <span className="text-gray-700">{F[b.sf[i]]} {b.sf[i]}</span> }) })),
+              ...[0, 1, 2, 3, 4, 5, 6, 7].map((i) => ({ label: `רבע ${i + 1}`, section: "quarter" as const, render: (b: Bettor) => ({ val: b.qf[i] || "", node: <span className="text-gray-700">{F[b.qf[i]]} {b.qf[i]}</span> }) })),
             ]}
           />
           {/* Popular picks — computed from real data */}
@@ -628,7 +628,17 @@ interface TransposedRow {
   label: string;
   render: (b: Bettor) => { val: string; node: React.ReactNode };
   highlight?: boolean;
+  /** Stage group — a tinted divider row is rendered whenever it changes. */
+  section?: "winner" | "final" | "semi" | "quarter";
 }
+
+/** Per-stage visual identity for the advancement table. */
+const SECTION_META: Record<NonNullable<TransposedRow["section"]>, { title: string; bandCls: string; labelCls: string }> = {
+  winner:  { title: "🏆 הזוכה",      bandCls: "bg-amber-100/80 text-amber-900",   labelCls: "bg-amber-50/90 text-amber-900" },
+  final:   { title: "🥇 עולות לגמר", bandCls: "bg-blue-100/80 text-blue-900",     labelCls: "bg-blue-50/80 text-blue-900" },
+  semi:    { title: "🔥 חצי גמר",    bandCls: "bg-emerald-100/80 text-emerald-900", labelCls: "bg-emerald-50/80 text-emerald-900" },
+  quarter: { title: "🎯 רבע גמר",    bandCls: "bg-purple-100/80 text-purple-900", labelCls: "bg-purple-50/80 text-purple-900" },
+};
 
 function TransposedBetTable({
   bettors,
@@ -671,8 +681,19 @@ function TransposedBetTable({
         </thead>
         <tbody>
           {rows.map((row, rowIdx) => (
+            <Fragment key={row.label}>
+              {/* Stage divider — rendered when this row starts a new section */}
+              {row.section && rows[rowIdx - 1]?.section !== row.section && (
+                <tr>
+                  <td
+                    colSpan={bettors.length + 1}
+                    className={`py-1 px-3 text-[10px] font-black tracking-wide ${SECTION_META[row.section].bandCls}`}
+                  >
+                    {SECTION_META[row.section].title}
+                  </td>
+                </tr>
+              )}
             <tr
-              key={row.label}
               className={`border-t border-gray-100 ${
                 row.highlight ? "bg-amber-50/40" : rowIdx % 2 ? "bg-gray-50/40" : ""
               }`}
@@ -680,7 +701,7 @@ function TransposedBetTable({
               <th
                 scope="row"
                 className={`py-1.5 px-3 text-start font-bold text-[11px] sticky start-0 z-10 border-e border-gray-100 whitespace-nowrap ${
-                  row.highlight ? "bg-amber-50/90 text-amber-900" : "bg-white text-gray-700"
+                  row.section ? SECTION_META[row.section].labelCls : row.highlight ? "bg-amber-50/90 text-amber-900" : "bg-white text-gray-700"
                 }`}
               >
                 {row.label}
@@ -699,6 +720,7 @@ function TransposedBetTable({
                 );
               })}
             </tr>
+            </Fragment>
           ))}
         </tbody>
       </table>

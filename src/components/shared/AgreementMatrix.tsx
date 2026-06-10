@@ -8,11 +8,17 @@
 import { agreementPct } from "@/lib/league-titles";
 import type { BettorBracket } from "@/lib/supabase/shared-data";
 
-function cellColor(v: number | null): React.CSSProperties {
+/**
+ * Color scale NORMALIZED to the league's actual value range. Real agreement
+ * values cluster in a narrow band (e.g. 45–91%) — an absolute 0–100 scale
+ * paints everything yellow-green. Here the league's lowest pair is full red
+ * and the highest full green, so differences pop.
+ */
+function cellColor(v: number | null, min: number, max: number): React.CSSProperties {
   if (v === null) return { backgroundColor: "#f1f5f9" };
-  // 0% → red hue, 100% → green hue; pastel lightness keeps dark text readable.
-  const hue = Math.round((Math.max(0, Math.min(100, v)) * 1.2));
-  return { backgroundColor: `hsl(${hue}, 72%, 82%)` };
+  const t = max > min ? (v - min) / (max - min) : 0.5;
+  const hue = Math.round(t * 120); // 0 = red → 120 = green
+  return { backgroundColor: `hsl(${hue}, 78%, ${84 - t * 8}%)` };
 }
 
 export function AgreementMatrix({
@@ -34,6 +40,9 @@ export function AgreementMatrix({
   const matrix = bettors.map((a) =>
     bettors.map((b) => (a.userId === b.userId ? null : agreementPct(a, b))),
   );
+  const values = matrix.flat().filter((v): v is number => v !== null);
+  const minV = values.length ? Math.min(...values) : 0;
+  const maxV = values.length ? Math.max(...values) : 100;
 
   const shortName = (name: string) => {
     const n = (name || "ללא שם").trim();
@@ -85,10 +94,10 @@ export function AgreementMatrix({
                     <td
                       key={col.userId}
                       title={v === null ? "" : `${row.displayName} ↔ ${col.displayName}: ${Math.round(v)}%`}
-                      style={cellColor(v)}
-                      className="w-10 h-9 min-w-10 text-center rounded-md text-[11px] font-black text-gray-800 tabular-nums"
+                      style={cellColor(v, minV, maxV)}
+                      className="w-11 h-9 min-w-11 text-center rounded-md text-[10px] font-black text-gray-800 tabular-nums whitespace-nowrap"
                     >
-                      {v === null ? <span className="text-gray-300">—</span> : Math.round(v)}
+                      {v === null ? <span className="text-gray-300">—</span> : `${Math.round(v)}%`}
                     </td>
                   );
                 })}

@@ -197,7 +197,7 @@ const DEMO_PICKS: Record<number, { name: string; home: number; away: number }[]>
     { name: "דני", home: 2, away: 1 }, { name: "רון ב", home: 1, away: 0 },
     { name: "יוני", home: 1, away: 1 }, { name: "אמית", home: 2, away: 2 },
     { name: "רון ג", home: 0, away: 0 }, { name: "דור דסא", home: 2, away: 0 },
-    { name: "רועי", home: 1, away: 0 }, { name: "עידן", home: 3, away: 1 },
+    { name: "רועי", home: 1, away: 0 }, { name: "עידן", home: 2, away: 1 },
   ],
   3: [
     { name: "דני", home: 1, away: 0 }, { name: "רון ב", home: 2, away: 0 },
@@ -308,7 +308,7 @@ export default function TitlesPreviewPage() {
                 : 0) || a.name.localeCompare(b.name, "he"),
             );
             const specials = DEMO_SPECIALS[m.id] ?? [];
-            // Consensus strip — same tally as the real widget
+            // Consensus strip — top 2 genuinely-common picks, same as the real widget
             const consensusLine = (() => {
               if (m.panel !== "revealed" || picks.length < 2) return "";
               const tally: Record<string, number> = {};
@@ -317,9 +317,10 @@ export default function TitlesPreviewPage() {
                 tally[k] = (tally[k] || 0) + 1;
               }
               return Object.entries(tally)
+                .filter(([, n]) => n > 1)
                 .sort((a, b) => b[1] - a[1])
-                .slice(0, 3)
-                .map(([k, n]) => (n > 1 ? `${k} ×${n}` : k))
+                .slice(0, 2)
+                .map(([k, n]) => `${k} ×${n}`)
                 .join(" · ");
             })();
             const counts = actual
@@ -582,17 +583,17 @@ export default function TitlesPreviewPage() {
         ))}
       </div>
 
-      {/* ===== 5 · 🏅 תארים ===== */}
-      <SectionMark n={5} label="תארים — מחושב בלוגיקת הפרודקשן" />
-      <LeagueTitles awards={awards} />
-
-      {/* ===== 6 · מצטיין / חולשת היום (real component) ===== */}
-      <SectionMark n={6} label="מצטיין וחולשת היום" />
+      {/* ===== 5 · מצטיין / חולשת היום (real component) ===== */}
+      <SectionMark n={5} label="מצטיין וחולשת היום — מתחת לטבלה" />
       <HeroRoast
         hero={{ name: "דני", points: 12, highlight: "3 תוצאות מדויקות!" }}
         roast={{ name: "רועי", points: 0, highlight: "רק 0 — יום קשה" }}
         matchday=""
       />
+
+      {/* ===== 6 · 🏅 תארים ===== */}
+      <SectionMark n={6} label="תארים — מחושב בלוגיקת הפרודקשן" />
+      <LeagueTitles awards={awards} />
 
       {/* ===== 7 · השוואת כל המהמרים (moved up per the proposal) ===== */}
       <SectionMark n={7} label="השוואת כל המהמרים" />

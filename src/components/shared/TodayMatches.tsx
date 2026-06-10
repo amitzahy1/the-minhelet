@@ -237,7 +237,9 @@ export function TodayMatches() {
                 hitRank[classifyHit({ home: b.home, away: b.away }, liveActual)]
               : 0) || a.name.localeCompare(b.name, "he"),
           );
-          // Consensus strip — "2-1 ×4 · 1-0 ×3"
+          // Consensus strip — the top 2 genuinely-common picks ("2-1 ×4 · 1-0 ×3").
+          // A score only one bettor chose isn't "popular"; with no repeats at
+          // all the strip is hidden.
           const consensusLine = (() => {
             if (revealedPicks.length < 2) return "";
             const tally: Record<string, number> = {};
@@ -246,9 +248,10 @@ export function TodayMatches() {
               tally[k] = (tally[k] || 0) + 1;
             }
             return Object.entries(tally)
+              .filter(([, n]) => n > 1)
               .sort((a, b) => b[1] - a[1])
-              .slice(0, 3)
-              .map(([k, n]) => (n > 1 ? `${k} ×${n}` : k))
+              .slice(0, 2)
+              .map(([k, n]) => `${k} ×${n}`)
               .join(" · ");
           })();
 

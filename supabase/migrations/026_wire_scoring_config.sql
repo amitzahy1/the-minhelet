@@ -10,8 +10,8 @@
 --
 -- Two things happen here:
 --   1. Add the two advancement tiers the table was missing:
---        - advance_r16            (R16 reachers, "עולה לשמינית")     default 1
---        - group_advance_as_3rd   (advanced as a best-3rd, "עולה ממקום שלישי")  default 2
+--        - advance_r16            (R16 reachers, "עולה לשמינית")     default 2
+--        - group_advance_as_3rd   (advanced as a best-3rd, "עולה ממקום שלישי")  default 0
 --      The scoring engine has always scored these (SCORING.advancement.r16 /
 --      .group_as_3rd); the DB config just never exposed them.
 --
@@ -26,8 +26,8 @@
 -- ============================================================================
 
 ALTER TABLE scoring_config
-  ADD COLUMN IF NOT EXISTS advance_r16 INT NOT NULL DEFAULT 1,
-  ADD COLUMN IF NOT EXISTS group_advance_as_3rd INT NOT NULL DEFAULT 2;
+  ADD COLUMN IF NOT EXISTS advance_r16 INT NOT NULL DEFAULT 2,
+  ADD COLUMN IF NOT EXISTS group_advance_as_3rd INT NOT NULL DEFAULT 0;
 
 -- Re-seed every row to the authoritative current scoring (SCORING in
 -- src/types/index.ts). toto_*/exact_* already match the constants but are set
@@ -52,10 +52,10 @@ UPDATE scoring_config SET
   exact_final = 2,
 
   -- Pre-tournament advancement picks
-  group_advance_exact   = 5,
-  group_advance_partial = 3,
-  group_advance_as_3rd  = 2,
-  advance_r16           = 1,
+  group_advance_exact   = 3,
+  group_advance_partial = 1,
+  group_advance_as_3rd  = 0,
+  advance_r16           = 2,
   advance_qf            = 3,
   advance_sf            = 6,
   advance_final         = 10,

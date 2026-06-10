@@ -36,6 +36,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# local private bet backups (never commit — contains participants' predictions)
+/local-backups/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

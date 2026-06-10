@@ -10,8 +10,8 @@ import { createClient } from "@supabase/supabase-js";
 const EXPECTED: Record<string, number> = {
   toto_group: 2, toto_r32: 3, toto_r16: 3, toto_qf: 3, toto_sf: 3, toto_third: 3, toto_final: 4,
   exact_group: 1, exact_r32: 1, exact_r16: 1, exact_qf: 1, exact_sf: 2, exact_third: 1, exact_final: 2,
-  group_advance_exact: 5, group_advance_partial: 3, group_advance_as_3rd: 2,
-  advance_r16: 1, advance_qf: 3, advance_sf: 6, advance_final: 10, advance_winner: 16,
+  group_advance_exact: 3, group_advance_partial: 1, group_advance_as_3rd: 0,
+  advance_r16: 2, advance_qf: 3, advance_sf: 6, advance_final: 10, advance_winner: 16,
   top_scorer_exact: 12, top_scorer_relative: 7, top_assists_exact: 9, top_assists_relative: 5,
   best_attack: 8, prolific_group: 6, driest_group: 6, dirtiest_team: 6, matchup: 5, penalties_over_under: 6,
   top_scorer_min_goals: 3, top_assists_min: 2,

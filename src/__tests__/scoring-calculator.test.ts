@@ -5,7 +5,7 @@ import { SCORING } from "@/types";
 describe("calculateGroupAdvancementScore", () => {
   const { group_exact, group_partial, group_as_3rd } = SCORING.advancement;
 
-  it("awards full 5+5 when both picks are exact", () => {
+  it("awards full 3+3 when both picks are exact", () => {
     const r = calculateGroupAdvancementScore("ARG", "MEX", "ARG", "MEX");
     expect(r.points).toBe(group_exact * 2);
     expect(r.reasons.map((x) => x.reason)).toEqual([
@@ -14,7 +14,7 @@ describe("calculateGroupAdvancementScore", () => {
     ]);
   });
 
-  it("awards 3+3 when 1st and 2nd are swapped", () => {
+  it("awards 1+1 when 1st and 2nd are swapped", () => {
     const r = calculateGroupAdvancementScore("ARG", "MEX", "MEX", "ARG");
     expect(r.points).toBe(group_partial * 2);
     expect(r.reasons.every((x) => x.reason === "GROUP_ADVANCE_PARTIAL")).toBe(true);
@@ -26,7 +26,7 @@ describe("calculateGroupAdvancementScore", () => {
     expect(r.reasons).toHaveLength(0);
   });
 
-  it("awards 2 (AS_3RD) when predicted 1st actually finished 3rd AND qualified", () => {
+  it("awards group_as_3rd (AS_3RD) when predicted 1st actually finished 3rd AND qualified", () => {
     const r = calculateGroupAdvancementScore(
       "MEX",   // predicted 1st
       "KOR",   // predicted 2nd — wrong
@@ -36,7 +36,7 @@ describe("calculateGroupAdvancementScore", () => {
       true,    // qualified as best-3rd
     );
     expect(r.points).toBe(group_as_3rd);
-    expect(r.reasons).toEqual([{ reason: "GROUP_ADVANCE_AS_3RD", points: 2 }]);
+    expect(r.reasons).toEqual([{ reason: "GROUP_ADVANCE_AS_3RD", points: group_as_3rd }]);
   });
 
   it("does NOT award AS_3RD when the 3rd team did not qualify", () => {
@@ -47,7 +47,7 @@ describe("calculateGroupAdvancementScore", () => {
     expect(r.reasons).toHaveLength(0);
   });
 
-  it("stacks: 1 pick exact + other pick as qualifying 3rd = 5 + 2", () => {
+  it("stacks: 1 pick exact + other pick as qualifying 3rd = group_exact + group_as_3rd", () => {
     const r = calculateGroupAdvancementScore(
       "BRA",   // predicted 1st — exact
       "MEX",   // predicted 2nd — actually 3rd but qualified
@@ -63,7 +63,7 @@ describe("calculateGroupAdvancementScore", () => {
     ]);
   });
 
-  it("stacks: 1 pick partial-swap + other pick as qualifying 3rd = 3 + 2", () => {
+  it("stacks: 1 pick partial-swap + other pick as qualifying 3rd = group_partial + group_as_3rd", () => {
     const r = calculateGroupAdvancementScore(
       "CZE",   // predicted 1st — actually 2nd → partial
       "MEX",   // predicted 2nd — actually 3rd but qualified

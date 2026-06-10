@@ -84,10 +84,10 @@ function OnboardingWizard({ onDismiss, onStart }: { onDismiss: () => void; onSta
             <div className="space-y-4">
               <div>
                 <h3 className="text-2xl font-black text-gray-900 leading-tight" style={{ fontFamily: "var(--font-secular)" }}>ברוכים הבאים</h3>
-                <p className="text-sm text-gray-500 mt-1">48 נבחרות · 12 בתים · 31 משחקי נוקאאוט</p>
+                <p className="text-sm text-gray-500 mt-1">48 נבחרות · 12 בתים · 32 משחקי נוקאאוט</p>
               </div>
               <p className="text-sm text-gray-700 leading-relaxed">
-                להשלמת ההרשמה — שלושה שלבי הימורים. אפשר לחזור ולערוך כל הימור עד מועד הנעילה.
+                להשלמת ההרשמה — שלושה שלבי הימורים. אפשר לחזור ולערוך כל הימור עד הנעילה — ותוצאות המשחקים נשארות פתוחות עד חצי שעה לפני כל משחק.
               </p>
               <div className="space-y-2.5">
                 <div className="bg-blue-50 rounded-xl p-3.5 border border-blue-100">
@@ -166,7 +166,7 @@ function OnboardingWizard({ onDismiss, onStart }: { onDismiss: () => void; onSta
                     </tbody>
                   </table>
                 </div>
-                <p className="text-[11px] text-gray-400 mt-1 leading-snug">ניקוד תוצאות הנוק-אאוט מגיע מ<strong>עץ נתוני אמת</strong> בלבד. עץ הסימולציה משמש לבחירת העולות והאלופה (ניקוד עולות).</p>
+                <p className="text-[11px] text-gray-400 mt-1 leading-snug">ניקוד תוצאות הנוק-אאוט מגיע מ<strong>עץ נתוני אמת</strong> בלבד. עץ הסימולציה משמש לבחירת העולות והאלופה (ניקוד עולות). הערכים בטבלה בסיסיים — חצי-הגמר והגמר שווים יותר (פירוט מלא בדף החוקים).</p>
               </div>
 
               {/* Advancement scoring */}
@@ -279,14 +279,14 @@ function OnboardingWizard({ onDismiss, onStart }: { onDismiss: () => void; onSta
                   <span className="mt-1.5 w-2 h-2 rounded-full bg-red-500 shrink-0"></span>
                   <div>
                     <p className="text-sm font-bold text-gray-900">ברגע הנעילה</p>
-                    <p className="text-[12px] text-gray-600 leading-snug">תוצאות שלב הבתים, בחירת העולות בעץ הגביע וההימורים המיוחדים — מוקפאים.</p>
+                    <p className="text-[12px] text-gray-600 leading-snug">בחירת העולות והאלופה (עץ הסימולציה) וההימורים המיוחדים — ננעלים. תוצאות המשחקים עדיין פתוחות לעריכה (ראו למטה).</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3 px-3 py-2.5 rounded-lg border border-gray-100">
                   <span className="mt-1.5 w-2 h-2 rounded-full bg-amber-500 shrink-0"></span>
                   <div>
-                    <p className="text-sm font-bold text-gray-900">תוצאות נוקאאוט נשארות פתוחות</p>
-                    <p className="text-[12px] text-gray-600 leading-snug">תוצאה מדויקת לכל משחק נוקאאוט (משלב 32 הגדולות ומעלה) ניתנת לעדכון עד לפני שריקת הפתיחה של אותו משחק.</p>
+                    <p className="text-sm font-bold text-gray-900">תוצאות המשחקים — נעילה מתגלגלת</p>
+                    <p className="text-[12px] text-gray-600 leading-snug">תוצאה מדויקת נשארת פתוחה עד חצי שעה לפני המשחק: בשלב הבתים — לפני המשחק הראשון של אותו יום; בעץ נתוני־האמת (משלב 32 הגדולות ומעלה) — לפני כל משחק.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3 px-3 py-2.5 rounded-lg border border-gray-100">

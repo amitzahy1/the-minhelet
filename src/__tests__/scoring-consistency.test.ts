@@ -82,9 +82,9 @@ describe("FE/BE/DB scoring consistency", () => {
       resolve(process.cwd(), "supabase/migrations/026_wire_scoring_config.sql"),
       "utf8",
     );
-    expect(sql).toMatch(/advance_r16 INT NOT NULL DEFAULT 1/);
-    expect(sql).toMatch(/group_advance_as_3rd INT NOT NULL DEFAULT 2/);
-    expect(SCORING.advancement.r16).toBe(1);
-    expect(SCORING.advancement.group_as_3rd).toBe(2);
+    expect(sql).toMatch(/advance_r16 INT NOT NULL DEFAULT 2/);
+    expect(sql).toMatch(/group_advance_as_3rd INT NOT NULL DEFAULT 0/);
+    expect(SCORING.advancement.r16).toBe(2);
+    expect(SCORING.advancement.group_as_3rd).toBe(0);
   });
 });

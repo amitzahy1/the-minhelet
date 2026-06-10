@@ -232,9 +232,9 @@ export default function RulesPage() {
           <h2 className="text-lg font-bold text-amber-800 mb-3">לוח זמנים</h2>
           <div className="space-y-2 text-sm text-amber-700 font-medium">
             <p>• <strong>עכשיו:</strong> הירשמו והתחילו להמר</p>
-            <p>• <strong>10 ביוני 2026, 17:00:</strong> נעילת הימורי בתים + מיוחדים + עולות</p>
-            <p>• <strong>11 ביוני 2026:</strong> שריקת פתיחה — אי אפשר לשנות יותר</p>
-            <p>• <strong>במהלך הטורניר:</strong> הימורי תוצאות נוק-אאוט ננעלים 30 דק׳ לפני כל משחק</p>
+            <p>• <strong>10 ביוני 2026, 17:00:</strong> נעילת העולות (עץ הסימולציה) וההימורים המיוחדים</p>
+            <p>• <strong>במהלך שלב הבתים:</strong> תוצאות כל יום־משחקים ננעלות 30 דק׳ לפני המשחק הראשון של אותו יום</p>
+            <p>• <strong>במהלך הנוק-אאוט:</strong> תוצאת כל משחק בעץ נתוני־האמת ננעלת 30 דק׳ לפני פתיחתו</p>
           </div>
         </section>
       </div>

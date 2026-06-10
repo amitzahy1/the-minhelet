@@ -17,6 +17,8 @@ export async function updateSession(request: NextRequest) {
       request.nextUrl.pathname === path ||
       request.nextUrl.pathname.startsWith("/join/") ||
       request.nextUrl.pathname.startsWith("/design-preview") ||
+      // QA page for the league-titles feature — mock data only, no user data.
+      request.nextUrl.pathname.startsWith("/titles-preview") ||
       request.nextUrl.pathname.startsWith("/api/")
   );
 

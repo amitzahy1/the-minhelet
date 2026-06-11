@@ -156,7 +156,7 @@ export async function loadAllSpecialBets(): Promise<BettorSpecialBets[]> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("special_bets")
-    .select("user_id, top_scorer_player, top_assists_player, best_attack_team, most_prolific_group, driest_group, dirtiest_team, matchup_pick, penalties_over_under, profiles(display_name)")
+    .select("user_id, top_scorer_team, top_scorer_player, top_assists_team, top_assists_player, best_attack_team, most_prolific_group, driest_group, dirtiest_team, matchup_pick, penalties_over_under, profiles(display_name)")
     .eq("league_id", await getLeagueId());
 
   if (error) {

@@ -96,7 +96,7 @@ export default function AdminGuidePage() {
         <ul className="space-y-1 text-gray-700 mb-4">
           <li>• מלך שערים: <strong>{sp.top_scorer_exact}</strong> (מוחלט) / <strong>{sp.top_scorer_relative}</strong> (יחסי, מינימום {rm.top_scorer_goals} שערים)</li>
           <li>• מלך בישולים: <strong>{sp.top_assists_exact}</strong> / <strong>{sp.top_assists_relative}</strong> (מינימום {rm.top_assists} בישולים)</li>
-          <li>• התקפה הכי טובה: <strong>{sp.best_attack}</strong> · בית פורה/יבש, כסחנית, פנדלים: <strong>{sp.dirtiest_team}</strong> כ״א · מאצ׳אפ: <strong>{sp.matchup}</strong> לכל דו-קרב (×3 = {sp.matchup * 3})</li>
+          <li>• התקפה הכי טובה: <strong>{sp.best_attack}</strong> · בית פורה: <strong>{sp.prolific_group}</strong> · בית יבש: <strong>{sp.driest_group}</strong> · כסחנית: <strong>{sp.dirtiest_team}</strong> · פנדלים: <strong>{sp.penalties_over_under}</strong> · מאצ׳אפ: <strong>{sp.matchup}</strong> לכל דו-קרב (×3 = {sp.matchup * 3})</li>
         </ul>
 
         <h3 className="font-bold text-gray-800 mb-2">שובר שוויון (בסדר)</h3>

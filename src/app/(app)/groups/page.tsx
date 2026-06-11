@@ -13,6 +13,7 @@ import { toIsraelDate, toIsraelTimeShort } from "@/lib/timezone";
 import { computeMatchDays, dayLockAtForKickoff, groupMatchStatus } from "@/lib/tournament/group-live-state";
 import { saveLiveGroupScore } from "@/lib/supabase/sync";
 import { classifyHit, type HitKind } from "@/lib/results-hits";
+import { useScoring } from "@/hooks/useScoring";
 import { SwipeableGroups } from "@/components/shared/SwipeableGroups";
 import { SlotMachineScore } from "@/components/shared/SlotMachineScore";
 import { SaveAndContinue } from "@/components/shared/SaveAndContinue";
@@ -58,6 +59,7 @@ function tiebreakerLabel(reason: TiebreakReason | null | undefined): string | nu
 
 function GroupView({ groupId }: { groupId: string }) {
   const teams = GROUPS_RAW[groupId];
+  const scoring = useScoring();
   const groupState = useBettingStore((s) => s.groups[groupId]);
   const setGroupScore = useBettingStore((s) => s.setGroupScore);
   const setGroupOrder = useBettingStore((s) => s.setGroupOrder);
@@ -364,8 +366,8 @@ function GroupView({ groupId }: { groupId: string }) {
                 <p className="text-sm text-gray-500">{liveMode ? "עדכנו תוצאות · כל יום משחקים ננעל 30 ד׳ לפני המשחק הראשון שלו" : "הזינו תוצאה מדויקת לכל משחק"}</p>
               </div>
               <div className="text-sm text-gray-500 text-end leading-relaxed" style={{ fontFamily: "var(--font-inter)" }}>
-                <span className="block">טוטו: <strong className="text-blue-600">2 נק׳</strong></span>
-                <span className="block">מדויקת: <strong className="text-green-600">+1 נק׳</strong></span>
+                <span className="block">טוטו: <strong className="text-blue-600">{scoring.toto.GROUP} נק׳</strong></span>
+                <span className="block">מדויקת: <strong className="text-green-600">+{scoring.exact.GROUP} נק׳</strong></span>
               </div>
             </div>
             <div className="p-3 space-y-1.5">

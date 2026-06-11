@@ -70,7 +70,7 @@ export function AdminGuide() {
         <ul className="space-y-1 mb-4">
           <li>• מלך שערים: <strong>{sp.top_scorer_exact}</strong> (מוחלט) / <strong>{sp.top_scorer_relative}</strong> (יחסי, מינ׳ {rm.top_scorer_goals})</li>
           <li>• מלך בישולים: <strong>{sp.top_assists_exact}</strong> / <strong>{sp.top_assists_relative}</strong> (מינ׳ {rm.top_assists})</li>
-          <li>• התקפה: <strong>{sp.best_attack}</strong> · כסחנית, בית פורה/יבש, פנדלים: <strong>{sp.dirtiest_team}</strong> כ״א · מאצ׳אפ: <strong>{sp.matchup}</strong> לכל דו-קרב (×3 = {sp.matchup * 3})</li>
+          <li>• התקפה: <strong>{sp.best_attack}</strong> · כסחנית: <strong>{sp.dirtiest_team}</strong> · בית פורה: <strong>{sp.prolific_group}</strong> · בית יבש: <strong>{sp.driest_group}</strong> · פנדלים: <strong>{sp.penalties_over_under}</strong> · מאצ׳אפ: <strong>{sp.matchup}</strong> לכל דו-קרב (×3 = {sp.matchup * 3})</li>
         </ul>
         <h4 className="font-bold mb-2">שובר שוויון</h4>
         <ol className="space-y-0.5">
@@ -95,7 +95,7 @@ export function AdminGuide() {
             <p className="text-red-700 mb-2">בטאב <strong>״הזנת תוצאות״</strong> (אזור ״תוצאות מיוחדות״). לשלושת ההימורים הבאים אין נתונים אוטומטיים — בלי הזנה ידנית בסוף הטורניר אף מהמר לא מקבל עליהם נקודות:</p>
             <ul className="space-y-1 text-red-700 list-disc pr-4">
               <li><strong>הנבחרת הכסחנית</strong> (+ מספר כרטיסים) — הדירוג ה״חי״ מציג 0 כרטיסים עד שתזין; הניקוד הסופי נקבע רק לפי הזנת האדמין.</li>
-              <li><strong>3 תוצאות המאצ׳אפים</strong> (מסי–רונאלדו · רפיניה–ויניסיוס · אמבפה–קיין) — קבע מי ניצח כל דו-קרב לפי שערים+בישולים. <strong>5 נק׳ לכל דו-קרב</strong>.</li>
+              <li><strong>3 תוצאות המאצ׳אפים</strong> (מסי–רונאלדו · רפיניה–ויניסיוס · אמבפה–קיין) — קבע מי ניצח כל דו-קרב לפי שערים+בישולים. <strong>{sp.matchup} נק׳ לכל דו-קרב</strong>.</li>
               <li><strong>סה״כ פנדלים בטורניר</strong> — ספור פנדלים (90 דק׳ + הארכה, ללא דו-קרב פנדלים) והזן את המספר; אובר/אנדר נגזר אוטומטית.</li>
             </ul>
             <p className="text-red-700 mt-2"><strong>מלך שערים / מלך בישולים / התקפה / בית פורה / בית יבש</strong> מתעדכנים אוטומטית מהפיד במהלך הטורניר (ניקוד ״זמני״), אך יש לאשר את התוצאה הסופית באותו טאב.</p>

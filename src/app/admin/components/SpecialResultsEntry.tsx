@@ -11,6 +11,7 @@ import { PlayerSelect } from "@/components/shared/PlayerSelect";
 import { CardTieAlert } from "./CardTieAlert";
 import { MATCHUPS } from "@/lib/matchups";
 import { PENALTIES_LINE, penaltiesResult } from "@/lib/constants";
+import { useScoring } from "@/hooks/useScoring";
 
 /** One row of the dirtiest-team leaderboard (admin-maintained, no auto feed). */
 type DirtyRow = { team: string; yellow: number; red: number };
@@ -76,6 +77,7 @@ const sortDirty = (board: DirtyRow[]) =>
   [...board].sort((a, b) => cardPoints(b) - cardPoints(a));
 
 export function SpecialResultsEntry() {
+  const scoring = useScoring();
   const [actuals, setActuals] = useState<Actuals>(EMPTY);
   const [baseline, setBaseline] = useState<Actuals>(EMPTY);
   const [loading, setLoading] = useState(true);
@@ -202,7 +204,7 @@ export function SpecialResultsEntry() {
           במערכת ויחושבו מול ההימורים של המהמרים. משדות ריקים — עדיין טרם נסגר.
         </p>
         <div className="mt-2 rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-800 leading-relaxed">
-          <strong>⚠️ חובה למלא ידנית (אין מקור אוטומטי):</strong> הנבחרת הכסחנית + מס׳ כרטיסים · 3 תוצאות המאצ׳אפים (5 נק׳ לכל דו-קרב) · סה״כ פנדלים. בלי הזנה — 0 נקודות למהמרים על ההימורים האלה. מלך שערים/בישולים/התקפה/בתים מתעדכנים אוטומטית אך טעונים אישור סופי.
+          <strong>⚠️ חובה למלא ידנית (אין מקור אוטומטי):</strong> הנבחרת הכסחנית + מס׳ כרטיסים · 3 תוצאות המאצ׳אפים ({scoring.specials.matchup} נק׳ לכל דו-קרב) · סה״כ פנדלים. בלי הזנה — 0 נקודות למהמרים על ההימורים האלה. מלך שערים/בישולים/התקפה/בתים מתעדכנים אוטומטית אך טעונים אישור סופי.
         </div>
       </CardHeader>
       <CardContent className="space-y-5">

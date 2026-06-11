@@ -3,6 +3,7 @@
 import { Fragment, useState, useMemo, useEffect } from "react";
 import { PredictionHeatmap } from "@/components/shared/PredictionHeatmap";
 import { useSharedData } from "@/hooks/useSharedData";
+import { useScoring } from "@/hooks/useScoring";
 import { GROUPS } from "@/lib/tournament/groups";
 import { MATCHUPS } from "@/lib/matchups";
 import { computeGroupHits, hitCounts, normalizeGroupLetter, type BettorHit, type FinishedMatch } from "@/lib/results-hits";
@@ -526,9 +527,6 @@ interface ResultsViewProps {
   loading: boolean;
 }
 
-const EXACT_PTS = 3; // bol
-const TOTO_PTS = 2;  // 1X2 only
-
 function ResultsView({ matches, brackets, currentUserId, loading }: ResultsViewProps) {
   if (loading) {
     return (
@@ -737,6 +735,12 @@ function DayTable({
   brackets: ResultsViewProps["brackets"];
   currentUserId: string | null;
 }) {
+  // This view is group-stage only (see the GROUP_STAGE filter upstream), so a
+  // "bol" (exact hit) is worth the toto points plus the exact bonus.
+  const scoring = useScoring();
+  const TOTO_PTS = scoring.toto.GROUP;
+  const EXACT_PTS = scoring.toto.GROUP + scoring.exact.GROUP;
+
   const matchHits = useMemo(() =>
     matches.map((m) => ({ match: m, hits: computeGroupHits(m, brackets) })),
     [matches, brackets]
@@ -784,7 +788,7 @@ function DayTable({
     return Object.values(byUser).sort(
       (a, b) => b.points - a.points || b.exacts - a.exacts || a.name.localeCompare(b.name, "he")
     );
-  }, [allBettors, matches, matchHits]);
+  }, [allBettors, matches, matchHits, TOTO_PTS, EXACT_PTS]);
 
   const perMatchCounts = matchHits.map(({ hits }) => hitCounts(hits));
   // Tie-aware day leader: only crown when a single bettor tops the day.

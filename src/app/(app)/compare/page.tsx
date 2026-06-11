@@ -56,6 +56,31 @@ function getValueColor(value: string, colorMap: Record<string, string>): string 
   return colorMap[value] || "";
 }
 
+/** Re-orders each bettor's picks within a stage so the same team lands on the
+ *  same row across all columns. Slot order inside a stage carries no meaning
+ *  (חצי 1 vs חצי 4), so row i is anchored to the i-th most-picked team: every
+ *  bettor who picked it shows it there, and leftover picks fill the remaining
+ *  rows by popularity. */
+function alignStageRows(picksPerBettor: string[][], slots: number): string[][] {
+  const counts: Record<string, number> = {};
+  for (const picks of picksPerBettor) for (const t of picks) if (t) counts[t] = (counts[t] || 0) + 1;
+  const byPopularity = (a: string, b: string) => (counts[b] - counts[a]) || a.localeCompare(b);
+  const anchors = Object.keys(counts).sort(byPopularity).slice(0, slots);
+  return picksPerBettor.map((picks) => {
+    const rows: string[] = new Array(slots).fill("");
+    const remaining = picks.filter(Boolean);
+    anchors.forEach((team, i) => {
+      const idx = remaining.indexOf(team);
+      if (idx !== -1) { rows[i] = team; remaining.splice(idx, 1); }
+    });
+    remaining.sort(byPopularity);
+    for (let i = 0; i < slots && remaining.length > 0; i++) {
+      if (!rows[i]) rows[i] = remaining.shift()!;
+    }
+    return rows;
+  });
+}
+
 interface Bettor {
   userId: string;
   name: string;
@@ -253,6 +278,21 @@ export default function ComparePage() {
     return buildColorMap(all);
   }, [BETTORS]);
 
+  // Advancement table: align rows so the same team sits on the same row for
+  // every bettor (slot order within a stage is meaningless).
+  const alignedBettors = useMemo(() => {
+    const finals = alignStageRows(fBettors.map((b) => [b.finalist1, b.finalist2]), 2);
+    const semis = alignStageRows(fBettors.map((b) => b.sf), 4);
+    const quarters = alignStageRows(fBettors.map((b) => b.qf), 8);
+    return fBettors.map((b, i) => ({
+      ...b,
+      finalist1: finals[i][0],
+      finalist2: finals[i][1],
+      sf: semis[i],
+      qf: quarters[i],
+    }));
+  }, [fBettors]);
+
   // Lock check — hide ALL predictions until deadline. No exceptions.
   // Uses the single-source-of-truth constant from lib/constants.
   const isLocked = new Date() >= new Date("2026-06-10T14:00:00Z");
@@ -370,7 +410,7 @@ export default function ComparePage() {
       {view === "advancement" && (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
           <TransposedBetTable
-            bettors={fBettors}
+            bettors={alignedBettors}
             colorMap={advColors}
             rows={[
               { label: "זוכה", section: "winner" as const, render: (b) => ({ val: b.winner, node: <span className="font-bold text-amber-700">{F[b.winner]} {b.winner}</span> }), highlight: true },

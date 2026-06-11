@@ -56,85 +56,12 @@ function getValueColor(value: string, colorMap: Record<string, string>): string 
   return colorMap[value] || "";
 }
 
-/** Advancement-table cell: a blank means "didn't pick this row's team" — show
- *  a faint dash so it reads as a deliberate non-pick, not missing data. */
-function advCell(team: string): { val: string; node: React.ReactNode } {
-  return {
-    val: team,
-    node: team
-      ? <span className="text-gray-700">{F[team]} {team}</span>
-      : <span className="text-gray-300 select-none">—</span>,
-  };
-}
-
-/** Re-orders each stage's picks so the same team lands on the same row across
- *  all columns. Slot order inside a stage carries no meaning (חצי 1 vs חצי 4),
- *  so every team picked by 2+ bettors gets its own dedicated row, popularity-
- *  ordered and labeled with that team. One-off picks land in shared "אחרות"
- *  rows below the anchors so they never sit in another team's row. Every pick
- *  is always displayed — a blank just means the bettor didn't pick that team. */
-interface AlignedStage {
-  /** rowCount-length pick array per bettor (same order as the input). */
-  matrix: string[][];
-  /** Team owning row i; rows beyond anchors.length are the "אחרות" rows. */
-  anchors: string[];
-  /** How many bettors picked each team — shown in the row label. */
-  counts: Record<string, number>;
-  rowCount: number;
-}
-
-function alignStageRows(picksPerBettor: string[][], minRows: number): AlignedStage {
-  const counts: Record<string, number> = {};
-  for (const picks of picksPerBettor) for (const t of picks) if (t) counts[t] = (counts[t] || 0) + 1;
-  const byPopularity = (a: string, b: string) => (counts[b] - counts[a]) || a.localeCompare(b);
-  const anchors = Object.keys(counts).filter((t) => counts[t] >= 2).sort(byPopularity);
-  const perBettor = picksPerBettor.map((picks) => {
-    const anchored = new Map<number, string>();
-    const singles: string[] = [];
-    for (const t of picks.filter(Boolean)) {
-      const i = anchors.indexOf(t);
-      if (i !== -1 && !anchored.has(i)) anchored.set(i, t);
-      else singles.push(t);
-    }
-    return { anchored, singles: singles.sort(byPopularity) };
-  });
-  const overflow = Math.max(0, ...perBettor.map((p) => p.singles.length));
-  const rowCount = Math.max(anchors.length + overflow, minRows);
-  const matrix = perBettor.map(({ anchored, singles }) => {
-    const rows: string[] = new Array(rowCount).fill("");
-    for (const [i, t] of anchored) rows[i] = t;
-    singles.forEach((t, j) => { rows[anchors.length + j] = t; });
-    return rows;
-  });
-  return { matrix, anchors, counts, rowCount };
-}
-
-/** Table rows for one aligned stage: anchor rows are labeled with the team
- *  itself plus how many bettors picked it; overflow rows with "אחרות". */
-function stageRows(
-  stage: AlignedStage,
-  section: NonNullable<TransposedRow["section"]>,
-  pick: (b: Bettor, i: number) => string,
-): TransposedRow[] {
-  return Array.from({ length: stage.rowCount }, (_, i) => {
-    const anchor = stage.anchors[i];
-    return {
-      label: anchor ? `${F[anchor] ?? ""} ${anchor} · ${stage.counts[anchor]}` : "אחרות",
-      section,
-      render: (b: Bettor) => advCell(pick(b, i)),
-    };
-  });
-}
-
 interface Bettor {
   userId: string;
   name: string;
   winner: string;
   finalist1: string;
   finalist2: string;
-  /** Row-aligned finalists — set only on the aligned copies fed to the
-   *  advancement table (may be longer than 2, with blank cells). */
-  finalRows?: string[];
   sf: string[];
   qf: string[];
   topScorer: string;
@@ -152,7 +79,7 @@ interface Bettor {
 }
 
 
-// Centralized flag map — the old local copy here was missing several teams
+// Centralized flag map — the old local copy was missing several teams
 // (TUR, SUI, CIV, AUS, QAT, ECU...), which rendered flagless.
 const F: Record<string, string> = FLAGS;
 
@@ -323,23 +250,6 @@ export default function ComparePage() {
     return buildColorMap(all);
   }, [BETTORS]);
 
-  // Advancement table: align rows so the same team sits on the same row for
-  // every bettor (slot order within a stage is meaningless).
-  const alignedAdv = useMemo(() => {
-    const finals = alignStageRows(fBettors.map((b) => [b.finalist1, b.finalist2]), 2);
-    const semis = alignStageRows(fBettors.map((b) => b.sf), 4);
-    const quarters = alignStageRows(fBettors.map((b) => b.qf), 8);
-    return {
-      finals, semis, quarters,
-      bettors: fBettors.map((b, i) => ({
-        ...b,
-        finalRows: finals.matrix[i],
-        sf: semis.matrix[i],
-        qf: quarters.matrix[i],
-      })),
-    };
-  }, [fBettors]);
-
   // Lock check — hide ALL predictions until deadline. No exceptions.
   // Uses the single-source-of-truth constant from lib/constants.
   const isLocked = new Date() >= new Date("2026-06-10T14:00:00Z");
@@ -457,13 +367,14 @@ export default function ComparePage() {
       {view === "advancement" && (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
           <TransposedBetTable
-            bettors={alignedAdv.bettors}
+            bettors={fBettors}
             colorMap={advColors}
             rows={[
               { label: "זוכה", section: "winner" as const, render: (b) => ({ val: b.winner, node: <span className="font-bold text-amber-700">{F[b.winner]} {b.winner}</span> }), highlight: true },
-              ...stageRows(alignedAdv.finals, "final", (b, i) => b.finalRows?.[i] || ""),
-              ...stageRows(alignedAdv.semis, "semi", (b, i) => b.sf[i] || ""),
-              ...stageRows(alignedAdv.quarters, "quarter", (b, i) => b.qf[i] || ""),
+              { label: "גמר 1", section: "final" as const, render: (b) => ({ val: b.finalist1, node: <span className="text-gray-700">{F[b.finalist1]} {b.finalist1}</span> }) },
+              { label: "גמר 2", section: "final" as const, render: (b) => ({ val: b.finalist2, node: <span className="text-gray-700">{F[b.finalist2]} {b.finalist2}</span> }) },
+              ...[0, 1, 2, 3].map((i) => ({ label: `חצי ${i + 1}`, section: "semi" as const, render: (b: Bettor) => ({ val: b.sf[i] || "", node: <span className="text-gray-700">{F[b.sf[i]]} {b.sf[i]}</span> }) })),
+              ...[0, 1, 2, 3, 4, 5, 6, 7].map((i) => ({ label: `רבע ${i + 1}`, section: "quarter" as const, render: (b: Bettor) => ({ val: b.qf[i] || "", node: <span className="text-gray-700">{F[b.qf[i]]} {b.qf[i]}</span> }) })),
             ]}
           />
           {/* Popular picks — computed from real data */}
@@ -768,7 +679,7 @@ function TransposedBetTable({
         </thead>
         <tbody>
           {rows.map((row, rowIdx) => (
-            <Fragment key={`${rowIdx}-${row.label}`}>
+            <Fragment key={row.label}>
               {/* Stage divider — uniform neutral band when a new section starts */}
               {row.section && rows[rowIdx - 1]?.section !== row.section && (
                 <tr>

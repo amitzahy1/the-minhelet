@@ -200,7 +200,14 @@ export async function POST(req: Request) {
   });
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  // Vercel cron hits routes with GET — run the sync for cron/bearer callers.
+  // Without this the 4-daily crons 403'd and the details sync never ran.
+  const auth = await isAuthorized(req);
+  if (auth.ok && (auth.who === "vercel-cron" || auth.who === "bearer")) {
+    return POST(req);
+  }
+
   const adminEmail = await verifyAdmin();
   if (!adminEmail) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   return NextResponse.json({

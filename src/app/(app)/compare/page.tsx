@@ -411,6 +411,7 @@ export default function ComparePage() {
       {view === "specials" && (
         <SpecialTrackerView
           specialBets={fSpecialBets}
+          advancements={fAdvancements}
           currentUserId={currentUserId}
         />
       )}

@@ -58,7 +58,10 @@ async function isAuthorized(req: Request): Promise<{ ok: boolean; who: string }>
 export async function POST(req: Request) {
   const auth = await isAuthorized(req);
   if (!auth.ok) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+  return runSnapshot(auth.who);
+}
 
+async function runSnapshot(who: string) {
   const supabase = getAdminClient();
   if (!supabase) return NextResponse.json({ error: "Missing server config" }, { status: 500 });
 
@@ -77,7 +80,7 @@ export async function POST(req: Request) {
   const key = `backup-${stamp}.json`;
   const payload = JSON.stringify({
     snapshotAt: new Date().toISOString(),
-    triggeredBy: auth.who,
+    triggeredBy: who,
     tables: dump,
     errors,
   });
@@ -100,13 +103,21 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: uploadErr.message }, { status: 500 });
   }
 
-  if (auth.who !== "cron") {
-    await logAdminAction(auth.who, "backup_snapshot", { key, tableCount: BACKUP_TABLES.length, errors });
+  if (who !== "vercel-cron" && who !== "bearer") {
+    await logAdminAction(who, "backup_snapshot", { key, tableCount: BACKUP_TABLES.length, errors });
   }
   return NextResponse.json({ ok: true, key, snapshotAt: new Date().toISOString(), errors });
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  // Vercel cron hits routes with GET (no cookie) — recognize it (or a
+  // service-role/CRON_SECRET bearer) and RUN the snapshot. Without this the
+  // daily 07:00 cron 403'd and no backup was ever written.
+  const auth = await isAuthorized(req);
+  if (auth.ok && (auth.who === "vercel-cron" || auth.who === "bearer")) {
+    return runSnapshot(auth.who);
+  }
+
   const adminEmail = await verifyAdmin();
   if (!adminEmail) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   const supabase = getAdminClient();

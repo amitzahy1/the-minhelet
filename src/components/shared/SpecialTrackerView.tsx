@@ -42,6 +42,8 @@ export interface BettorLike {
   matchup2: "1" | "X" | "2" | null;
   matchup3: "1" | "X" | "2" | null;
   penalties: "OVER" | "UNDER" | null;
+  /** Champion pick (advancement_picks.winner) — shown as its own card. */
+  champion?: string | null;
 }
 
 type PickStatus = "hit" | "leading" | "onTrack" | "listed" | "behind" | "notInRace" | "tied" | "empty";
@@ -321,16 +323,19 @@ function buildChoiceRows(opts: {
 
 // -- Main component ---------------------------------------------------------
 
-import type { BettorSpecialBets } from "@/lib/supabase/shared-data";
+import type { BettorSpecialBets, BettorAdvancement } from "@/lib/supabase/shared-data";
 
 export function SpecialTrackerView({
   bettors,
   specialBets,
+  advancements,
   currentUserId,
   started = true,
 }: {
   bettors?: BettorLike[];
   specialBets?: BettorSpecialBets[];
+  /** Advancement picks — supplies each bettor's champion pick for the זוכה card. */
+  advancements?: BettorAdvancement[];
   currentUserId?: string | null;
   started?: boolean; // false = tournament hasn't kicked off → hide picks
 }) {
@@ -352,12 +357,14 @@ export function SpecialTrackerView({
     if (isDemo) return DEMO_BETTORS;
     if (bettors && bettors.length > 0) return bettors;
     if (!specialBets) return [];
+    const championOf = new Map((advancements ?? []).map((a) => [a.userId, a.winner || null]));
     return specialBets.map<BettorLike>((sb) => {
       const parts = (sb.matchupPick ?? "").split(",");
       return {
         userId: sb.userId,
         name: sb.displayName || "ללא שם",
         isYou: sb.userId === currentUserId,
+        champion: championOf.get(sb.userId) ?? null,
         topScorerPlayer: sb.topScorerPlayer,
         topAssistsPlayer: sb.topAssistsPlayer,
         bestAttack: sb.bestAttackTeam,
@@ -370,7 +377,7 @@ export function SpecialTrackerView({
         penalties: (sb.penaltiesOverUnder as "OVER" | "UNDER" | null) || null,
       };
     });
-  }, [isDemo, bettors, specialBets, currentUserId]);
+  }, [isDemo, bettors, specialBets, advancements, currentUserId]);
 
   // Fixed color per participant (stable by userId), reused on every card.
   const colorOf = useMemo(() => {
@@ -538,7 +545,31 @@ export function SpecialTrackerView({
       actualKey: actuals?.penalties_over_under ?? null,
     });
 
+    // Champion picks (advancement bet, but the marquee pick — shown first).
+    // Options are exactly the teams someone picked (plus the actual champion
+    // once decided), most-picked first via buildChoiceRows.
+    const champTeams = Array.from(new Set(
+      [...bs.map((b) => b.champion), actuals?.champion].filter((c): c is string => !!c),
+    ));
+    const champ = buildChoiceRows({
+      bettors: bs,
+      getPick: (b) => b.champion ?? null,
+      options: champTeams.map((code) => ({ key: code, label: flagName(code) })),
+      actualKey: actuals?.champion ?? null,
+    });
+
     return [
+      {
+        title: "אלופת העולם",
+        points: `${scoring.advancement.winner} נק׳`,
+        nameHeader: "נבחרת",
+        valueHeader: undefined,
+        updatedAt: actAt,
+        rows: champ.rows,
+        notBetCount: champ.notBet,
+        decided: actuals?.champion != null,
+        decidedLabel: actuals?.champion ? "הוכרעה" : undefined,
+      },
       ranked({ title: "מלך שערים", points: `${sp.top_scorer_exact} / ${sp.top_scorer_relative} נק׳`, nameHeader: "שחקן", valueHeader: "שערים", updatedAt: liveAt, getPick: (b) => b.topScorerPlayer, list: scorerRanked, actualKey: actuals?.top_scorer_player ?? null, fuzzy: true, decidedLabel: actuals?.top_scorer_player ? `הוכרע: ${actuals.top_scorer_player}` : undefined }),
       ranked({ title: "מלך בישולים", points: `${sp.top_assists_exact} / ${sp.top_assists_relative} נק׳`, nameHeader: "שחקן", valueHeader: "בישולים", updatedAt: liveAt, getPick: (b) => b.topAssistsPlayer, list: assistRanked, actualKey: actuals?.top_assists_player ?? null, fuzzy: true, decidedLabel: actuals?.top_assists_player ? `הוכרע: ${actuals.top_assists_player}` : undefined }),
       ranked({ title: "התקפה פורייה", points: `${sp.best_attack} נק׳`, nameHeader: "נבחרת", valueHeader: "שערים", updatedAt: actAt, getPick: (b) => b.bestAttack, list: attackRanked, actualKey: actuals?.best_attack_team ?? null, decidedLabel: "הוכרע" }),

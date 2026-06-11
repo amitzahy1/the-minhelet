@@ -58,24 +58,28 @@ function getValueColor(value: string, colorMap: Record<string, string>): string 
 
 /** Re-orders each bettor's picks within a stage so the same team lands on the
  *  same row across all columns. Slot order inside a stage carries no meaning
- *  (חצי 1 vs חצי 4), so row i is anchored to the i-th most-picked team: every
- *  bettor who picked it shows it there, and leftover picks fill the remaining
- *  rows by popularity. */
-function alignStageRows(picksPerBettor: string[][], slots: number): string[][] {
+ *  (חצי 1 vs חצי 4), so every team picked by 2+ bettors gets its own dedicated
+ *  row (popularity-ordered) — the section may grow beyond the nominal slot
+ *  count. One-off picks fill empty cells from the bottom up; they're the only
+ *  values that can share a row, and they're never color-coded so the row still
+ *  reads as the anchor team's. */
+function alignStageRows(picksPerBettor: string[][], minRows: number): string[][] {
   const counts: Record<string, number> = {};
   for (const picks of picksPerBettor) for (const t of picks) if (t) counts[t] = (counts[t] || 0) + 1;
   const byPopularity = (a: string, b: string) => (counts[b] - counts[a]) || a.localeCompare(b);
-  const anchors = Object.keys(counts).sort(byPopularity).slice(0, slots);
+  const anchors = Object.keys(counts).filter((t) => counts[t] >= 2).sort(byPopularity);
+  const maxPicks = Math.max(0, ...picksPerBettor.map((p) => p.filter(Boolean).length));
+  const rowCount = Math.max(anchors.length, maxPicks, minRows);
   return picksPerBettor.map((picks) => {
-    const rows: string[] = new Array(slots).fill("");
-    const remaining = picks.filter(Boolean);
-    anchors.forEach((team, i) => {
-      const idx = remaining.indexOf(team);
-      if (idx !== -1) { rows[i] = team; remaining.splice(idx, 1); }
-    });
-    remaining.sort(byPopularity);
-    for (let i = 0; i < slots && remaining.length > 0; i++) {
-      if (!rows[i]) rows[i] = remaining.shift()!;
+    const rows: string[] = new Array(rowCount).fill("");
+    const singles: string[] = [];
+    for (const t of picks.filter(Boolean)) {
+      const i = anchors.indexOf(t);
+      if (i !== -1 && !rows[i]) rows[i] = t;
+      else singles.push(t);
+    }
+    for (let i = rowCount - 1; i >= 0 && singles.length > 0; i--) {
+      if (!rows[i]) rows[i] = singles.pop()!;
     }
     return rows;
   });
@@ -87,6 +91,9 @@ interface Bettor {
   winner: string;
   finalist1: string;
   finalist2: string;
+  /** Row-aligned finalists — set only on the aligned copies fed to the
+   *  advancement table (may be longer than 2, with blank cells). */
+  finalRows?: string[];
   sf: string[];
   qf: string[];
   topScorer: string;
@@ -286,8 +293,7 @@ export default function ComparePage() {
     const quarters = alignStageRows(fBettors.map((b) => b.qf), 8);
     return fBettors.map((b, i) => ({
       ...b,
-      finalist1: finals[i][0],
-      finalist2: finals[i][1],
+      finalRows: finals[i],
       sf: semis[i],
       qf: quarters[i],
     }));
@@ -414,10 +420,9 @@ export default function ComparePage() {
             colorMap={advColors}
             rows={[
               { label: "זוכה", section: "winner" as const, render: (b) => ({ val: b.winner, node: <span className="font-bold text-amber-700">{F[b.winner]} {b.winner}</span> }), highlight: true },
-              { label: "גמר 1", section: "final" as const, render: (b) => ({ val: b.finalist1, node: <span className="text-gray-700">{F[b.finalist1]} {b.finalist1}</span> }) },
-              { label: "גמר 2", section: "final" as const, render: (b) => ({ val: b.finalist2, node: <span className="text-gray-700">{F[b.finalist2]} {b.finalist2}</span> }) },
-              ...[0, 1, 2, 3].map((i) => ({ label: `חצי ${i + 1}`, section: "semi" as const, render: (b: Bettor) => ({ val: b.sf[i] || "", node: <span className="text-gray-700">{F[b.sf[i]]} {b.sf[i]}</span> }) })),
-              ...[0, 1, 2, 3, 4, 5, 6, 7].map((i) => ({ label: `רבע ${i + 1}`, section: "quarter" as const, render: (b: Bettor) => ({ val: b.qf[i] || "", node: <span className="text-gray-700">{F[b.qf[i]]} {b.qf[i]}</span> }) })),
+              ...Array.from({ length: alignedBettors[0]?.finalRows?.length ?? 0 }, (_, i) => ({ label: `גמר ${i + 1}`, section: "final" as const, render: (b: Bettor) => { const t = b.finalRows?.[i] || ""; return { val: t, node: <span className="text-gray-700">{F[t]} {t}</span> }; } })),
+              ...Array.from({ length: alignedBettors[0]?.sf.length ?? 0 }, (_, i) => ({ label: `חצי ${i + 1}`, section: "semi" as const, render: (b: Bettor) => ({ val: b.sf[i] || "", node: <span className="text-gray-700">{F[b.sf[i]]} {b.sf[i]}</span> }) })),
+              ...Array.from({ length: alignedBettors[0]?.qf.length ?? 0 }, (_, i) => ({ label: `רבע ${i + 1}`, section: "quarter" as const, render: (b: Bettor) => ({ val: b.qf[i] || "", node: <span className="text-gray-700">{F[b.qf[i]]} {b.qf[i]}</span> }) })),
             ]}
           />
           {/* Popular picks — computed from real data */}

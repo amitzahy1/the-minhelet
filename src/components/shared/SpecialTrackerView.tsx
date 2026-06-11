@@ -106,7 +106,11 @@ const pinYouFirst = (a: BettorChip, b: BettorChip) => (b.isYou ? 1 : 0) - (a.isY
 
 function rankToStatus(rank: number | null, actualIsDecided: boolean, matchesPick: boolean): PickStatus {
   if (actualIsDecided) return matchesPick ? "hit" : "notInRace";
-  if (rank === null) return "notInRace";
+  // While the bet is still open, a pick that isn't on the current board yet
+  // (no goals/cards recorded) is just "listed" — NOT dimmed. Dimming
+  // (notInRace → opacity-50) is reserved for actual misses after the result
+  // is decided; fading someone's pick mid-race read as "already lost".
+  if (rank === null) return "listed";
   if (rank === 1) return "leading";
   if (rank <= 3) return "onTrack";
   if (rank <= 10) return "listed";

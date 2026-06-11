@@ -463,17 +463,18 @@ export default function StandingsPage() {
       tournamentActuals,
       playerStats,
       bestThirdsOverride,
+      scoring,
     }),
-    [brackets, finishedMatches, advancements, specialBets, tournamentActuals, playerStats, bestThirdsOverride]
+    [brackets, finishedMatches, advancements, specialBets, tournamentActuals, playerStats, bestThirdsOverride, scoring]
   );
   const todayScores = useMemo(
-    () => computeTodayScores(brackets, finishedMatches),
-    [brackets, finishedMatches]
+    () => computeTodayScores(brackets, finishedMatches, scoring),
+    [brackets, finishedMatches, scoring]
   );
   // Cumulative points per bettor across all finished matches — drives the sparkline.
   const playerHistories = useMemo(
-    () => computePlayerHistories(brackets, finishedMatches),
-    [brackets, finishedMatches]
+    () => computePlayerHistories(brackets, finishedMatches, scoring),
+    [brackets, finishedMatches, scoring]
   );
 
   // Build real players from Supabase profiles + live scoring

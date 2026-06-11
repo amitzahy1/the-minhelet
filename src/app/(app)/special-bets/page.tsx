@@ -13,6 +13,7 @@ import { formatLockDeadline, PENALTIES_LINE } from "@/lib/constants";
 import { AgreementBadge } from "@/components/shared/AgreementBadge";
 import { StillAliveBadge } from "@/components/shared/StillAliveBadge";
 import { useConfetti } from "@/hooks/useConfetti";
+import { useScoring } from "@/hooks/useScoring";
 import { MATCHUPS } from "@/lib/matchups";
 
 const GROUP_LETTERS = ["A","B","C","D","E","F","G","H","I","J","K","L"];
@@ -139,6 +140,11 @@ export default function SpecialBetsPage() {
   const sb = useBettingStore((s) => s.specialBets);
   const set = useBettingStore((s) => s.setSpecialBet);
   const knockout = useBettingStore((s) => s.knockout);
+  // Live point values from scoring_config (admin "ניקוד" tab) — never hardcode
+  // points in labels here; the rules page and the scorers read the same source.
+  const scoring = useScoring();
+  const advPts = scoring.advancement;
+  const spPts = scoring.specials;
 
   // Defensive pad: saves .filter(Boolean) the arrays, so the store or DB
   // may return shorter lists. Always render the canonical 4 / 8 / 3 slots.
@@ -379,7 +385,7 @@ export default function SpecialBetsPage() {
               <SectionCard
                 title="זוכה הטורניר"
                 subtitle="חייב להיות אחד מהעולות לגמר"
-                points="12 נק׳"
+                points={`${advPts.winner} נק׳`}
                 warning={
                   championOutOfFinals
                     ? `⚠️ ${sb.winner} אינה אחת משתי העולות לגמר שבחרת — בחרו מחדש`
@@ -408,7 +414,7 @@ export default function SpecialBetsPage() {
               <SectionCard
                 title="עולות לגמר"
                 subtitle="חייבות להיות 2 מתוך 4 עולות לחצי הגמר"
-                points="8 נק׳ כ״א"
+                points={`${advPts.final} נק׳ כ״א`}
                 warning={
                   finalsOutOfSemis
                     ? "⚠️ אחת מהעולות לגמר אינה בחצי הגמר — תקנו את החצי גמר או את הגמר"
@@ -427,7 +433,7 @@ export default function SpecialBetsPage() {
               <SectionCard
                 title="עולות לחצי גמר"
                 subtitle="חייבות להיות 4 מתוך 8 עולות לרבע הגמר"
-                points="6 נק׳ כ״א"
+                points={`${advPts.sf} נק׳ כ״א`}
                 warning={
                   semisOutOfQf
                     ? "⚠️ אחת מהעולות לחצי אינה ברבע — תקנו את הרבע גמר או את החצי"
@@ -454,7 +460,7 @@ export default function SpecialBetsPage() {
               <SectionCard
                 title="עולות לרבע גמר"
                 subtitle="8 נבחרות — חייבות להיות מתוך 16 העולות לשמינית"
-                points="4 נק׳ כ״א"
+                points={`${advPts.qf} נק׳ כ״א`}
                 warning={qfOutOfR16 ? "⚠️ אחת מהעולות לרבע אינה בשמינית — תקנו את השמינית או את הרבע" : qfMismatch}
               >
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -471,7 +477,7 @@ export default function SpecialBetsPage() {
               <SectionCard
                 title="עולות לשמינית הגמר"
                 subtitle="16 נבחרות — מתמלא אוטומטית מעץ הסימולציה, וניתן לשנות ידנית"
-                points="2 נק׳ כ״א"
+                points={`${advPts.r16} נק׳ כ״א`}
                 warning={r16Mismatch}
               >
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -493,38 +499,38 @@ export default function SpecialBetsPage() {
           <div><h2 className="text-xl font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>הימורים מיוחדים</h2><p className="text-sm text-gray-500">שחקנים, נבחרות וסטטיסטיקות</p></div>
         </div>
 
-        <SectionCard title="מלך שערים" subtitle="בחרו נבחרת ואז שחקן" points="12 / 7 נק׳">
+        <SectionCard title="מלך שערים" subtitle="בחרו נבחרת ואז שחקן" points={`${spPts.top_scorer_exact} / ${spPts.top_scorer_relative} נק׳`}>
           <div className="grid grid-cols-2 gap-3 max-w-md">
             <TeamSelect value={sb.topScorerTeam} onChange={(v) => { set("topScorerTeam", v); set("topScorerPlayer", ""); }} label="נבחרת" />
             <PlayerSelect team={sb.topScorerTeam} value={sb.topScorerPlayer} onChange={(v) => set("topScorerPlayer", v)} label="שחקן" />
           </div>
         </SectionCard>
 
-        <SectionCard title="מלך בישולים" subtitle="בחרו נבחרת ואז שחקן" points="9 / 5 נק׳">
+        <SectionCard title="מלך בישולים" subtitle="בחרו נבחרת ואז שחקן" points={`${spPts.top_assists_exact} / ${spPts.top_assists_relative} נק׳`}>
           <div className="grid grid-cols-2 gap-3 max-w-md">
             <TeamSelect value={sb.topAssistsTeam} onChange={(v) => { set("topAssistsTeam", v); set("topAssistsPlayer", ""); }} label="נבחרת" />
             <PlayerSelect team={sb.topAssistsTeam} value={sb.topAssistsPlayer} onChange={(v) => set("topAssistsPlayer", v)} label="שחקן" />
           </div>
         </SectionCard>
 
-        <SectionCard title="ההתקפה הטובה ביותר" subtitle="הכי הרבה שערים בטורניר · כולל הארכות, ללא דו-קרב פנדלים" points="8 נק׳">
+        <SectionCard title="ההתקפה הטובה ביותר" subtitle="הכי הרבה שערים בטורניר · כולל הארכות, ללא דו-קרב פנדלים" points={`${spPts.best_attack} נק׳`}>
           <div className="max-w-xs"><TeamSelect value={sb.bestAttack} onChange={(v) => set("bestAttack", v)} label="נבחרת" /></div>
         </SectionCard>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <SectionCard title="הבית הכי פורה" subtitle="הכי הרבה שערים בבתים" points="6 נק׳">
+          <SectionCard title="הבית הכי פורה" subtitle="הכי הרבה שערים בבתים" points={`${spPts.prolific_group} נק׳`}>
             <select value={sb.prolificGroup} onChange={e => set("prolificGroup", e.target.value)} className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option value="">בחרו בית...</option>{GROUP_LETTERS.map(g => <option key={g} value={g}>{groupLabel(g)}</option>)}
             </select>
           </SectionCard>
-          <SectionCard title="הבית הכי יבש" subtitle="הכי מעט שערים בבתים" points="6 נק׳">
+          <SectionCard title="הבית הכי יבש" subtitle="הכי מעט שערים בבתים" points={`${spPts.driest_group} נק׳`}>
             <select value={sb.driestGroup} onChange={e => set("driestGroup", e.target.value)} className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option value="">בחרו בית...</option>{GROUP_LETTERS.filter(g => g !== sb.prolificGroup).map(g => <option key={g} value={g}>{groupLabel(g)}</option>)}
             </select>
           </SectionCard>
         </div>
 
-        <SectionCard title="הנבחרת הכסחנית" subtitle="צהוב=1, אדום=3 · צהוב שני באותו משחק = אדום אחד" points="6 נק׳">
+        <SectionCard title="הנבחרת הכסחנית" subtitle="צהוב=1, אדום=3 · צהוב שני באותו משחק = אדום אחד" points={`${spPts.dirtiest_team} נק׳`}>
           <div className="max-w-xs"><TeamSelect value={sb.dirtiestTeam} onChange={(v) => set("dirtiestTeam", v)} label="נבחרת" /></div>
         </SectionCard>
 
@@ -534,7 +540,7 @@ export default function SpecialBetsPage() {
         </div>
 
         {MATCHUPS.map(mu => (
-          <SectionCard key={mu.id} title={`${mu.p1} vs ${mu.p2}`} subtitle="מי יצבור יותר שערים + בישולים?" points="5 נק׳">
+          <SectionCard key={mu.id} title={`${mu.p1} vs ${mu.p2}`} subtitle="מי יצבור יותר שערים + בישולים?" points={`${spPts.matchup} נק׳`}>
             <div className="flex gap-2">
               {[{ val: "1", label: mu.p1 }, { val: "X", label: "שווה" }, { val: "2", label: mu.p2 }].map(opt => (
                 <button key={opt.val} onClick={() => { const n = [...sb.matchups]; n[mu.id] = opt.val; set("matchups", n); }}
@@ -546,7 +552,7 @@ export default function SpecialBetsPage() {
           </SectionCard>
         ))}
 
-        <SectionCard title="סה״כ פנדלים בטורניר" subtitle={`אובר / אנדר ${PENALTIES_LINE} · כולל הארכות, ללא דו-קרב פנדלים`} points="6 נק׳">
+        <SectionCard title="סה״כ פנדלים בטורניר" subtitle={`אובר / אנדר ${PENALTIES_LINE} · כולל הארכות, ללא דו-קרב פנדלים`} points={`${spPts.penalties_over_under} נק׳`}>
           <div className="flex gap-3">
             {[{ val: "OVER", label: `מעל ${PENALTIES_LINE}` }, { val: "UNDER", label: `מתחת ${PENALTIES_LINE}` }].map(opt => (
               <button key={opt.val} onClick={() => set("penaltiesOverUnder", opt.val)}

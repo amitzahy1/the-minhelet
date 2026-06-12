@@ -9,6 +9,7 @@ import { matchPairIndex, normalizeGroupLetter } from "@/lib/results-hits";
 import { computeMatchDays, dayLockAtForKickoff, type MatchDay } from "@/lib/tournament/group-live-state";
 
 import { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { toIsraelTimeShort, toIsraelDate, toIsraelDateKey } from "@/lib/timezone";
 import { TeamLogo } from "@/components/shared/TeamLogo";
@@ -392,6 +393,21 @@ export default function SchedulePage() {
                             <p className="text-base font-black text-gray-900 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{toIsraelTimeShort(m.date)}</p>
                           )}
                           <p className="text-[10px] text-gray-400">{m.group?.replace("GROUP_", "בית ") || m.stage}</p>
+                          {/* Direct link to this match's betting row (upcoming group matches) */}
+                          {!isFinished && !isLive && (() => {
+                            const letter = normalizeGroupLetter(m.group);
+                            const betPair = letter ? matchPairIndex(letter, m.homeTla, m.awayTla) : null;
+                            if (!betPair || !letter) return null;
+                            return (
+                              <Link
+                                href={`/groups?group=${letter}&match=${betPair.pairIdx}`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="mt-1 inline-flex items-center gap-1 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold px-2.5 py-0.5 transition-colors"
+                              >
+                                🎯 להימור
+                              </Link>
+                            );
+                          })()}
                         </div>
                         <div className="flex items-center gap-2 justify-start">
                           <TeamLogo code={m.awayTla} size="sm" />

@@ -38,15 +38,14 @@ const BETTING_PAGES = [
   { href: "/special-bets", label: "הימורים מיוחדים", step: 3 },
 ];
 
-// Tracking/social pages
+// Tracking/social pages — order: ראשי → לייב → לו״ז → השוואה (then squads/rules).
+// Desktop renders this array in RTL visual order; the mobile bottom nav below
+// is hardcoded the same way.
 const TRACKING_ITEMS = [
   { href: "/standings", label: "ראשי", iconKey: "leaderboard" as const },
-  { href: "/compare", label: "השוואה", iconKey: "compare" as const },
   { href: "/live", label: "לייב", iconKey: "live" as const },
-  // Order matters: נבחרות sits BETWEEN לו״ז and חוקים (desktop renders this
-  // array in RTL visual order; the mobile bottom nav below is hardcoded the
-  // same way).
   { href: "/schedule", label: "לו״ז", iconKey: "schedule" as const },
+  { href: "/compare", label: "השוואה", iconKey: "compare" as const },
   { href: "/squads", label: "נבחרות", iconKey: "squads" as const },
   { href: "/rules", label: "חוקים", iconKey: "rules" as const },
 ];
@@ -956,11 +955,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             {Icons.leaderboard(pathname === "/standings")}
             <span className="text-[8px] font-bold">טבלה</span>
           </Link>
-          <Link href="/compare"
-            className={`flex flex-col items-center gap-0.5 py-1 ${pathname === "/compare" ? "text-gray-900" : "text-gray-400"}`}>
-            {Icons.compare(pathname === "/compare")}
-            <span className="text-[8px] font-bold">השוואה</span>
-          </Link>
           <Link href="/live"
             className={`flex flex-col items-center gap-0.5 py-1 ${pathname === "/live" ? "text-gray-900" : "text-gray-400"}`}>
             {Icons.live(pathname === "/live")}
@@ -970,6 +964,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             className={`flex flex-col items-center gap-0.5 py-1 ${pathname === "/schedule" ? "text-gray-900" : "text-gray-400"}`}>
             {Icons.schedule(pathname === "/schedule")}
             <span className="text-[8px] font-bold">לו״ז</span>
+          </Link>
+          <Link href="/compare"
+            className={`flex flex-col items-center gap-0.5 py-1 ${pathname === "/compare" ? "text-gray-900" : "text-gray-400"}`}>
+            {Icons.compare(pathname === "/compare")}
+            <span className="text-[8px] font-bold">השוואה</span>
           </Link>
           <Link href="/squads"
             className={`flex flex-col items-center gap-0.5 py-1 ${pathname === "/squads" ? "text-gray-900" : "text-gray-400"}`}>

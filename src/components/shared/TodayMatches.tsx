@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { getFlag, getTeamNameHe } from "@/lib/flags";
 import { TeamLogo } from "@/components/shared/TeamLogo";
@@ -284,7 +285,8 @@ export function TodayMatches() {
             if (revealedPicks.length < 2) return "";
             const tally: Record<string, number> = {};
             for (const p of revealedPicks) {
-              const k = `${p.home}-${p.away}`;
+              // Away-home glyph order — matches every other score string here.
+              const k = `${p.away}-${p.home}`;
               tally[k] = (tally[k] || 0) + 1;
             }
             return Object.entries(tally)
@@ -296,7 +298,11 @@ export function TodayMatches() {
           })();
 
           return (
-            <div key={m.id} className="min-w-[46%] sm:min-w-[30%] shrink-0 snap-start md:min-w-0 md:shrink md:col-span-1">
+            // Fixed width (not just min-) — inside the horizontal scroll
+            // container a flex item otherwise grows to fit its longest
+            // unwrapped line (e.g. the reveal-time caption) and smears the
+            // page sideways instead of wrapping.
+            <div key={m.id} className="w-[46%] sm:w-[30%] shrink-0 snap-start md:w-auto md:shrink md:col-span-1">
               <div
                 onClick={() => setExpandedId(isExpanded ? null : m.id)}
                 className={`bg-white rounded-xl border shadow-sm p-3 text-center transition-all cursor-pointer ${
@@ -368,6 +374,22 @@ export function TodayMatches() {
                   </svg>
                 </div>
 
+                {/* Direct link to this match's betting row — upcoming group
+                    matches only (once it kicks off there's nothing to edit). */}
+                {!isFinished && !isLive && groupLetter && (() => {
+                  const betPair = matchPairIndex(groupLetter, m.homeTla, m.awayTla);
+                  if (!betPair) return null;
+                  return (
+                    <Link
+                      href={`/groups?group=${groupLetter}&match=${betPair.pairIdx}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="mt-2 inline-flex items-center gap-1 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold px-3 py-1 transition-colors"
+                    >
+                      🎯 הימור על המשחק
+                    </Link>
+                  );
+                })()}
+
                 {/* Venue + referee (populated automatically ~24-48h pre-kickoff via the cron) */}
                 {(m.venue || (m.referees && m.referees.length > 0)) && (
                   <div className="mt-1.5 pt-1.5 border-t border-gray-100 text-[9px] text-gray-500 leading-tight space-y-0.5">
@@ -407,7 +429,7 @@ export function TodayMatches() {
                                     <>
                                       <span className="mx-1.5">·</span>
                                       <span className="text-blue-700">
-                                        לפי התוצאה כרגע (<span className="tabular-nums">{liveActual.home}-{liveActual.away}</span>)
+                                        לפי התוצאה כרגע (<span dir="ltr" className="tabular-nums">{liveActual.away}-{liveActual.home}</span>)
                                       </span>
                                     </>
                                   )}
@@ -441,8 +463,8 @@ export function TodayMatches() {
                                       >
                                         <span className="text-[11px] font-bold text-gray-800 truncate">{p.name}</span>
                                         <span className="flex items-center gap-1 shrink-0">
-                                          <span className="text-[11px] font-black tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>
-                                            {p.home}-{p.away}
+                                          <span dir="ltr" className="text-[11px] font-black tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>
+                                            {p.away}-{p.home}
                                           </span>
                                           {icon && <span className="text-xs">{icon}</span>}
                                         </span>
@@ -468,7 +490,8 @@ export function TodayMatches() {
                           {groupHits.length > 0 && (
                             <div>
                               <p className="text-[10px] font-bold text-gray-500 mb-1">
-                                תוצאה: <span className="tabular-nums text-gray-700">{m.homeGoals}-{m.awayGoals}</span>
+                                {/* Same away-home glyph order as the card score above */}
+                                תוצאה: <span dir="ltr" className="tabular-nums text-gray-700">{m.awayGoals}-{m.homeGoals}</span>
                                 <span className="mx-1.5">·</span>
                                 <span className="text-green-700">🎯 {exactCount} תפסו תוצאה</span>
                                 <span className="mx-1">·</span>
@@ -496,8 +519,8 @@ export function TodayMatches() {
                                     >
                                       <span className="text-[11px] font-bold text-gray-800 truncate">{h.name}</span>
                                       <span className="flex items-center gap-1 shrink-0">
-                                        <span className="text-[11px] font-black tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>
-                                          {h.pred.home}-{h.pred.away}
+                                        <span dir="ltr" className="text-[11px] font-black tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>
+                                          {h.pred.away}-{h.pred.home}
                                         </span>
                                         <span className="text-xs">{icon}</span>
                                       </span>

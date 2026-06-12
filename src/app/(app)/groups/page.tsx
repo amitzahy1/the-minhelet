@@ -196,6 +196,24 @@ function GroupView({ groupId }: { groupId: string }) {
     if (liveMode) scheduleGroupSave(matchIdx);
   };
 
+  // Deep link target: ?group=<this letter>&match=<pairIdx> → scroll to the
+  // row and flash it so the bettor lands straight on the match they tapped.
+  const [highlightIdx, setHighlightIdx] = useState<number | null>(null);
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("group")?.toUpperCase() !== groupId) return;
+      const idx = Number(params.get("match"));
+      if (!Number.isInteger(idx) || idx < 0 || idx > 5) return;
+      setHighlightIdx(idx);
+      const t = setTimeout(() => {
+        document.getElementById(`bet-row-${groupId}-${idx}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 250);
+      const clear = setTimeout(() => setHighlightIdx(null), 3500);
+      return () => { clearTimeout(t); clearTimeout(clear); };
+    } catch { /* ignore */ }
+  }, [groupId]);
+
   const getTeam = (code: string) => teams.find(t => t.code === code)!;
   const getFlag = (code: string) => __FLAGS[code] || "🏳️";
 
@@ -439,7 +457,10 @@ function GroupView({ groupId }: { groupId: string }) {
                         <span className="flex-1 h-px bg-gray-100" />
                       </div>
                     )}
-                    <div className={`rounded-lg border transition-colors ${rowClass}`}>
+                    <div
+                      id={`bet-row-${groupId}-${i}`}
+                      className={`rounded-lg border transition-all ${rowClass}${highlightIdx === i ? " ring-2 ring-blue-400 ring-offset-1" : ""}`}
+                    >
                       <div className="flex items-center px-3 py-2">
                         <div className="flex items-center gap-1.5 flex-1 min-w-0">
                           <span className="text-lg shrink-0">{getFlag(rightTeam.code)}</span>
@@ -623,6 +644,17 @@ export default function GroupsPage() {
         setCurrentGroupIndex(0);
         localStorage.setItem("wc_groups_visited", "1");
       }
+    } catch { /* ignore */ }
+  }, [setCurrentGroupIndex]);
+
+  // Deep link from the schedule / today-matches cards: /groups?group=B&match=4
+  // selects the group (GroupView handles the scroll-to-row). Read from
+  // window.location instead of useSearchParams to avoid the Suspense-boundary
+  // requirement on a client page.
+  useEffect(() => {
+    try {
+      const g = new URLSearchParams(window.location.search).get("group")?.toUpperCase();
+      if (g && GROUP_LETTERS.includes(g)) setCurrentGroupIndex(GROUP_LETTERS.indexOf(g));
     } catch { /* ignore */ }
   }, [setCurrentGroupIndex]);
 

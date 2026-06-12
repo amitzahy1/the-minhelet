@@ -818,38 +818,17 @@ function DayTable({
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
-      {/* Day header with gradient, matching the rest of the site */}
-      <div className="bg-gradient-to-l from-indigo-50/60 via-blue-50/40 to-white border-b border-blue-100/50 px-5 py-3.5">
+      {/* Day header — quiet: date + facts in one muted line */}
+      <div className="border-b border-gray-200 px-5 py-3">
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          <div className="flex items-center gap-2.5">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-60" />
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500" />
-            </span>
-            <h3 className="text-base font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>{dateLabel}</h3>
-            <span className="text-xs font-medium text-gray-500">· {matches.length} משחקים נגמרו</span>
-          </div>
-          <div className="flex items-center gap-2 text-[11px]">
-            {totalBols > 0 && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-green-50 text-green-700 border border-green-200 px-2 py-0.5 font-bold">
-                🎯 {totalBols} תוצאות מדויקות
-              </span>
-            )}
-            {totalTotos > 0 && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 font-bold">
-                ✓ {totalTotos} טוטו
-              </span>
-            )}
-            {tiedAtTop.length === 1 ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-2.5 py-0.5 font-bold shadow-sm">
-                👑 {tiedAtTop[0].name} · {tiedAtTop[0].points} נק׳
-              </span>
-            ) : tiedAtTop.length > 1 ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-2.5 py-0.5 font-bold shadow-sm">
-                🤝 תיקו · {tiedAtTop.slice(0, 3).map((r) => r.name).join(" · ")}{tiedAtTop.length > 3 ? ` +${tiedAtTop.length - 3}` : ""} · {topPoints} נק׳
-              </span>
-            ) : null}
-          </div>
+          <h3 className="text-base font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>{dateLabel}</h3>
+          <p className="text-xs text-gray-500">
+            {matches.length} משחקים
+            {totalBols > 0 && <> · <span className="font-bold text-gray-700">{totalBols}</span> מדויקות</>}
+            {totalTotos > 0 && <> · <span className="font-bold text-gray-700">{totalTotos}</span> טוטו</>}
+            {tiedAtTop.length === 1 && <> · מוביל היום: <span className="font-bold text-gray-900">{tiedAtTop[0].name}</span> ({topPoints} נק׳)</>}
+            {tiedAtTop.length > 1 && <> · מובילים: <span className="font-bold text-gray-900">{tiedAtTop.slice(0, 3).map((r) => r.name).join(", ")}{tiedAtTop.length > 3 ? ` +${tiedAtTop.length - 3}` : ""}</span> ({topPoints} נק׳)</>}
+          </p>
         </div>
       </div>
 
@@ -897,10 +876,10 @@ function DayTable({
                   <span className="bg-gray-100 rounded-md px-1.5 py-0.5 font-bold whitespace-nowrap">בית {m.group}</span>
                   <span className="tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{time}</span>
                 </span>
-                <span className="flex items-center gap-1 shrink-0 text-[10px] font-bold">
-                  {c.exact > 0 && <span className="text-green-700 bg-green-50 rounded-full px-1.5 py-0.5 border border-green-200">🎯{c.exact}</span>}
-                  {c.toto > 0 && <span className="text-amber-700 bg-amber-50 rounded-full px-1.5 py-0.5 border border-amber-200">✓{c.toto}</span>}
-                  {c.miss > 0 && <span className="text-red-600 bg-red-50 rounded-full px-1.5 py-0.5 border border-red-200">✗{c.miss}</span>}
+                <span className="flex items-center gap-2 shrink-0 text-[11px] font-bold text-gray-400 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>
+                  {c.exact > 0 && <span className="text-green-700">🎯{c.exact}</span>}
+                  {c.toto > 0 && <span className="text-gray-600">✓{c.toto}</span>}
+                  {c.miss > 0 && <span>✗{c.miss}</span>}
                 </span>
                 <svg
                   width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
@@ -912,49 +891,39 @@ function DayTable({
 
               {isOpen && (
                 <div className="px-3 sm:px-5 pb-3">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1.5">
+                  <div className="rounded-lg border border-gray-100 overflow-hidden sm:columns-2 lg:columns-3 sm:gap-0 [column-fill:balance]">
                     {sortedHits.map((h) => {
                       const you = h.userId === currentUserId;
-                      let badgeBg = "bg-gray-200 text-gray-400";
-                      let bg = "bg-white";
-                      let icon = "—";
-                      let text = "text-gray-400";
+                      let icon = "·";
+                      let iconColor = "text-gray-300";
                       let delta = 0;
-                      if (h.hit === "exact") {
-                        badgeBg = "bg-green-500 text-white"; bg = "bg-green-50"; icon = "🎯"; text = "text-green-900"; delta = EXACT_PTS;
-                      } else if (h.hit === "toto") {
-                        badgeBg = "bg-amber-500 text-white"; bg = "bg-amber-50"; icon = "✓"; text = "text-amber-900"; delta = TOTO_PTS;
-                      } else if (h.hit === "miss") {
-                        badgeBg = "bg-red-400 text-white"; bg = "bg-red-50/60"; icon = "✗"; text = "text-red-700";
-                      }
+                      if (h.hit === "exact") { icon = "🎯"; iconColor = "text-green-600"; delta = EXACT_PTS; }
+                      else if (h.hit === "toto") { icon = "✓"; iconColor = "text-green-600"; delta = TOTO_PTS; }
+                      else if (h.hit === "miss") { icon = "✗"; iconColor = "text-gray-400"; }
                       return (
                         <div
                           key={h.userId}
-                          className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg border ${bg} ${you ? "border-blue-300 ring-1 ring-blue-200" : "border-gray-100"}`}
+                          className={`flex items-center justify-between gap-2 px-3 py-1.5 border-b border-gray-50 break-inside-avoid ${you ? "bg-blue-50/50" : "bg-white"}`}
                         >
-                          <span className="flex items-center gap-1.5 min-w-0">
-                            <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-[11px] font-bold shrink-0 ${badgeBg}`}>
-                              {icon}
-                            </span>
-                            <span className="text-sm font-bold text-gray-900 truncate" style={{ fontFamily: "var(--font-secular)" }}>
+                          <span className="flex items-center gap-2 min-w-0">
+                            <span className={`w-4 text-center text-[12px] font-bold shrink-0 ${iconColor}`}>{icon}</span>
+                            <span className={`text-[13px] truncate ${h.hit === "exact" ? "font-bold text-gray-900" : "text-gray-700"}`} style={{ fontFamily: "var(--font-secular)" }}>
                               {h.name}
                             </span>
-                            {you && <span className="text-[9px] bg-blue-100 text-blue-600 rounded px-1 font-bold shrink-0">אתה</span>}
+                            {you && <span className="text-[9px] text-blue-600 font-bold shrink-0">אתה</span>}
                           </span>
-                          <span className="flex items-center gap-2 shrink-0">
+                          <span className="flex items-center gap-2 shrink-0 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>
                             {h.hit === "empty" ? (
-                              <span className="text-[11px] text-gray-400">לא הימר/ה</span>
+                              <span className="text-[11px] text-gray-300">לא הימר/ה</span>
                             ) : (
                               <>
                                 {/* Same away-home glyph order as the result chip above */}
-                                <span dir="ltr" className={`text-sm font-black tabular-nums ${text}`} style={{ fontFamily: "var(--font-inter)" }}>
+                                <span dir="ltr" className={`text-[13px] font-bold ${h.hit === "miss" ? "text-gray-400" : "text-gray-900"}`}>
                                   {h.pred.away}-{h.pred.home}
                                 </span>
-                                {delta > 0 && (
-                                  <span className="text-[11px] font-bold text-blue-700 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>
-                                    +{delta}
-                                  </span>
-                                )}
+                                <span className={`text-[11px] font-bold w-6 text-start ${delta > 0 ? "text-green-700" : "text-gray-300"}`}>
+                                  {delta > 0 ? `+${delta}` : "0"}
+                                </span>
                               </>
                             )}
                           </span>
@@ -969,35 +938,23 @@ function DayTable({
         })}
       </div>
 
-      {/* Day totals */}
-      <div className="px-4 py-3 bg-gradient-to-l from-blue-50/50 to-indigo-50/30 border-t border-gray-100">
-        <p className="text-xs font-bold text-gray-700 mb-1.5">
-          סה״כ היום
-          {tiedAtTop.length > 1 && (
-            <span className="ms-1 text-[10px] font-normal text-blue-700">· 🤝 תיקו בראש</span>
-          )}
-        </p>
-        <div className="flex flex-wrap gap-1.5">
-          {rows.filter(r => r.points > 0).map((r) => {
-            const isYou = r.userId === currentUserId;
-            const isTopTied = r.points === topPoints;
-            const isSoloLeader = hasSoloLeader && isTopTied;
+      {/* Day totals — quiet ranked line */}
+      <div className="px-5 py-2.5 bg-gray-50/60 border-t border-gray-100">
+        <p className="text-xs text-gray-500 leading-relaxed">
+          <span className="font-bold text-gray-700">סה״כ היום:</span>{" "}
+          {rows.filter(r => r.points > 0).map((r, i) => {
+            const isTopTied = r.points === topPoints && topPoints > 0;
             return (
-              <span key={r.userId} className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold ${
-                isSoloLeader ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white" :
-                isTopTied ? "bg-gradient-to-r from-blue-500/90 to-indigo-500/90 text-white" :
-                isYou ? "bg-blue-100 text-blue-700 border border-blue-200" :
-                "bg-white text-gray-700 border border-gray-200"
-              }`}>
-                {isSoloLeader && <span>👑</span>}
-                {!isSoloLeader && isTopTied && <span>🤝</span>}
-                <span style={{ fontFamily: "var(--font-secular)" }}>{r.name}</span>
-                <span className="tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>· {r.points}</span>
+              <span key={r.userId}>
+                {i > 0 && " · "}
+                <span className={isTopTied ? "font-bold text-gray-900" : ""}>
+                  {r.name} <span className="tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{r.points}</span>
+                </span>
               </span>
             );
           })}
-          {rows.every(r => r.points === 0) && <span className="text-xs text-gray-500">אף מהמר עוד לא צבר נקודות</span>}
-        </div>
+          {rows.every(r => r.points === 0) && "אף מהמר עוד לא צבר נקודות"}
+        </p>
       </div>
       <div className="px-4 py-2.5 bg-gray-50/50 border-t border-gray-100 flex items-center gap-3 text-[11px] text-gray-500 flex-wrap">
         <span className="inline-flex items-center gap-1">

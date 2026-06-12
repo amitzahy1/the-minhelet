@@ -7,6 +7,7 @@ import { getFlag, getTeamNameHe } from "@/lib/flags";
 import { TeamLogo } from "@/components/shared/TeamLogo";
 import { toIsraelTimeShort, toIsraelDate, toIsraelDateShort, toIsraelDateKey, getTodayIsrael } from "@/lib/timezone";
 import { useSharedData } from "@/hooks/useSharedData";
+import { useBettingStore } from "@/stores/betting-store";
 import { isLocked, revealAtFor, formatLockDeadline, LOCK_DEADLINE } from "@/lib/constants";
 import { computeGroupHits, hitCounts, normalizeGroupLetter, matchPairIndex, classifyHit, type HitKind } from "@/lib/results-hits";
 import { computeMatchDays, dayLockAtForKickoff, type MatchDay } from "@/lib/tournament/group-live-state";
@@ -62,6 +63,8 @@ export function TodayMatches() {
   const [showAll, setShowAll] = useState(false);
   const [matchDays, setMatchDays] = useState<MatchDay[]>([]);
   const { specialBets, brackets, refetch } = useSharedData();
+  // The viewer's OWN picks (local store) — shown next to the edit-bet button.
+  const myGroups = useBettingStore((s) => s.groups);
   const locked = isLocked();
 
   // State-backed "now" so reveal gates stay pure during render; bumped by the
@@ -379,17 +382,31 @@ export function TodayMatches() {
                 {!isFinished && !isLive && groupLetter && (() => {
                   const betPair = matchPairIndex(groupLetter, m.homeTla, m.awayTla);
                   if (!betPair) return null;
+                  // The stored pick is in canonical pair orientation; flip to
+                  // the REAL home/away so it matches the teams shown above,
+                  // then render away-home (home goals = right-hand digit).
+                  const stored = myGroups[groupLetter]?.scores?.[betPair.pairIdx];
+                  const myPick = stored && stored.home !== null && stored.away !== null
+                    ? (betPair.flipped ? { home: stored.away, away: stored.home } : { home: stored.home, away: stored.away })
+                    : null;
                   return (
-                    <Link
-                      href={`/groups?group=${groupLetter}&match=${betPair.pairIdx}`}
-                      onClick={(e) => e.stopPropagation()}
-                      className="mt-2 inline-flex items-center justify-center gap-1 rounded-md bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-500 hover:text-gray-700 text-[11px] font-bold px-2.5 py-1 transition-colors"
-                    >
-                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                        <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-                      </svg>
-                      שנה הימור
-                    </Link>
+                    <span className="mt-2 inline-flex items-center justify-center gap-1.5">
+                      <Link
+                        href={`/groups?group=${groupLetter}&match=${betPair.pairIdx}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="inline-flex items-center justify-center gap-1 rounded-md bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-500 hover:text-gray-700 text-[11px] font-bold px-2.5 py-1 transition-colors"
+                      >
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                          <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                        </svg>
+                        שנה הימור
+                      </Link>
+                      {myPick && (
+                        <span dir="ltr" className="text-[10px] font-bold text-gray-400 tabular-nums" style={{ fontFamily: "var(--font-inter)" }} title="ההימור שלך">
+                          {myPick.away}-{myPick.home}
+                        </span>
+                      )}
+                    </span>
                   );
                 })()}
 

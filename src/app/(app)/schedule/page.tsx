@@ -395,44 +395,46 @@ export default function SchedulePage() {
                             <p className="text-base font-black text-gray-900 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{toIsraelTimeShort(m.date)}</p>
                           )}
                           <p className="text-[10px] text-gray-400">{m.group?.replace("GROUP_", "בית ") || m.stage}</p>
-                          {/* Direct link to this match's betting row (upcoming group matches) */}
-                          {!isFinished && !isLive && (() => {
-                            const letter = normalizeGroupLetter(m.group);
-                            const betPair = letter ? matchPairIndex(letter, m.homeTla, m.awayTla) : null;
-                            if (!betPair || !letter) return null;
-                            // Stored pick is canonical-oriented; flip to the real
-                            // home/away so it matches the row's team sides, then
-                            // render away-home (home goals = right-hand digit).
-                            const stored = myGroups[letter]?.scores?.[betPair.pairIdx];
-                            const myPick = stored && stored.home !== null && stored.away !== null
-                              ? (betPair.flipped ? { home: stored.away, away: stored.home } : { home: stored.home, away: stored.away })
-                              : null;
-                            return (
-                              <span className="mt-1 inline-flex items-center justify-center gap-1.5">
-                                <Link
-                                  href={`/groups?group=${letter}&match=${betPair.pairIdx}`}
-                                  onClick={(e) => e.stopPropagation()}
-                                  className="inline-flex items-center justify-center gap-1 rounded-md bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-500 hover:text-gray-700 text-[10px] font-bold px-2 py-0.5 transition-colors"
-                                >
-                                  <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                                    <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-                                  </svg>
-                                  שנה הימור
-                                </Link>
-                                {myPick && (
-                                  <span dir="ltr" className="text-[10px] font-bold text-gray-400 tabular-nums" style={{ fontFamily: "var(--font-inter)" }} title="ההימור שלך">
-                                    {myPick.away}-{myPick.home}
-                                  </span>
-                                )}
-                              </span>
-                            );
-                          })()}
+
                         </div>
                         <div className="flex items-center gap-2 justify-start">
                           <TeamLogo code={m.awayTla} size="sm" />
                           <span className="font-bold text-sm">{getTeamNameHe(m.awayTla) || m.awayTeam}</span>
                         </div>
                       </div>
+                      {/* Edit-bet strip — below the row; the 80px center cell
+                          can't fit the button on mobile. */}
+                      {!isFinished && !isLive && (() => {
+                        const letter = normalizeGroupLetter(m.group);
+                        const betPair = letter ? matchPairIndex(letter, m.homeTla, m.awayTla) : null;
+                        if (!betPair || !letter) return null;
+                        // Stored pick is canonical-oriented; flip to the real
+                        // home/away so it matches the row's team sides, then
+                        // render away-home (home goals = right-hand digit).
+                        const stored = myGroups[letter]?.scores?.[betPair.pairIdx];
+                        const myPick = stored && stored.home !== null && stored.away !== null
+                          ? (betPair.flipped ? { home: stored.away, away: stored.home } : { home: stored.home, away: stored.away })
+                          : null;
+                        return (
+                          <div className="pb-2.5 -mt-1 flex items-center justify-center gap-2">
+                            <Link
+                              href={`/groups?group=${letter}&match=${betPair.pairIdx}`}
+                              onClick={(e) => e.stopPropagation()}
+                              className="inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-md bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-500 hover:text-gray-700 text-[11px] font-bold px-2.5 py-1 transition-colors"
+                            >
+                              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                              </svg>
+                              שנה הימור
+                            </Link>
+                            {myPick && (
+                              <span dir="ltr" className="text-[11px] font-bold text-gray-400 tabular-nums" style={{ fontFamily: "var(--font-inter)" }} title="ההימור שלך">
+                                {myPick.away}-{myPick.home}
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })()}
                       {(m.venue || (m.referees && m.referees.length > 0)) && (
                         <div className="px-4 py-2 border-t border-gray-100 bg-gray-50/60 text-[11px] text-gray-600 flex flex-wrap gap-x-4 gap-y-1">
                           {m.venue && (

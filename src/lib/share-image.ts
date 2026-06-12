@@ -20,17 +20,24 @@ export interface ShareImageRow {
   name: string;
   total: number;
   today: string;
+  /** Count of exact-score hits (🎯) — shown as its own column when provided. */
+  exacts?: number;
   isLifter?: boolean;
   isSheep?: boolean;
 }
 
+export interface ShareImageOptions {
+  /** Total finished matches — adds "אחרי N משחקים" context to the header. */
+  matchesPlayed?: number;
+}
+
 const FONT = "-apple-system, 'Segoe UI', 'Noto Sans Hebrew', 'Arial Hebrew', sans-serif";
 
-export function renderLeaderboardImage(rows: ShareImageRow[], dateLabel: string): Promise<Blob> {
+export function renderLeaderboardImage(rows: ShareImageRow[], dateLabel: string, opts: ShareImageOptions = {}): Promise<Blob> {
   const scale = 2;
   const W = 460;
   const pad = 18;
-  const headerH = 78;
+  const headerH = 86;
   const rowH = 42;
   const footerH = 44;
   const H = headerH + rows.length * rowH + footerH;
@@ -56,13 +63,20 @@ export function renderLeaderboardImage(rows: ShareImageRow[], dateLabel: string)
   ctx.fillStyle = "#ffffff";
   ctx.font = `900 22px ${FONT}`;
   ctx.textAlign = "right";
-  ctx.fillText("🏆 The Minhelet", W - pad, 30);
+  ctx.fillText("🏆 The Minhelet", W - pad, 28);
   ctx.font = `600 13px ${FONT}`;
   ctx.fillStyle = "#cbd5e1";
-  ctx.fillText(`דירוג עדכני · ${dateLabel}`, W - pad, 56);
-  ctx.font = `26px ${FONT}`;
+  const sub = opts.matchesPlayed
+    ? `דירוג עדכני · ${dateLabel} · אחרי ${opts.matchesPlayed} משחקים`
+    : `דירוג עדכני · ${dateLabel}`;
+  ctx.fillText(sub, W - pad, 52);
+  // Column captions (align with the row columns drawn below)
+  ctx.font = `700 10px ${FONT}`;
+  ctx.fillStyle = "#94a3b8";
   ctx.textAlign = "left";
-  ctx.fillText("⚽", pad, 40);
+  ctx.fillText("סה״כ", pad, 74);
+  ctx.fillText("היום", pad + 64, 74);
+  ctx.fillText("מדויקות", pad + 136, 74);
 
   // Rows
   rows.forEach((r, i) => {
@@ -94,9 +108,9 @@ export function renderLeaderboardImage(rows: ShareImageRow[], dateLabel: string)
     ctx.font = `800 15px ${FONT}`;
     const nameX = W - pad - 34;
     const mark = r.isLifter ? " 🏆" : r.isSheep ? " 🐑" : "";
-    // Truncate long names so the points column never collides
+    // Truncate long names so the stat columns never collide
     let name = r.name;
-    while (ctx.measureText(name + mark).width > W - 170 && name.length > 3) {
+    while (ctx.measureText(name + mark).width > W - 230 && name.length > 3) {
       name = name.slice(0, -2);
     }
     if (name !== r.name) name += "…";
@@ -108,11 +122,18 @@ export function renderLeaderboardImage(rows: ShareImageRow[], dateLabel: string)
       ctx.fillText(label, nameX - ctx.measureText(name).width - 26, cy);
     }
 
-    // Today (left-center column)
+    // Exact hits (center-left column)
     ctx.textAlign = "left";
+    if (r.exacts != null) {
+      ctx.font = `700 13px ${FONT}`;
+      ctx.fillStyle = r.exacts > 0 ? "#15803d" : "#cbd5e1";
+      ctx.fillText(r.exacts > 0 ? `🎯 ${r.exacts}` : "—", pad + 136, cy);
+    }
+
+    // Today (left-center column)
     ctx.font = `700 13px ${FONT}`;
     ctx.fillStyle = r.today.startsWith("+") ? "#16a34a" : "#94a3b8";
-    ctx.fillText(`${r.today} היום`, pad + 64, cy);
+    ctx.fillText(r.today, pad + 64, cy);
 
     // Total points (left edge, big)
     ctx.font = `900 18px ${FONT}`;
@@ -151,8 +172,9 @@ export type ShareImageOutcome = "shared" | "copied" | "downloaded";
 export async function shareLeaderboardImage(
   rows: ShareImageRow[],
   dateLabel: string,
+  opts: ShareImageOptions = {},
 ): Promise<ShareImageOutcome> {
-  const blob = await renderLeaderboardImage(rows, dateLabel);
+  const blob = await renderLeaderboardImage(rows, dateLabel, opts);
   const file = new File([blob], "minhelet-standings.png", { type: "image/png" });
 
   // 1. Native share with file (mobile — straight into the WhatsApp group)

@@ -560,6 +560,10 @@ function ResultsView({ matches, brackets, currentUserId, loading }: ResultsViewP
     byDate[key].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }
 
+  // `matches` arrives sorted newest-first, so the first id is the most recent
+  // finished match — the only one that starts expanded.
+  const mostRecentId = matches[0]?.id ?? null;
+
   return (
     <div className="space-y-8">
       {Object.entries(byDate).map(([dateLabel, dayMatches]) => (
@@ -569,6 +573,7 @@ function ResultsView({ matches, brackets, currentUserId, loading }: ResultsViewP
           matches={dayMatches}
           brackets={brackets}
           currentUserId={currentUserId}
+          defaultOpenMatchId={mostRecentId}
         />
       ))}
     </div>
@@ -727,17 +732,32 @@ function DayTable({
   matches,
   brackets,
   currentUserId,
+  defaultOpenMatchId = null,
 }: {
   dateLabel: string;
   matches: FinishedMatch[];
   brackets: ResultsViewProps["brackets"];
   currentUserId: string | null;
+  /** The single match (across all days) that starts expanded. */
+  defaultOpenMatchId?: number | null;
 }) {
   // This view is group-stage only (see the GROUP_STAGE filter upstream), so a
   // "bol" (exact hit) is worth the toto points plus the exact bonus.
   const scoring = useScoring();
   const TOTO_PTS = scoring.toto.GROUP;
   const EXACT_PTS = scoring.toto.GROUP + scoring.exact.GROUP;
+
+  // Collapsible matches — everything starts closed except the most recent one.
+  const [openIds, setOpenIds] = useState<Set<number>>(
+    () => new Set(defaultOpenMatchId != null && matches.some((m) => m.id === defaultOpenMatchId) ? [defaultOpenMatchId] : [])
+  );
+  const toggleMatch = (id: number) =>
+    setOpenIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
 
   const matchHits = useMemo(() =>
     matches.map((m) => ({ match: m, hits: computeGroupHits(m, brackets) })),
@@ -833,285 +853,152 @@ function DayTable({
         </div>
       </div>
 
-      {/* Mobile: card-per-match layout (<md) */}
-      <div className="md:hidden divide-y divide-gray-100">
+      {/* Unified collapsible match list (all breakpoints). Finished matches
+          are collapsed by default; only the most recent one (defaultOpenMatchId,
+          chosen across all days) starts open. */}
+      <div className="divide-y divide-gray-100">
         {matches.map((m, mi) => {
           const mHits = matchHits[mi].hits;
+          const c = perMatchCounts[mi];
+          const isOpen = openIds.has(m.id);
           const time = new Date(m.date).toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
+          const hitRank: Record<BettorHit["hit"], number> = { exact: 0, toto: 1, miss: 2, empty: 3 };
+          const sortedHits = [...mHits].sort(
+            (a, b) => hitRank[a.hit] - hitRank[b.hit] || a.name.localeCompare(b.name, "he")
+          );
           return (
-            <div key={m.id} className="px-3 py-3">
-              {/* Single-line match header: meta (group + time) inline with teams + score */}
-              <div className="flex items-center gap-2 mb-2 flex-wrap">
-                {/* Team1 name + flag (RTL start) */}
-                <div className="flex items-center gap-1.5 flex-1 min-w-0 justify-end text-end">
+            <div key={m.id}>
+              <button
+                onClick={() => toggleMatch(m.id)}
+                className={`w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-5 py-2.5 text-start transition-colors ${
+                  isOpen ? "bg-blue-50/40" : "hover:bg-gray-50/70"
+                }`}
+              >
+                {/* Home (right in RTL) */}
+                <span className="flex items-center gap-1.5 flex-1 min-w-0 justify-end">
                   <span className="text-[13px] font-bold text-gray-900 truncate" style={{ fontFamily: "var(--font-secular)" }}>
-                    {getTeamNameHe(m.homeTla)}
+                    {getTeamNameHe(m.homeTla) || m.homeTla}
                   </span>
                   <span className="text-xl shrink-0">{getFlag(m.homeTla)}</span>
-                </div>
-                {/* RTL: home team is on the RIGHT → home goals must be the
-                    right-hand digit (away-home glyph order). */}
+                </span>
+                {/* Score — home goals = right-hand digit (RTL) */}
                 <span dir="ltr" className="text-sm font-black tabular-nums bg-white rounded-md border-2 border-gray-200 px-2 py-0.5 shrink-0" style={{ fontFamily: "var(--font-inter)" }}>
                   {m.awayGoals}-{m.homeGoals}
                 </span>
-                {/* Team2 flag + name */}
-                <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                {/* Away */}
+                <span className="flex items-center gap-1.5 flex-1 min-w-0">
                   <span className="text-xl shrink-0">{getFlag(m.awayTla)}</span>
                   <span className="text-[13px] font-bold text-gray-900 truncate" style={{ fontFamily: "var(--font-secular)" }}>
-                    {getTeamNameHe(m.awayTla)}
+                    {getTeamNameHe(m.awayTla) || m.awayTla}
                   </span>
-                </div>
-                {/* Meta chips (group + time) inline at the far end (RTL left) */}
-                <div className="flex items-center gap-1 shrink-0 text-[10px] text-gray-500 font-medium">
+                </span>
+                {/* Meta + hit counters */}
+                <span className="hidden sm:flex items-center gap-1 shrink-0 text-[10px] text-gray-500 font-medium">
                   <span className="bg-gray-100 rounded-md px-1.5 py-0.5 font-bold whitespace-nowrap">בית {m.group}</span>
                   <span className="tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{time}</span>
-                </div>
-              </div>
-              <div className="space-y-1">
-                {mHits.map((h) => {
-                  const you = h.userId === currentUserId;
-                  let badgeBg = "bg-gray-100 text-gray-300";
-                  let bg = "bg-white";
-                  let icon = "—";
-                  let text = "text-gray-300";
-                  let delta = 0;
-                  if (h.hit === "exact") {
-                    badgeBg = "bg-green-500 text-white"; bg = "bg-green-50"; icon = "🎯"; text = "text-green-900"; delta = EXACT_PTS;
-                  } else if (h.hit === "toto") {
-                    badgeBg = "bg-amber-500 text-white"; bg = "bg-amber-50"; icon = "✓"; text = "text-amber-900"; delta = TOTO_PTS;
-                  } else if (h.hit === "miss") {
-                    badgeBg = "bg-red-400 text-white"; bg = "bg-red-50/60"; icon = "✗"; text = "text-red-700";
-                  }
-                  return (
-                    <div
-                      key={h.userId}
-                      className={`flex items-center justify-between px-3 py-1.5 rounded-lg border ${bg} ${you ? "border-blue-300 ring-1 ring-blue-200" : "border-gray-100"}`}
-                    >
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-[11px] font-bold shrink-0 ${badgeBg}`}>
-                          {icon}
-                        </span>
-                        <span className="text-sm font-bold text-gray-900 truncate" style={{ fontFamily: "var(--font-secular)" }}>
-                          {h.name}
-                        </span>
-                        {you && <span className="text-[9px] bg-blue-100 text-blue-600 rounded px-1 font-bold">אתה</span>}
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        {h.hit === "empty" ? (
-                          <span className="text-[11px] text-gray-400">לא הימר/ה</span>
-                        ) : (
-                          <>
-                            {/* Same away-home glyph order as the result chip
-                                above, so an exact hit reads identically. */}
-                            <span dir="ltr" className={`text-sm font-black tabular-nums ${text}`} style={{ fontFamily: "var(--font-inter)" }}>
-                              {h.pred.away}-{h.pred.home}
+                </span>
+                <span className="flex items-center gap-1 shrink-0 text-[10px] font-bold">
+                  {c.exact > 0 && <span className="text-green-700 bg-green-50 rounded-full px-1.5 py-0.5 border border-green-200">🎯{c.exact}</span>}
+                  {c.toto > 0 && <span className="text-amber-700 bg-amber-50 rounded-full px-1.5 py-0.5 border border-amber-200">✓{c.toto}</span>}
+                  {c.miss > 0 && <span className="text-red-600 bg-red-50 rounded-full px-1.5 py-0.5 border border-red-200">✗{c.miss}</span>}
+                </span>
+                <svg
+                  width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+                  className={`shrink-0 text-gray-400 transition-transform ${isOpen ? "rotate-180" : ""}`}
+                >
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </button>
+
+              {isOpen && (
+                <div className="px-3 sm:px-5 pb-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1.5">
+                    {sortedHits.map((h) => {
+                      const you = h.userId === currentUserId;
+                      let badgeBg = "bg-gray-200 text-gray-400";
+                      let bg = "bg-white";
+                      let icon = "—";
+                      let text = "text-gray-400";
+                      let delta = 0;
+                      if (h.hit === "exact") {
+                        badgeBg = "bg-green-500 text-white"; bg = "bg-green-50"; icon = "🎯"; text = "text-green-900"; delta = EXACT_PTS;
+                      } else if (h.hit === "toto") {
+                        badgeBg = "bg-amber-500 text-white"; bg = "bg-amber-50"; icon = "✓"; text = "text-amber-900"; delta = TOTO_PTS;
+                      } else if (h.hit === "miss") {
+                        badgeBg = "bg-red-400 text-white"; bg = "bg-red-50/60"; icon = "✗"; text = "text-red-700";
+                      }
+                      return (
+                        <div
+                          key={h.userId}
+                          className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg border ${bg} ${you ? "border-blue-300 ring-1 ring-blue-200" : "border-gray-100"}`}
+                        >
+                          <span className="flex items-center gap-1.5 min-w-0">
+                            <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-[11px] font-bold shrink-0 ${badgeBg}`}>
+                              {icon}
                             </span>
-                            {delta > 0 && (
-                              <span className="text-[11px] font-bold text-blue-700 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>
-                                +{delta}
-                              </span>
+                            <span className="text-sm font-bold text-gray-900 truncate" style={{ fontFamily: "var(--font-secular)" }}>
+                              {h.name}
+                            </span>
+                            {you && <span className="text-[9px] bg-blue-100 text-blue-600 rounded px-1 font-bold shrink-0">אתה</span>}
+                          </span>
+                          <span className="flex items-center gap-2 shrink-0">
+                            {h.hit === "empty" ? (
+                              <span className="text-[11px] text-gray-400">לא הימר/ה</span>
+                            ) : (
+                              <>
+                                {/* Same away-home glyph order as the result chip above */}
+                                <span dir="ltr" className={`text-sm font-black tabular-nums ${text}`} style={{ fontFamily: "var(--font-inter)" }}>
+                                  {h.pred.away}-{h.pred.home}
+                                </span>
+                                {delta > 0 && (
+                                  <span className="text-[11px] font-bold text-blue-700 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>
+                                    +{delta}
+                                  </span>
+                                )}
+                              </>
                             )}
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}
-        {/* Mobile day totals */}
-        <div className="px-4 py-3 bg-gradient-to-l from-blue-50/50 to-indigo-50/30">
-          <p className="text-xs font-bold text-gray-700 mb-1.5">
-            סה״כ היום
-            {tiedAtTop.length > 1 && (
-              <span className="ms-1 text-[10px] font-normal text-blue-700">· 🤝 תיקו בראש</span>
-            )}
-          </p>
-          <div className="flex flex-wrap gap-1.5">
-            {rows.filter(r => r.points > 0).map((r) => {
-              const isYou = r.userId === currentUserId;
-              const isTopTied = r.points === topPoints;
-              const isSoloLeader = hasSoloLeader && isTopTied;
-              return (
-                <span key={r.userId} className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold ${
-                  isSoloLeader ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white" :
-                  isTopTied ? "bg-gradient-to-r from-blue-500/90 to-indigo-500/90 text-white" :
-                  isYou ? "bg-blue-100 text-blue-700 border border-blue-200" :
-                  "bg-white text-gray-700 border border-gray-200"
-                }`}>
-                  {isSoloLeader && <span>👑</span>}
-                  {!isSoloLeader && isTopTied && <span>🤝</span>}
-                  <span style={{ fontFamily: "var(--font-secular)" }}>{r.name}</span>
-                  <span className="tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>· {r.points}</span>
-                </span>
-              );
-            })}
-            {rows.every(r => r.points === 0) && <span className="text-xs text-gray-500">אף מהמר עוד לא צבר נקודות</span>}
-          </div>
+      </div>
+
+      {/* Day totals */}
+      <div className="px-4 py-3 bg-gradient-to-l from-blue-50/50 to-indigo-50/30 border-t border-gray-100">
+        <p className="text-xs font-bold text-gray-700 mb-1.5">
+          סה״כ היום
+          {tiedAtTop.length > 1 && (
+            <span className="ms-1 text-[10px] font-normal text-blue-700">· 🤝 תיקו בראש</span>
+          )}
+        </p>
+        <div className="flex flex-wrap gap-1.5">
+          {rows.filter(r => r.points > 0).map((r) => {
+            const isYou = r.userId === currentUserId;
+            const isTopTied = r.points === topPoints;
+            const isSoloLeader = hasSoloLeader && isTopTied;
+            return (
+              <span key={r.userId} className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold ${
+                isSoloLeader ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white" :
+                isTopTied ? "bg-gradient-to-r from-blue-500/90 to-indigo-500/90 text-white" :
+                isYou ? "bg-blue-100 text-blue-700 border border-blue-200" :
+                "bg-white text-gray-700 border border-gray-200"
+              }`}>
+                {isSoloLeader && <span>👑</span>}
+                {!isSoloLeader && isTopTied && <span>🤝</span>}
+                <span style={{ fontFamily: "var(--font-secular)" }}>{r.name}</span>
+                <span className="tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>· {r.points}</span>
+              </span>
+            );
+          })}
+          {rows.every(r => r.points === 0) && <span className="text-xs text-gray-500">אף מהמר עוד לא צבר נקודות</span>}
         </div>
       </div>
-
-      {/* Desktop: full table (≥md) */}
-      <div className="hidden md:block overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="bg-gradient-to-l from-white to-gray-50/50 border-b border-gray-200">
-              <th className="py-3 px-3 text-start sticky start-0 bg-white z-10 border-e border-gray-100 min-w-[7rem]">
-                <span className="text-xs font-bold text-gray-500 uppercase tracking-wide" style={{ fontFamily: "var(--font-inter)" }}>
-                  מהמר
-                </span>
-              </th>
-              {matches.map((m, i) => {
-                const time = new Date(m.date).toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
-                const c = perMatchCounts[i];
-                return (
-                  <th key={m.id} className="py-2 px-2 text-center min-w-[12rem] border-e border-gray-100 last:border-e-0">
-                    <div className="flex flex-col items-center gap-1.5">
-                      <div className="flex items-center gap-1.5 text-[10px] text-gray-500 font-medium">
-                        <span className="bg-gray-100 rounded-md px-1.5 py-0.5 font-bold">בית {m.group}</span>
-                        <span style={{ fontFamily: "var(--font-inter)" }}>{time}</span>
-                      </div>
-                      <div className="flex items-center gap-2" dir="ltr">
-                        <div className="flex flex-col items-center gap-0.5 w-12">
-                          <span className="text-3xl leading-none">{getFlag(m.homeTla)}</span>
-                          <span
-                            className="text-[11px] font-bold text-gray-800 text-center leading-tight"
-                            style={{ fontFamily: "var(--font-secular)" }}
-                            title={getTeamNameHe(m.homeTla) || m.homeTla}
-                          >
-                            {getTeamNameHe(m.homeTla) || m.homeTla}
-                          </span>
-                        </div>
-                        <span
-                          className="text-base font-black tabular-nums text-gray-900 bg-white rounded-lg border border-gray-200 px-2 py-0.5 shadow-sm"
-                          style={{ fontFamily: "var(--font-inter)" }}
-                        >
-                          {m.homeGoals} - {m.awayGoals}
-                        </span>
-                        <div className="flex flex-col items-center gap-0.5 w-12">
-                          <span className="text-3xl leading-none">{getFlag(m.awayTla)}</span>
-                          <span
-                            className="text-[11px] font-bold text-gray-800 text-center leading-tight"
-                            style={{ fontFamily: "var(--font-secular)" }}
-                            title={getTeamNameHe(m.awayTla) || m.awayTla}
-                          >
-                            {getTeamNameHe(m.awayTla) || m.awayTla}
-                          </span>
-                        </div>
-                      </div>
-                      {(c.exact + c.toto > 0) && (
-                        <div className="flex items-center gap-1.5 text-[10px] font-bold">
-                          {c.exact > 0 && <span className="text-green-700 bg-green-50 rounded-full px-1.5 py-0.5 border border-green-200">🎯 {c.exact}</span>}
-                          {c.toto > 0 && <span className="text-amber-700 bg-amber-50 rounded-full px-1.5 py-0.5 border border-amber-200">✓ {c.toto}</span>}
-                        </div>
-                      )}
-                    </div>
-                  </th>
-                );
-              })}
-              <th className="py-3 px-3 text-center bg-gradient-to-l from-blue-50 to-indigo-50 border-s border-blue-100 min-w-[5rem]">
-                <span className="text-xs font-bold text-blue-700 uppercase tracking-wide" style={{ fontFamily: "var(--font-inter)" }}>
-                  נק׳ היום
-                </span>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row, rowIdx) => {
-              const isYou = row.userId === currentUserId;
-              // Crown only when there's a single outright leader for the day.
-              const isLead = rowIdx === 0 && hasSoloLeader && row.points > 0;
-              return (
-                <tr
-                  key={row.userId}
-                  className={`border-t border-gray-100 transition-colors ${
-                    isYou ? "bg-gradient-to-l from-blue-50/70 to-indigo-50/30" : "hover:bg-gray-50/60"
-                  }`}
-                >
-                  <td
-                    className={`py-2 px-2 font-bold sticky start-0 z-10 border-e border-gray-100 whitespace-nowrap ${
-                      isYou ? "bg-blue-50/80" : "bg-white"
-                    }`}
-                  >
-                    <div className="flex items-center gap-1.5">
-                      {isLead && <span className="text-sm" title="מוביל יומי">👑</span>}
-                      <span className="text-xs text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>
-                        {row.name}
-                      </span>
-                      {isYou && (
-                        <span className="text-[9px] font-bold bg-blue-100 text-blue-700 rounded-full px-1.5 py-0.5">
-                          אתה
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                  {row.cells.map((cell, i) => {
-                    let bg = "bg-white";
-                    let text = "text-gray-300";
-                    let badge = "";
-                    let badgeBg = "";
-                    if (cell.hit === "exact") {
-                      bg = "bg-gradient-to-br from-green-50 to-emerald-50";
-                      text = "text-green-900";
-                      badge = "🎯";
-                      badgeBg = "bg-green-500 text-white";
-                    } else if (cell.hit === "toto") {
-                      bg = "bg-gradient-to-br from-amber-50 to-yellow-50";
-                      text = "text-amber-900";
-                      badge = "✓";
-                      badgeBg = "bg-amber-500 text-white";
-                    } else if (cell.hit === "miss") {
-                      bg = "bg-red-50/40";
-                      text = "text-red-700";
-                      badge = "✗";
-                      badgeBg = "bg-red-400 text-white";
-                    }
-                    return (
-                      <td
-                        key={i}
-                        className={`py-1.5 px-1.5 text-center border-e border-gray-100 last:border-e-0 ${bg}`}
-                      >
-                        {cell.hit === "empty" ? (
-                          <span className="text-gray-300 text-[11px]">לא הימר/ה</span>
-                        ) : (
-                          <div className="inline-flex items-center gap-1">
-                            <span className={`font-black tabular-nums text-xs ${text}`} style={{ fontFamily: "var(--font-inter)" }}>
-                              {cell.pred.home}-{cell.pred.away}
-                            </span>
-                            <span className={`inline-flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-bold ${badgeBg}`}>
-                              {badge}
-                            </span>
-                          </div>
-                        )}
-                      </td>
-                    );
-                  })}
-                  <td className="py-1.5 px-2 text-center bg-gradient-to-l from-blue-50/60 to-indigo-50/30 border-s border-blue-100">
-                    <div className="inline-flex flex-col items-center">
-                      <span
-                        className={`text-base font-black tabular-nums ${row.points > 0 ? "text-blue-700" : "text-gray-300"}`}
-                        style={{ fontFamily: "var(--font-inter)" }}
-                      >
-                        {row.points}
-                      </span>
-                      {(row.exacts + row.totos > 0) && (
-                        <span className="text-[9px] font-bold text-gray-500">
-                          {row.exacts > 0 && <span className="text-green-700">🎯{row.exacts}</span>}
-                          {row.exacts > 0 && row.totos > 0 && " "}
-                          {row.totos > 0 && <span className="text-amber-700">✓{row.totos}</span>}
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-
       <div className="px-4 py-2.5 bg-gray-50/50 border-t border-gray-100 flex items-center gap-3 text-[11px] text-gray-500 flex-wrap">
         <span className="inline-flex items-center gap-1">
           <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-green-500 text-white text-[9px] font-bold">🎯</span>

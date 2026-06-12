@@ -55,6 +55,7 @@ function stageLabelHe(stage?: string): string {
 
 export function TodayMatches() {
   const [matches, setMatches] = useState<Match[]>([]);
+  const [allMatches, setAllMatches] = useState<Match[]>([]);
   const [heading, setHeading] = useState("משחקים קרובים");
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [showAll, setShowAll] = useState(false);
@@ -103,6 +104,7 @@ export function TodayMatches() {
         hasRealDataRef.current = true;
 
         const allMatches = data.matches as Match[];
+        setAllMatches(allMatches);
         // Match-day lock instants drive the per-match score reveal below.
         setMatchDays(
           computeMatchDays(allMatches.map((mm) => ({ date: mm.date, group: mm.group, stage: mm.stage, status: mm.status }))),
@@ -151,26 +153,31 @@ export function TodayMatches() {
     loadMatches();
   }, [loadMatches]);
 
-  // Live refresh: while any displayed match is in its play window, re-pull
-  // the schedule every 60s so scores/statuses move without a manual reload.
+  // Live refresh: while any match is in its play window, re-pull the schedule
+  // every 60s so scores/statuses move without a manual reload.
   // (The FD fetch behind /api/matches revalidates every 60s too.)
   useEffect(() => {
-    if (matches.length === 0 || !anyMatchInPlayWindow(matches)) return;
+    const pool = allMatches.length > 0 ? allMatches : matches;
+    if (pool.length === 0 || !anyMatchInPlayWindow(pool)) return;
     const id = setInterval(loadMatches, LIVE_REFRESH_MS);
     return () => clearInterval(id);
-  }, [matches, loadMatches]);
+  }, [allMatches, matches, loadMatches]);
 
   if (matches.length === 0) return null;
 
-  // Featured selection (collapsed view): the 2 most recently finished matches
-  // of the day + the next 2 (live/upcoming), backfilling from either bucket up
-  // to 4 cards. "הצג את כל..." still expands to the whole day.
-  const finishedToday = matches.filter((m) => m.status === "FINISHED");
-  const restToday = matches.filter((m) => m.status !== "FINISHED");
-  const upcomingTake = Math.min(restToday.length, Math.max(2, 4 - finishedToday.length));
-  const finishedTake = Math.min(finishedToday.length, 4 - upcomingTake);
-  const featured = [...finishedToday.slice(-finishedTake), ...restToday.slice(0, upcomingTake)]
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  // Featured selection (collapsed view): ALWAYS the 2 most recently finished
+  // matches + the next 2 not-yet-finished (live counts as "next") — across the
+  // whole schedule, not just today, so the widget never shrinks to 2 cards on
+  // a thin matchday. Backfills from either bucket up to 4.
+  const byKickoff = (a: Match, b: Match) => new Date(a.date).getTime() - new Date(b.date).getTime();
+  const pool = allMatches.length > 0 ? allMatches : matches;
+  const finishedAll = pool.filter((m) => m.status === "FINISHED").sort(byKickoff);
+  const upcomingAll = pool.filter((m) => m.status !== "FINISHED").sort(byKickoff);
+  const upTake = Math.min(2, upcomingAll.length);
+  const finTake = Math.min(finishedAll.length, 4 - upTake);
+  const featured = [...finishedAll.slice(-finTake), ...upcomingAll.slice(0, Math.min(upcomingAll.length, 4 - finTake))]
+    .sort(byKickoff);
+  const todayKey = getTodayIsrael();
 
   // Build bettors' special bets relevant to a match's teams
   function getRelatedBets(homeTla: string, awayTla: string) {
@@ -210,16 +217,18 @@ export function TodayMatches() {
     ).filter((h) => h.hit !== "empty");
   }
 
+  const displayed = showAll ? matches : featured;
   return (
     <div className="mb-6">
       <div className="flex items-center gap-2 mb-3">
         <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
-        <h2 className="text-base font-bold text-gray-800">{heading}</h2>
-        <span className="text-sm text-gray-400">{matches.length} משחקים</span>
+        <h2 className="text-base font-bold text-gray-800">{showAll ? heading : "משחקים — אחרונים והבאים"}</h2>
+        <span className="text-sm text-gray-400">{displayed.length} משחקים</span>
       </div>
-      {/* 2 columns on mobile — 3 made the cards too narrow to read a score. */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {(showAll ? matches : featured).map((m) => {
+      {/* Mobile: horizontal snap carousel so all 4 cards are reachable without
+          shrinking them; desktop: 4-column grid. */}
+      <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory md:grid md:grid-cols-4 md:overflow-visible md:pb-0">
+        {displayed.map((m) => {
           const isFinished = m.status === "FINISHED";
           const isLive = m.status === "IN_PLAY" || m.status === "PAUSED";
           const isExpanded = expandedId === m.id;
@@ -287,7 +296,7 @@ export function TodayMatches() {
           })();
 
           return (
-            <div key={m.id} className="col-span-1">
+            <div key={m.id} className="min-w-[46%] sm:min-w-[30%] shrink-0 snap-start md:min-w-0 md:shrink md:col-span-1">
               <div
                 onClick={() => setExpandedId(isExpanded ? null : m.id)}
                 className={`bg-white rounded-xl border shadow-sm p-3 text-center transition-all cursor-pointer ${
@@ -297,8 +306,8 @@ export function TodayMatches() {
                   "border-gray-200 hover:border-gray-300 hover:shadow-md"
                 }`}
               >
-                {/* Status badge */}
-                <div className="mb-2">
+                {/* Status badge (+ date when the card isn't from today) */}
+                <div className="mb-2 flex items-center justify-center gap-1.5">
                   {isLive && (
                     <span className="text-[10px] font-bold text-red-600 bg-red-100 rounded-full px-2 py-0.5 inline-flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />LIVE
@@ -308,6 +317,11 @@ export function TodayMatches() {
                   {!isLive && !isFinished && (
                     <span className="text-xs font-bold text-gray-500" style={{ fontFamily: "var(--font-inter)" }}>
                       {toIsraelTimeShort(m.date)}
+                    </span>
+                  )}
+                  {toIsraelDateKey(m.date) !== todayKey && (
+                    <span className="text-[10px] font-bold text-gray-400 bg-gray-100 rounded-full px-1.5 py-0.5" style={{ fontFamily: "var(--font-inter)" }}>
+                      {toIsraelDateShort(m.date)}
                     </span>
                   )}
                 </div>
@@ -527,18 +541,16 @@ export function TodayMatches() {
           );
         })}
       </div>
-      {matches.length > 4 && (
-        <button
-          onClick={() => setShowAll((v) => !v)}
-          className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 rounded-xl border border-gray-200 bg-white text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
-        >
-          {showAll ? "הצג פחות" : `הצג את כל ${matches.length} המשחקים`}
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
-            className={`transition-transform ${showAll ? "rotate-180" : ""}`}>
-            <polyline points="6 9 12 15 18 9" />
-          </svg>
-        </button>
-      )}
+      <button
+        onClick={() => setShowAll((v) => !v)}
+        className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 rounded-xl border border-gray-200 bg-white text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
+      >
+        {showAll ? "הצג אחרונים והבאים" : `הצג את כל משחקי היום (${matches.length})`}
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+          className={`transition-transform ${showAll ? "rotate-180" : ""}`}>
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </button>
     </div>
   );
 }

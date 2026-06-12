@@ -646,10 +646,12 @@ export default function StandingsPage() {
                   name: p.name,
                   total: p.total,
                   today: p.today,
+                  exacts: Number(p.exact) || 0,
                   isLifter: p.id === lifterId,
                   isSheep: p.id === sheepId,
                 })),
                 dateLabel,
+                { matchesPlayed: finishedMatches.length },
               );
               if (outcome === "copied") setShareHint("התמונה הועתקה — הדביקו בקבוצה 📋");
               else if (outcome === "downloaded") setShareHint("התמונה ירדה — שתפו אותה מההורדות");

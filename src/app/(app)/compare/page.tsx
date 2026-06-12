@@ -565,7 +565,7 @@ function ResultsView({ matches, brackets, currentUserId, loading }: ResultsViewP
   const mostRecentId = matches[0]?.id ?? null;
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto">
+    <div className="max-w-6xl mx-auto space-y-6 md:space-y-0 md:grid md:grid-cols-2 md:gap-4 md:items-start">
       {Object.entries(byDate).map(([dateLabel, dayMatches]) => (
         <DayTable
           key={dateLabel}
@@ -835,7 +835,7 @@ function DayTable({
       {/* Unified collapsible match list (all breakpoints). Finished matches
           are collapsed by default; only the most recent one (defaultOpenMatchId,
           chosen across all days) starts open. */}
-      <div className="divide-y divide-gray-100 md:divide-y-0 md:grid md:grid-cols-2 md:gap-3 md:p-4">
+      <div className="divide-y divide-gray-100">
         {matches.map((m, mi) => {
           const mHits = matchHits[mi].hits;
           const c = perMatchCounts[mi];
@@ -846,7 +846,7 @@ function DayTable({
             (a, b) => hitRank[a.hit] - hitRank[b.hit] || a.name.localeCompare(b.name, "he")
           );
           return (
-            <div key={m.id} className="md:border md:border-gray-200 md:rounded-xl md:overflow-hidden md:self-start md:bg-white">
+            <div key={m.id}>
               <button
                 onClick={() => toggleMatch(m.id)}
                 className={`w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-5 py-2.5 text-start transition-colors ${
@@ -891,7 +891,7 @@ function DayTable({
 
               {isOpen && (
                 <div className="px-3 sm:px-5 pb-3">
-                  <div className="rounded-lg border border-gray-100 overflow-hidden sm:columns-2 md:columns-1 xl:columns-2 sm:gap-0 [column-fill:balance]">
+                  <div className="rounded-lg border border-gray-100 overflow-hidden sm:columns-2 md:columns-1 sm:gap-0 [column-fill:balance]">
                     {sortedHits.map((h) => {
                       const you = h.userId === currentUserId;
                       let icon = "·";

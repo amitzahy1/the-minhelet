@@ -560,10 +560,6 @@ function ResultsView({ matches, brackets, currentUserId, loading }: ResultsViewP
     byDate[key].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }
 
-  // `matches` arrives sorted newest-first, so the first id is the most recent
-  // finished match — the only one that starts expanded.
-  const mostRecentId = matches[0]?.id ?? null;
-
   return (
     <div className="max-w-6xl mx-auto space-y-6 md:space-y-0 md:grid md:grid-cols-2 md:gap-4 md:items-start">
       {Object.entries(byDate).map(([dateLabel, dayMatches]) => (
@@ -573,7 +569,6 @@ function ResultsView({ matches, brackets, currentUserId, loading }: ResultsViewP
           matches={dayMatches}
           brackets={brackets}
           currentUserId={currentUserId}
-          defaultOpenMatchId={mostRecentId}
         />
       ))}
     </div>

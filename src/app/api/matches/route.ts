@@ -1,7 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import fdMatchDetailsBundled from "@/lib/tournament/fd-match-details.json";
 import { toAppCode, findUnmappedTeams } from "@/lib/fd-team-mapping";
+import { buildResultRows } from "@/lib/sync-results";
+import type { MatchResult } from "@/lib/api-football-data";
 
 interface FdDetails {
   syncedAt?: string;
@@ -126,22 +128,29 @@ export async function GET() {
       : Promise.resolve({ matches: [], error: "No API token" }),
     supabaseUrl && supabaseAnon
       ? (async () => {
+          // null = READ FAILED (as opposed to []: read succeeded, no rows).
+          // The self-heal below must distinguish the two — treating a failed
+          // read as "no rows exist" would let the heal overwrite admin-entered
+          // scores with FD data. supabase-js returns errors, it doesn't throw.
           try {
-            const { data } = await createClient(supabaseUrl, supabaseAnon)
+            const { data, error } = await createClient(supabaseUrl, supabaseAnon)
               .from("demo_match_results")
               .select("match_id, home_goals, away_goals, home_penalties, away_penalties, home_team, away_team, group_id, stage, status, scheduled_at");
+            if (error) return null;
             return (data as DemoResult[]) || [];
           } catch {
-            return [] as DemoResult[];
+            return null;
           }
         })()
-      : Promise.resolve([] as DemoResult[]),
+      : Promise.resolve(null),
     loadDynamicDetails(),
   ]);
 
+  const demoReadFailed = ourResults === null;
+
   // 2. Index our results by match_id for quick lookup
   const demoById: Record<string, DemoResult> = {};
-  for (const r of ourResults) demoById[r.match_id] = r;
+  for (const r of ourResults ?? []) demoById[r.match_id] = r;
 
   // 3. Map Football-Data matches, overlay our data when present
   const fdMatches: FdRawMatch[] = fdResult.matches || [];
@@ -180,7 +189,7 @@ export async function GET() {
 
   // 4. Include any DB-only rows (manually entered matches that aren't in
   //    Football-Data.org yet — rare, but possible).
-  for (const r of ourResults) {
+  for (const r of ourResults ?? []) {
     if (seen.has(r.match_id)) continue;
     // Skip if no team codes — nothing useful to show.
     if (!r.home_team || !r.away_team) continue;
@@ -212,8 +221,64 @@ export async function GET() {
     console.error(`[/api/matches] Unmapped team codes: ${unmappedTeams.join(", ")} — add to FD_TLA_TO_APP in src/lib/fd-team-mapping.ts`);
   }
 
+  // Self-heal: persist any FD-FINISHED match (with a real score) whose demo
+  // row is missing or scoreless. The only scheduled sync is the daily 06:00
+  // cron (Vercel Hobby = daily crons only), so during the evening play window
+  // THIS is what gets results into the DB — every client polls /api/matches
+  // every 60s while a match is live. after() runs it post-response (a bare
+  // floating promise would be frozen with the lambda); it never overwrites an
+  // admin-entered (non-null) score.
+  // NEVER heal when the demo read failed — an empty demoById from a failed
+  // read would make every FD-FINISHED match look "missing" and the heal would
+  // overwrite admin-entered corrections with FD data.
+  if (!demoReadFailed) after(() => healFinishedResults(fdMatches, demoById));
+
   const payload: { matches: Match[]; error?: string; unmappedTeams?: string[] } = { matches: merged };
   if ("error" in fdResult && fdResult.error) payload.error = fdResult.error;
   if (unmappedTeams.length) payload.unmappedTeams = unmappedTeams;
   return NextResponse.json(payload);
+}
+
+// Per-instance throttle so the 60s polling doesn't re-upsert the same rows on
+// every request. Cold starts reset it — harmless, the upsert is idempotent.
+const healedAt = new Map<string, number>();
+const HEAL_TTL_MS = 10 * 60_000;
+
+async function healFinishedResults(
+  fdMatches: FdRawMatch[],
+  demoById: Record<string, DemoResult>,
+): Promise<void> {
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!url || !serviceKey) return;
+
+  const now = Date.now();
+  const needHeal = fdMatches.filter((m) => {
+    if (m.status !== "FINISHED") return false;
+    const demo = demoById[String(m.id)];
+    if (demo && demo.home_goals != null && demo.away_goals != null) return false;
+    const t = healedAt.get(String(m.id));
+    return !t || now - t > HEAL_TTL_MS;
+  });
+  if (needHeal.length === 0) return;
+
+  // buildResultRows applies the null-score guard, stage/TLA normalization and
+  // the regularTime-vs-fullTime selection — identical to the sync routes.
+  const rows = buildResultRows(needHeal as unknown as MatchResult[], "auto-heal");
+  if (rows.length === 0) return;
+
+  try {
+    const supabase = createClient(url, serviceKey);
+    const { error } = await supabase
+      .from("demo_match_results")
+      .upsert(rows, { onConflict: "match_id" });
+    if (!error) {
+      for (const r of rows) healedAt.set(r.match_id, now);
+      console.log(`[/api/matches] auto-healed ${rows.length} finished result(s): ${rows.map((r) => r.match_id).join(", ")}`);
+    } else {
+      console.error(`[/api/matches] auto-heal failed: ${error.message}`);
+    }
+  } catch (e) {
+    console.error(`[/api/matches] auto-heal error: ${String(e)}`);
+  }
 }

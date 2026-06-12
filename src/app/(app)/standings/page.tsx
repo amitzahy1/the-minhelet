@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { useBettingStore } from "@/stores/betting-store";
 import { shareLeaderboard, openWhatsApp } from "@/lib/share";
@@ -14,11 +14,13 @@ import { isLocked } from "@/lib/constants";
 import { GROUPS } from "@/lib/tournament/groups";
 import { TodayMatches } from "@/components/shared/TodayMatches";
 import { computeLiveScores, computeTodayScores, computePlayerHistories, koStageMaxPts } from "@/lib/scoring/live-scorer";
-import { normalizeGroupLetter, matchPairIndex, type FinishedMatch, GROUP_MATCH_PAIRS } from "@/lib/results-hits";
+import { normalizeGroupLetter, matchPairIndex, computeGroupHits, type FinishedMatch, GROUP_MATCH_PAIRS } from "@/lib/results-hits";
 import { computeMatchDays, dayLockAtForKickoff } from "@/lib/tournament/group-live-state";
 import { toIsraelTimeShort } from "@/lib/timezone";
 import { computeLeagueTitles } from "@/lib/league-titles";
 import { LeagueTitles } from "@/components/shared/LeagueTitles";
+import { anyMatchInPlayWindow, LIVE_REFRESH_MS } from "@/lib/live-window";
+import { getTeamNameHe } from "@/lib/flags";
 
 // Mock completion data — in production this comes from Supabase
 const MOCK_COMPLETION_DATA: PlayerCompletion[] = [
@@ -340,17 +342,22 @@ export default function StandingsPage() {
   const [tournamentActuals, setTournamentActuals] = useState<import("@/lib/scoring/special-bets-scorer").TournamentActuals | null>(null);
   const [playerStats, setPlayerStats] = useState<import("@/lib/scoring/special-bets-scorer").PlayerStat[]>([]);
   const [bestThirdsOverride, setBestThirdsOverride] = useState<string[] | null>(null);
-  useEffect(() => {
-    let alive = true;
-    (async () => {
+  const loadScoringData = useCallback(async (aliveRef?: { current: boolean }) => {
+    const alive = () => aliveRef?.current !== false;
+    {
       try {
         const [matchesRes, statsRes, thirdsRes] = await Promise.all([
           fetch("/api/matches").then((r) => r.json()).catch(() => ({ matches: [] })),
           fetch("/api/tournament-stats").then((r) => r.json()).catch(() => null),
           fetch("/api/best-thirds").then((r) => r.json()).catch(() => ({ override: null })),
         ]);
-        if (!alive) return;
+        if (!alive()) return;
         const all: MatchApi[] = matchesRes.matches || [];
+        // Resilience: a failed poll resolves to {matches: []} (the .catch
+        // above). Overwriting state with [] would zero every player's points
+        // on screen AND permanently kill the polling loop (it's gated on a
+        // non-empty allMatches). Keep the previous data instead.
+        if (all.length === 0) return;
         setAllMatches(all);
         const finished = all
           .filter(
@@ -406,11 +413,26 @@ export default function StandingsPage() {
         const override = thirdsRes?.override;
         setBestThirdsOverride(Array.isArray(override) && override.length === 8 ? override : null);
       } catch {
-        if (alive) setFinishedMatches([]);
+        // Keep whatever data we already have — never blank the table on a blip.
       }
-    })();
-    return () => { alive = false; };
+    }
   }, []);
+
+  useEffect(() => {
+    const aliveRef = { current: true };
+    loadScoringData(aliveRef);
+    return () => { aliveRef.current = false; };
+  }, [loadScoringData]);
+
+  // Live refresh: while any match is in its play window, re-pull the scoring
+  // inputs every 60s so the table moves without a manual reload (the points
+  // are computed client-side from these inputs).
+  useEffect(() => {
+    if (allMatches.length === 0 || !anyMatchInPlayWindow(allMatches)) return;
+    const aliveRef = { current: true };
+    const id = setInterval(() => loadScoringData(aliveRef), LIVE_REFRESH_MS);
+    return () => { aliveRef.current = false; clearInterval(id); };
+  }, [allMatches, loadScoringData]);
 
   // Max possible scores: for each user, how many more points can they earn?
   const maxPossibleScores = useMemo(() => {
@@ -754,25 +776,48 @@ export default function StandingsPage() {
         );
       })()}
 
-      {/* מירוץ הנקודות — only when real scoring data exists */}
-      {PLAYERS.length >= 2 && PLAYERS[0]?.total > 0 && (
-        <div className="mb-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-3">מירוץ הנקודות</h2>
-          {(() => {
-            const COLORS = ["#3B82F6", "#10B981", "#F59E0B", "#8B5CF6", "#EF4444", "#EC4899", "#06B6D4", "#F97316", "#6366F1", "#14B8A6", "#E11D48"];
-            const raceData = PLAYERS.map((p, idx) => {
-              const steps = 10;
-              const history = Array.from({ length: steps }, (_, i) =>
-                Math.round((p.total / steps) * (i + 1) + (Math.sin(idx + i) * 8))
-              );
-              history[steps - 1] = p.total;
-              return { name: p.name, color: COLORS[idx % COLORS.length], history };
-            });
-            const matchdays = Array.from({ length: 10 }, (_, i) => `יום ${i + 1}`);
-            return <LeaderboardRace data={raceData} matchdays={matchdays} />;
-          })()}
-        </div>
-      )}
+      {/* מירוץ הנקודות — REAL cumulative match points per finished group match
+          (used to be synthetic sin-wave filler around the total, which produced
+          nonsense values like -8). Hover/tap a player shows where each point
+          came from. */}
+      {PLAYERS.length >= 2 && PLAYERS[0]?.total > 0 && (() => {
+        const COLORS = ["#3B82F6", "#10B981", "#F59E0B", "#8B5CF6", "#EF4444", "#EC4899", "#06B6D4", "#F97316", "#6366F1", "#14B8A6", "#E11D48"];
+        const raceMatches = [...finishedMatches]
+          .filter((m) => m.stage === "GROUP_STAGE" || m.stage === "GROUP")
+          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        if (raceMatches.length === 0) return null;
+
+        // Away-home digit order: the label renders in an RTL context, where the
+        // Hebrew home name sits rightmost and the LTR digit run sits to its
+        // left — so the home goals must be the right-hand digit.
+        const matchdays = raceMatches.map(
+          (m) => `${getTeamNameHe(m.homeTla) || m.homeTla} ${m.awayGoals}-${m.homeGoals} ${getTeamNameHe(m.awayTla) || m.awayTla}`
+        );
+        const hitsPerMatch = raceMatches.map((m) => computeGroupHits(m, brackets));
+        const raceData = PLAYERS.map((p, idx) => {
+          const history: number[] = [];
+          const contributions: ({ label: string; pts: number; note?: string } | null)[] = [];
+          let running = 0;
+          raceMatches.forEach((m, i) => {
+            const h = hitsPerMatch[i].find((x) => x.userId === p.id);
+            let pts = 0;
+            let note: string | undefined;
+            if (h?.hit === "exact") { pts = scoring.toto.GROUP + scoring.exact.GROUP; note = `מדויקת (ניחש ${h.pred.away}-${h.pred.home})`; }
+            else if (h?.hit === "toto") { pts = scoring.toto.GROUP; note = `טוטו (ניחש ${h.pred.away}-${h.pred.home})`; }
+            else if (h?.hit === "miss") { note = `פספס (ניחש ${h.pred.away}-${h.pred.home})`; }
+            running += pts;
+            history.push(running);
+            contributions.push(h && h.hit !== "empty" ? { label: matchdays[i], pts, note } : null);
+          });
+          return { name: p.name, color: COLORS[idx % COLORS.length], history, contributions };
+        });
+        return (
+          <div className="mb-6">
+            <h2 className="text-lg font-bold text-gray-900 mb-3">מירוץ הנקודות</h2>
+            <LeaderboardRace data={raceData} matchdays={matchdays} />
+          </div>
+        );
+      })()}
 
       {/* Comparison table */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden hover:shadow-lg transition-all mb-6">
@@ -793,7 +838,7 @@ export default function StandingsPage() {
               </tr>
             </thead>
             <tbody>
-              {PLAYERS.map((p) => (
+              {[...PLAYERS].sort((a, b) => b.total - a.total).map((p) => (
                 <tr key={p.id} className={`border-t border-gray-100 ${p.isYou ? "bg-blue-50/40" : "hover:bg-gray-50/30"}`}>
                   <td className="py-3 px-4 font-bold text-gray-900">{p.name} {p.isYou && <span className="text-xs text-blue-500 bg-blue-100 rounded px-1">אתה</span>}</td>
                   <td className="py-3 px-3 text-center font-black text-base" style={{ fontFamily: "var(--font-inter)" }}>{p.total}</td>

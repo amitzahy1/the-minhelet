@@ -25,6 +25,9 @@ interface Match {
   awayTla: string;
   group: string;
   stage: string;
+  status?: string;
+  homeGoals?: number | null;
+  awayGoals?: number | null;
 }
 
 interface MatchBetsPanelProps {
@@ -356,9 +359,14 @@ export default function SchedulePage() {
               <div className="space-y-2">
                 {dayMatches.map(m => {
                   const isExpanded = expandedMatch === m.id;
+                  const isFinished = m.status === "FINISHED";
+                  const isLive = m.status === "IN_PLAY" || m.status === "PAUSED";
+                  const hasScore = (isFinished || isLive) && m.homeGoals != null && m.awayGoals != null;
                   return (
-                    <div key={m.id} className={`bg-white rounded-xl border shadow-sm overflow-hidden transition-all ${
-                      isExpanded ? "border-blue-300 shadow-md" : "border-gray-200 hover:border-gray-300"
+                    <div key={m.id} className={`rounded-xl border shadow-sm overflow-hidden transition-all ${
+                      isLive ? "bg-red-50/40 border-red-200" :
+                      isFinished ? "bg-green-50/40 border-green-200" :
+                      isExpanded ? "bg-white border-blue-300 shadow-md" : "bg-white border-gray-200 hover:border-gray-300"
                     }`}>
                       <div
                         onClick={() => setExpandedMatch(isExpanded ? null : m.id)}
@@ -369,7 +377,20 @@ export default function SchedulePage() {
                           <TeamLogo code={m.homeTla} size="sm" />
                         </div>
                         <div className="text-center">
-                          <p className="text-base font-black text-gray-900 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{toIsraelTimeShort(m.date)}</p>
+                          {hasScore ? (
+                            <>
+                              {/* RTL: home team is on the RIGHT → home goals must
+                                  be the right-hand digit (away-home glyph order). */}
+                              <p dir="ltr" className="text-lg font-black text-gray-900 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>
+                                {m.awayGoals}-{m.homeGoals}
+                              </p>
+                              <p className={`text-[10px] font-bold ${isLive ? "text-red-600" : "text-green-700"}`}>
+                                {isLive ? "● לייב" : "✓ נגמר"}
+                              </p>
+                            </>
+                          ) : (
+                            <p className="text-base font-black text-gray-900 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{toIsraelTimeShort(m.date)}</p>
+                          )}
                           <p className="text-[10px] text-gray-400">{m.group?.replace("GROUP_", "בית ") || m.stage}</p>
                         </div>
                         <div className="flex items-center gap-2 justify-start">

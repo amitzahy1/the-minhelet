@@ -46,7 +46,11 @@ export function SystemStatus() {
       const res = await fetch("/api/sync");
       const data = await res.json();
       results.sync = data.success
-        ? { ok: true, message: `סונכרנו ${data.matchesCount} משחקים`, lastUpdate: new Date().toLocaleString("he-IL") }
+        ? {
+            ok: true,
+            message: `${data.matchesCount} משחקים הסתיימו · נשמרו ${data.persisted ?? 0}${data.pendingScore ? ` · ${data.pendingScore} ממתינים לתוצאה מה-API` : ""}`,
+            lastUpdate: new Date().toLocaleString("he-IL"),
+          }
         : { ok: false, message: data.error || "סנכרון נכשל" };
     } catch { results.sync = { ok: false, message: "שגיאת סנכרון" }; }
 
@@ -114,7 +118,19 @@ export function SystemStatus() {
         <CardHeader><CardTitle className="text-base">פעולות מהירות</CardTitle></CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-2">
-            <Button variant="outline" className="justify-start" onClick={() => { window.location.href = "/api/sync"; }}>
+            <Button variant="outline" className="justify-start" onClick={async () => {
+              // Stay in the panel — navigating to /api/sync dumps raw JSON.
+              try {
+                const res = await fetch("/api/sync");
+                const data = await res.json();
+                alert(data.success
+                  ? `נשמרו ${data.persisted ?? 0} תוצאות (${data.matchesCount} משחקים הסתיימו${data.pendingScore ? `, ${data.pendingScore} ממתינים לתוצאה` : ""})`
+                  : `סנכרון נכשל: ${data.error || "שגיאה לא ידועה"}`);
+                checkAll();
+              } catch {
+                alert("שגיאת רשת בסנכרון");
+              }
+            }}>
               🔄 סנכרן תוצאות מ-API
             </Button>
             <Button variant="outline" className="justify-start" onClick={() => {

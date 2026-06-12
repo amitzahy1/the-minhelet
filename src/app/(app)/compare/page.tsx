@@ -849,8 +849,10 @@ function DayTable({
                   </span>
                   <span className="text-xl shrink-0">{getFlag(m.homeTla)}</span>
                 </div>
-                <span className="text-sm font-black tabular-nums bg-white rounded-md border-2 border-gray-200 px-2 py-0.5 shrink-0" style={{ fontFamily: "var(--font-inter)" }}>
-                  {m.homeGoals}-{m.awayGoals}
+                {/* RTL: home team is on the RIGHT → home goals must be the
+                    right-hand digit (away-home glyph order). */}
+                <span dir="ltr" className="text-sm font-black tabular-nums bg-white rounded-md border-2 border-gray-200 px-2 py-0.5 shrink-0" style={{ fontFamily: "var(--font-inter)" }}>
+                  {m.awayGoals}-{m.homeGoals}
                 </span>
                 {/* Team2 flag + name */}
                 <div className="flex items-center gap-1.5 flex-1 min-w-0">
@@ -899,8 +901,10 @@ function DayTable({
                           <span className="text-[11px] text-gray-400">לא הימר/ה</span>
                         ) : (
                           <>
-                            <span className={`text-sm font-black tabular-nums ${text}`} style={{ fontFamily: "var(--font-inter)" }}>
-                              {h.pred.home}-{h.pred.away}
+                            {/* Same away-home glyph order as the result chip
+                                above, so an exact hit reads identically. */}
+                            <span dir="ltr" className={`text-sm font-black tabular-nums ${text}`} style={{ fontFamily: "var(--font-inter)" }}>
+                              {h.pred.away}-{h.pred.home}
                             </span>
                             {delta > 0 && (
                               <span className="text-[11px] font-bold text-blue-700 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>

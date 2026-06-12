@@ -7,7 +7,7 @@
 // Reads /api/matches which already overlays admin-entered demo_match_results.
 // =============================================================================
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { GROUPS, GROUP_LETTERS, getTeamByCode } from "@/lib/tournament/groups";
 import { getFlag } from "@/lib/flags";
 import {
@@ -25,6 +25,7 @@ import { rankBestThirds } from "@/lib/tournament/thirds-ranker";
 import { SpecialTrackerView } from "./SpecialTrackerView";
 import { useSharedData } from "@/hooks/useSharedData";
 import { FdStandingsCheck } from "./FdStandingsCheck";
+import { anyMatchInPlayWindow, LIVE_REFRESH_MS } from "@/lib/live-window";
 
 interface MatchApi {
   id: number;
@@ -99,15 +100,17 @@ function GroupCard({ letter, matches, fairPlay }: { letter: string; matches: Mat
       </div>
       <table className="w-full text-xs">
         <thead>
-          <tr className="bg-gray-50 text-[10px] font-semibold text-gray-500 uppercase border-b border-gray-100" style={{ fontFamily: "var(--font-inter)" }}>
+          {/* Hebrew abbreviations — the old Latin M/N/T/H letters were
+              unreadable to users (a legend also renders under each table). */}
+          <tr className="bg-gray-50 text-[10px] font-semibold text-gray-500 border-b border-gray-100">
             <th className="py-1.5 px-2 text-start">#</th>
             <th className="py-1.5 px-1 text-start">נבחרת</th>
-            <th className="py-1.5 px-1 text-center" title="משחקים">M</th>
-            <th className="py-1.5 px-1 text-center" title="ניצחונות">N</th>
-            <th className="py-1.5 px-1 text-center" title="תיקו">T</th>
-            <th className="py-1.5 px-1 text-center" title="הפסדים">H</th>
-            <th className="py-1.5 px-1 text-center" title="שערי זכות">+</th>
-            <th className="py-1.5 px-1 text-center" title="שערי חובה">-</th>
+            <th className="py-1.5 px-1 text-center" title="משחקים">מש׳</th>
+            <th className="py-1.5 px-1 text-center" title="ניצחונות">נצ׳</th>
+            <th className="py-1.5 px-1 text-center" title="תיקו">תיקו</th>
+            <th className="py-1.5 px-1 text-center" title="הפסדים">הפ׳</th>
+            <th className="py-1.5 px-1 text-center" title="שערים שהבקיעה">+</th>
+            <th className="py-1.5 px-1 text-center" title="שערים שספגה">-</th>
             <th className="py-1.5 px-2 text-center font-bold">נק׳</th>
           </tr>
         </thead>
@@ -138,6 +141,9 @@ function GroupCard({ letter, matches, fairPlay }: { letter: string; matches: Mat
           })}
         </tbody>
       </table>
+      <p className="px-2 py-1.5 text-[10px] text-gray-400 border-t border-gray-100">
+        מש׳ משחקים · נצ׳ ניצחונות · הפ׳ הפסדים · + הבקיעה · − ספגה · נק׳ נקודות
+      </p>
     </div>
   );
 }
@@ -287,28 +293,43 @@ export function LiveGroupsAndBracket() {
   // All bettors' special-bet picks → drives the "who currently holds each bet" view.
   const { specialBets, currentUserId } = useSharedData();
 
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      try {
-        const [matchesRes, thirdsRes, statsRes] = await Promise.all([
-          fetch("/api/matches").then((r) => r.json()).catch(() => ({ matches: [] })),
-          fetch("/api/best-thirds").then((r) => r.json()).catch(() => ({ override: null })),
-          fetch("/api/tournament-stats").then((r) => r.json()).catch(() => null),
-        ]);
-        if (!alive) return;
-        setMatches((matchesRes.matches as MatchApi[]) || []);
-        const override = thirdsRes?.override;
-        setThirdsOverride(Array.isArray(override) && override.length === 8 ? override : null);
-        const board = statsRes?.actuals?.dirtiest_board;
-        if (Array.isArray(board)) setDirtyBoard(board);
-      } catch {
-        /* keep empty */
-      }
-      if (alive) setLoading(false);
-    })();
-    return () => { alive = false; };
+  const loadLiveData = useCallback(async (aliveRef?: { current: boolean }) => {
+    const alive = () => aliveRef?.current !== false;
+    try {
+      const [matchesRes, thirdsRes, statsRes] = await Promise.all([
+        fetch("/api/matches").then((r) => r.json()).catch(() => ({ matches: [] })),
+        fetch("/api/best-thirds").then((r) => r.json()).catch(() => ({ override: null })),
+        fetch("/api/tournament-stats").then((r) => r.json()).catch(() => null),
+      ]);
+      if (!alive()) return;
+      const incoming = (matchesRes.matches as MatchApi[]) || [];
+      // A failed poll resolves to [] — keep previous data so the group tables
+      // don't blank out and the refresh loop (gated on non-empty) stays armed.
+      if (incoming.length > 0) setMatches(incoming);
+      const override = thirdsRes?.override;
+      setThirdsOverride(Array.isArray(override) && override.length === 8 ? override : null);
+      const board = statsRes?.actuals?.dirtiest_board;
+      if (Array.isArray(board)) setDirtyBoard(board);
+    } catch {
+      /* keep empty */
+    }
+    if (alive()) setLoading(false);
   }, []);
+
+  useEffect(() => {
+    const aliveRef = { current: true };
+    loadLiveData(aliveRef);
+    return () => { aliveRef.current = false; };
+  }, [loadLiveData]);
+
+  // Live refresh: the group tables + bracket used to be computed once per
+  // mount and go stale during matches. Re-pull every 60s while in a play window.
+  useEffect(() => {
+    if (matches.length === 0 || !anyMatchInPlayWindow(matches)) return;
+    const aliveRef = { current: true };
+    const id = setInterval(() => loadLiveData(aliveRef), LIVE_REFRESH_MS);
+    return () => { aliveRef.current = false; clearInterval(id); };
+  }, [matches, loadLiveData]);
 
   const fairPlay = useMemo(() => fairPlayFromBoard(dirtyBoard), [dirtyBoard]);
   const groupOrders = useMemo(() => computeGroupOrdersFromStandings(matches, fairPlay), [matches, fairPlay]);

@@ -67,9 +67,13 @@ interface Row {
 
 // ---------------------------------------------------------------------------
 
+// MUST match FD_STAGE_TO_APP in src/lib/sync-results.ts (verified live):
+// LAST_32 is the 48-team Round of 32, LAST_16 is the Round of 16.
 const STAGE_MAP: Record<string, string> = {
   GROUP_STAGE: "GROUP",
-  LAST_16: "R32",
+  LAST_32: "R32",
+  ROUND_OF_32: "R32",
+  LAST_16: "R16",
   ROUND_OF_16: "R16",
   QUARTER_FINALS: "QF",
   SEMI_FINALS: "SF",
@@ -281,7 +285,11 @@ export function MatchResultsEntry() {
       const res = await fetch("/api/admin/results/sync-from-api", { method: "POST" });
       const data = await res.json();
       if (data.success) {
-        setMessage(`סונכרנו ${data.synced} תוצאות מ-Football-Data.org (${data.total} משחקים נסרקו) ✓`);
+        setMessage(
+          `סונכרנו ${data.synced} תוצאות מ-Football-Data.org (${data.total} משחקים נסרקו` +
+          (data.pendingScore ? `, ${data.pendingScore} הסתיימו אך התוצאה טרם פורסמה ב-API — נסו שוב בעוד כמה דקות` : "") +
+          ") ✓"
+        );
         await loadAll();
       } else {
         setMessage("שגיאה: " + (data.error || "Sync failed"));

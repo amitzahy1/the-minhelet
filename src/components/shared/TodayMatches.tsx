@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getFlag, getTeamNameHe } from "@/lib/flags";
 import { TeamLogo } from "@/components/shared/TeamLogo";
@@ -9,6 +9,7 @@ import { useSharedData } from "@/hooks/useSharedData";
 import { isLocked, revealAtFor, formatLockDeadline, LOCK_DEADLINE } from "@/lib/constants";
 import { computeGroupHits, hitCounts, normalizeGroupLetter, matchPairIndex, classifyHit, type HitKind } from "@/lib/results-hits";
 import { computeMatchDays, dayLockAtForKickoff, type MatchDay } from "@/lib/tournament/group-live-state";
+import { anyMatchInPlayWindow, LIVE_REFRESH_MS } from "@/lib/live-window";
 
 interface Match {
   id: number;
@@ -84,15 +85,22 @@ export function TodayMatches() {
     return () => clearTimeout(id);
   }, [matchDays, refetch, now]);
 
+  // True once a real (non-demo) match list rendered — a later failed poll must
+  // not replace live data with the demo placeholder (loadMatches is a stable
+  // useCallback, so it can't read the matches state directly).
+  const hasRealDataRef = useRef(false);
+
   const loadMatches = useCallback(async () => {
       try {
         const res = await fetch("/api/matches");
         const data = await res.json();
         if (!data.matches || data.matches.length === 0) {
+          if (hasRealDataRef.current) return;
           setMatches(DEMO_MATCHES);
           setHeading("משחקים קרובים — תצוגה מקדימה");
           return;
         }
+        hasRealDataRef.current = true;
 
         const allMatches = data.matches as Match[];
         // Match-day lock instants drive the per-match score reveal below.
@@ -133,6 +141,7 @@ export function TodayMatches() {
         setMatches(DEMO_MATCHES);
         setHeading("משחקים קרובים — תצוגה מקדימה");
       } catch {
+        if (hasRealDataRef.current) return;
         setMatches(DEMO_MATCHES);
         setHeading("משחקים קרובים — תצוגה מקדימה");
       }
@@ -146,20 +155,22 @@ export function TodayMatches() {
   // the schedule every 60s so scores/statuses move without a manual reload.
   // (The FD fetch behind /api/matches revalidates every 60s too.)
   useEffect(() => {
-    if (matches.length === 0) return;
-    const nowMs = Date.now();
-    const inWindow = matches.some((m) => {
-      if (m.status === "IN_PLAY" || m.status === "PAUSED") return true;
-      if (m.status === "FINISHED") return false;
-      const ko = new Date(m.date).getTime();
-      return nowMs >= ko - 15 * 60_000 && nowMs <= ko + 150 * 60_000;
-    });
-    if (!inWindow) return;
-    const id = setInterval(loadMatches, 60_000);
+    if (matches.length === 0 || !anyMatchInPlayWindow(matches)) return;
+    const id = setInterval(loadMatches, LIVE_REFRESH_MS);
     return () => clearInterval(id);
   }, [matches, loadMatches]);
 
   if (matches.length === 0) return null;
+
+  // Featured selection (collapsed view): the 2 most recently finished matches
+  // of the day + the next 2 (live/upcoming), backfilling from either bucket up
+  // to 4 cards. "הצג את כל..." still expands to the whole day.
+  const finishedToday = matches.filter((m) => m.status === "FINISHED");
+  const restToday = matches.filter((m) => m.status !== "FINISHED");
+  const upcomingTake = Math.min(restToday.length, Math.max(2, 4 - finishedToday.length));
+  const finishedTake = Math.min(finishedToday.length, 4 - upcomingTake);
+  const featured = [...finishedToday.slice(-finishedTake), ...restToday.slice(0, upcomingTake)]
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   // Build bettors' special bets relevant to a match's teams
   function getRelatedBets(homeTla: string, awayTla: string) {
@@ -206,8 +217,9 @@ export function TodayMatches() {
         <h2 className="text-base font-bold text-gray-800">{heading}</h2>
         <span className="text-sm text-gray-400">{matches.length} משחקים</span>
       </div>
-      <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
-        {(showAll ? matches : matches.slice(0, 4)).map((m, idx) => {
+      {/* 2 columns on mobile — 3 made the cards too narrow to read a score. */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {(showAll ? matches : featured).map((m) => {
           const isFinished = m.status === "FINISHED";
           const isLive = m.status === "IN_PLAY" || m.status === "PAUSED";
           const isExpanded = expandedId === m.id;
@@ -275,7 +287,7 @@ export function TodayMatches() {
           })();
 
           return (
-            <div key={m.id} className={`col-span-1${!showAll && idx === 3 ? " hidden md:block" : ""}`}>
+            <div key={m.id} className="col-span-1">
               <div
                 onClick={() => setExpandedId(isExpanded ? null : m.id)}
                 className={`bg-white rounded-xl border shadow-sm p-3 text-center transition-all cursor-pointer ${
@@ -310,8 +322,12 @@ export function TodayMatches() {
                   </div>
                   <div className="shrink-0 px-1">
                     {(isLive || isFinished) && m.homeGoals !== null ? (
-                      <span className="text-lg font-black tabular-nums text-gray-900" style={{ fontFamily: "var(--font-inter)" }}>
-                        {m.homeGoals}-{m.awayGoals}
+                      // RTL: the home team renders on the RIGHT, so the home
+                      // goals must be the RIGHT digit — i.e. away-home in glyph
+                      // order. Rendering "{home}-{away}" put the home score next
+                      // to the AWAY team and read as a reversed result.
+                      <span className="text-xl font-black tabular-nums text-gray-900" dir="ltr" style={{ fontFamily: "var(--font-inter)" }}>
+                        {m.awayGoals}-{m.homeGoals}
                       </span>
                     ) : (
                       <span className="text-sm font-bold text-gray-300">vs</span>
@@ -390,7 +406,9 @@ export function TodayMatches() {
                                     </span>
                                   </p>
                                 )}
-                                <div className="grid grid-cols-2 gap-1">
+                                {/* One pick per row — 2 columns squeezed the
+                                    bettor name out entirely on mobile. */}
+                                <div className="grid grid-cols-1 gap-1">
                                   {revealedPicks.map((p) => {
                                     const hit = liveActual ? classifyHit({ home: p.home, away: p.away }, liveActual) : null;
                                     const bg =
@@ -448,7 +466,7 @@ export function TodayMatches() {
                                   </>
                                 )}
                               </p>
-                              <div className="grid grid-cols-2 gap-1">
+                              <div className="grid grid-cols-1 gap-1">
                                 {groupHits.map((h) => {
                                   const bg =
                                     h.hit === "exact"

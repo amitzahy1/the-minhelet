@@ -25,7 +25,13 @@ const GROUP_LETTERS = Object.keys(GROUPS_RAW);
 
 function generateMatchups(codes: string[]) {
   const [a, b, c, d] = codes;
-  return [{ h: a, a: b }, { h: c, a: d }, { h: a, a: c }, { h: d, a: b }, { h: d, a: a }, { h: b, a: c }];
+  // MUST mirror GROUP_MATCH_PAIRS in results-hits.ts ([0,1],[2,3],[0,2],[1,3],
+  // [0,3],[1,2]) in both pair order AND home/away orientation — the scorer, the
+  // bot generator and the admin editor all read scores[i] in that orientation.
+  // (Matches 4+5 used to be {h:d,a:b},{h:d,a:a}: every human bracket stored
+  // those two flipped, scored as misses while the page itself showed hits —
+  // repaired by scripts/migrate-flip-pairs-3-4.ts on 2026-06-12.)
+  return [{ h: a, a: b }, { h: c, a: d }, { h: a, a: c }, { h: b, a: d }, { h: a, a: d }, { h: b, a: c }];
 }
 
 function ScoreStepper({ value, onChange, disabled }: { value: number | null; onChange: (v: number) => void; disabled?: boolean }) {

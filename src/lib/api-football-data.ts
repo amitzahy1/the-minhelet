@@ -13,13 +13,18 @@ function getToken(): string {
   return process.env.FOOTBALL_DATA_TOKEN || "";
 }
 
-async function fetchAPI(endpoint: string) {
+async function fetchAPI(endpoint: string, opts?: { fresh?: boolean }) {
   const token = getToken();
   if (!token) throw new Error("FOOTBALL_DATA_TOKEN not set");
 
   const res = await fetch(`${BASE_URL}${endpoint}`, {
     headers: { "X-Auth-Token": token },
-    next: { revalidate: 600 }, // Cache for 10 minutes
+    // RESULT-SYNC paths must bypass the data cache: a 10-min-stale snapshot
+    // taken in FD's "FINISHED but score not yet entered" window is how a null
+    // score got persisted for the opening match (2026-06-11). Browse-only
+    // endpoints (scorers/standings/teams) keep the cache — they're hit by
+    // client-facing routes and FD free tier allows only 10 req/min.
+    ...(opts?.fresh ? { cache: "no-store" as const } : { next: { revalidate: 600 } }),
   });
 
   if (!res.ok) {
@@ -60,10 +65,11 @@ export interface MatchResult {
 }
 
 /**
- * Get all WC2026 matches (fixtures + results)
+ * Get all WC2026 matches (fixtures + results).
+ * Pass fresh=true from sync paths — they must never act on a stale snapshot.
  */
-export async function getMatches(): Promise<MatchResult[]> {
-  const data = await fetchAPI(`/competitions/${COMPETITION}/matches?season=${SEASON}`);
+export async function getMatches(fresh = false): Promise<MatchResult[]> {
+  const data = await fetchAPI(`/competitions/${COMPETITION}/matches?season=${SEASON}`, { fresh });
   return data.matches || [];
 }
 
@@ -81,15 +87,16 @@ export async function getMatchesByMatchday(matchday: number): Promise<MatchResul
 export async function getTodayMatches(): Promise<MatchResult[]> {
   const today = new Date().toISOString().split("T")[0];
   const tomorrow = new Date(Date.now() + 86400000).toISOString().split("T")[0];
-  const data = await fetchAPI(`/competitions/${COMPETITION}/matches?season=${SEASON}&dateFrom=${today}&dateTo=${tomorrow}`);
+  const data = await fetchAPI(`/competitions/${COMPETITION}/matches?season=${SEASON}&dateFrom=${today}&dateTo=${tomorrow}`, { fresh: true });
   return data.matches || [];
 }
 
 /**
- * Get only finished matches (for scoring)
+ * Get only finished matches (for scoring). Always fresh — never serve a stale
+ * cached snapshot to a sync that is about to persist scores.
  */
 export async function getFinishedMatches(): Promise<MatchResult[]> {
-  const data = await fetchAPI(`/competitions/${COMPETITION}/matches?season=${SEASON}&status=FINISHED`);
+  const data = await fetchAPI(`/competitions/${COMPETITION}/matches?season=${SEASON}&status=FINISHED`, { fresh: true });
   return data.matches || [];
 }
 

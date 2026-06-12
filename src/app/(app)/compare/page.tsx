@@ -98,7 +98,7 @@ interface MatchApi {
 }
 
 export default function ComparePage() {
-  const [view, setView] = useState<View>("results");
+  const [view, setView] = useState<View>("specials");
 
   // Load real data from Supabase (after lock, uses server API to bypass RLS)
   const { brackets, specialBets, advancements, currentUserId, loading } = useSharedData();
@@ -288,9 +288,9 @@ export default function ComparePage() {
       {/* View tabs — only visible after lock + data loaded */}
       {isLocked && !loading && BETTORS.length > 0 && <div className="mb-5 flex gap-2 flex-wrap">
         {[
-          { key: "results" as View, label: "תוצאות ותפיסות" },
-          { key: "advancement" as View, label: "עולות + זוכה" },
           { key: "specials" as View, label: "הימורים מיוחדים" },
+          { key: "advancement" as View, label: "עולות + זוכה" },
+          { key: "results" as View, label: "תוצאות ותפיסות" },
           { key: "groups" as View, label: "עולות מהבתים" },
           { key: "matrix" as View, label: "מטריצה" },
           { key: "whatif" as View, label: "מה אם...?" },

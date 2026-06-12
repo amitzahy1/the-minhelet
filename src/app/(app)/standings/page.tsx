@@ -763,16 +763,42 @@ export default function StandingsPage() {
       {/* 🏅 תארים — fun league titles, post-lock only */}
       {titleAwards.length > 0 && <LeagueTitles awards={titleAwards} />}
 
-      {/* מצטיין היום / חולשת היום — only when real scoring data exists */}
+      {/* מצטיין היום / חולשת היום — tie-aware: every player sharing the top
+          (or bottom) daily score is named, so no one is crowned or roasted
+          arbitrarily out of a tie. Hidden entirely when nobody scored today. */}
       {PLAYERS.length >= 2 && PLAYERS[0]?.total > 0 && (() => {
-        const sorted = [...PLAYERS].sort((a, b) => parseInt(b.today || "0") - parseInt(a.today || "0"));
-        const heroPlayer = sorted[0];
-        const roastPlayer = sorted[sorted.length - 1];
-        if (!heroPlayer?.name || !roastPlayer?.name) return null;
+        const todayNum = (p: { today?: string }) => parseInt(p.today || "0") || 0;
+        const joinNames = (names: string[]) =>
+          names.length === 2 ? `${names[0]} ו${names[1]}`
+          : names.length > 3 ? `${names.slice(0, 3).join(" · ")} +${names.length - 3}`
+          : names.join(" · ");
+
+        const topToday = Math.max(...PLAYERS.map(todayNum));
+        if (topToday <= 0) return null; // no points moved today — nothing to crown
+
+        // Heroes: everyone at the top daily score (tie-break display only).
+        const heroes = PLAYERS.filter((p) => todayNum(p) === topToday);
+        // Roast: lowest daily score; among them, only those also lowest in the
+        // OVERALL table (so a 0-day with a strong total isn't "the weakness").
+        const minToday = Math.min(...PLAYERS.map(todayNum));
+        const roastPool = PLAYERS.filter((p) => todayNum(p) === minToday);
+        const minTotal = Math.min(...roastPool.map((p) => p.total));
+        const roasts = roastPool.filter((p) => p.total === minTotal);
+        if (heroes.length === 0 || roasts.length === 0) return null;
+
         return (
           <HeroRoast
-            hero={{ name: heroPlayer.name, points: parseInt(heroPlayer.today || "0"), highlight: `${heroPlayer.exact} מדויקות!` }}
-            roast={{ name: roastPlayer.name, points: parseInt(roastPlayer.today || "0"), highlight: `רק ${roastPlayer.today || "0"} — יום קשה` }}
+            hero={{
+              name: joinNames(heroes.map((h) => h.name)),
+              points: topToday,
+              plural: heroes.length > 1,
+              highlight: heroes.length === 1 ? `${heroes[0].exact} מדויקות!` : undefined,
+            }}
+            roast={{
+              name: joinNames(roasts.map((r) => r.name)),
+              points: minToday,
+              plural: roasts.length > 1,
+            }}
             matchday=""
           />
         );

@@ -14,6 +14,8 @@ interface Performer {
   name: string;
   points: number;
   highlight?: string;
+  /** True when `name` is several tied players — switches to plural phrasing. */
+  plural?: boolean;
 }
 
 interface HeroRoastProps {
@@ -35,7 +37,20 @@ function dailyPick(options: string[], seed: string): string {
   return options[Math.abs(h) % options.length];
 }
 
-function roastLines(name: string, pts: number): string[] {
+function roastLines(name: string, pts: number, plural?: boolean): string[] {
+  if (plural) {
+    if (pts === 0)
+      return [
+        `${name} סיימו את היום עם אפס. הטפסים היו מיותרים.`,
+        `אפס נקודות ל${name}. הקבוצות פשוט לא שיתפו פעולה.`,
+        `${name} ניחשו הכל — חוץ ממה שקרה בפועל.`,
+      ];
+    return [
+      `${pts} נקודות בלבד ל${name}. תחתית משותפת.`,
+      `${name} חולקים את התחתית עם ${pts}. לפחות יש חברה.`,
+      `${name} עם ${pts} — אחרונים, אבל ביחד.`,
+    ];
+  }
   if (pts === 0)
     return [
       `${name} סיים את היום עם אפס. הטופס היה מיותר.`,
@@ -61,7 +76,13 @@ function roastLines(name: string, pts: number): string[] {
   ];
 }
 
-function heroLines(name: string, pts: number, highlight?: string): string[] {
+function heroLines(name: string, pts: number, highlight?: string, plural?: boolean): string[] {
+  if (plural)
+    return [
+      `${name} חולקים את ההובלה היומית עם ${pts} נקודות כל אחד.`,
+      `${pts} נקודות לכל אחד — ${name} בראש היום, ביחד.`,
+      `${name} מובילים את היום עם ${pts}. תיקו בצמרת.`,
+    ];
   if (pts >= 15)
     return [
       `${name} עשה ${pts} נקודות ביום אחד. שמישהו יבדוק אותו.`,
@@ -93,8 +114,8 @@ export function HeroRoast({ hero, roast, matchday }: HeroRoastProps) {
   const [dayKey] = useState(() =>
     new Date().toLocaleString("en-CA", { timeZone: "Asia/Jerusalem", year: "numeric", month: "2-digit", day: "2-digit" }),
   );
-  const heroText = dailyPick(heroLines(hero.name, hero.points, hero.highlight), `${dayKey}:hero:${hero.name}`);
-  const roastText = dailyPick(roastLines(roast.name, roast.points), `${dayKey}:roast:${roast.name}`);
+  const heroText = dailyPick(heroLines(hero.name, hero.points, hero.highlight, hero.plural), `${dayKey}:hero:${hero.name}`);
+  const roastText = dailyPick(roastLines(roast.name, roast.points, roast.plural), `${dayKey}:roast:${roast.name}`);
   return (
     <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-md mb-6" dir="rtl">
       <div className="flex items-stretch">

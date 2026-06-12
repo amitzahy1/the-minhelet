@@ -526,6 +526,7 @@ interface ResultsViewProps {
 }
 
 function ResultsView({ matches, brackets, currentUserId, loading }: ResultsViewProps) {
+  const scoring = useScoring();
   if (loading) {
     return (
       <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center">
@@ -571,6 +572,9 @@ function ResultsView({ matches, brackets, currentUserId, loading }: ResultsViewP
           currentUserId={currentUserId}
         />
       ))}
+      <p className="md:col-span-2 text-center text-[11px] text-gray-400 pt-1">
+        🎯 תוצאה מדויקת ({scoring.toto.GROUP + scoring.exact.GROUP} נק׳) · ✓ טוטו 1X2 ({scoring.toto.GROUP} נק׳) · ✗ פספוס (0)
+      </p>
     </div>
   );
 }
@@ -808,8 +812,6 @@ function DayTable({
   const topPoints = rows.length > 0 ? rows[0].points : 0;
   const tiedAtTop = topPoints > 0 ? rows.filter((r) => r.points === topPoints) : [];
   const hasSoloLeader = tiedAtTop.length === 1;
-  const totalBols = rows.reduce((s, r) => s + r.exacts, 0);
-  const totalTotos = rows.reduce((s, r) => s + r.totos, 0);
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
@@ -819,10 +821,8 @@ function DayTable({
           <h3 className="text-base font-black text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>{dateLabel}</h3>
           <p className="text-xs text-gray-500">
             {matches.length} משחקים
-            {totalBols > 0 && <> · <span className="font-bold text-gray-700">{totalBols}</span> מדויקות</>}
-            {totalTotos > 0 && <> · <span className="font-bold text-gray-700">{totalTotos}</span> טוטו</>}
-            {tiedAtTop.length === 1 && <> · מוביל היום: <span className="font-bold text-gray-900">{tiedAtTop[0].name}</span> ({topPoints} נק׳)</>}
-            {tiedAtTop.length > 1 && <> · מובילים: <span className="font-bold text-gray-900">{tiedAtTop.slice(0, 3).map((r) => r.name).join(", ")}{tiedAtTop.length > 3 ? ` +${tiedAtTop.length - 3}` : ""}</span> ({topPoints} נק׳)</>}
+            {tiedAtTop.length === 1 && <> · מוביל היום: <span className="font-bold text-gray-900">{tiedAtTop[0].name}</span></>}
+            {tiedAtTop.length > 1 && <> · מובילים: <span className="font-bold text-gray-900">{tiedAtTop.slice(0, 3).map((r) => r.name).join(", ")}{tiedAtTop.length > 3 ? ` +${tiedAtTop.length - 3}` : ""}</span></>}
           </p>
         </div>
       </div>
@@ -866,16 +866,6 @@ function DayTable({
                     {getTeamNameHe(m.awayTla) || m.awayTla}
                   </span>
                 </span>
-                {/* Meta + hit counters */}
-                <span className="hidden sm:flex items-center gap-1 shrink-0 text-[10px] text-gray-500 font-medium">
-                  <span className="bg-gray-100 rounded-md px-1.5 py-0.5 font-bold whitespace-nowrap">בית {m.group}</span>
-                  <span className="tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{time}</span>
-                </span>
-                <span className="flex items-center gap-2 shrink-0 text-[11px] font-bold text-gray-400 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>
-                  {c.exact > 0 && <span className="text-green-700">🎯{c.exact}</span>}
-                  {c.toto > 0 && <span className="text-gray-600">✓{c.toto}</span>}
-                  {c.miss > 0 && <span>✗{c.miss}</span>}
-                </span>
                 <svg
                   width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
                   className={`shrink-0 text-gray-400 transition-transform ${isOpen ? "rotate-180" : ""}`}
@@ -886,6 +876,13 @@ function DayTable({
 
               {isOpen && (
                 <div className="px-3 sm:px-5 pb-3">
+                  <p className="text-[11px] text-gray-400 mb-1.5">
+                    בית {m.group} · {time}
+                    <span className="mx-1.5 text-gray-200">|</span>
+                    <span className="text-green-700 font-bold">🎯 {c.exact}</span>
+                    <span className="mx-1 text-gray-600 font-bold">✓ {c.toto}</span>
+                    <span className="font-bold">✗ {c.miss}</span>
+                  </p>
                   <div className="rounded-lg border border-gray-100 overflow-hidden sm:columns-2 md:columns-1 sm:gap-0 [column-fill:balance]">
                     {sortedHits.map((h) => {
                       const you = h.userId === currentUserId;
@@ -950,20 +947,6 @@ function DayTable({
           })}
           {rows.every(r => r.points === 0) && "אף מהמר עוד לא צבר נקודות"}
         </p>
-      </div>
-      <div className="px-4 py-2.5 bg-gray-50/50 border-t border-gray-100 flex items-center gap-3 text-[11px] text-gray-500 flex-wrap">
-        <span className="inline-flex items-center gap-1">
-          <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-green-500 text-white text-[9px] font-bold">🎯</span>
-          תוצאה מדויקת · <b className="text-gray-700">{EXACT_PTS} נק׳</b>
-        </span>
-        <span className="inline-flex items-center gap-1">
-          <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-amber-500 text-white text-[9px] font-bold">✓</span>
-          טוטו (1X2) · <b className="text-gray-700">{TOTO_PTS} נק׳</b>
-        </span>
-        <span className="inline-flex items-center gap-1">
-          <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-red-400 text-white text-[9px] font-bold">✗</span>
-          פספוס · 0
-        </span>
       </div>
     </div>
   );

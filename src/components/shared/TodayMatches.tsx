@@ -168,23 +168,18 @@ export function TodayMatches() {
 
   if (matches.length === 0) return null;
 
-  // Featured selection (collapsed view): the current batch — recently finished
-  // + the next not-yet-finished (live counts as "next"), up to 4.
-  // Once a new matchday starts we DROP finished matches from earlier days, so a
-  // night with 4 live/upcoming games shows those, not yesterday's results. If
-  // nothing finished today (a rest gap), we keep the single most-recent result
-  // so the widget still shows context instead of being all-upcoming.
+  // Featured selection (collapsed view): the NEXT matches to come — live +
+  // upcoming, soonest first, up to 4. Finished matches drop off entirely (their
+  // results live on the table / compare pages); we fall back to the most recent
+  // results only when there's nothing left to play (end of tournament). This is
+  // why a fully-upcoming night shows all of its games and no stale finished one.
   const byKickoff = (a: Match, b: Match) => new Date(a.date).getTime() - new Date(b.date).getTime();
   const todayKey = getTodayIsrael();
   const pool = allMatches.length > 0 ? allMatches : matches;
-  const finishedAll = pool.filter((m) => m.status === "FINISHED").sort(byKickoff);
-  const finishedToday = finishedAll.filter((m) => toIsraelDateKey(m.date) >= todayKey);
-  const finishedPool = finishedToday.length > 0 ? finishedToday : finishedAll.slice(-1);
-  const upcomingAll = pool.filter((m) => m.status !== "FINISHED").sort(byKickoff);
-  const upTake = Math.min(2, upcomingAll.length);
-  const finTake = Math.min(finishedPool.length, 4 - upTake);
-  const featured = [...finishedPool.slice(-finTake), ...upcomingAll.slice(0, Math.min(upcomingAll.length, 4 - finTake))]
-    .sort(byKickoff);
+  const upcoming = pool.filter((m) => m.status !== "FINISHED").sort(byKickoff);
+  const featured = upcoming.length > 0
+    ? upcoming.slice(0, 4)
+    : pool.filter((m) => m.status === "FINISHED").sort(byKickoff).slice(-4);
 
   // Build bettors' special bets relevant to a match's teams
   function getRelatedBets(homeTla: string, awayTla: string) {
@@ -229,7 +224,7 @@ export function TodayMatches() {
     <div className="mb-6">
       <div className="flex items-center gap-2 mb-3">
         <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
-        <h2 className="text-base font-bold text-gray-800">{heading === "משחקים היום" ? heading : "משחקים — אחרונים והבאים"}</h2>
+        <h2 className="text-base font-bold text-gray-800">{heading === "משחקים היום" ? heading : "המשחקים הבאים"}</h2>
         <span className="text-sm text-gray-400">{displayed.length} משחקים</span>
       </div>
       {/* Mobile: horizontal snap carousel so all 4 cards are reachable without

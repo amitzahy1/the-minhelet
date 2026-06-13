@@ -123,7 +123,8 @@ export async function GET() {
 
   // ---- Cards board (the "dirtiest team" tally) ---- shared helper, also used
   // by the /api/matches self-heal so the board refreshes through the day.
-  const cardsSynced = supabase && finished.length > 0 ? await syncCardBoard(supabase) : 0;
+  // force=true: the cron/manual sync bypasses the self-heal rate gate.
+  const cardsSynced = supabase && finished.length > 0 ? await syncCardBoard(supabase, { force: true }) : 0;
 
   return NextResponse.json({
     success: true,

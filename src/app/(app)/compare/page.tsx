@@ -144,6 +144,28 @@ export default function ComparePage() {
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [allMatches]);
 
+  // Heatmap: per-bettor × per-group score-prediction accuracy from finished
+  // group matches. value = % of that group's finished matches the bettor hit
+  // (exact or toto). Groups with no finished match yet are omitted (rendered
+  // as a neutral "—" cell, not a misleading red 0%).
+  const heatmapData = useMemo(() => {
+    if (finishedGroupMatches.length === 0 || brackets.length === 0) return [];
+    const byGroup: Record<string, FinishedMatch[]> = {};
+    for (const m of finishedGroupMatches) (byGroup[m.group] ||= []).push(m);
+    return brackets.map((b) => {
+      const groups: Record<string, number | null> = {};
+      for (const [letter, ms] of Object.entries(byGroup)) {
+        let hit = 0;
+        for (const m of ms) {
+          const h = computeGroupHits(m, [b])[0];
+          if (h && (h.hit === "exact" || h.hit === "toto")) hit++;
+        }
+        groups[letter] = Math.round((hit / ms.length) * 100);
+      }
+      return { name: b.displayName || "ללא שם", groups };
+    });
+  }, [finishedGroupMatches, brackets]);
+
   // Build real bettors from Supabase data
   const realBettors = useMemo((): Bettor[] => {
     if (brackets.length === 0) return [];
@@ -496,15 +518,21 @@ export default function ComparePage() {
       {/* === HEATMAP VIEW === */}
       {view === "heatmap" && (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
-          <div className="px-5 py-4 bg-gradient-to-l from-white via-amber-50/30 to-orange-50/40 border-b border-amber-100/50">
-            <h3 className="text-lg font-bold text-gray-900">מפת חום — דיוק בבתים</h3>
-            <p className="text-sm text-gray-500">כמה כל מהמר צדק בניחושי העולות מכל בית</p>
+          <div className="px-5 py-4 border-b border-gray-200">
+            <h3 className="text-lg font-bold text-gray-900">מפת חום — דיוק בניחושי התוצאות</h3>
+            <p className="text-sm text-gray-500">אחוז הפגיעות (טוטו/מדויקת) של כל מהמר בכל בית, לפי המשחקים שנגמרו</p>
           </div>
-          <div className="p-8 text-center">
-            <span className="text-4xl mb-3 block">📊</span>
-            <p className="text-sm text-gray-500 font-bold">מפת החום תהיה זמינה אחרי תחילת הטורניר</p>
-            <p className="text-xs text-gray-400 mt-1">כאן תוכלו לראות כמה כל מהמר צדק בניחושים לכל בית</p>
-          </div>
+          {heatmapData.length > 0 ? (
+            <div className="p-4">
+              <PredictionHeatmap data={heatmapData} />
+            </div>
+          ) : (
+            <div className="p-8 text-center">
+              <span className="text-4xl mb-3 block">📊</span>
+              <p className="text-sm text-gray-500 font-bold">עוד אין משחקים שנגמרו</p>
+              <p className="text-xs text-gray-400 mt-1">המפה תתמלא ככל שמשחקי הבתים יסתיימו</p>
+            </div>
+          )}
         </div>
       )}
       </>}

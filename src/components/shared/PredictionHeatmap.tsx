@@ -3,7 +3,8 @@
 export interface HeatmapProps {
   data: {
     name: string;
-    groups: Record<string, number>; // "A" -> 0-100 accuracy
+    // "A" -> 0-100 accuracy; null/undefined = no finished match yet (neutral).
+    groups: Record<string, number | null>;
   }[];
 }
 
@@ -72,20 +73,21 @@ export function PredictionHeatmap({ data }: { data?: HeatmapProps["data"] }) {
             >
               {bettor.name}
             </div>
-            {/* Group cells */}
+            {/* Group cells — neutral gray "—" when the group has no finished match yet */}
             {GROUPS.map((g) => {
-              const val = bettor.groups[g] ?? 0;
+              const val = bettor.groups[g];
+              const hasData = val !== null && val !== undefined;
               return (
                 <div
                   key={`${bettor.name}-${g}`}
                   className="flex items-center justify-center rounded-md text-xs font-bold h-10 transition-colors"
                   style={{
-                    backgroundColor: getHeatColor(val),
-                    color: getTextColor(val),
+                    backgroundColor: hasData ? getHeatColor(val) : "#f3f4f6",
+                    color: hasData ? getTextColor(val) : "#9ca3af",
                     fontFamily: "var(--font-inter)",
                   }}
                 >
-                  {val}%
+                  {hasData ? `${val}%` : "—"}
                 </div>
               );
             })}

@@ -95,7 +95,19 @@ export function buildResultRows(matches: MatchResult[], enteredBy: string): Demo
 
 export interface CardRow { team: string; yellow: number; red: number }
 
-export async function syncCardBoard(supabase: SupabaseClient): Promise<number> {
+/**
+ * @param force  When false (the /api/matches self-heal), a DB-backed gate skips
+ *   the sync if the board was auto-synced within `minIntervalMs`. The gate is a
+ *   SHARED timestamp (tournament_actuals.updated_at), so it holds across all
+ *   serverless instances — without it, N concurrent instances would each fan
+ *   out N timeline calls and trip TheSportsDB's 30 req/min limit. The cron and
+ *   manual admin sync pass force=true. Never skips when an ADMIN last wrote the
+ *   row (entered_by != tsdb-cards-sync) — we don't want to stall a manual edit.
+ */
+export async function syncCardBoard(
+  supabase: SupabaseClient,
+  { force = false, minIntervalMs = 15 * 60_000 }: { force?: boolean; minIntervalMs?: number } = {},
+): Promise<number> {
   const { data: tourn } = await supabase
     .from("tournaments")
     .select("id")
@@ -108,10 +120,17 @@ export async function syncCardBoard(supabase: SupabaseClient): Promise<number> {
   // board with a partial/empty one.
   const { data: actuals, error: actualsErr } = await supabase
     .from("tournament_actuals")
-    .select("dirtiest_board")
+    .select("dirtiest_board, updated_at, entered_by")
     .eq("tournament_id", tourn.id)
     .maybeSingle();
   if (actualsErr) return 0;
+
+  // Shared rate gate (self-heal only): if the LAST writer was this auto-sync and
+  // it ran recently, skip the external fan-out. Date.now() is fine in a route.
+  if (!force && actuals?.entered_by === "tsdb-cards-sync" && actuals.updated_at) {
+    const age = Date.now() - new Date(actuals.updated_at).getTime();
+    if (age >= 0 && age < minIntervalMs) return 0;
+  }
 
   const board = await getTsdbCardBoard();
   if (!board || board.length === 0) return 0;

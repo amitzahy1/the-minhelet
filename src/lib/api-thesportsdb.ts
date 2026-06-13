@@ -78,13 +78,17 @@ export interface TsdbResult {
   date: string;
 }
 
-async function fetchPastEvents(): Promise<TsdbEvent[]> {
-  const res = await fetch(`${TSDB_BASE}/eventspastleague.php?id=${WC_LEAGUE_ID}`, {
+// Finished season events. eventspastleague returns only the SINGLE most recent
+// match on the free tier — eventsseason returns the whole season (all 104), so
+// we filter to finished here. One request either way.
+const WC_SEASON = "2026";
+async function fetchSeasonEvents(): Promise<TsdbEvent[]> {
+  const res = await fetch(`${TSDB_BASE}/eventsseason.php?id=${WC_LEAGUE_ID}&s=${WC_SEASON}`, {
     cache: "no-store",
   });
   if (!res.ok) return [];
   const data = (await res.json()) as { events?: TsdbEvent[] | null };
-  return data.events || [];
+  return (data.events || []).filter((e) => e.intHomeScore != null && e.intAwayScore != null);
 }
 
 /**
@@ -94,7 +98,7 @@ async function fetchPastEvents(): Promise<TsdbEvent[]> {
 export async function getTsdbRecentResults(): Promise<TsdbResult[]> {
   try {
     const out: TsdbResult[] = [];
-    for (const e of await fetchPastEvents()) {
+    for (const e of await fetchSeasonEvents()) {
       if (e.intHomeScore == null || e.intAwayScore == null) continue;
       const homeCode = tsdbNameToCode(e.strHomeTeam);
       const awayCode = tsdbNameToCode(e.strAwayTeam);
@@ -143,11 +147,18 @@ export interface TsdbTeamCards {
  * Returns null when the source is unreachable (callers must then SKIP the
  * update — never write an empty board over real data).
  */
+// Cap timeline fetches per sync so we stay well under TheSportsDB's 30 req/min
+// even as finished matches accumulate. Most-recent-first; older matches' cards
+// persist in the board via the caller's MAX-merge. NOTE: the free tier caps
+// each timeline at 5 events total (goals+cards+subs), so card counts are an
+// UNDERCOUNT, not authoritative — the board is admin-correctable.
+const MAX_TIMELINE_FETCHES = 15;
+
 export async function getTsdbCardBoard(): Promise<TsdbTeamCards[] | null> {
   try {
-    const events = (await fetchPastEvents()).filter(
-      (e) => e.intHomeScore != null && e.intAwayScore != null
-    );
+    const events = (await fetchSeasonEvents())
+      .sort((a, b) => (b.strTimestamp || b.dateEvent || "").localeCompare(a.strTimestamp || a.dateEvent || ""))
+      .slice(0, MAX_TIMELINE_FETCHES);
     if (events.length === 0) return null;
 
     const byTeam: Record<string, { yellow: number; red: number }> = {};

@@ -5,7 +5,7 @@ import { useBettingStore } from "@/stores/betting-store";
 import { isLocked, revealAtFor, LOCK_DEADLINE } from "@/lib/constants";
 import { getFlag, getTeamNameHe } from "@/lib/flags";
 import type { BettorSpecialBets, BettorAdvancement, BettorBracket } from "@/lib/supabase/shared-data";
-import { matchPairIndex, normalizeGroupLetter } from "@/lib/results-hits";
+import { matchPairIndex, normalizeGroupLetter, classifyHit } from "@/lib/results-hits";
 import { computeMatchDays, dayLockAtForKickoff, type MatchDay } from "@/lib/tournament/group-live-state";
 
 import { useState, useEffect, useMemo } from "react";
@@ -61,6 +61,12 @@ function MatchBetsPanel({ match, brackets, specialBets, advancements, matchDays 
   // Each bettor's stored score prediction for THIS group match, oriented to the
   // displayed home/away. Built only once revealed; before that the redacted
   // server payload carries nulls anyway, so this is defense-in-depth.
+  // Actual score for live grading of the revealed picks (real home/away order).
+  const isLiveMatch = match.status === "IN_PLAY" || match.status === "PAUSED";
+  const matchActual =
+    (match.status === "FINISHED" || isLiveMatch) && match.homeGoals != null && match.awayGoals != null
+      ? { home: match.homeGoals, away: match.awayGoals }
+      : null;
   const pair = groupLetter ? matchPairIndex(groupLetter, home, away) : null;
   const scorePredictions = scoresRevealed && pair
     ? brackets.flatMap((b) => {
@@ -178,15 +184,40 @@ function MatchBetsPanel({ match, brackets, specialBets, advancements, matchDays 
         {globalLocked && groupLetter && (
           scoresRevealed ? (
             <div>
-              <p className="text-xs font-bold text-gray-500 mb-2">ניחושי תוצאה</p>
+              <p className="text-xs font-bold text-gray-500 mb-2">
+                ניחושי תוצאה
+                {matchActual && (
+                  <>
+                    <span className="mx-1.5">·</span>
+                    <span className={isLiveMatch ? "text-red-600" : "text-green-700"}>
+                      {isLiveMatch ? "לפי התוצאה כרגע" : "התוצאה"}{" "}
+                      <span dir="ltr" className="tabular-nums">{matchActual.away}-{matchActual.home}</span>
+                    </span>
+                  </>
+                )}
+              </p>
               {scorePredictions.length > 0 ? (
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
-                  {scorePredictions.map((p) => (
-                    <div key={p.userId} className="flex items-center justify-between px-2.5 py-1.5 bg-white rounded-lg border border-gray-200 text-xs">
-                      <span className="font-bold text-gray-800">{p.name}</span>
-                      <span className="font-black text-gray-900 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{p.home}-{p.away}</span>
-                    </div>
-                  ))}
+                  {scorePredictions.map((p) => {
+                    // Color each pick vs the actual once there IS one (finished
+                    // or live): exact=green, toto=amber, miss=red. Same away-home
+                    // glyph order as the teams/score shown above the panel.
+                    const hit = matchActual ? classifyHit({ home: p.home, away: p.away }, matchActual) : null;
+                    const cls = hit === "exact" ? "bg-green-50 border-green-300"
+                      : hit === "toto" ? "bg-amber-50 border-amber-300"
+                      : hit === "miss" ? "bg-red-50 border-red-200"
+                      : "bg-white border-gray-200";
+                    const icon = hit === "exact" ? "🎯" : hit === "toto" ? "✓" : hit === "miss" ? "✗" : "";
+                    return (
+                      <div key={p.userId} className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg border text-xs ${cls}`}>
+                        <span className="font-bold text-gray-800 truncate">{p.name}</span>
+                        <span className="flex items-center gap-1 shrink-0">
+                          <span dir="ltr" className="font-black text-gray-900 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{p.away}-{p.home}</span>
+                          {icon && <span>{icon}</span>}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               ) : (
                 <p className="text-xs text-gray-400">אף מהמר לא ניחש תוצאה למשחק זה.</p>

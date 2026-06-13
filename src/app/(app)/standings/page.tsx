@@ -277,13 +277,6 @@ function SortableHeader({
     </button>
   );
 }
-const TABS: { label: string; key: SortKey }[] = [
-  { label: "כללי", key: "total" },
-  { label: "משחקים", key: "matchPts" },
-  { label: "עולות", key: "advPts" },
-  { label: "מיוחדים", key: "specPts" },
-];
-
 // --- Scoring reason → breakdown bucket mapping ---
 const REASON_TO_BUCKET: Record<string, keyof typeof MOCK_PLAYERS[0]["breakdown"]> = {
   toto_group: "totoGroup",
@@ -736,7 +729,6 @@ export default function StandingsPage() {
           <span className="w-8 text-center">#</span>
           <span className="w-9 me-2"></span>
           <span className="me-3 flex-1 text-start">שחקן</span>
-          <SortableHeader label={TABS.find(t => t.key === activeTab)?.label || ""} sortKey={activeTab} activeTab={activeTab} setActiveTab={setActiveTab} width="w-12" />
           <span className="w-12 text-center">היום</span>
           <SortableHeader label="סה״כ" sortKey="total" activeTab={activeTab} setActiveTab={setActiveTab} width="w-16" />
           <span className={`w-8 text-center ${hasLiveMatch ? "text-amber-600 font-bold" : ""}`}>{hasLiveMatch ? "לייב" : "שינוי"}</span>
@@ -785,10 +777,6 @@ export default function StandingsPage() {
                 {p.id === sheepId && <span className="text-xs text-gray-600 ms-1.5 bg-gray-100 border border-gray-200 rounded px-1.5 py-0.5 font-bold whitespace-nowrap">🐑 הכבש?</span>}
                 <PlayerTooltip player={p} visible={hoveredPlayer === p.id} onClose={() => setHoveredPlayer(null)} />
               </div>
-              {/* Mobile: show only the active tab value */}
-              <span className={`w-12 text-center text-sm font-bold text-blue-600 sm:hidden`} style={{ fontFamily: "var(--font-inter)" }}>
-                {activeTab === "matchPts" ? p.matchPts : activeTab === "advPts" ? p.advPts : activeTab === "specPts" ? p.specPts : ""}
-              </span>
               {/* Desktop: show all 3 + sparkline */}
               <span className={`w-14 text-center text-sm font-medium hidden sm:block ${activeTab === "matchPts" ? "text-blue-600 font-bold" : "text-gray-600"}`} style={{ fontFamily: "var(--font-inter)" }}>{p.matchPts}</span>
               <span className={`w-14 text-center text-sm font-medium hidden sm:block ${activeTab === "advPts" ? "text-blue-600 font-bold" : "text-gray-600"}`} style={{ fontFamily: "var(--font-inter)" }}>{p.advPts}</span>

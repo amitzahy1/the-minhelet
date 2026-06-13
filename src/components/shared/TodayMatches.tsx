@@ -60,7 +60,6 @@ export function TodayMatches() {
   const [allMatches, setAllMatches] = useState<Match[]>([]);
   const [heading, setHeading] = useState("משחקים קרובים");
   const [expandedId, setExpandedId] = useState<number | null>(null);
-  const [showAll, setShowAll] = useState(false);
   const [matchDays, setMatchDays] = useState<MatchDay[]>([]);
   const { specialBets, brackets, refetch } = useSharedData();
   // The viewer's OWN picks (local store) — shown next to the edit-bet button.
@@ -221,12 +220,12 @@ export function TodayMatches() {
     ).filter((h) => h.hit !== "empty");
   }
 
-  const displayed = showAll ? matches : featured;
+  const displayed = featured;
   return (
     <div className="mb-6">
       <div className="flex items-center gap-2 mb-3">
         <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
-        <h2 className="text-base font-bold text-gray-800">{showAll ? heading : "משחקים — אחרונים והבאים"}</h2>
+        <h2 className="text-base font-bold text-gray-800">{heading === "משחקים היום" ? heading : "משחקים — אחרונים והבאים"}</h2>
         <span className="text-sm text-gray-400">{displayed.length} משחקים</span>
       </div>
       {/* Mobile: horizontal snap carousel so all 4 cards are reachable without
@@ -584,16 +583,6 @@ export function TodayMatches() {
           );
         })}
       </div>
-      <button
-        onClick={() => setShowAll((v) => !v)}
-        className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 rounded-xl border border-gray-200 bg-white text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
-      >
-        {showAll ? "הצג אחרונים והבאים" : `הצג את כל משחקי היום (${matches.length})`}
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
-          className={`transition-transform ${showAll ? "rotate-180" : ""}`}>
-          <polyline points="6 9 12 15 18 9" />
-        </svg>
-      </button>
     </div>
   );
 }

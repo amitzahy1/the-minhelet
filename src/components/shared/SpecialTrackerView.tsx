@@ -17,7 +17,6 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { getFlag, getTeamNameHe } from "@/lib/flags";
 import { MATCHUPS } from "@/lib/matchups";
 import { GROUPS } from "@/lib/tournament/groups";
-import { PENALTIES_LINE } from "@/lib/constants";
 import { useScoring } from "@/hooks/useScoring";
 import { DEMO_BETTORS, DEMO_STATS } from "./special-tracker-demo";
 import type {
@@ -539,15 +538,6 @@ export function SpecialTrackerView({
       };
     };
 
-    const pen = buildChoiceRows({
-      bettors: bs,
-      getPick: (b) => b.penalties,
-      options: [
-        { key: "OVER", label: `מעל ${PENALTIES_LINE}` },
-        { key: "UNDER", label: `מתחת ${PENALTIES_LINE}` },
-      ],
-      actualKey: actuals?.penalties_over_under ?? null,
-    });
 
     // Champion picks (advancement bet, but the marquee pick — shown first).
     // Options are exactly the teams someone picked (plus the actual champion
@@ -586,18 +576,6 @@ export function SpecialTrackerView({
       matchupCard(0, actuals?.matchup_result_1 ?? null),
       matchupCard(1, actuals?.matchup_result_2 ?? null),
       matchupCard(2, actuals?.matchup_result_3 ?? null),
-      {
-        title: `סה״כ פנדלים · ${PENALTIES_LINE}`,
-        points: `${sp.penalties_over_under} נק׳`,
-        nameHeader: "הימור",
-        valueHeader: undefined,
-        statusLine: actuals?.total_penalties != null ? `${actuals.total_penalties} פנדלים` : undefined,
-        updatedAt: actAt,
-        rows: pen.rows,
-        notBetCount: pen.notBet,
-        decided: actuals?.penalties_over_under != null,
-        decidedLabel: actuals?.penalties_over_under ? (actuals.penalties_over_under === "OVER" ? `מעל ${PENALTIES_LINE}` : `מתחת ${PENALTIES_LINE}`) : undefined,
-      },
     ];
   }, [stats, normalizedBettors, isDemo, fetchedAt, scoring]);
 

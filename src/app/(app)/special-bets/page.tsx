@@ -245,9 +245,9 @@ export default function SpecialBetsPage() {
 
   const filledCount = [sb.winner, sb.finalist1, sb.finalist2, ...paddedSemis, ...paddedQuarters,
     sb.topScorerPlayer, sb.topAssistsPlayer, sb.bestAttack, sb.prolificGroup, sb.driestGroup,
-    sb.dirtiestTeam, ...(sb.matchups ?? []), sb.penaltiesOverUnder].filter(Boolean).length;
+    sb.dirtiestTeam, ...(sb.matchups ?? [])].filter(Boolean).length;
 
-  // Celebrate every time the user transitions from <25 to 25 filled bets
+  // Celebrate every time the user transitions from <24 to 24 filled bets
   const fireConfetti = useConfetti();
   const [showCelebration, setShowCelebration] = useState(false);
   const prevCountRef = useRef(filledCount);
@@ -258,7 +258,7 @@ export default function SpecialBetsPage() {
     // Fire once per mount on the genuine <25 → 25 transition. The latch stops
     // it re-popping every time the count dips and returns to 25 (e.g. changing
     // an already-picked field clears then re-sets it) now that every edit saves.
-    if (prev < 25 && filledCount === 25 && !hasCelebratedRef.current) {
+    if (prev < 24 && filledCount === 24 && !hasCelebratedRef.current) {
       hasCelebratedRef.current = true;
       setShowCelebration(true);
       fireConfetti();
@@ -284,11 +284,11 @@ export default function SpecialBetsPage() {
         </div>
         <div className="text-center bg-white rounded-lg border border-gray-200 px-3 py-1.5 shadow-sm">
           <span className="text-lg font-black text-blue-600" style={{ fontFamily: "var(--font-inter)" }}>{filledCount}</span>
-          <span className="text-sm text-gray-400">/25</span>
+          <span className="text-sm text-gray-400">/24</span>
         </div>
       </div>
 
-      {/* Celebration modal — fires when all 25 bets are filled */}
+      {/* Celebration modal — fires when all 24 bets are filled */}
       <AnimatePresence>
         {showCelebration && (
           <motion.div
@@ -323,13 +323,13 @@ export default function SpecialBetsPage() {
                 </h2>
                 <p className="text-lg text-gray-700 mb-1 font-bold">סיימת את כל ההימורים!</p>
                 <p className="text-sm text-gray-500 mb-6">
-                  כל 25 ההימורים מולאו · הברקט שלך מוכן ✨<br/>
+                  כל 24 ההימורים מולאו · הברקט שלך מוכן ✨<br/>
                   עכשיו רק לחכות לשריקת הפתיחה
                 </p>
                 <div className="grid grid-cols-3 gap-2 mb-6 text-xs">
                   <div className="bg-white/80 rounded-lg py-2 border border-gray-200"><div className="text-2xl">🏟️</div><div className="font-bold text-gray-700 mt-1">72 בתים</div></div>
                   <div className="bg-white/80 rounded-lg py-2 border border-gray-200"><div className="text-2xl">🏅</div><div className="font-bold text-gray-700 mt-1">31 נוקאאוט</div></div>
-                  <div className="bg-white/80 rounded-lg py-2 border border-gray-200"><div className="text-2xl">⭐</div><div className="font-bold text-gray-700 mt-1">25 מיוחדים</div></div>
+                  <div className="bg-white/80 rounded-lg py-2 border border-gray-200"><div className="text-2xl">⭐</div><div className="font-bold text-gray-700 mt-1">24 מיוחדים</div></div>
                 </div>
                 <div className="flex gap-2">
                   <Link
@@ -552,20 +552,10 @@ export default function SpecialBetsPage() {
           </SectionCard>
         ))}
 
-        <SectionCard title="סה״כ פנדלים בטורניר" subtitle={`אובר / אנדר ${PENALTIES_LINE} · כולל הארכות, ללא דו-קרב פנדלים`} points={`${spPts.penalties_over_under} נק׳`}>
-          <div className="flex gap-3">
-            {[{ val: "OVER", label: `מעל ${PENALTIES_LINE}` }, { val: "UNDER", label: `מתחת ${PENALTIES_LINE}` }].map(opt => (
-              <button key={opt.val} onClick={() => set("penaltiesOverUnder", opt.val)}
-                className={`flex-1 py-3 rounded-xl border text-sm font-bold transition-all ${
-                  sb.penaltiesOverUnder === opt.val ? "bg-blue-50 border-blue-300 text-blue-700 shadow-sm" : "border-gray-200 text-gray-600 hover:bg-gray-50"
-                }`}>{opt.label}</button>
-            ))}
-          </div>
-        </SectionCard>
 
         <SaveAndContinue
-          label={filledCount === 25 ? "💾 שמור הכל ✓" : "💾 שמור הימורים עד כה"}
-          completion={Math.round((filledCount / 25) * 100)}
+          label={filledCount === 24 ? "💾 שמור הכל ✓" : "💾 שמור הימורים עד כה"}
+          completion={Math.round((filledCount / 24) * 100)}
         />
       </div>
     </div>

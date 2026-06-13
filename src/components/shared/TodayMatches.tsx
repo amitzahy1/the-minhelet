@@ -168,19 +168,23 @@ export function TodayMatches() {
 
   if (matches.length === 0) return null;
 
-  // Featured selection (collapsed view): ALWAYS the 2 most recently finished
-  // matches + the next 2 not-yet-finished (live counts as "next") — across the
-  // whole schedule, not just today, so the widget never shrinks to 2 cards on
-  // a thin matchday. Backfills from either bucket up to 4.
+  // Featured selection (collapsed view): the current batch — recently finished
+  // + the next not-yet-finished (live counts as "next"), up to 4.
+  // Once a new matchday starts we DROP finished matches from earlier days, so a
+  // night with 4 live/upcoming games shows those, not yesterday's results. If
+  // nothing finished today (a rest gap), we keep the single most-recent result
+  // so the widget still shows context instead of being all-upcoming.
   const byKickoff = (a: Match, b: Match) => new Date(a.date).getTime() - new Date(b.date).getTime();
+  const todayKey = getTodayIsrael();
   const pool = allMatches.length > 0 ? allMatches : matches;
   const finishedAll = pool.filter((m) => m.status === "FINISHED").sort(byKickoff);
+  const finishedToday = finishedAll.filter((m) => toIsraelDateKey(m.date) >= todayKey);
+  const finishedPool = finishedToday.length > 0 ? finishedToday : finishedAll.slice(-1);
   const upcomingAll = pool.filter((m) => m.status !== "FINISHED").sort(byKickoff);
   const upTake = Math.min(2, upcomingAll.length);
-  const finTake = Math.min(finishedAll.length, 4 - upTake);
-  const featured = [...finishedAll.slice(-finTake), ...upcomingAll.slice(0, Math.min(upcomingAll.length, 4 - finTake))]
+  const finTake = Math.min(finishedPool.length, 4 - upTake);
+  const featured = [...finishedPool.slice(-finTake), ...upcomingAll.slice(0, Math.min(upcomingAll.length, 4 - finTake))]
     .sort(byKickoff);
-  const todayKey = getTodayIsrael();
 
   // Build bettors' special bets relevant to a match's teams
   function getRelatedBets(homeTla: string, awayTla: string) {

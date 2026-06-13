@@ -168,18 +168,29 @@ export function TodayMatches() {
 
   if (matches.length === 0) return null;
 
-  // Featured selection (collapsed view): the NEXT matches to come — live +
-  // upcoming, soonest first, up to 4. Finished matches drop off entirely (their
-  // results live on the table / compare pages); we fall back to the most recent
-  // results only when there's nothing left to play (end of tournament). This is
-  // why a fully-upcoming night shows all of its games and no stale finished one.
+  // Featured selection (collapsed view) — a LOCK-BASED transition:
+  //   • Between matchdays (the next matchday hasn't locked yet) → show the most
+  //     recent FINISHED results, so you see how the last batch ended.
+  //   • Once the next matchday LOCKS (30 min before its first kickoff) → flip to
+  //     that day's LIVE + UPCOMING games (no finished — a live match means its
+  //     day is already locked, so its games are what's relevant).
+  // Up to 4 either way. Falls back to upcoming pre-tournament (no results yet).
   const byKickoff = (a: Match, b: Match) => new Date(a.date).getTime() - new Date(b.date).getTime();
   const todayKey = getTodayIsrael();
   const pool = allMatches.length > 0 ? allMatches : matches;
   const upcoming = pool.filter((m) => m.status !== "FINISHED").sort(byKickoff);
-  const featured = upcoming.length > 0
-    ? upcoming.slice(0, 4)
-    : pool.filter((m) => m.status === "FINISHED").sort(byKickoff).slice(-4);
+  const finishedPool = pool.filter((m) => m.status === "FINISHED").sort(byKickoff);
+  // Has the next matchday locked? (Its day-lock has passed, or a match is live.)
+  const nextUp = upcoming[0];
+  const nextLockISO = nextUp ? dayLockAtForKickoff(nextUp.date, matchDays) : null;
+  const nextLockMs = nextLockISO
+    ? new Date(nextLockISO).getTime()
+    : nextUp ? new Date(nextUp.date).getTime() - 30 * 60_000 : null;
+  const nextDayLocked = nextLockMs != null && now >= nextLockMs;
+  const featured =
+    upcoming.length > 0 && nextDayLocked ? upcoming.slice(0, 4)
+    : finishedPool.length > 0 ? finishedPool.slice(-4)
+    : upcoming.slice(0, 4);
 
   // Build bettors' special bets relevant to a match's teams
   function getRelatedBets(homeTla: string, awayTla: string) {

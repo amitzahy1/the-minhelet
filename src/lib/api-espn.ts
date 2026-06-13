@@ -49,7 +49,49 @@ function toCode(abbr: string | undefined, displayName: string | undefined): stri
   return null;
 }
 
-interface EspnEvent { id: string; competitions?: { status?: { type?: { state?: string } } }[] }
+interface EspnCompetitor { homeAway?: string; score?: string; team?: { abbreviation?: string; displayName?: string } }
+interface EspnEvent {
+  id: string;
+  date?: string;
+  competitions?: { status?: { type?: { state?: string } }; competitors?: EspnCompetitor[] }[];
+}
+
+export interface EspnResult {
+  homeCode: string;
+  awayCode: string;
+  homeGoals: number;
+  awayGoals: number;
+  /** UTC kickoff date "YYYY-MM-DD". */
+  date: string;
+}
+
+/**
+ * Finished WC2026 match scores from ESPN's scoreboard (ONE call, scores
+ * included — no per-match summary needed). Used as a score fallback for
+ * matches football-data hasn't published, and as a cross-check against FD.
+ * NOTE: for a knockout match ESPN's score may include extra time; the caller
+ * restricts use to group-stage matches (90' is unambiguous there).
+ */
+export async function getEspnResults(): Promise<EspnResult[] | null> {
+  const board = await fetchJson(`${ESPN_BASE}/scoreboard?dates=${DATE_RANGE}`); // no-store: must be live
+  const events = (board as { events?: EspnEvent[] } | null)?.events;
+  if (!events) return null;
+  const out: EspnResult[] = [];
+  for (const e of events) {
+    const comp = e.competitions?.[0];
+    if (comp?.status?.type?.state !== "post") continue;
+    const home = comp.competitors?.find((c) => c.homeAway === "home");
+    const away = comp.competitors?.find((c) => c.homeAway === "away");
+    const homeCode = toCode(home?.team?.abbreviation, home?.team?.displayName);
+    const awayCode = toCode(away?.team?.abbreviation, away?.team?.displayName);
+    if (!homeCode || !awayCode) continue;
+    const hg = parseInt(home?.score ?? "", 10);
+    const ag = parseInt(away?.score ?? "", 10);
+    if (!Number.isFinite(hg) || !Number.isFinite(ag)) continue;
+    out.push({ homeCode, awayCode, homeGoals: hg, awayGoals: ag, date: (e.date || "").slice(0, 10) });
+  }
+  return out.length > 0 ? out : null;
+}
 
 async function fetchJson(url: string, revalidate?: number): Promise<unknown | null> {
   try {

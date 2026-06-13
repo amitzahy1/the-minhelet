@@ -45,13 +45,27 @@ export function SystemStatus() {
     try {
       const res = await fetch("/api/sync");
       const data = await res.json();
-      results.sync = data.success
-        ? {
-            ok: true,
-            message: `${data.matchesCount} משחקים הסתיימו · נשמרו ${data.persisted ?? 0}${data.pendingScore ? ` · ${data.pendingScore} ממתינים לתוצאה מה-API` : ""}`,
-            lastUpdate: new Date().toLocaleString("he-IL"),
-          }
-        : { ok: false, message: data.error || "סנכרון נכשל" };
+      // Cross-check warning (admin-only): football-data and ESPN disagree on a
+      // score — surface loudly so an admin can verify which feed is right.
+      const disc: { match: string; fd: string; espn: string }[] = data.scoreDiscrepancies || [];
+      if (!data.success) {
+        results.sync = { ok: false, message: data.error || "סנכרון נכשל" };
+      } else if (disc.length > 0) {
+        results.sync = {
+          ok: false,
+          message:
+            `⚠️ אי-התאמה בין מקורות (${disc.length}): ` +
+            disc.map((d) => `${d.match} — Football-Data ${d.fd} מול ESPN ${d.espn}`).join(" · ") +
+            " — בדקו ידנית מי צודק",
+          lastUpdate: new Date().toLocaleString("he-IL"),
+        };
+      } else {
+        results.sync = {
+          ok: true,
+          message: `${data.matchesCount} משחקים הסתיימו · נשמרו ${data.persisted ?? 0}${data.pendingScore ? ` · ${data.pendingScore} ממתינים לתוצאה` : ""}${data.cardsSynced ? ` · ${data.cardsSynced} קבוצות בלוח הכרטיסים` : ""} · מאומת מול ESPN ✓`,
+          lastUpdate: new Date().toLocaleString("he-IL"),
+        };
+      }
     } catch { results.sync = { ok: false, message: "שגיאת סנכרון" }; }
 
     try {

@@ -8,6 +8,7 @@
 
 import { createClient } from "@supabase/supabase-js";
 import { penaltiesResult } from "@/lib/constants";
+import { getEspnPlayerStats } from "@/lib/api-espn";
 
 // ---------- Types ----------
 
@@ -205,12 +206,37 @@ async function fetchActuals(): Promise<TournamentActuals | null> {
 
 // ---------- Public API ----------
 
+const normName = (s: string): string =>
+  s.toLowerCase().replace(/['’`´׳]/g, "").replace(/[^a-z ]+/g, " ").replace(/\s+/g, " ").trim();
+
 export async function getTournamentStats(): Promise<TournamentStatsPayload> {
-  const [scorers, finishedMatches, actuals] = await Promise.all([
+  const [fdScorers, espnPlayers, finishedMatches, actuals] = await Promise.all([
     fetchFdScorers(25),
+    getEspnPlayerStats(),
     fetchDemoResults(),
     fetchActuals(),
   ]);
+
+  // Merge scorer data. football-data has goals but returns assists as NULL;
+  // ESPN has both (parsed from goal events incl. the assister). Build a union
+  // keyed by normalized name: ESPN is authoritative for assists, and goals
+  // take the max of the two feeds (they agree; max guards a lagging feed).
+  // ESPN also surfaces assist-only players football-data's scorer list omits —
+  // important so the matchup duels (goals + assists) count those players too.
+  const merged = new Map<string, ScorerRow>();
+  for (const s of fdScorers) merged.set(normName(s.name), { ...s });
+  for (const p of espnPlayers || []) {
+    const key = normName(p.name);
+    const ex = merged.get(key);
+    if (ex) {
+      ex.goals = Math.max(ex.goals, p.goals);
+      ex.assists = Math.max(ex.assists, p.assists);
+      if (!ex.team && p.team) ex.team = p.team;
+    } else {
+      merged.set(key, { name: p.name, team: p.team, goals: p.goals, assists: p.assists, played: p.played });
+    }
+  }
+  const scorers = [...merged.values()];
 
   const teamStats = aggregateTeamStats(finishedMatches);
   const groupStats = aggregateGroupStats(finishedMatches);

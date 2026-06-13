@@ -239,9 +239,9 @@ export function TodayMatches() {
           <span className="text-sm text-gray-400">{displayed.length} משחקים</span>
         )}
       </div>
-      {/* Mobile: horizontal snap carousel so all 4 cards are reachable without
-          shrinking them; desktop: 4-column grid. */}
-      <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory md:grid md:grid-cols-4 md:overflow-visible md:pb-0">
+      {/* 2×2 on mobile, 4-across on desktop — all matches visible, no scroll.
+          items-start so expanding one card doesn't stretch its row-mates. */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 items-start">
         {displayed.map((m) => {
           const isFinished = m.status === "FINISHED";
           const isLive = m.status === "IN_PLAY" || m.status === "PAUSED";
@@ -315,17 +315,17 @@ export function TodayMatches() {
             // container a flex item otherwise grows to fit its longest
             // unwrapped line (e.g. the reveal-time caption) and smears the
             // page sideways instead of wrapping.
-            <div key={m.id} className="w-[46%] sm:w-[30%] shrink-0 snap-start md:w-auto md:shrink md:col-span-1">
+            <div key={m.id} className="col-span-1">
               <div
                 onClick={() => setExpandedId(isExpanded ? null : m.id)}
-                className={`bg-white rounded-xl border shadow-sm p-3 text-center transition-all cursor-pointer ${
+                className={`bg-white rounded-xl border shadow-sm p-3 text-center transition-all cursor-pointer flex flex-col h-full ${
                   isLive ? "border-red-300 bg-red-50/30" :
                   isFinished ? "border-green-200" :
                   isExpanded ? "border-blue-300 shadow-md" :
                   "border-gray-200 hover:border-gray-300 hover:shadow-md"
                 }`}
               >
-                {/* Status badge (+ date when the card isn't from today) */}
+                {/* Header: status + group + (date) + expand chevron */}
                 <div className="mb-2 flex items-center justify-center gap-1.5">
                   {isLive && (
                     <span className="text-[10px] font-bold text-red-600 bg-red-100 rounded-full px-2 py-0.5 inline-flex items-center gap-1">
@@ -343,10 +343,19 @@ export function TodayMatches() {
                       {toIsraelDateShort(m.date)}
                     </span>
                   )}
+                  <span className="text-[10px] font-bold text-gray-400">
+                    {m.group ? `בית ${m.group.replace("GROUP_", "")}` : stageLabelHe(m.stage)}
+                  </span>
+                  <svg
+                    width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+                    className={`text-gray-300 transition-transform ${isExpanded ? "rotate-180" : ""}`}
+                  >
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
                 </div>
 
-                {/* Teams */}
-                <div className="flex items-center justify-between gap-1">
+                {/* Teams (centered, fills the height so all cards match) */}
+                <div className="flex-1 flex items-center justify-between gap-1">
                   <div className="flex flex-col items-center gap-0.5 flex-1 min-w-0">
                     <TeamLogo code={m.homeTla} size="md" />
                     <span className="text-[11px] font-bold text-gray-800 truncate max-w-full">
@@ -374,49 +383,53 @@ export function TodayMatches() {
                   </div>
                 </div>
 
-                {/* Group + expand hint */}
-                <div className="flex items-center justify-center gap-1 mt-1.5">
-                  <p className="text-[10px] text-gray-400">
-                    {m.group ? `בית ${m.group.replace("GROUP_", "")}` : stageLabelHe(m.stage)}
-                  </p>
-                  <svg
-                    width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
-                    className={`text-gray-300 transition-transform ${isExpanded ? "rotate-180" : ""}`}
-                  >
-                    <polyline points="6 9 12 15 18 9" />
-                  </svg>
-                </div>
-
-                {/* Direct link to this match's betting row — upcoming group
-                    matches only (once it kicks off there's nothing to edit). */}
-                {!isFinished && !isLive && groupLetter && (() => {
+                {/* Footer — the viewer's OWN pick, emphasized, on EVERY group
+                    card (so all cards share this row → equal height). Upcoming
+                    matches also get a small edit button. mt-auto pins it to the
+                    bottom so the team block stays vertically centered above. */}
+                {groupLetter && (() => {
                   const betPair = matchPairIndex(groupLetter, m.homeTla, m.awayTla);
-                  if (!betPair) return null;
-                  // The stored pick is in canonical pair orientation; flip to
-                  // the REAL home/away so it matches the teams shown above,
-                  // then render away-home (home goals = right-hand digit).
-                  const stored = myGroups[groupLetter]?.scores?.[betPair.pairIdx];
+                  const stored = betPair ? myGroups[groupLetter]?.scores?.[betPair.pairIdx] : null;
+                  // Canonical → real home/away, then shown away-home (home = right digit).
                   const myPick = stored && stored.home !== null && stored.away !== null
-                    ? (betPair.flipped ? { home: stored.away, away: stored.home } : { home: stored.home, away: stored.away })
+                    ? (betPair!.flipped ? { home: stored.away, away: stored.home } : { home: stored.home, away: stored.away })
                     : null;
+                  const editable = !isFinished && !isLive && !!betPair;
+                  // Grade the pick once there's a score to grade against.
+                  const actual = (isLive || isFinished) && m.homeGoals !== null && m.awayGoals !== null
+                    ? { home: m.homeGoals, away: m.awayGoals } : null;
+                  const hit = myPick && actual ? classifyHit({ home: myPick.home, away: myPick.away }, actual) : null;
+                  const chip = hit === "exact" ? "bg-green-100 text-green-800 border-green-200"
+                    : hit === "toto" ? "bg-amber-100 text-amber-800 border-amber-200"
+                    : hit === "miss" ? "bg-red-50 text-red-600 border-red-200"
+                    : "bg-blue-50 text-blue-700 border-blue-200";
                   return (
-                    <span className="mt-2 inline-flex items-center justify-center gap-1.5">
-                      <Link
-                        href={`/groups?group=${groupLetter}&match=${betPair.pairIdx}`}
-                        onClick={(e) => e.stopPropagation()}
-                        className="inline-flex items-center justify-center gap-1 rounded-md bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-500 hover:text-gray-700 text-[11px] font-bold px-2.5 py-1 transition-colors"
-                      >
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                          <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-                        </svg>
-                        שנה הימור
-                      </Link>
-                      {myPick && (
-                        <span dir="ltr" className="text-[10px] font-bold text-gray-400 tabular-nums" style={{ fontFamily: "var(--font-inter)" }} title="ההימור שלך">
-                          {myPick.away}-{myPick.home}
+                    <div className="mt-auto pt-2 flex items-center justify-center gap-1.5 min-h-[28px]">
+                      {myPick ? (
+                        <span className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 ${chip}`}>
+                          <span className="text-[8px] font-bold opacity-70">שלך</span>
+                          <span dir="ltr" className="text-[12px] font-black tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{myPick.away}-{myPick.home}</span>
+                          {hit === "exact" && <span className="text-[10px]">🎯</span>}
+                          {hit === "toto" && <span className="text-[10px]">✓</span>}
+                          {hit === "miss" && <span className="text-[10px]">✗</span>}
                         </span>
+                      ) : (
+                        <span className="text-[10px] text-gray-300">{editable ? "עוד לא הימרת" : "לא הימרת"}</span>
                       )}
-                    </span>
+                      {editable && (
+                        <Link
+                          href={`/groups?group=${groupLetter}&match=${betPair!.pairIdx}`}
+                          onClick={(e) => e.stopPropagation()}
+                          title="שנה הימור"
+                          className="inline-flex items-center justify-center gap-0.5 rounded-md bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-500 hover:text-gray-700 text-[10px] font-bold px-1.5 py-0.5 transition-colors"
+                        >
+                          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                          </svg>
+                          שנה
+                        </Link>
+                      )}
+                    </div>
                   );
                 })()}
 

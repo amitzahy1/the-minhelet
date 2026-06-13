@@ -88,6 +88,16 @@ export interface LiveScoringOptions {
    * so existing callers and tests keep their current behavior.
    */
   scoring?: ScoringValues;
+  /**
+   * LIVE-leaderboard scope: in-play matches (with their current score) to fold
+   * into the MATCH-RESULT scoring only (group + knockout toto/exact). When
+   * provided, group/KO points are computed from this set, while advancement,
+   * who-qualifies, the bracket resolution and specials stay on the FINISHED
+   * `matches` arg — so a half-played match moves match points but never
+   * prematurely advances a team or shifts the bracket. Omit it (the default)
+   * and behavior is identical to scoring `matches` alone (fully backward-compatible).
+   */
+  liveMatches?: FinishedMatch[];
 }
 
 function emptyScore(userId: string, displayName: string): PlayerScore {
@@ -158,8 +168,13 @@ export function computeLiveScores(
     byUser[b.userId] = emptyScore(b.userId, b.displayName || "ללא שם");
   }
 
+  // Match-RESULT scoring (group + KO toto/exact) reads the live-inclusive set
+  // when the caller passes in-play matches; everything else (advancement,
+  // resolution, specials) stays on the FINISHED `matches` arg below.
+  const matchResults = options.liveMatches ?? matches;
+
   // -------- Group-stage match scoring --------
-  for (const match of matches) {
+  for (const match of matchResults) {
     const isGroup = match.stage === "GROUP_STAGE" || match.stage === "GROUP";
     if (!isGroup) continue;
 
@@ -184,10 +199,11 @@ export function computeLiveScores(
   }
 
   // -------- Knockout scoring --------
-  // Resolve the real bracket state once; map each user's slot prediction to
-  // the slot's actual outcome and award toto/exact (with penalty handling).
-  const slotTree = resolveKnockoutTree(matches, options.bestThirdsOverride ?? null, fairPlay);
-  const thirdPlace = findThirdPlaceMatch(matches);
+  // Resolve from the match-result set (live-inclusive) so an in-play KO match's
+  // current score grades its own toto/exact. Downstream slots without a score
+  // are skipped below, so a live result can't mis-score a not-yet-played round.
+  const slotTree = resolveKnockoutTree(matchResults, options.bestThirdsOverride ?? null, fairPlay);
+  const thirdPlace = findThirdPlaceMatch(matchResults);
 
   for (const slot of Object.values(slotTree)) {
     if (slot.score1 === null || slot.score2 === null || !slot.team1 || !slot.team2) continue;
@@ -254,20 +270,27 @@ export function computeLiveScores(
     }
   }
 
-  // -------- Advancement scoring --------
+  // -------- Advancement scoring (FINISHED-only — never moves live) --------
+  // Resolve who advances / the bracket / champion from the FINISHED `matches`
+  // ONLY, so an in-play result can't prematurely qualify a team or reshuffle
+  // the bracket. (When no liveMatches were passed this is the same tree as
+  // above, so behavior is unchanged.)
   if (options.advancements && options.advancements.length > 0) {
+    const advSlotTree = options.liveMatches
+      ? resolveKnockoutTree(matches, options.bestThirdsOverride ?? null, fairPlay)
+      : slotTree;
     const groupOrders = computeGroupOrders(matches, fairPlay);
-    const actualGroupOrders = deriveActualGroupOrders(slotTree, groupOrders, GROUPS);
+    const actualGroupOrders = deriveActualGroupOrders(advSlotTree, groupOrders, GROUPS);
     // 3rd-place qualifiers = teams currently appearing as `?3` resolved slots
-    // (their group is among the 8 best thirds). Derive from slotTree: any
+    // (their group is among the 8 best thirds). Derive from advSlotTree: any
     // team in a slot whose `h`/`a` reference was a "Xn" slot with n=3.
     const bestThirdsCodes = new Set<string>();
     // Compute by inspecting which 3rd-place teams from completed groups actually
     // appear in any R32 slot.
     const allR32Teams = new Set<string>();
-    for (const k of Object.keys(slotTree)) {
+    for (const k of Object.keys(advSlotTree)) {
       if (!k.startsWith("r32")) continue;
-      const slot = slotTree[k as keyof typeof slotTree];
+      const slot = advSlotTree[k as keyof typeof advSlotTree];
       if (slot.team1) allR32Teams.add(slot.team1);
       if (slot.team2) allR32Teams.add(slot.team2);
     }
@@ -278,7 +301,7 @@ export function computeLiveScores(
     }
 
     // Champion = winner of the final slot.
-    const champion = slotTree["final"]?.winner ?? null;
+    const champion = advSlotTree["final"]?.winner ?? null;
 
     for (const adv of options.advancements) {
       const score = byUser[adv.userId];
@@ -287,7 +310,7 @@ export function computeLiveScores(
         adv,
         actualGroupOrders,
         bestThirdsCodes,
-        slotTree as Record<string, SlotState>,
+        advSlotTree as Record<string, SlotState>,
         champion,
         scoring,
       );

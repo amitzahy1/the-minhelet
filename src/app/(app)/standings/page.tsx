@@ -476,8 +476,33 @@ export default function StandingsPage() {
     return out;
   }, [brackets, allMatches, finishedMatches, scoring]);
 
-  // Live-computed scores (from finished matches + brackets + advancement +
-  // special-bet picks + tournament actuals). Replaces the empty scoring_log.
+  // LIVE leaderboard: in-play matches (with their current score) fold into the
+  // MATCH-RESULT points only. Same mapping as finishedMatches but also keeps
+  // IN_PLAY/PAUSED. Advancement/specials still read finishedMatches (frozen).
+  const liveMatches: FinishedMatch[] = useMemo(
+    () => allMatches
+      .filter((m) =>
+        (m.status === "FINISHED" || m.status === "IN_PLAY" || m.status === "PAUSED") &&
+        m.homeGoals !== null && m.homeGoals !== undefined &&
+        m.awayGoals !== null && m.awayGoals !== undefined)
+      .map((m) => ({
+        id: m.id, date: m.date, homeTla: m.homeTla, awayTla: m.awayTla,
+        group: normalizeGroupLetter(m.group), stage: m.stage || "GROUP_STAGE",
+        homeGoals: m.homeGoals as number, awayGoals: m.awayGoals as number,
+        homePenalties: m.homePenalties ?? null, awayPenalties: m.awayPenalties ?? null,
+        winner: m.winner ?? null,
+      })),
+    [allMatches]
+  );
+  // Any match currently in play → the table is showing provisional points.
+  const hasLiveMatch = useMemo(
+    () => allMatches.some((m) => m.status === "IN_PLAY" || m.status === "PAUSED"),
+    [allMatches]
+  );
+
+  // Live-computed scores. Match points (group + KO toto/exact) use the
+  // live-inclusive set so the table moves during a match; advancement, the
+  // bracket and specials stay on finishedMatches (frozen — never live).
   const liveScores = useMemo(
     () => computeLiveScores(brackets, finishedMatches, {
       advancements,
@@ -486,12 +511,13 @@ export default function StandingsPage() {
       playerStats,
       bestThirdsOverride,
       scoring,
+      liveMatches,
     }),
-    [brackets, finishedMatches, advancements, specialBets, tournamentActuals, playerStats, bestThirdsOverride, scoring]
+    [brackets, finishedMatches, liveMatches, advancements, specialBets, tournamentActuals, playerStats, bestThirdsOverride, scoring]
   );
   const todayScores = useMemo(
-    () => computeTodayScores(brackets, finishedMatches, scoring),
-    [brackets, finishedMatches, scoring]
+    () => computeTodayScores(brackets, liveMatches, scoring),
+    [brackets, liveMatches, scoring]
   );
   // Cumulative points per bettor across all finished matches — drives the sparkline.
   const playerHistories = useMemo(
@@ -676,8 +702,19 @@ export default function StandingsPage() {
       {/* Main leaderboard — FIRST and most prominent */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-visible hover:shadow-lg transition-all mb-6">
         <div className="px-5 py-3 bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/40 border-b border-blue-100/50">
-          <h2 className="text-base font-bold text-gray-800">טבלת דירוג</h2>
-          <p className="text-xs text-gray-400 mt-0.5">לחצו על כותרת עמודה כדי למיין לפיה</p>
+          <div className="flex items-center gap-2">
+            <h2 className="text-base font-bold text-gray-800">טבלת דירוג</h2>
+            {hasLiveMatch && (
+              <span className="text-[10px] font-bold text-red-600 bg-red-100 rounded-full px-2 py-0.5 inline-flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />לייב
+              </span>
+            )}
+          </div>
+          <p className="text-xs text-gray-400 mt-0.5">
+            {hasLiveMatch
+              ? "נקודות המשחקים מתעדכנות לפי התוצאה כרגע · סופי בסיום המשחק"
+              : "לחצו על כותרת עמודה כדי למיין לפיה"}
+          </p>
         </div>
 
         {/* Table header — mobile (clickable) */}

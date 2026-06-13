@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { getFlag, getTeamNameHe } from "@/lib/flags";
 import { TeamLogo } from "@/components/shared/TeamLogo";
-import { toIsraelTimeShort, toIsraelDate, toIsraelDateShort, toIsraelDateKey, getTodayIsrael } from "@/lib/timezone";
+import { toIsraelTimeShort, toIsraelDateShort, toIsraelDateKey, getTodayIsrael } from "@/lib/timezone";
 import { useSharedData } from "@/hooks/useSharedData";
 import { useBettingStore } from "@/stores/betting-store";
 import { isLocked, revealAtFor, formatLockDeadline, LOCK_DEADLINE } from "@/lib/constants";
@@ -58,9 +58,10 @@ function stageLabelHe(stage?: string): string {
 export function TodayMatches() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [allMatches, setAllMatches] = useState<Match[]>([]);
-  const [heading, setHeading] = useState("משחקים קרובים");
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [matchDays, setMatchDays] = useState<MatchDay[]>([]);
+  // Header toggle: "הבאים" (upcoming, default) ⇄ "אחרונים" (finished results).
+  const [view, setView] = useState<"upcoming" | "finished">("upcoming");
   const { specialBets, brackets, refetch } = useSharedData();
   // The viewer's OWN picks (local store) — shown next to the edit-bet button.
   const myGroups = useBettingStore((s) => s.groups);
@@ -101,7 +102,6 @@ export function TodayMatches() {
         if (!data.matches || data.matches.length === 0) {
           if (hasRealDataRef.current) return;
           setMatches(DEMO_MATCHES);
-          setHeading("משחקים קרובים — תצוגה מקדימה");
           return;
         }
         hasRealDataRef.current = true;
@@ -121,7 +121,6 @@ export function TodayMatches() {
         if (todayMatches.length > 0) {
           todayMatches.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
           setMatches(todayMatches);
-          setHeading("משחקים היום");
           return;
         }
 
@@ -139,16 +138,13 @@ export function TodayMatches() {
             .filter((m) => toIsraelDateKey(m.date) === earliestDate)
             .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
           setMatches(matchesOnDate);
-          setHeading(`המשחקים הבאים — ${toIsraelDate(matchesOnDate[0].date)}`);
           return;
         }
 
         setMatches(DEMO_MATCHES);
-        setHeading("משחקים קרובים — תצוגה מקדימה");
       } catch {
         if (hasRealDataRef.current) return;
         setMatches(DEMO_MATCHES);
-        setHeading("משחקים קרובים — תצוגה מקדימה");
       }
   }, []);
 
@@ -168,29 +164,22 @@ export function TodayMatches() {
 
   if (matches.length === 0) return null;
 
-  // Featured selection (collapsed view) — a LOCK-BASED transition:
-  //   • Between matchdays (the next matchday hasn't locked yet) → show the most
-  //     recent FINISHED results, so you see how the last batch ended.
-  //   • Once the next matchday LOCKS (30 min before its first kickoff) → flip to
-  //     that day's LIVE + UPCOMING games (no finished — a live match means its
-  //     day is already locked, so its games are what's relevant).
-  // Up to 4 either way. Falls back to upcoming pre-tournament (no results yet).
+  // Two views, switched manually by the underline tabs in the header — the
+  // SAME behavior at all hours, no time/lock-based auto-switching:
+  //   • "הבאים" (default) — the next live + upcoming games, soonest first.
+  //   • "אחרונים" — the most recent results.
+  // The toggle only appears when both views have matches; otherwise the view
+  // falls back to whichever has data (pre-tournament → upcoming, end → results).
   const byKickoff = (a: Match, b: Match) => new Date(a.date).getTime() - new Date(b.date).getTime();
   const todayKey = getTodayIsrael();
   const pool = allMatches.length > 0 ? allMatches : matches;
-  const upcoming = pool.filter((m) => m.status !== "FINISHED").sort(byKickoff);
-  const finishedPool = pool.filter((m) => m.status === "FINISHED").sort(byKickoff);
-  // Has the next matchday locked? (Its day-lock has passed, or a match is live.)
-  const nextUp = upcoming[0];
-  const nextLockISO = nextUp ? dayLockAtForKickoff(nextUp.date, matchDays) : null;
-  const nextLockMs = nextLockISO
-    ? new Date(nextLockISO).getTime()
-    : nextUp ? new Date(nextUp.date).getTime() - 30 * 60_000 : null;
-  const nextDayLocked = nextLockMs != null && now >= nextLockMs;
-  const featured =
-    upcoming.length > 0 && nextDayLocked ? upcoming.slice(0, 4)
-    : finishedPool.length > 0 ? finishedPool.slice(-4)
-    : upcoming.slice(0, 4);
+  const upcomingList = pool.filter((m) => m.status !== "FINISHED").sort(byKickoff).slice(0, 4);
+  const finishedList = pool.filter((m) => m.status === "FINISHED").sort(byKickoff).slice(-4);
+  const showToggle = upcomingList.length > 0 && finishedList.length > 0;
+  const effectiveView = view === "finished"
+    ? (finishedList.length > 0 ? "finished" : "upcoming")
+    : (upcomingList.length > 0 ? "upcoming" : "finished");
+  const featured = effectiveView === "finished" ? finishedList : upcomingList;
 
   // Build bettors' special bets relevant to a match's teams
   function getRelatedBets(homeTla: string, awayTla: string) {
@@ -235,8 +224,20 @@ export function TodayMatches() {
     <div className="mb-6">
       <div className="flex items-center gap-2 mb-3">
         <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
-        <h2 className="text-base font-bold text-gray-800">{heading === "משחקים היום" ? heading : "המשחקים הבאים"}</h2>
-        <span className="text-sm text-gray-400">{displayed.length} משחקים</span>
+        <h2 className="text-base font-bold text-gray-800">משחקים</h2>
+        {showToggle ? (
+          // Underline tabs (Option B): manual switch, identical at all hours.
+          <div className="flex items-center gap-3 text-[13px] font-bold ms-auto">
+            {([["upcoming", "הבאים"], ["finished", "אחרונים"]] as const).map(([v, label]) => (
+              <button key={v} onClick={() => setView(v)} className="relative pb-1">
+                <span className={effectiveView === v ? "text-gray-900" : "text-gray-400"}>{label}</span>
+                {effectiveView === v && <span className="absolute -bottom-0.5 inset-x-0 h-0.5 rounded-full bg-blue-600" />}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <span className="text-sm text-gray-400">{displayed.length} משחקים</span>
+        )}
       </div>
       {/* Mobile: horizontal snap carousel so all 4 cards are reachable without
           shrinking them; desktop: 4-column grid. */}

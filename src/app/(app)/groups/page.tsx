@@ -11,7 +11,7 @@ import { FLAGS as __FLAGS } from "@/lib/flags";
 import { loadRealFixtures, groupFixtureInfo, pairKey, type RealFixture } from "@/lib/fixtures-client";
 import { toIsraelDate, toIsraelTimeShort } from "@/lib/timezone";
 import { computeMatchDays, dayLockAtForKickoff, groupMatchStatus } from "@/lib/tournament/group-live-state";
-import { saveLiveGroupScore } from "@/lib/supabase/sync";
+import { saveLiveGroupScore, fetchSavedGroupScore } from "@/lib/supabase/sync";
 import { classifyHit, type HitKind } from "@/lib/results-hits";
 import { useScoring } from "@/hooks/useScoring";
 import { SwipeableGroups } from "@/components/shared/SwipeableGroups";
@@ -176,8 +176,13 @@ function GroupView({ groupId }: { groupId: string }) {
   // Live mode: persist each edited score per match-day (debounced). The server
   // (save_live_group_score) enforces the lock; surface a toast on rejection.
   const saveTimers = useRef<Record<number, ReturnType<typeof setTimeout>>>({});
+  // Per-match save feedback (mobile had no visible confirmation): "saving" while
+  // the debounced write is in flight, "saved" briefly on success.
+  const [saveState, setSaveState] = useState<Record<number, "saving" | "saved">>({});
+  const savedClearTimers = useRef<Record<number, ReturnType<typeof setTimeout>>>({});
   const scheduleGroupSave = (pairIdx: number) => {
     if (saveTimers.current[pairIdx]) clearTimeout(saveTimers.current[pairIdx]);
+    setSaveState((s) => ({ ...s, [pairIdx]: "saving" }));
     saveTimers.current[pairIdx] = setTimeout(async () => {
       const mm = matchups[pairIdx];
       const info = fixtureInfo[pairKey(mm.h, mm.a)];
@@ -185,8 +190,27 @@ function GroupView({ groupId }: { groupId: string }) {
       const sc = useBettingStore.getState().groups[groupId]?.scores?.[pairIdx];
       if (!sc) return;
       const res = await saveLiveGroupScore(groupId, pairIdx, { home: sc.home, away: sc.away }, lockAt);
-      if (!res.success && typeof window !== "undefined") {
-        useToastStore.getState().push(res.error || "שמירת התוצאה נכשלה", "error", 4000);
+      if (res.success) {
+        // Flash "נשמר ✓" then clear it after a moment.
+        setSaveState((s) => ({ ...s, [pairIdx]: "saved" }));
+        if (savedClearTimers.current[pairIdx]) clearTimeout(savedClearTimers.current[pairIdx]);
+        savedClearTimers.current[pairIdx] = setTimeout(() => {
+          setSaveState((s) => { const n = { ...s }; delete n[pairIdx]; return n; });
+        }, 2000);
+      } else if (typeof window !== "undefined") {
+        setSaveState((s) => { const n = { ...s }; delete n[pairIdx]; return n; });
+        // The optimistic local value didn't persist (locked / network / error).
+        // Revert the on-screen score to what's ACTUALLY saved on the server so
+        // the bettor never believes a change saved when it didn't — the
+        // divergence that left a user's browser showing a score the DB (and
+        // therefore the scoring engine) never had.
+        const saved = await fetchSavedGroupScore(groupId, pairIdx);
+        if (saved && saved.home !== null && saved.away !== null) {
+          const store = useBettingStore.getState();
+          store.setGroupScore(groupId, pairIdx, "home", saved.home);
+          store.setGroupScore(groupId, pairIdx, "away", saved.away);
+        }
+        useToastStore.getState().push((res.error || "שמירת התוצאה נכשלה") + " · הוחזר לערך השמור בשרת", "error", 5000);
       }
     }, 800);
   };
@@ -478,10 +502,22 @@ function GroupView({ groupId }: { groupId: string }) {
                       </div>
                       {liveMode && (
                         <div className="px-3 pb-1.5 -mt-0.5 flex items-center justify-center gap-1.5 text-[11px]">
+                          {/* Save feedback (overrides the status text while active) */}
+                          {status === "open" && saveState[i] === "saving" && (
+                            <span className="text-gray-400 font-semibold inline-flex items-center gap-1">
+                              <span className="w-3 h-3 border-2 border-gray-300 border-t-gray-500 rounded-full animate-spin" />
+                              שומר…
+                            </span>
+                          )}
+                          {status === "open" && saveState[i] === "saved" && (
+                            <span className="text-green-600 font-bold inline-flex items-center gap-1 animate-in fade-in zoom-in duration-200">
+                              ✓ נשמר
+                            </span>
+                          )}
                           {status === "loading" && (
                             <span className="text-gray-400 font-semibold">טוען זמני נעילה…</span>
                           )}
-                          {status === "open" && (
+                          {status === "open" && !saveState[i] && (
                             <span className="text-blue-600 font-semibold">
                               🔓 ניתן לעדכן{dayLockAt ? ` · ננעל ב-${toIsraelTimeShort(dayLockAt)}` : ""}
                             </span>

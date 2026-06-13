@@ -438,3 +438,38 @@ export async function saveLiveGroupScore(
 
   return { success: true };
 }
+
+/**
+ * Read the authoritative SAVED value for one group/pair from the server. Used
+ * to revert the optimistic local value when a live save fails (e.g. the match
+ * day locked), so a bettor never keeps an on-screen score that didn't persist
+ * — the bug that left Yoni's browser showing QAT 0-2 SUI while the DB held 1-1.
+ */
+export async function fetchSavedGroupScore(
+  group: string,
+  pairIdx: number,
+  leagueId?: string,
+): Promise<{ home: number | null; away: number | null } | null> {
+  try {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+    let lid = leagueId;
+    if (!lid) {
+      const { data: league } = await supabase.from("leagues").select("id").limit(1).single();
+      lid = league?.id;
+    }
+    if (!lid) return null;
+    const { data: row } = await supabase
+      .from("user_brackets")
+      .select("group_predictions")
+      .eq("user_id", user.id)
+      .eq("league_id", lid)
+      .single();
+    const gp = row?.group_predictions as Record<string, { scores?: { home: number | null; away: number | null }[] }> | undefined;
+    const sc = gp?.[group]?.scores?.[pairIdx];
+    return sc && typeof sc === "object" ? { home: sc.home ?? null, away: sc.away ?? null } : null;
+  } catch {
+    return null;
+  }
+}

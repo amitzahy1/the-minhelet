@@ -99,12 +99,24 @@ function computeLiveLeaders(stats: PlayerStat[]): LiveLeaderInfo {
   return { topScorer, topAssists };
 }
 
+// Accent-insensitive, all-significant-tokens match — so a stored pick like
+// "Vinícius Jr." resolves to the feed's "Vinícius Júnior", while "Harry Kane"
+// does NOT collide with squad-mate "Harry Maguire" (requires "kane" too).
+const deburrName = (s: string) =>
+  s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z ]/g, " ").replace(/\s+/g, " ").trim();
+
 function findStat(stats: PlayerStat[], name: string | null | undefined): PlayerStat | null {
   if (!name) return null;
+  const exact = stats.find((s) => s.name === name) ||
+    stats.find((s) => s.name.endsWith(` ${name}`) || s.name.endsWith(`. ${name}`));
+  if (exact) return exact;
+  const q = deburrName(name);
+  const qTokens = q.split(" ").filter((t) => t.length >= 4);
   return (
-    stats.find((s) => s.name === name) ||
-    stats.find((s) => s.name.endsWith(` ${name}`) || s.name.endsWith(`. ${name}`)) ||
-    null
+    stats.find((s) => {
+      const n = deburrName(s.name);
+      return n.includes(q) || q.includes(n) || (qTokens.length > 0 && qTokens.every((t) => n.includes(t)));
+    }) || null
   );
 }
 

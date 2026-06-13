@@ -15,7 +15,8 @@ const ESPN_BASE = "https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.wor
 // Whole-tournament window — one scoreboard call returns every event in range,
 // each tagged with its state ("post" = finished). June 11 – July 19, 2026.
 const DATE_RANGE = "20260611-20260719";
-const MAX_SUMMARY_FETCHES = 25; // bound per call (most-recent-first); ESPN has no published limit but be polite
+const LIMIT = 200; // WC2026 has 104 matches; ESPN defaults to 100 → would drop the SFs + final
+const MAX_SUMMARY_FETCHES = 110; // cover all 104 matches — cards/scorers are cumulative, so a window would drop earlier matches
 
 const VALID_CODES = new Set(ALL_TEAMS.map((t) => t.code));
 
@@ -73,7 +74,7 @@ export interface EspnResult {
  * restricts use to group-stage matches (90' is unambiguous there).
  */
 export async function getEspnResults(): Promise<EspnResult[] | null> {
-  const board = await fetchJson(`${ESPN_BASE}/scoreboard?dates=${DATE_RANGE}`); // no-store: must be live
+  const board = await fetchJson(`${ESPN_BASE}/scoreboard?dates=${DATE_RANGE}&limit=${LIMIT}`); // no-store: must be live
   const events = (board as { events?: EspnEvent[] } | null)?.events;
   if (!events) return null;
   const out: EspnResult[] = [];
@@ -105,7 +106,7 @@ async function fetchJson(url: string, revalidate?: number): Promise<unknown | nu
 
 /** Finished-match summary JSONs (most-recent-first, capped). null on failure. */
 async function fetchFinishedSummaries(revalidate?: number): Promise<unknown[] | null> {
-  const board = await fetchJson(`${ESPN_BASE}/scoreboard?dates=${DATE_RANGE}`, revalidate);
+  const board = await fetchJson(`${ESPN_BASE}/scoreboard?dates=${DATE_RANGE}&limit=${LIMIT}`, revalidate);
   const events = (board as { events?: EspnEvent[] } | null)?.events;
   if (!events) return null;
   const finished = events
@@ -135,7 +136,9 @@ const statValue = (stats: EspnStat[], name: string): number => {
 };
 
 export async function getEspnCardBoard(): Promise<CardRow[] | null> {
-  const summaries = await fetchFinishedSummaries(); // no-store: cards must be live
+  // 5-min cache: a finished match's cards are immutable, and the board isn't
+  // time-critical — this keeps re-summing all matches from being N uncached calls.
+  const summaries = await fetchFinishedSummaries(300);
   if (!summaries) return null;
   const byTeam: Record<string, { yellow: number; red: number }> = {};
   for (const summary of summaries) {

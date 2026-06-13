@@ -1,0 +1,709 @@
+{
+  "source": "live:https://ysmorcovpskxuzpzvxoz.supabase.co",
+  "userId": "c3de558d-3b73-4ec8-838a-3177525e750c",
+  "leagueId": "ec21904b-7968-4580-84a4-5bdde7200ee0",
+  "user_brackets": {
+    "id": "bbacef87-107b-4ecd-8763-11acfc576d85",
+    "user_id": "c3de558d-3b73-4ec8-838a-3177525e750c",
+    "league_id": "ec21904b-7968-4580-84a4-5bdde7200ee0",
+    "group_predictions": {
+      "A": {
+        "order": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "scores": [
+          {
+            "away": 1,
+            "home": 1
+          },
+          {
+            "away": 0,
+            "home": 2
+          },
+          {
+            "away": 1,
+            "home": 2
+          },
+          {
+            "away": 2,
+            "home": 0
+          },
+          {
+            "away": 2,
+            "home": 0
+          },
+          {
+            "away": 1,
+            "home": 1
+          }
+        ]
+      },
+      "B": {
+        "order": [
+          2,
+          0,
+          3,
+          1
+        ],
+        "scores": [
+          {
+            "away": 0,
+            "home": 2
+          },
+          {
+            "away": 0,
+            "home": 2
+          },
+          {
+            "away": 2,
+            "home": 0
+          },
+          {
+            "away": 0,
+            "home": 2
+          },
+          {
+            "away": 1,
+            "home": 0
+          },
+          {
+            "away": 2,
+            "home": 0
+          }
+        ]
+      },
+      "C": {
+        "order": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "scores": [
+          {
+            "away": 1,
+            "home": 1
+          },
+          {
+            "away": 0,
+            "home": 2
+          },
+          {
+            "away": 0,
+            "home": 2
+          },
+          {
+            "away": 1,
+            "home": 0
+          },
+          {
+            "away": 3,
+            "home": 0
+          },
+          {
+            "away": 0,
+            "home": 1
+          }
+        ]
+      },
+      "D": {
+        "order": [
+          0,
+          2,
+          1,
+          3
+        ],
+        "scores": [
+          {
+            "away": 0,
+            "home": 1
+          },
+          {
+            "away": 0,
+            "home": 2
+          },
+          {
+            "away": 1,
+            "home": 1
+          },
+          {
+            "away": 1,
+            "home": 0
+          },
+          {
+            "away": 2,
+            "home": 0
+          },
+          {
+            "away": 1,
+            "home": 1
+          }
+        ]
+      },
+      "E": {
+        "order": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "scores": [
+          {
+            "away": 0,
+            "home": 1
+          },
+          {
+            "away": 0,
+            "home": 2
+          },
+          {
+            "away": 1,
+            "home": 2
+          },
+          {
+            "away": 2,
+            "home": 0
+          },
+          {
+            "away": 2,
+            "home": 0
+          },
+          {
+            "away": 0,
+            "home": 1
+          }
+        ]
+      },
+      "F": {
+        "order": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "scores": [
+          {
+            "away": 1,
+            "home": 1
+          },
+          {
+            "away": 0,
+            "home": 2
+          },
+          {
+            "away": 1,
+            "home": 2
+          },
+          {
+            "away": 2,
+            "home": 0
+          },
+          {
+            "away": 1,
+            "home": 0
+          },
+          {
+            "away": 1,
+            "home": 1
+          }
+        ]
+      },
+      "G": {
+        "order": [
+          0,
+          2,
+          1,
+          3
+        ],
+        "scores": [
+          {
+            "away": 0,
+            "home": 2
+          },
+          {
+            "away": 1,
+            "home": 2
+          },
+          {
+            "away": 0,
+            "home": 2
+          },
+          {
+            "away": 1,
+            "home": 1
+          },
+          {
+            "away": 2,
+            "home": 0
+          },
+          {
+            "away": 1,
+            "home": 1
+          }
+        ]
+      },
+      "H": {
+        "order": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "scores": [
+          {
+            "away": 0,
+            "home": 2
+          },
+          {
+            "away": 0,
+            "home": 0
+          },
+          {
+            "away": 0,
+            "home": 2
+          },
+          {
+            "away": 1,
+            "home": 0
+          },
+          {
+            "away": 3,
+            "home": 0
+          },
+          {
+            "away": 1,
+            "home": 2
+          }
+        ]
+      },
+      "I": {
+        "order": [
+          0,
+          2,
+          1,
+          3
+        ],
+        "scores": [
+          {
+            "away": 0,
+            "home": 2
+          },
+          {
+            "away": 0,
+            "home": 2
+          },
+          {
+            "away": 1,
+            "home": 2
+          },
+          {
+            "away": 2,
+            "home": 0
+          },
+          {
+            "away": 2,
+            "home": 0
+          },
+          {
+            "away": 1,
+            "home": 0
+          }
+        ]
+      },
+      "J": {
+        "order": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "scores": [
+          {
+            "away": 1,
+            "home": 2
+          },
+          {
+            "away": 0,
+            "home": 1
+          },
+          {
+            "away": 0,
+            "home": 1
+          },
+          {
+            "away": 2,
+            "home": 0
+          },
+          {
+            "away": 3,
+            "home": 0
+          },
+          {
+            "away": 0,
+            "home": 1
+          }
+        ]
+      },
+      "K": {
+        "order": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "scores": [
+          {
+            "away": 0,
+            "home": 1
+          },
+          {
+            "away": 0,
+            "home": 1
+          },
+          {
+            "away": 0,
+            "home": 2
+          },
+          {
+            "away": 1,
+            "home": 0
+          },
+          {
+            "away": 3,
+            "home": 0
+          },
+          {
+            "away": 0,
+            "home": 1
+          }
+        ]
+      },
+      "L": {
+        "order": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "scores": [
+          {
+            "away": 0,
+            "home": 2
+          },
+          {
+            "away": 0,
+            "home": 2
+          },
+          {
+            "away": 1,
+            "home": 2
+          },
+          {
+            "away": 1,
+            "home": 0
+          },
+          {
+            "away": 2,
+            "home": 0
+          },
+          {
+            "away": 0,
+            "home": 1
+          }
+        ]
+      }
+    },
+    "third_place_qualifiers": [
+      "C",
+      "B",
+      "S",
+      "P",
+      "C",
+      "S",
+      "I",
+      "K",
+      "S",
+      "A",
+      "U",
+      "G"
+    ],
+    "knockout_tree": {
+      "final": {
+        "score1": null,
+        "score2": null,
+        "winner": "ESP"
+      },
+      "qfl_0": {
+        "score1": null,
+        "score2": null,
+        "winner": "BRA"
+      },
+      "qfl_1": {
+        "score1": 1,
+        "score2": 0,
+        "winner": "ESP"
+      },
+      "qfr_0": {
+        "score1": null,
+        "score2": null,
+        "winner": "FRA"
+      },
+      "qfr_1": {
+        "score1": 0,
+        "score2": 1,
+        "winner": "POR"
+      },
+      "sfl_0": {
+        "score1": 0,
+        "score2": 1,
+        "winner": "ESP"
+      },
+      "sfr_0": {
+        "score1": 0,
+        "score2": 1,
+        "winner": "FRA"
+      },
+      "r16l_0": {
+        "score1": 0,
+        "score2": 1,
+        "winner": "GER"
+      },
+      "r16l_1": {
+        "score1": 0,
+        "score2": 1,
+        "winner": "BRA"
+      },
+      "r16l_2": {
+        "score1": 0,
+        "score2": 1,
+        "winner": "ESP"
+      },
+      "r16l_3": {
+        "score1": 1,
+        "score2": 0,
+        "winner": "SUI"
+      },
+      "r16r_0": {
+        "score1": 1,
+        "score2": 0,
+        "winner": "FRA"
+      },
+      "r16r_1": {
+        "score1": 0,
+        "score2": 1,
+        "winner": "ARG"
+      },
+      "r16r_2": {
+        "score1": 0,
+        "score2": 1,
+        "winner": "ENG"
+      },
+      "r16r_3": {
+        "score1": 0,
+        "score2": 1,
+        "winner": "POR"
+      },
+      "r32l_0": {
+        "score1": 1,
+        "score2": 0,
+        "winner": "CAN"
+      },
+      "r32l_1": {
+        "score1": 1,
+        "score2": 0,
+        "winner": "GER"
+      },
+      "r32l_2": {
+        "score1": 1,
+        "score2": 0,
+        "winner": "NED"
+      },
+      "r32l_3": {
+        "score1": 2,
+        "score2": 0,
+        "winner": "BRA"
+      },
+      "r32l_4": {
+        "score1": 1,
+        "score2": 0,
+        "winner": "MEX"
+      },
+      "r32l_5": {
+        "score1": 2,
+        "score2": 0,
+        "winner": "ESP"
+      },
+      "r32l_6": {
+        "score1": 1,
+        "score2": 0,
+        "winner": "SUI"
+      },
+      "r32l_7": {
+        "score1": null,
+        "score2": null,
+        "winner": "TUR"
+      },
+      "r32r_0": {
+        "score1": 2,
+        "score2": 0,
+        "winner": "FRA"
+      },
+      "r32r_1": {
+        "score1": 2,
+        "score2": 0,
+        "winner": "BEL"
+      },
+      "r32r_2": {
+        "score1": 1,
+        "score2": 0,
+        "winner": "COL"
+      },
+      "r32r_3": {
+        "score1": 2,
+        "score2": 0,
+        "winner": "ARG"
+      },
+      "r32r_4": {
+        "score1": null,
+        "score2": null,
+        "winner": "USA"
+      },
+      "r32r_5": {
+        "score1": 2,
+        "score2": 0,
+        "winner": "ENG"
+      },
+      "r32r_6": {
+        "score1": 0,
+        "score2": 1,
+        "winner": "NOR"
+      },
+      "r32r_7": {
+        "score1": 1,
+        "score2": 0,
+        "winner": "POR"
+      }
+    },
+    "champion": "ESP",
+    "locked_at": null,
+    "created_at": "2026-05-30T03:55:25.097055+00:00",
+    "updated_at": "2026-06-09T15:42:19.287369+00:00",
+    "knockout_tree_live": {}
+  },
+  "special_bets": {
+    "id": "b9a7a799-6c82-4699-a4e4-06e82cbbb710",
+    "user_id": "c3de558d-3b73-4ec8-838a-3177525e750c",
+    "league_id": "ec21904b-7968-4580-84a4-5bdde7200ee0",
+    "top_scorer_player": "Mikel Oyarzabal",
+    "top_assists_player": "Bruno Fernandes",
+    "best_attack_team": "ESP",
+    "most_prolific_group": "I",
+    "driest_group": "G",
+    "dirtiest_team": "ARG",
+    "matchup_pick": "1,1,2",
+    "penalties_over_under": "OVER",
+    "locked_at": null,
+    "created_at": "2026-05-30T03:55:25.097055+00:00",
+    "top_scorer_team": "FRA",
+    "top_assists_team": "POR"
+  },
+  "advancement_picks": {
+    "id": "16a05d36-0c21-4b9a-9fb3-a881f65115c2",
+    "user_id": "c3de558d-3b73-4ec8-838a-3177525e750c",
+    "league_id": "ec21904b-7968-4580-84a4-5bdde7200ee0",
+    "group_qualifiers": {
+      "A": [
+        "MEX",
+        "KOR"
+      ],
+      "B": [
+        "SUI",
+        "CAN"
+      ],
+      "C": [
+        "BRA",
+        "MAR"
+      ],
+      "D": [
+        "USA",
+        "TUR"
+      ],
+      "E": [
+        "GER",
+        "ECU"
+      ],
+      "F": [
+        "NED",
+        "JPN"
+      ],
+      "G": [
+        "BEL",
+        "EGY"
+      ],
+      "H": [
+        "ESP",
+        "URU"
+      ],
+      "I": [
+        "FRA",
+        "NOR"
+      ],
+      "J": [
+        "ARG",
+        "AUT"
+      ],
+      "K": [
+        "POR",
+        "COL"
+      ],
+      "L": [
+        "ENG",
+        "CRO"
+      ]
+    },
+    "advance_to_qf": [
+      "GER",
+      "BRA",
+      "ESP",
+      "SUI",
+      "FRA",
+      "ARG",
+      "ENG",
+      "POR"
+    ],
+    "advance_to_sf": [
+      "BRA",
+      "ESP",
+      "FRA",
+      "POR"
+    ],
+    "advance_to_final": [
+      "ESP",
+      "FRA"
+    ],
+    "winner": "ESP",
+    "locked_at": null,
+    "created_at": "2026-05-30T03:55:25.097055+00:00",
+    "advance_to_r16": [
+      "CAN",
+      "GER",
+      "NED",
+      "BRA",
+      "MEX",
+      "ESP",
+      "SUI",
+      "TUR",
+      "FRA",
+      "BEL",
+      "COL",
+      "ARG",
+      "USA",
+      "ENG",
+      "NOR",
+      "POR"
+    ]
+  }
+}

@@ -9,7 +9,7 @@ import { getSquadPlayers } from "@/lib/tournament/squad-players";
 import { getFlag } from "@/lib/flags";
 import { PageTransition } from "@/components/shared/PageTransition";
 import { SaveAndContinue } from "@/components/shared/SaveAndContinue";
-import { formatLockDeadline, PENALTIES_LINE } from "@/lib/constants";
+import { formatLockDeadline } from "@/lib/constants";
 import { AgreementBadge } from "@/components/shared/AgreementBadge";
 import { StillAliveBadge } from "@/components/shared/StillAliveBadge";
 import { useConfetti } from "@/hooks/useConfetti";

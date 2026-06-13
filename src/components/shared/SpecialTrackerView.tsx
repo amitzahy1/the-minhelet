@@ -469,7 +469,10 @@ export function SpecialTrackerView({
       const qTokens = q.split(" ").filter((t) => t.length >= 4);
       const s = stats.scorers.find((x) => {
         const n = deburr(x.name);
-        return n.includes(q) || q.includes(n) || qTokens.some((t) => n.includes(t));
+        // ALL significant tokens must appear — `.some` matched "Harry Kane" to
+        // "Harry Maguire" on the shared "harry" token. `.every` requires "kane"
+        // too, so squad-mates with a shared first name don't collide.
+        return n.includes(q) || q.includes(n) || (qTokens.length > 0 && qTokens.every((t) => n.includes(t)));
       });
       return { g: s?.goals ?? 0, a: s?.assists ?? 0 };
     };

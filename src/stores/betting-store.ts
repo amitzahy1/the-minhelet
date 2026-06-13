@@ -492,14 +492,13 @@ export const useBettingStore = create<BettingState & BettingActions>()(
         if (sb.prolificGroup) count++;
         if (sb.driestGroup) count++;
         count += sb.matchups.filter(Boolean).length;
-        if (sb.penaltiesOverUnder) count++;
         return count;
       },
 
       areAllBetsFilled: () => {
         return get().getCompletedGroupsCount() === 12
           && get().getKnockoutFilledCount() === 31
-          && get().getSpecialsFilledCount() === 25;
+          && get().getSpecialsFilledCount() === 24;
       },
 
     })),
@@ -651,7 +650,6 @@ async function performSave(state: BettingState) {
     if (sb.prolificGroup) sc++;
     if (sb.driestGroup) sc++;
     sc += sb.matchups.filter(Boolean).length;
-    if (sb.penaltiesOverUnder) sc++;
     lastSavedSpecialsCount = sc;
   } else {
     saveStatus?.markError(errorMsg);
@@ -793,9 +791,8 @@ if (typeof window !== "undefined") {
     if (sb.prolificGroup) specials++;
     if (sb.driestGroup) specials++;
     specials += sb.matchups.filter(Boolean).length;
-    if (sb.penaltiesOverUnder) specials++;
 
-    const allDone = groups === 12 && knockout === 31 && specials === 25;
+    const allDone = groups === 12 && knockout === 31 && specials === 24;
 
     // Per-group completion detection — fires when the user enters the LAST
     // match score of any single group, independent of the overall stage
@@ -811,7 +808,7 @@ if (typeof window !== "undefined") {
     // Milestone detection: auto-save when a stage transitions incomplete → complete.
     const groupsJustCompleted = lastCounts.groups < 12 && groups === 12;
     const knockoutJustCompleted = lastCounts.knockout < 31 && knockout === 31;
-    const specialsJustCompleted = lastCounts.specials < 25 && specials === 25;
+    const specialsJustCompleted = lastCounts.specials < 24 && specials === 24;
 
     // Batch detection: every N net edits within knockout or specials trips a
     // safety-net save so the user never has >N unsaved picks in either stage.

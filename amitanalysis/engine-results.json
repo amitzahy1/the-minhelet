@@ -1,0 +1,2069 @@
+{
+  "meta": {
+    "N": 200000,
+    "asOf": "2026-06-10",
+    "penaltiesLine": 21.5
+  },
+  "validation": [
+    {
+      "code": "ESP",
+      "simChamp": 16.7,
+      "targetChamp": 16.3,
+      "market": 15.5,
+      "simReachSF": 43.4,
+      "simReachQF": 56.7
+    },
+    {
+      "code": "FRA",
+      "simChamp": 13.5,
+      "targetChamp": 14.2,
+      "market": 14.8,
+      "simReachSF": 34.7,
+      "simReachQF": 55.2
+    },
+    {
+      "code": "ENG",
+      "simChamp": 10,
+      "targetChamp": 10,
+      "market": 10.6,
+      "simReachSF": 30.2,
+      "simReachQF": 49.8
+    },
+    {
+      "code": "ARG",
+      "simChamp": 9.7,
+      "targetChamp": 10.4,
+      "market": 8.5,
+      "simReachSF": 28.3,
+      "simReachQF": 44.5
+    },
+    {
+      "code": "BRA",
+      "simChamp": 9.1,
+      "targetChamp": 7.4,
+      "market": 8.1,
+      "simReachSF": 29.4,
+      "simReachQF": 44.5
+    },
+    {
+      "code": "GER",
+      "simChamp": 8.2,
+      "targetChamp": 7.5,
+      "market": 5.7,
+      "simReachSF": 29,
+      "simReachQF": 50.8
+    },
+    {
+      "code": "POR",
+      "simChamp": 7.4,
+      "targetChamp": 7.1,
+      "market": 9,
+      "simReachSF": 24.6,
+      "simReachQF": 40.8
+    },
+    {
+      "code": "NED",
+      "simChamp": 4.5,
+      "targetChamp": 3.9,
+      "market": 4.1,
+      "simReachSF": 18.2,
+      "simReachQF": 31.1
+    },
+    {
+      "code": "NOR",
+      "simChamp": 3,
+      "targetChamp": 2.5,
+      "market": 2.4,
+      "simReachSF": 14.7,
+      "simReachQF": 29.8
+    },
+    {
+      "code": "BEL",
+      "simChamp": 2.6,
+      "targetChamp": 2,
+      "market": 2.1,
+      "simReachSF": 14.2,
+      "simReachQF": 32.7
+    }
+  ],
+  "groupWinnerCheck": [
+    {
+      "group": "A",
+      "fav": "MEX",
+      "simWin": 56.4,
+      "targetWin": 56.2
+    },
+    {
+      "group": "B",
+      "fav": "SUI",
+      "simWin": 54.2,
+      "targetWin": 54
+    },
+    {
+      "group": "C",
+      "fav": "BRA",
+      "simWin": 70.5,
+      "targetWin": 70.9
+    },
+    {
+      "group": "D",
+      "fav": "USA",
+      "simWin": 40.7,
+      "targetWin": 41.6
+    },
+    {
+      "group": "E",
+      "fav": "GER",
+      "simWin": 73.9,
+      "targetWin": 73.8
+    },
+    {
+      "group": "F",
+      "fav": "NED",
+      "simWin": 53.6,
+      "targetWin": 53.8
+    },
+    {
+      "group": "G",
+      "fav": "BEL",
+      "simWin": 71.2,
+      "targetWin": 71
+    },
+    {
+      "group": "H",
+      "fav": "ESP",
+      "simWin": 77.3,
+      "targetWin": 76.9
+    },
+    {
+      "group": "I",
+      "fav": "FRA",
+      "simWin": 61.9,
+      "targetWin": 61.8
+    },
+    {
+      "group": "J",
+      "fav": "ARG",
+      "simWin": 73.9,
+      "targetWin": 74
+    },
+    {
+      "group": "K",
+      "fav": "POR",
+      "simWin": 61.1,
+      "targetWin": 60.9
+    },
+    {
+      "group": "L",
+      "fav": "ENG",
+      "simWin": 67.7,
+      "targetWin": 68.1
+    }
+  ],
+  "groupScorelines": {
+    "evNow": 88.9,
+    "evOptimal": 94.5,
+    "detail": [
+      {
+        "group": "A",
+        "fixture": "Mexico v South Korea",
+        "pred": "1-1",
+        "predType": "D",
+        "evNow": 0.549,
+        "bestScore": "1-0",
+        "bestEV": 1.305,
+        "gain": 0.756,
+        "lambdas": [
+          1.87,
+          0.93
+        ]
+      },
+      {
+        "group": "A",
+        "fixture": "Czechia v South Africa",
+        "pred": "2-0",
+        "predType": "H",
+        "evNow": 1.122,
+        "bestScore": "1-0",
+        "bestEV": 1.141,
+        "gain": 0.019,
+        "lambdas": [
+          1.66,
+          1.05
+        ]
+      },
+      {
+        "group": "A",
+        "fixture": "Mexico v Czechia",
+        "pred": "2-1",
+        "predType": "H",
+        "evNow": 1.136,
+        "bestScore": "1-0",
+        "bestEV": 1.15,
+        "gain": 0.014,
+        "lambdas": [
+          1.67,
+          1.04
+        ]
+      },
+      {
+        "group": "A",
+        "fixture": "South Africa v South Korea",
+        "pred": "0-2",
+        "predType": "A",
+        "evNow": 0.955,
+        "bestScore": "0-1",
+        "bestEV": 0.982,
+        "gain": 0.027,
+        "lambdas": [
+          1.18,
+          1.47
+        ]
+      },
+      {
+        "group": "A",
+        "fixture": "South Africa v Mexico",
+        "pred": "0-2",
+        "predType": "A",
+        "evNow": 1.449,
+        "bestScore": "0-2",
+        "bestEV": 1.449,
+        "gain": 0,
+        "lambdas": [
+          0.83,
+          2.09
+        ]
+      },
+      {
+        "group": "A",
+        "fixture": "South Korea v Czechia",
+        "pred": "1-1",
+        "predType": "D",
+        "evNow": 0.636,
+        "bestScore": "0-1",
+        "bestEV": 0.99,
+        "gain": 0.354,
+        "lambdas": [
+          1.17,
+          1.48
+        ]
+      },
+      {
+        "group": "B",
+        "fixture": "Canada v Qatar",
+        "pred": "2-0",
+        "predType": "H",
+        "evNow": 1.466,
+        "bestScore": "2-0",
+        "bestEV": 1.466,
+        "gain": 0,
+        "lambdas": [
+          2.12,
+          0.82
+        ]
+      },
+      {
+        "group": "B",
+        "fixture": "Switzerland v Bosnia-Herzegovina",
+        "pred": "2-0",
+        "predType": "H",
+        "evNow": 1.296,
+        "bestScore": "1-0",
+        "bestEV": 1.303,
+        "gain": 0.007,
+        "lambdas": [
+          1.87,
+          0.93
+        ]
+      },
+      {
+        "group": "B",
+        "fixture": "Canada v Switzerland",
+        "pred": "0-2",
+        "predType": "A",
+        "evNow": 1.016,
+        "bestScore": "0-1",
+        "bestEV": 1.04,
+        "gain": 0.025,
+        "lambdas": [
+          1.13,
+          1.54
+        ]
+      },
+      {
+        "group": "B",
+        "fixture": "Bosnia-Herzegovina v Qatar",
+        "pred": "2-0",
+        "predType": "H",
+        "evNow": 1.196,
+        "bestScore": "1-0",
+        "bestEV": 1.21,
+        "gain": 0.014,
+        "lambdas": [
+          1.75,
+          1
+        ]
+      },
+      {
+        "group": "B",
+        "fixture": "Bosnia-Herzegovina v Canada",
+        "pred": "0-1",
+        "predType": "A",
+        "evNow": 1.098,
+        "bestScore": "0-1",
+        "bestEV": 1.098,
+        "gain": 0,
+        "lambdas": [
+          1.09,
+          1.61
+        ]
+      },
+      {
+        "group": "B",
+        "fixture": "Qatar v Switzerland",
+        "pred": "0-2",
+        "predType": "A",
+        "evNow": 1.651,
+        "bestScore": "0-2",
+        "bestEV": 1.651,
+        "gain": 0,
+        "lambdas": [
+          0.7,
+          2.48
+        ]
+      },
+      {
+        "group": "C",
+        "fixture": "Brazil v Morocco",
+        "pred": "1-1",
+        "predType": "D",
+        "evNow": 0.546,
+        "bestScore": "1-0",
+        "bestEV": 1.314,
+        "gain": 0.769,
+        "lambdas": [
+          1.89,
+          0.92
+        ]
+      },
+      {
+        "group": "C",
+        "fixture": "Scotland v Haiti",
+        "pred": "2-0",
+        "predType": "H",
+        "evNow": 1.415,
+        "bestScore": "2-0",
+        "bestEV": 1.415,
+        "gain": 0,
+        "lambdas": [
+          2.04,
+          0.85
+        ]
+      },
+      {
+        "group": "C",
+        "fixture": "Brazil v Scotland",
+        "pred": "2-0",
+        "predType": "H",
+        "evNow": 1.466,
+        "bestScore": "2-0",
+        "bestEV": 1.466,
+        "gain": 0,
+        "lambdas": [
+          2.12,
+          0.82
+        ]
+      },
+      {
+        "group": "C",
+        "fixture": "Haiti v Morocco",
+        "pred": "0-1",
+        "predType": "A",
+        "evNow": 1.548,
+        "bestScore": "0-2",
+        "bestEV": 1.564,
+        "gain": 0.016,
+        "lambdas": [
+          0.76,
+          2.3
+        ]
+      },
+      {
+        "group": "C",
+        "fixture": "Haiti v Brazil",
+        "pred": "0-3",
+        "predType": "A",
+        "evNow": 1.901,
+        "bestScore": "0-3",
+        "bestEV": 1.901,
+        "gain": 0,
+        "lambdas": [
+          0.53,
+          3.29
+        ]
+      },
+      {
+        "group": "C",
+        "fixture": "Morocco v Scotland",
+        "pred": "1-0",
+        "predType": "H",
+        "evNow": 0.99,
+        "bestScore": "1-0",
+        "bestEV": 0.99,
+        "gain": 0,
+        "lambdas": [
+          1.48,
+          1.17
+        ]
+      },
+      {
+        "group": "D",
+        "fixture": "United States v Paraguay",
+        "pred": "1-0",
+        "predType": "H",
+        "evNow": 1.227,
+        "bestScore": "1-0",
+        "bestEV": 1.227,
+        "gain": 0,
+        "lambdas": [
+          1.77,
+          0.99
+        ]
+      },
+      {
+        "group": "D",
+        "fixture": "Turkey v Australia",
+        "pred": "2-0",
+        "predType": "H",
+        "evNow": 1.178,
+        "bestScore": "1-0",
+        "bestEV": 1.194,
+        "gain": 0.015,
+        "lambdas": [
+          1.72,
+          1.01
+        ]
+      },
+      {
+        "group": "D",
+        "fixture": "United States v Turkey",
+        "pred": "1-1",
+        "predType": "D",
+        "evNow": 0.647,
+        "bestScore": "1-0",
+        "bestEV": 0.867,
+        "gain": 0.22,
+        "lambdas": [
+          1.35,
+          1.29
+        ]
+      },
+      {
+        "group": "D",
+        "fixture": "Australia v Paraguay",
+        "pred": "0-1",
+        "predType": "A",
+        "evNow": 0.833,
+        "bestScore": "0-1",
+        "bestEV": 0.833,
+        "gain": 0,
+        "lambdas": [
+          1.32,
+          1.32
+        ]
+      },
+      {
+        "group": "D",
+        "fixture": "Australia v United States",
+        "pred": "0-2",
+        "predType": "A",
+        "evNow": 1.215,
+        "bestScore": "0-1",
+        "bestEV": 1.228,
+        "gain": 0.013,
+        "lambdas": [
+          0.99,
+          1.77
+        ]
+      },
+      {
+        "group": "D",
+        "fixture": "Paraguay v Turkey",
+        "pred": "1-1",
+        "predType": "D",
+        "evNow": 0.589,
+        "bestScore": "0-1",
+        "bestEV": 1.193,
+        "gain": 0.604,
+        "lambdas": [
+          1.01,
+          1.72
+        ]
+      },
+      {
+        "group": "E",
+        "fixture": "Germany v Ecuador",
+        "pred": "1-0",
+        "predType": "H",
+        "evNow": 1.373,
+        "bestScore": "1-0",
+        "bestEV": 1.373,
+        "gain": 0,
+        "lambdas": [
+          1.98,
+          0.88
+        ]
+      },
+      {
+        "group": "E",
+        "fixture": "Ivory Coast v Curaçao",
+        "pred": "2-0",
+        "predType": "H",
+        "evNow": 1.342,
+        "bestScore": "1-0",
+        "bestEV": 1.346,
+        "gain": 0.004,
+        "lambdas": [
+          1.94,
+          0.9
+        ]
+      },
+      {
+        "group": "E",
+        "fixture": "Germany v Ivory Coast",
+        "pred": "2-1",
+        "predType": "H",
+        "evNow": 1.499,
+        "bestScore": "2-0",
+        "bestEV": 1.526,
+        "gain": 0.027,
+        "lambdas": [
+          2.22,
+          0.78
+        ]
+      },
+      {
+        "group": "E",
+        "fixture": "Curaçao v Ecuador",
+        "pred": "0-2",
+        "predType": "A",
+        "evNow": 1.499,
+        "bestScore": "0-2",
+        "bestEV": 1.499,
+        "gain": 0,
+        "lambdas": [
+          0.8,
+          2.18
+        ]
+      },
+      {
+        "group": "E",
+        "fixture": "Curaçao v Germany",
+        "pred": "0-2",
+        "predType": "A",
+        "evNow": 1.886,
+        "bestScore": "0-3",
+        "bestEV": 1.897,
+        "gain": 0.01,
+        "lambdas": [
+          0.53,
+          3.26
+        ]
+      },
+      {
+        "group": "E",
+        "fixture": "Ecuador v Ivory Coast",
+        "pred": "1-0",
+        "predType": "H",
+        "evNow": 0.991,
+        "bestScore": "1-0",
+        "bestEV": 0.991,
+        "gain": 0,
+        "lambdas": [
+          1.49,
+          1.17
+        ]
+      },
+      {
+        "group": "F",
+        "fixture": "Netherlands v Japan",
+        "pred": "1-1",
+        "predType": "D",
+        "evNow": 0.617,
+        "bestScore": "1-0",
+        "bestEV": 1.093,
+        "gain": 0.476,
+        "lambdas": [
+          1.6,
+          1.09
+        ]
+      },
+      {
+        "group": "F",
+        "fixture": "Sweden v Tunisia",
+        "pred": "2-0",
+        "predType": "H",
+        "evNow": 0.949,
+        "bestScore": "1-0",
+        "bestEV": 0.976,
+        "gain": 0.027,
+        "lambdas": [
+          1.47,
+          1.19
+        ]
+      },
+      {
+        "group": "F",
+        "fixture": "Netherlands v Sweden",
+        "pred": "2-1",
+        "predType": "H",
+        "evNow": 1.273,
+        "bestScore": "1-0",
+        "bestEV": 1.287,
+        "gain": 0.015,
+        "lambdas": [
+          1.85,
+          0.94
+        ]
+      },
+      {
+        "group": "F",
+        "fixture": "Tunisia v Japan",
+        "pred": "0-2",
+        "predType": "A",
+        "evNow": 1.157,
+        "bestScore": "0-1",
+        "bestEV": 1.174,
+        "gain": 0.017,
+        "lambdas": [
+          1.03,
+          1.7
+        ]
+      },
+      {
+        "group": "F",
+        "fixture": "Tunisia v Netherlands",
+        "pred": "0-1",
+        "predType": "A",
+        "evNow": 1.422,
+        "bestScore": "0-2",
+        "bestEV": 1.425,
+        "gain": 0.003,
+        "lambdas": [
+          0.85,
+          2.06
+        ]
+      },
+      {
+        "group": "F",
+        "fixture": "Japan v Sweden",
+        "pred": "1-1",
+        "predType": "D",
+        "evNow": 0.63,
+        "bestScore": "1-0",
+        "bestEV": 1.029,
+        "gain": 0.399,
+        "lambdas": [
+          1.53,
+          1.14
+        ]
+      },
+      {
+        "group": "G",
+        "fixture": "Belgium v Iran",
+        "pred": "2-0",
+        "predType": "H",
+        "evNow": 1.397,
+        "bestScore": "2-0",
+        "bestEV": 1.397,
+        "gain": 0,
+        "lambdas": [
+          2.01,
+          0.86
+        ]
+      },
+      {
+        "group": "G",
+        "fixture": "Egypt v New Zealand",
+        "pred": "2-1",
+        "predType": "H",
+        "evNow": 1.028,
+        "bestScore": "1-0",
+        "bestEV": 1.041,
+        "gain": 0.014,
+        "lambdas": [
+          1.54,
+          1.13
+        ]
+      },
+      {
+        "group": "G",
+        "fixture": "Belgium v Egypt",
+        "pred": "2-0",
+        "predType": "H",
+        "evNow": 1.468,
+        "bestScore": "2-0",
+        "bestEV": 1.468,
+        "gain": 0,
+        "lambdas": [
+          2.13,
+          0.82
+        ]
+      },
+      {
+        "group": "G",
+        "fixture": "New Zealand v Iran",
+        "pred": "1-1",
+        "predType": "D",
+        "evNow": 0.611,
+        "bestScore": "0-1",
+        "bestEV": 1.114,
+        "gain": 0.503,
+        "lambdas": [
+          1.07,
+          1.63
+        ]
+      },
+      {
+        "group": "G",
+        "fixture": "New Zealand v Belgium",
+        "pred": "0-2",
+        "predType": "A",
+        "evNow": 1.653,
+        "bestScore": "0-2",
+        "bestEV": 1.653,
+        "gain": 0,
+        "lambdas": [
+          0.7,
+          2.48
+        ]
+      },
+      {
+        "group": "G",
+        "fixture": "Iran v Egypt",
+        "pred": "1-1",
+        "predType": "D",
+        "evNow": 0.645,
+        "bestScore": "1-0",
+        "bestEV": 0.904,
+        "gain": 0.259,
+        "lambdas": [
+          1.39,
+          1.25
+        ]
+      },
+      {
+        "group": "H",
+        "fixture": "Spain v Uruguay",
+        "pred": "2-0",
+        "predType": "H",
+        "evNow": 1.356,
+        "bestScore": "1-0",
+        "bestEV": 1.359,
+        "gain": 0.002,
+        "lambdas": [
+          1.96,
+          0.89
+        ]
+      },
+      {
+        "group": "H",
+        "fixture": "Saudi Arabia v Cape Verde",
+        "pred": "0-0",
+        "predType": "D",
+        "evNow": 0.586,
+        "bestScore": "1-0",
+        "bestEV": 0.971,
+        "gain": 0.384,
+        "lambdas": [
+          1.46,
+          1.19
+        ]
+      },
+      {
+        "group": "H",
+        "fixture": "Spain v Saudi Arabia",
+        "pred": "2-0",
+        "predType": "H",
+        "evNow": 1.765,
+        "bestScore": "2-0",
+        "bestEV": 1.765,
+        "gain": 0,
+        "lambdas": [
+          2.77,
+          0.63
+        ]
+      },
+      {
+        "group": "H",
+        "fixture": "Cape Verde v Uruguay",
+        "pred": "0-1",
+        "predType": "A",
+        "evNow": 1.432,
+        "bestScore": "0-2",
+        "bestEV": 1.436,
+        "gain": 0.004,
+        "lambdas": [
+          0.84,
+          2.07
+        ]
+      },
+      {
+        "group": "H",
+        "fixture": "Cape Verde v Spain",
+        "pred": "0-3",
+        "predType": "A",
+        "evNow": 1.851,
+        "bestScore": "0-3",
+        "bestEV": 1.851,
+        "gain": 0,
+        "lambdas": [
+          0.57,
+          3.07
+        ]
+      },
+      {
+        "group": "H",
+        "fixture": "Uruguay v Saudi Arabia",
+        "pred": "2-1",
+        "predType": "H",
+        "evNow": 1.289,
+        "bestScore": "1-0",
+        "bestEV": 1.303,
+        "gain": 0.015,
+        "lambdas": [
+          1.87,
+          0.93
+        ]
+      },
+      {
+        "group": "I",
+        "fixture": "France v Senegal",
+        "pred": "2-0",
+        "predType": "H",
+        "evNow": 1.348,
+        "bestScore": "1-0",
+        "bestEV": 1.351,
+        "gain": 0.003,
+        "lambdas": [
+          1.94,
+          0.9
+        ]
+      },
+      {
+        "group": "I",
+        "fixture": "Norway v Iraq",
+        "pred": "2-0",
+        "predType": "H",
+        "evNow": 1.572,
+        "bestScore": "2-0",
+        "bestEV": 1.572,
+        "gain": 0,
+        "lambdas": [
+          2.31,
+          0.75
+        ]
+      },
+      {
+        "group": "I",
+        "fixture": "France v Norway",
+        "pred": "2-1",
+        "predType": "H",
+        "evNow": 1.157,
+        "bestScore": "1-0",
+        "bestEV": 1.171,
+        "gain": 0.014,
+        "lambdas": [
+          1.7,
+          1.03
+        ]
+      },
+      {
+        "group": "I",
+        "fixture": "Iraq v Senegal",
+        "pred": "0-2",
+        "predType": "A",
+        "evNow": 1.397,
+        "bestScore": "0-2",
+        "bestEV": 1.397,
+        "gain": 0,
+        "lambdas": [
+          0.86,
+          2.02
+        ]
+      },
+      {
+        "group": "I",
+        "fixture": "Iraq v France",
+        "pred": "0-2",
+        "predType": "A",
+        "evNow": 1.821,
+        "bestScore": "0-2",
+        "bestEV": 1.821,
+        "gain": 0,
+        "lambdas": [
+          0.59,
+          2.97
+        ]
+      },
+      {
+        "group": "I",
+        "fixture": "Senegal v Norway",
+        "pred": "0-1",
+        "predType": "A",
+        "evNow": 1.017,
+        "bestScore": "0-1",
+        "bestEV": 1.017,
+        "gain": 0,
+        "lambdas": [
+          1.15,
+          1.51
+        ]
+      },
+      {
+        "group": "J",
+        "fixture": "Argentina v Austria",
+        "pred": "2-1",
+        "predType": "H",
+        "evNow": 1.418,
+        "bestScore": "2-0",
+        "bestEV": 1.437,
+        "gain": 0.019,
+        "lambdas": [
+          2.08,
+          0.84
+        ]
+      },
+      {
+        "group": "J",
+        "fixture": "Algeria v Jordan",
+        "pred": "1-0",
+        "predType": "H",
+        "evNow": 1.256,
+        "bestScore": "1-0",
+        "bestEV": 1.256,
+        "gain": 0,
+        "lambdas": [
+          1.81,
+          0.97
+        ]
+      },
+      {
+        "group": "J",
+        "fixture": "Argentina v Algeria",
+        "pred": "1-0",
+        "predType": "H",
+        "evNow": 1.456,
+        "bestScore": "2-0",
+        "bestEV": 1.463,
+        "gain": 0.007,
+        "lambdas": [
+          2.12,
+          0.82
+        ]
+      },
+      {
+        "group": "J",
+        "fixture": "Jordan v Austria",
+        "pred": "0-2",
+        "predType": "A",
+        "evNow": 1.272,
+        "bestScore": "0-1",
+        "bestEV": 1.281,
+        "gain": 0.009,
+        "lambdas": [
+          0.95,
+          1.84
+        ]
+      },
+      {
+        "group": "J",
+        "fixture": "Jordan v Argentina",
+        "pred": "0-3",
+        "predType": "A",
+        "evNow": 1.797,
+        "bestScore": "0-2",
+        "bestEV": 1.802,
+        "gain": 0.004,
+        "lambdas": [
+          0.6,
+          2.9
+        ]
+      },
+      {
+        "group": "J",
+        "fixture": "Austria v Algeria",
+        "pred": "1-0",
+        "predType": "H",
+        "evNow": 0.859,
+        "bestScore": "1-0",
+        "bestEV": 0.859,
+        "gain": 0,
+        "lambdas": [
+          1.35,
+          1.29
+        ]
+      },
+      {
+        "group": "K",
+        "fixture": "Portugal v Colombia",
+        "pred": "1-0",
+        "predType": "H",
+        "evNow": 1.093,
+        "bestScore": "1-0",
+        "bestEV": 1.093,
+        "gain": 0,
+        "lambdas": [
+          1.6,
+          1.09
+        ]
+      },
+      {
+        "group": "K",
+        "fixture": "Uzbekistan v Congo DR",
+        "pred": "1-0",
+        "predType": "H",
+        "evNow": 0.65,
+        "bestScore": "0-1",
+        "bestEV": 1.026,
+        "gain": 0.375,
+        "lambdas": [
+          1.14,
+          1.52
+        ]
+      },
+      {
+        "group": "K",
+        "fixture": "Portugal v Uzbekistan",
+        "pred": "2-0",
+        "predType": "H",
+        "evNow": 1.694,
+        "bestScore": "2-0",
+        "bestEV": 1.694,
+        "gain": 0,
+        "lambdas": [
+          2.58,
+          0.68
+        ]
+      },
+      {
+        "group": "K",
+        "fixture": "Congo DR v Colombia",
+        "pred": "0-1",
+        "predType": "A",
+        "evNow": 1.283,
+        "bestScore": "0-1",
+        "bestEV": 1.283,
+        "gain": 0,
+        "lambdas": [
+          0.95,
+          1.84
+        ]
+      },
+      {
+        "group": "K",
+        "fixture": "Congo DR v Portugal",
+        "pred": "0-3",
+        "predType": "A",
+        "evNow": 1.5,
+        "bestScore": "0-2",
+        "bestEV": 1.531,
+        "gain": 0.031,
+        "lambdas": [
+          0.78,
+          2.24
+        ]
+      },
+      {
+        "group": "K",
+        "fixture": "Colombia v Uzbekistan",
+        "pred": "1-0",
+        "predType": "H",
+        "evNow": 1.462,
+        "bestScore": "2-0",
+        "bestEV": 1.469,
+        "gain": 0.007,
+        "lambdas": [
+          2.13,
+          0.82
+        ]
+      },
+      {
+        "group": "L",
+        "fixture": "England v Croatia",
+        "pred": "2-0",
+        "predType": "H",
+        "evNow": 1.226,
+        "bestScore": "1-0",
+        "bestEV": 1.238,
+        "gain": 0.012,
+        "lambdas": [
+          1.78,
+          0.98
+        ]
+      },
+      {
+        "group": "L",
+        "fixture": "Ghana v Panama",
+        "pred": "2-0",
+        "predType": "H",
+        "evNow": 1.066,
+        "bestScore": "1-0",
+        "bestEV": 1.088,
+        "gain": 0.022,
+        "lambdas": [
+          1.59,
+          1.09
+        ]
+      },
+      {
+        "group": "L",
+        "fixture": "England v Ghana",
+        "pred": "2-1",
+        "predType": "H",
+        "evNow": 1.499,
+        "bestScore": "2-0",
+        "bestEV": 1.526,
+        "gain": 0.027,
+        "lambdas": [
+          2.22,
+          0.78
+        ]
+      },
+      {
+        "group": "L",
+        "fixture": "Panama v Croatia",
+        "pred": "0-1",
+        "predType": "A",
+        "evNow": 1.381,
+        "bestScore": "0-1",
+        "bestEV": 1.381,
+        "gain": 0,
+        "lambdas": [
+          0.88,
+          1.99
+        ]
+      },
+      {
+        "group": "L",
+        "fixture": "Panama v England",
+        "pred": "0-2",
+        "predType": "A",
+        "evNow": 1.735,
+        "bestScore": "0-2",
+        "bestEV": 1.735,
+        "gain": 0,
+        "lambdas": [
+          0.65,
+          2.69
+        ]
+      },
+      {
+        "group": "L",
+        "fixture": "Croatia v Ghana",
+        "pred": "1-0",
+        "predType": "H",
+        "evNow": 1.134,
+        "bestScore": "1-0",
+        "bestEV": 1.134,
+        "gain": 0,
+        "lambdas": [
+          1.65,
+          1.06
+        ]
+      }
+    ]
+  },
+  "groupQualifiers": {
+    "evNow": 42,
+    "evOptimal": 42.5,
+    "detail": [
+      {
+        "group": "A",
+        "pick": "MEX/KOR",
+        "evNow": 2.82,
+        "best": "MEX/CZE",
+        "bestEV": 3.153,
+        "gain": 0.333,
+        "probs": {
+          "MEX": {
+            "p1st": 0.564,
+            "p2nd": 0.255,
+            "p3q": 0.104
+          },
+          "KOR": {
+            "p1st": 0.133,
+            "p2nd": 0.247,
+            "p3q": 0.22
+          },
+          "CZE": {
+            "p1st": 0.227,
+            "p2nd": 0.327,
+            "p3q": 0.192
+          },
+          "RSA": {
+            "p1st": 0.076,
+            "p2nd": 0.172,
+            "p3q": 0.188
+          }
+        }
+      },
+      {
+        "group": "B",
+        "pick": "SUI/CAN",
+        "evNow": 3.328,
+        "best": "SUI/CAN",
+        "bestEV": 3.328,
+        "gain": 0,
+        "probs": {
+          "CAN": {
+            "p1st": 0.303,
+            "p2nd": 0.371,
+            "p3q": 0.182
+          },
+          "QAT": {
+            "p1st": 0.028,
+            "p2nd": 0.09,
+            "p3q": 0.136
+          },
+          "SUI": {
+            "p1st": 0.542,
+            "p2nd": 0.286,
+            "p3q": 0.112
+          },
+          "BIH": {
+            "p1st": 0.127,
+            "p2nd": 0.253,
+            "p3q": 0.267
+          }
+        }
+      },
+      {
+        "group": "C",
+        "pick": "BRA/MAR",
+        "evNow": 3.787,
+        "best": "BRA/MAR",
+        "bestEV": 3.787,
+        "gain": 0,
+        "probs": {
+          "BRA": {
+            "p1st": 0.705,
+            "p2nd": 0.214,
+            "p3q": 0.064
+          },
+          "MAR": {
+            "p1st": 0.182,
+            "p2nd": 0.425,
+            "p3q": 0.229
+          },
+          "SCO": {
+            "p1st": 0.106,
+            "p2nd": 0.311,
+            "p3q": 0.3
+          },
+          "HAI": {
+            "p1st": 0.007,
+            "p2nd": 0.05,
+            "p3q": 0.083
+          }
+        }
+      },
+      {
+        "group": "D",
+        "pick": "USA/TUR",
+        "evNow": 2.814,
+        "best": "USA/TUR",
+        "bestEV": 2.814,
+        "gain": 0,
+        "probs": {
+          "USA": {
+            "p1st": 0.407,
+            "p2nd": 0.298,
+            "p3q": 0.149
+          },
+          "PAR": {
+            "p1st": 0.113,
+            "p2nd": 0.197,
+            "p3q": 0.208
+          },
+          "TUR": {
+            "p1st": 0.366,
+            "p2nd": 0.31,
+            "p3q": 0.159
+          },
+          "AUS": {
+            "p1st": 0.114,
+            "p2nd": 0.195,
+            "p3q": 0.21
+          }
+        }
+      },
+      {
+        "group": "E",
+        "pick": "GER/ECU",
+        "evNow": 3.868,
+        "best": "GER/ECU",
+        "bestEV": 3.868,
+        "gain": 0,
+        "probs": {
+          "GER": {
+            "p1st": 0.739,
+            "p2nd": 0.195,
+            "p3q": 0.051
+          },
+          "ECU": {
+            "p1st": 0.161,
+            "p2nd": 0.431,
+            "p3q": 0.221
+          },
+          "CIV": {
+            "p1st": 0.091,
+            "p2nd": 0.309,
+            "p3q": 0.283
+          },
+          "CUR": {
+            "p1st": 0.009,
+            "p2nd": 0.064,
+            "p3q": 0.095
+          }
+        }
+      },
+      {
+        "group": "F",
+        "pick": "NED/JPN",
+        "evNow": 3.111,
+        "best": "NED/JPN",
+        "bestEV": 3.111,
+        "gain": 0,
+        "probs": {
+          "NED": {
+            "p1st": 0.536,
+            "p2nd": 0.266,
+            "p3q": 0.113
+          },
+          "JPN": {
+            "p1st": 0.255,
+            "p2nd": 0.327,
+            "p3q": 0.189
+          },
+          "SWE": {
+            "p1st": 0.132,
+            "p2nd": 0.24,
+            "p3q": 0.22
+          },
+          "TUN": {
+            "p1st": 0.077,
+            "p2nd": 0.167,
+            "p3q": 0.188
+          }
+        }
+      },
+      {
+        "group": "G",
+        "pick": "BEL/EGY",
+        "evNow": 3.322,
+        "best": "BEL/IRN",
+        "bestEV": 3.497,
+        "gain": 0.175,
+        "probs": {
+          "BEL": {
+            "p1st": 0.712,
+            "p2nd": 0.195,
+            "p3q": 0.06
+          },
+          "IRN": {
+            "p1st": 0.135,
+            "p2nd": 0.343,
+            "p3q": 0.206
+          },
+          "EGY": {
+            "p1st": 0.107,
+            "p2nd": 0.294,
+            "p3q": 0.215
+          },
+          "NZL": {
+            "p1st": 0.046,
+            "p2nd": 0.167,
+            "p3q": 0.171
+          }
+        }
+      },
+      {
+        "group": "H",
+        "pick": "ESP/URU",
+        "evNow": 4.274,
+        "best": "ESP/URU",
+        "bestEV": 4.274,
+        "gain": 0,
+        "probs": {
+          "ESP": {
+            "p1st": 0.773,
+            "p2nd": 0.185,
+            "p3q": 0.032
+          },
+          "URU": {
+            "p1st": 0.182,
+            "p2nd": 0.529,
+            "p3q": 0.145
+          },
+          "KSA": {
+            "p1st": 0.03,
+            "p2nd": 0.173,
+            "p3q": 0.221
+          },
+          "CPV": {
+            "p1st": 0.015,
+            "p2nd": 0.113,
+            "p3q": 0.156
+          }
+        }
+      },
+      {
+        "group": "I",
+        "pick": "FRA/NOR",
+        "evNow": 3.551,
+        "best": "FRA/NOR",
+        "bestEV": 3.551,
+        "gain": 0,
+        "probs": {
+          "FRA": {
+            "p1st": 0.619,
+            "p2nd": 0.258,
+            "p3q": 0.093
+          },
+          "SEN": {
+            "p1st": 0.129,
+            "p2nd": 0.29,
+            "p3q": 0.302
+          },
+          "NOR": {
+            "p1st": 0.241,
+            "p2nd": 0.398,
+            "p3q": 0.217
+          },
+          "IRQ": {
+            "p1st": 0.011,
+            "p2nd": 0.054,
+            "p3q": 0.093
+          }
+        }
+      },
+      {
+        "group": "J",
+        "pick": "ARG/AUT",
+        "evNow": 3.625,
+        "best": "ARG/AUT",
+        "bestEV": 3.625,
+        "gain": 0,
+        "probs": {
+          "ARG": {
+            "p1st": 0.739,
+            "p2nd": 0.187,
+            "p3q": 0.053
+          },
+          "AUT": {
+            "p1st": 0.127,
+            "p2nd": 0.365,
+            "p3q": 0.226
+          },
+          "ALG": {
+            "p1st": 0.114,
+            "p2nd": 0.342,
+            "p3q": 0.237
+          },
+          "JOR": {
+            "p1st": 0.02,
+            "p2nd": 0.106,
+            "p3q": 0.129
+          }
+        }
+      },
+      {
+        "group": "K",
+        "pick": "POR/COL",
+        "evNow": 3.7,
+        "best": "POR/COL",
+        "bestEV": 3.7,
+        "gain": 0,
+        "probs": {
+          "POR": {
+            "p1st": 0.611,
+            "p2nd": 0.276,
+            "p3q": 0.076
+          },
+          "COL": {
+            "p1st": 0.299,
+            "p2nd": 0.431,
+            "p3q": 0.148
+          },
+          "UZB": {
+            "p1st": 0.028,
+            "p2nd": 0.105,
+            "p3q": 0.164
+          },
+          "COD": {
+            "p1st": 0.063,
+            "p2nd": 0.188,
+            "p3q": 0.251
+          }
+        }
+      },
+      {
+        "group": "L",
+        "pick": "ENG/CRO",
+        "evNow": 3.761,
+        "best": "ENG/CRO",
+        "bestEV": 3.761,
+        "gain": 0,
+        "probs": {
+          "ENG": {
+            "p1st": 0.677,
+            "p2nd": 0.229,
+            "p3q": 0.065
+          },
+          "CRO": {
+            "p1st": 0.22,
+            "p2nd": 0.427,
+            "p3q": 0.179
+          },
+          "GHA": {
+            "p1st": 0.077,
+            "p2nd": 0.233,
+            "p3q": 0.247
+          },
+          "PAN": {
+            "p1st": 0.026,
+            "p2nd": 0.111,
+            "p3q": 0.152
+          }
+        }
+      }
+    ]
+  },
+  "advanceR16": {
+    "evNow": 19.47,
+    "evOptimal": 19.47,
+    "gain": 0,
+    "picks": [
+      {
+        "code": "CAN",
+        "p": 0.458
+      },
+      {
+        "code": "GER",
+        "p": 0.701
+      },
+      {
+        "code": "NED",
+        "p": 0.54
+      },
+      {
+        "code": "BRA",
+        "p": 0.664
+      },
+      {
+        "code": "MEX",
+        "p": 0.558
+      },
+      {
+        "code": "ESP",
+        "p": 0.73
+      },
+      {
+        "code": "SUI",
+        "p": 0.6
+      },
+      {
+        "code": "TUR",
+        "p": 0.489
+      },
+      {
+        "code": "FRA",
+        "p": 0.757
+      },
+      {
+        "code": "BEL",
+        "p": 0.665
+      },
+      {
+        "code": "COL",
+        "p": 0.489
+      },
+      {
+        "code": "ARG",
+        "p": 0.664
+      },
+      {
+        "code": "USA",
+        "p": 0.516
+      },
+      {
+        "code": "ENG",
+        "p": 0.695
+      },
+      {
+        "code": "NOR",
+        "p": 0.54
+      },
+      {
+        "code": "POR",
+        "p": 0.67
+      }
+    ],
+    "optimal": [
+      {
+        "code": "FRA",
+        "p": 0.757
+      },
+      {
+        "code": "ESP",
+        "p": 0.73
+      },
+      {
+        "code": "GER",
+        "p": 0.701
+      },
+      {
+        "code": "ENG",
+        "p": 0.695
+      },
+      {
+        "code": "POR",
+        "p": 0.67
+      },
+      {
+        "code": "BEL",
+        "p": 0.665
+      },
+      {
+        "code": "BRA",
+        "p": 0.664
+      },
+      {
+        "code": "ARG",
+        "p": 0.664
+      },
+      {
+        "code": "SUI",
+        "p": 0.6
+      },
+      {
+        "code": "MEX",
+        "p": 0.558
+      },
+      {
+        "code": "NED",
+        "p": 0.54
+      },
+      {
+        "code": "NOR",
+        "p": 0.54
+      },
+      {
+        "code": "USA",
+        "p": 0.516
+      },
+      {
+        "code": "COL",
+        "p": 0.489
+      },
+      {
+        "code": "TUR",
+        "p": 0.489
+      },
+      {
+        "code": "CAN",
+        "p": 0.458
+      }
+    ]
+  },
+  "advanceQF": {
+    "evNow": 11.21,
+    "evOptimal": 11.25,
+    "gain": 0.03,
+    "picks": [
+      {
+        "code": "GER",
+        "p": 0.508
+      },
+      {
+        "code": "BRA",
+        "p": 0.445
+      },
+      {
+        "code": "ESP",
+        "p": 0.567
+      },
+      {
+        "code": "SUI",
+        "p": 0.315
+      },
+      {
+        "code": "FRA",
+        "p": 0.552
+      },
+      {
+        "code": "ARG",
+        "p": 0.445
+      },
+      {
+        "code": "ENG",
+        "p": 0.498
+      },
+      {
+        "code": "POR",
+        "p": 0.408
+      }
+    ],
+    "optimal": [
+      {
+        "code": "ESP",
+        "p": 0.567
+      },
+      {
+        "code": "FRA",
+        "p": 0.552
+      },
+      {
+        "code": "GER",
+        "p": 0.508
+      },
+      {
+        "code": "ENG",
+        "p": 0.498
+      },
+      {
+        "code": "ARG",
+        "p": 0.445
+      },
+      {
+        "code": "BRA",
+        "p": 0.445
+      },
+      {
+        "code": "POR",
+        "p": 0.408
+      },
+      {
+        "code": "BEL",
+        "p": 0.327
+      }
+    ]
+  },
+  "advanceSF": {
+    "evNow": 7.93,
+    "evOptimal": 8.27,
+    "gain": 0.34,
+    "picks": [
+      {
+        "code": "BRA",
+        "p": 0.294
+      },
+      {
+        "code": "ESP",
+        "p": 0.434
+      },
+      {
+        "code": "FRA",
+        "p": 0.347
+      },
+      {
+        "code": "POR",
+        "p": 0.246
+      }
+    ],
+    "optimal": [
+      {
+        "code": "ESP",
+        "p": 0.434
+      },
+      {
+        "code": "FRA",
+        "p": 0.347
+      },
+      {
+        "code": "ENG",
+        "p": 0.302
+      },
+      {
+        "code": "BRA",
+        "p": 0.294
+      }
+    ]
+  },
+  "advanceFinal": {
+    "evNow": 4.99,
+    "evOptimal": 4.99,
+    "gain": 0,
+    "picks": [
+      {
+        "code": "ESP",
+        "p": 0.28
+      },
+      {
+        "code": "FRA",
+        "p": 0.219
+      }
+    ],
+    "optimal": [
+      {
+        "code": "ESP",
+        "p": 0.28
+      },
+      {
+        "code": "FRA",
+        "p": 0.219
+      }
+    ]
+  },
+  "winner": {
+    "pick": "ESP",
+    "pPick": 0.167,
+    "evNow": 2.68,
+    "best": "ESP",
+    "evOptimal": 2.68,
+    "top5": [
+      {
+        "code": "ESP",
+        "p": 0.167
+      },
+      {
+        "code": "FRA",
+        "p": 0.135
+      },
+      {
+        "code": "ENG",
+        "p": 0.1
+      },
+      {
+        "code": "ARG",
+        "p": 0.097
+      },
+      {
+        "code": "BRA",
+        "p": 0.091
+      }
+    ]
+  },
+  "specials": {
+    "best_attack": {
+      "pick": "ESP",
+      "pSim": 0.146,
+      "evNow": 1.17,
+      "simTop5": [
+        {
+          "code": "ESP",
+          "p": 0.146
+        },
+        {
+          "code": "GER",
+          "p": 0.135
+        },
+        {
+          "code": "BRA",
+          "p": 0.134
+        },
+        {
+          "code": "ARG",
+          "p": 0.082
+        },
+        {
+          "code": "BEL",
+          "p": 0.069
+        }
+      ],
+      "marketTop": {
+        "ESP": {
+          "odds": "+300",
+          "impliedDevig": 0.241
+        },
+        "FRA": {
+          "odds": "+500",
+          "impliedDevig": 0.161
+        },
+        "BRA": {
+          "odds": "+600",
+          "impliedDevig": 0.138
+        },
+        "ENG": {
+          "odds": "+650",
+          "impliedDevig": 0.129
+        },
+        "ARG": {
+          "odds": "+700",
+          "impliedDevig": 0.121
+        },
+        "GER": {
+          "odds": "+750",
+          "impliedDevig": 0.114
+        },
+        "POR": {
+          "odds": "+900",
+          "impliedDevig": 0.097
+        }
+      }
+    },
+    "prolific_group": {
+      "pick": "I",
+      "pSim": 0.089,
+      "evNow": 0.54,
+      "simTop5": [
+        {
+          "g": "C",
+          "p": 0.129605
+        },
+        {
+          "g": "E",
+          "p": 0.12037
+        },
+        {
+          "g": "H",
+          "p": 0.114925
+        },
+        {
+          "g": "I",
+          "p": 0.08944
+        },
+        {
+          "g": "B",
+          "p": 0.082775
+        }
+      ]
+    },
+    "driest_group": {
+      "pick": "G",
+      "pSim": 0.086,
+      "evNow": 0.51,
+      "simTop5": [
+        {
+          "g": "A",
+          "p": 0.13783
+        },
+        {
+          "g": "D",
+          "p": 0.13295
+        },
+        {
+          "g": "F",
+          "p": 0.11345
+        },
+        {
+          "g": "B",
+          "p": 0.10567
+        },
+        {
+          "g": "G",
+          "p": 0.0857
+        }
+      ]
+    },
+    "top_scorer": {
+      "pick": "Mikel Oyarzabal",
+      "market": [
+        {
+          "player": "Kylian Mbappé",
+          "team": "FRA",
+          "odds": "+600",
+          "impliedDevig": 0.1423
+        },
+        {
+          "player": "Harry Kane",
+          "team": "ENG",
+          "odds": "+700",
+          "impliedDevig": 0.1245
+        },
+        {
+          "player": "Erling Haaland",
+          "team": "NOR",
+          "odds": "+1400",
+          "impliedDevig": 0.0664
+        },
+        {
+          "player": "Mikel Oyarzabal",
+          "team": "ESP",
+          "odds": "+1400",
+          "impliedDevig": 0.0664
+        },
+        {
+          "player": "Lionel Messi",
+          "team": "ARG",
+          "odds": "+1600",
+          "impliedDevig": 0.0586
+        },
+        {
+          "player": "Lamine Yamal",
+          "team": "ESP",
+          "odds": "+2000",
+          "impliedDevig": 0.0474
+        },
+        {
+          "player": "Cristiano Ronaldo",
+          "team": "POR",
+          "odds": "+2200",
+          "impliedDevig": 0.0433
+        },
+        {
+          "player": "Julián Álvarez",
+          "team": "ARG",
+          "odds": "+3000",
+          "impliedDevig": 0.0321
+        }
+      ]
+    },
+    "top_assists": {
+      "pick": "Bruno Fernandes",
+      "market": [
+        {
+          "player": "Bruno Fernandes",
+          "team": "POR",
+          "odds": "+900",
+          "impliedDevig": 0.1394
+        },
+        {
+          "player": "Michael Olise",
+          "team": "FRA",
+          "odds": "+1000",
+          "impliedDevig": 0.1267
+        },
+        {
+          "player": "Lionel Messi",
+          "team": "ARG",
+          "odds": "+1200",
+          "impliedDevig": 0.1072
+        },
+        {
+          "player": "Lamine Yamal",
+          "team": "ESP",
+          "odds": "+1200",
+          "impliedDevig": 0.1072
+        },
+        {
+          "player": "Vinícius Júnior",
+          "team": "BRA",
+          "odds": "+1400",
+          "impliedDevig": 0.0929
+        },
+        {
+          "player": "Kylian Mbappé",
+          "team": "FRA",
+          "odds": "+2000",
+          "impliedDevig": 0.0664
+        }
+      ]
+    },
+    "penalties": {
+      "pick": "OVER",
+      "line": 21.5
+    }
+  },
+  "headline": {
+    "groupScorelines": 88.9,
+    "groupQualifiers": 42,
+    "advanceR16": 19.47,
+    "advanceQF": 11.21,
+    "advanceSF": 7.93,
+    "advanceFinal": 4.99,
+    "winner": 2.68,
+    "advancementTotal": 88.3
+  }
+}

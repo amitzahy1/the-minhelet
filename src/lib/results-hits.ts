@@ -115,6 +115,14 @@ export function computeGroupHits(
   match: FinishedMatch,
   brackets: BettorBracket[]
 ): BettorHit[] {
+  // Defense-in-depth: a match with no real score must never be graded. Callers
+  // already filter null-goal FINISHED rows, but `classifyHit` treats null-null
+  // as a draw (null>null and null<null are both false → "D"), which would hand
+  // a phantom toto to everyone who predicted a draw. Guard at the chokepoint.
+  if (
+    match.homeGoals == null || match.awayGoals == null ||
+    Number.isNaN(match.homeGoals) || Number.isNaN(match.awayGoals)
+  ) return [];
   const pair = matchPairIndex(match.group, match.homeTla, match.awayTla);
   if (!pair) return [];
   const { pairIdx, flipped } = pair;

@@ -18,7 +18,7 @@ import { Suspense } from "react";
 import { useSharedData } from "@/hooks/useSharedData";
 import { useScoring } from "@/hooks/useScoring";
 import { useRealKnockoutStatus } from "@/hooks/useRealKnockoutStatus";
-import { formatLockDeadline, isLocked, PENALTIES_LINE } from "@/lib/constants";
+import { formatLockDeadline, isLocked } from "@/lib/constants";
 
 const Icons = {
   bets: (a: boolean) => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={a ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6M9 15l3 3 3-3"/></svg>,
@@ -112,7 +112,7 @@ function OnboardingWizard({ onDismiss, onStart }: { onDismiss: () => void; onSta
                   <div className="flex items-center gap-2 mb-1">
                     <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-purple-600 text-white text-xs font-black" style={{ fontFamily: "var(--font-inter)" }}>3</span>
                     <strong className="text-sm">הימורים מיוחדים</strong>
-                    <span className="ms-auto text-[11px] font-bold text-purple-700 bg-purple-100 rounded-full px-2 py-0.5" style={{ fontFamily: "var(--font-inter)" }}>25 הימורים</span>
+                    <span className="ms-auto text-[11px] font-bold text-purple-700 bg-purple-100 rounded-full px-2 py-0.5" style={{ fontFamily: "var(--font-inter)" }}>24 הימורים</span>
                   </div>
                   <p className="text-[13px] text-gray-600 leading-snug ps-8">אלוף, מלך שערים, בית פורה, מאצ׳אפים ועוד</p>
                 </div>
@@ -194,7 +194,6 @@ function OnboardingWizard({ onDismiss, onStart }: { onDismiss: () => void; onSta
                   <div className="bg-amber-50 rounded-lg py-1.5 px-2.5 border border-amber-100 flex items-center justify-between"><span className="text-gray-700">בית פורה / יבש</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>{sp.prolific_group}</span></div>
                   <div className="bg-amber-50 rounded-lg py-1.5 px-2.5 border border-amber-100 flex items-center justify-between"><span className="text-gray-700">נבחרת כסחנית</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>{sp.dirtiest_team}</span></div>
                   <div className="bg-amber-50 rounded-lg py-1.5 px-2.5 border border-amber-100 flex items-center justify-between"><span className="text-gray-700">מאצ׳אפ נכון</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>{sp.matchup}</span></div>
-                  <div className="bg-amber-50 rounded-lg py-1.5 px-2.5 border border-amber-100 flex items-center justify-between col-span-2"><span className="text-gray-700">סה״כ פנדלים (אובר/אנדר {PENALTIES_LINE})</span><span className="font-black text-amber-700" style={{ fontFamily: "var(--font-inter)" }}>{sp.penalties_over_under}</span></div>
                 </div>
               </div>
               <p className="text-[11px] text-gray-500 text-center bg-gray-50 rounded-lg py-2 border border-gray-100">
@@ -358,7 +357,7 @@ function LockedCelebrationModal({ onClose, groupsFilled, knockoutFilled, special
           {[
             { label: "בתים", val: groupsFilled, total: 12 },
             { label: "נוק-אאוט", val: knockoutFilled, total: 31 },
-            { label: "מיוחדים", val: specialsFilled, total: 25 },
+            { label: "מיוחדים", val: specialsFilled, total: 24 },
           ].map(({ label, val, total }) => (
             <div key={label} className="bg-gray-50 rounded-xl p-3 border border-gray-100">
               <p className={`text-lg font-black ${val === total ? "text-green-600" : "text-gray-800"}`} style={{ fontFamily: "var(--font-inter)" }}>
@@ -425,19 +424,18 @@ function BettingSubNav({ pathname }: { pathname: string }) {
     if (sb.prolificGroup) count++;
     if (sb.driestGroup) count++;
     count += (sb.matchups ?? []).filter(Boolean).length;
-    if (sb.penaltiesOverUnder) count++;
     return count;
   });
 
   const pcts: Record<string, number> = {
     "/groups": Math.round(groupsFilled / 12 * 100),
     "/knockout": Math.round(knockoutFilled / 31 * 100),
-    "/special-bets": Math.round(specialsFilled / 25 * 100),
+    "/special-bets": Math.round(specialsFilled / 24 * 100),
   };
   const completion: Record<string, boolean> = {
     "/groups": groupsFilled >= 12,
     "/knockout": knockoutFilled >= 31,
-    "/special-bets": specialsFilled >= 25,
+    "/special-bets": specialsFilled >= 24,
   };
 
   // The second tree ("עץ נתוני אמת", /knockout-live) opens once the group stage
@@ -640,13 +638,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const groupsFilled = useBettingStore((s) => s.getCompletedGroupsCount());
   const knockoutFilled = useBettingStore((s) => Object.keys(s.knockout).filter((k) => s.knockout[k]?.winner).length);
   const specialsFilled = useBettingStore((s) => s.getSpecialsFilledCount());
-  const bettingOverallPct = Math.round((groupsFilled / 12 + knockoutFilled / 31 + specialsFilled / 25) / 3 * 100);
+  const bettingOverallPct = Math.round((groupsFilled / 12 + knockoutFilled / 31 + specialsFilled / 24) / 3 * 100);
 
   // Completion per betting destination — drives the green ✓ in the הימורים menu.
   const stepDone: Record<string, boolean> = {
     "/groups": groupsFilled >= 12,
     "/knockout": knockoutFilled >= 31,
-    "/special-bets": specialsFilled >= 25,
+    "/special-bets": specialsFilled >= 24,
   };
   // Real-data tree "done" = all currently-open matches predicted (it fills round
   // by round, so completion is relative to what's open right now).

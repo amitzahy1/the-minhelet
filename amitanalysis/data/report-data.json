@@ -1,0 +1,47 @@
+{
+  "source": "amitanalysis/report.pdf — 'Kimi 2026 World Cup Analysis & Prediction Report' (277pp, AI-generated, 8-source ensemble + 100k MC, as of 2026-06-05)",
+  "trust": "Top-team probabilities + per-team/group qualitative analysis are well-calibrated (track market & Groll/Zeileis). KNOWN DEFECTS: Table 8.1 tail (ranks 18-48) lists phantom teams NOT in the actual draw (Denmark, Poland, Ukraine, Cameroon, Costa Rica, Wales, Serbia, Honduras, Indonesia) — stale/hallucinated; ignore the tail. Group chapter (Ch4) uses the CORRECT actual draw.",
+  "championship_pct": {
+    "ESP": 16.5, "FRA": 15.0, "ARG": 12.0, "ENG": 11.0, "GER": 11.0,
+    "BRA": 9.0, "POR": 7.0, "NED": 4.0, "COL": 3.5, "MAR": 2.5,
+    "SUI": 2.0, "BEL": 1.5, "JPN": 1.2, "MEX": 1.0, "USA": 0.9,
+    "URU": 0.8, "CRO": 0.7
+  },
+  "championship_market_implied_pct": {
+    "ESP": 18.2, "FRA": 16.7, "ARG": 11.1, "ENG": 14.3, "GER": 7.4,
+    "BRA": 11.1, "POR": 8.3, "NED": 5.0
+  },
+  "semifinal_pct": {
+    "ESP": 33.9, "ARG": 30.5, "FRA": 30.4, "BRA": 22.5, "ENG": 20.1,
+    "POR": 18.4, "NED": 15.8, "GER": 14.2
+  },
+  "quarterfinal_pct": {
+    "ESP": 48.2, "FRA": 47.5, "ARG": 45.8, "ENG": 42.1, "BRA": 38.6,
+    "POR": 35.2, "GER": 33.8, "NED": 31.5, "COL": 28.4, "MAR": 26.7,
+    "BEL": 24.3, "SUI": 22.1, "JPN": 18.5, "MEX": 17.2, "USA": 16.8, "CRO": 15.3
+  },
+  "most_likely_final": "Spain vs Argentina (~5.3% joint) — report's #1 final pairing (note: report assumes ESP & FRA share a half; the repo bracket that scores this game puts H1 left & I1 right = opposite halves, so an ESP-FRA final IS valid here).",
+  "group_finish_example_A": {
+    "note": "Report group tables sourced from Opta Supercomputer + ESPN Strength Index. Format = 1st/2nd/3rd/qualify per team.",
+    "MEX": {"first": 47.8, "second": 25.0, "third": 9.2, "qualify": 82.0},
+    "KOR": {"first": 22.0, "second": 30.0, "third": 15.0, "qualify": 67.0},
+    "CZE": {"first": 15.0, "second": 20.0, "third": 20.0, "qualify": 55.0},
+    "RSA": {"first": 5.0, "second": 10.0, "third": 18.0, "qualify": 33.0}
+  },
+  "specials_signals": {
+    "top_scorer": "No global Golden-Boot ranking in report. Per-team: Mbappé (42 G / 44 matches Real Madrid, UCL Golden Boot) = elite; Yamal (24G+17A season, but winger); Kane (78 G / 112 caps); Haaland (Norway, prolific). Report is BEARISH on Oyarzabal: 'Spain lacks a 30+ goal striker; Oyarzabal ~0.35 G/game; absence of a Kane/Mbappé-grade finisher is Spain's fatal weakness.' BUT market rates Oyarzabal +1400 joint-3rd (penalty taker + Euro 2024 final scorer) — divergence to resolve.",
+    "best_attack": "Spain attack 'balanced but lacks a finisher'; France = 'forward nuclear arsenal' (Mbappé+Dembélé). Market makes Spain best-attack favorite +300.",
+    "dirtiest_team": "Argentina (Amit's pick) — physical/aggressive; check discipline section. Report doesn't give a cards ranking explicitly here.",
+    "penalties": "Section 5.3.2 'Penalty Shootouts: The Ultimate Variance Compressor' — expanded 48-team KO (extra R32 round) raises total knockout matches → more shootout exposure (supports OVER)."
+  },
+  "key_team_notes": {
+    "ESP": "Champion favorite 16.5%. Core Rodri/Pedri/Yamal. Risk: Yamal hamstring; no elite striker. 33-match unbeaten (may contain luck).",
+    "FRA": "15.0%. Mbappé+Dembélé pace arsenal; L'Equipe reports Mbappé-teammate tensions; lost 2-1 to Ivory Coast friendly 4 Jun.",
+    "ARG": "12.0%, +0.9 vs market (mild underdog value). Title-defence curse + Messi age 38 / Otamendi 38 = 'time tax'. Highest SF prob bracket dividend (Pathway 2).",
+    "ENG": "11.0% but market 14.3% (model -3.3, biggest disagreement; Goldman Sachs only 5.0% w/ geographic penalty). Tuchel + Kane.",
+    "GER": "11.0%, +3.6 vs market (model thinks market underrates Nagelsmann system; Musiala/Wirtz).",
+    "BRA": "9.0%, -2.1 ('Ancelotti premium'); squad age 28.6 vs golden window 26.9; Rodrygo ACL, Militão hamstring, Neymar calf injuries.",
+    "POR": "7.0%. Ronaldo age-41 role question vs Bruno/Bernardo creativity. Bruno Fernandes elite assists.",
+    "NED": "4.0%. De Jong recovery a swing factor; Depay ageing."
+  }
+}

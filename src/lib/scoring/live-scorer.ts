@@ -8,6 +8,7 @@
 import { computeGroupHits, type FinishedMatch } from "../results-hits";
 import type { BettorBracket, BettorAdvancement, BettorSpecialBets } from "../supabase/shared-data";
 import { GROUPS } from "../tournament/groups";
+import { getTodayIsrael, toIsraelDateKey } from "../timezone";
 import {
   resolveKnockoutTree,
   computeGroupOrders,
@@ -323,10 +324,13 @@ export function computeTodayScores(
   matches: FinishedMatch[],
   scoring: ScoringValues = SCORING,
 ): Record<string, number> {
-  const todayIsrael = new Date().toLocaleDateString("he-IL");
+  // Israel calendar day (not the runtime TZ) — matches the rest of the app, so
+  // a late kickoff (e.g. 23:00 UTC) is attributed to the day users see it on,
+  // and the value is identical whether computed in the browser or on a UTC server.
+  const todayIsrael = getTodayIsrael();
   const todayMatches = matches.filter((m) => {
     try {
-      return new Date(m.date).toLocaleDateString("he-IL") === todayIsrael;
+      return toIsraelDateKey(m.date) === todayIsrael;
     } catch {
       return false;
     }

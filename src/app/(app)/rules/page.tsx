@@ -1,7 +1,6 @@
 "use client";
 
 import { PageTransition } from "@/components/shared/PageTransition";
-import { PENALTIES_LINE } from "@/lib/constants";
 import { useScoring } from "@/hooks/useScoring";
 import type { MatchStage } from "@/types";
 
@@ -127,7 +126,6 @@ export default function RulesPage() {
                   ["בית יבש", `${sp.driest_group}`, "הכי מעט שערים בשלב הבתים"],
                   ["כסחנית", `${sp.dirtiest_team}`, "צהוב=1, אדום=3 · צהוב שני באותו משחק = אדום אחד (פירוט למטה)"],
                   ["מאצ׳אפ", `${sp.matchup} ×3`, `${sp.matchup} נק׳ לכל דו-קרב (3 דו-קרבות = ${sp.matchup * 3}) · שערים + בישולים בכל הטורניר`],
-                  ["פנדלים", `${sp.penalties_over_under}`, `אובר/אנדר ${PENALTIES_LINE} · כולל הארכות, ללא דו-קרב פנדלים`],
                 ].map(([bet, pts, note]) => (
                   <tr key={bet} className="border-b border-gray-50">
                     <td className="py-2.5 font-bold text-gray-800">{bet}</td>
@@ -139,7 +137,7 @@ export default function RulesPage() {
             </table>
 
             <div className="mt-5 rounded-xl bg-blue-50 border border-blue-200 px-4 py-3 text-xs text-blue-900 leading-relaxed">
-              <p className="font-bold mb-1 text-blue-950">📋 איך נספרים שערים, בישולים ופנדלים</p>
+              <p className="font-bold mb-1 text-blue-950">📋 איך נספרים שערים ובישולים</p>
               <ul className="space-y-1.5 list-disc pr-4">
                 <li>
                   <strong>שערים ובישולים</strong> (מלך שערים, מלך בישולים, ההתקפה
@@ -153,11 +151,6 @@ export default function RulesPage() {
                   (מסי–רונאלדו · רפיניה–ויניסיוס · אמבפה–קיין). הזוכה בכל דו-קרב
                   נקבע לפי סך <strong>שערים + בישולים</strong> בכל הטורניר. בוחרים
                   1 / X (שווה) / 2 בכל דו-קרב.
-                </li>
-                <li>
-                  <strong>פנדלים (אובר/אנדר {PENALTIES_LINE}):</strong> נספרים
-                  פנדלים שנפסקו ב-90 הדקות + ההארכה. <strong>דו-קרב פנדלים</strong>
-                  שאחרי ההארכה <strong>אינו נספר</strong>.
                 </li>
               </ul>
             </div>

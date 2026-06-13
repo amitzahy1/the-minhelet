@@ -111,7 +111,7 @@ export function CompletionMatrix() {
                   </td>
                   <td className="py-3 px-2 text-center">
                     <div className="flex flex-col items-center gap-0.5">
-                      {check(u.specials >= 25)}
+                      {check(u.specials >= 24)}
                       {u.specials < 25 && <span className="text-[10px] text-gray-400" style={{ fontFamily: "var(--font-inter)" }}>{u.specials}/25</span>}
                     </div>
                   </td>

@@ -90,7 +90,6 @@ export async function GET() {
       if (sb.matchup_pick) {
         specialsFilled += sb.matchup_pick.split(",").filter(Boolean).length; // up to 3
       }
-      if (sb.penalties_over_under) specialsFilled++;
     }
     if (adv) {
       specialsFilled += ((adv.advance_to_qf as string[]) || []).filter(Boolean).length;   // up to 8
@@ -99,7 +98,7 @@ export async function GET() {
       if (adv.winner) specialsFilled++; // 1
     }
 
-    const totalItems = 12 + 31 + 25;
+    const totalItems = 12 + 31 + 24;
     const filledItems = completedGroups + knockoutFilled + specialsFilled;
     const totalPct = Math.round((filledItems / totalItems) * 100);
 

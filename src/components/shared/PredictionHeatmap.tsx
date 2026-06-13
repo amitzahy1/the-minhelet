@@ -1,5 +1,7 @@
 "use client";
 
+import { Fragment } from "react";
+
 export interface HeatmapProps {
   data: {
     name: string;
@@ -65,10 +67,9 @@ export function PredictionHeatmap({ data }: { data?: HeatmapProps["data"] }) {
 
         {/* Data rows */}
         {rows.map((bettor) => (
-          <>
+          <Fragment key={bettor.name}>
             {/* Bettor name — sticky */}
             <div
-              key={`name-${bettor.name}`}
               className="sticky start-0 z-10 bg-white flex items-center pe-3 text-sm font-bold text-gray-900 whitespace-nowrap"
             >
               {bettor.name}
@@ -91,7 +92,7 @@ export function PredictionHeatmap({ data }: { data?: HeatmapProps["data"] }) {
                 </div>
               );
             })}
-          </>
+          </Fragment>
         ))}
       </div>
     </div>

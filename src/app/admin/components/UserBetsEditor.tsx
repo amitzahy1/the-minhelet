@@ -402,7 +402,7 @@ export function UserBetsEditor() {
 
     // Special section = 10 items (NOT counting *_team fields)
     // 1 top_scorer_player + 1 top_assists_player + 1 best_attack + 1 prolific +
-    // 1 driest + 1 dirtiest + up to 3 matchup_pick (split by commas) + 1 penalties = 10
+    // 1 driest + 1 dirtiest + up to 3 matchup_pick (split by commas) = 9
     let specialOnly = 0;
     if (isFilledStr(lockedSpecial.top_scorer_player)) specialOnly += 1;
     if (isFilledStr(lockedSpecial.top_assists_player)) specialOnly += 1;
@@ -413,7 +413,6 @@ export function UserBetsEditor() {
     if (isFilledStr(lockedSpecial.matchup_pick)) {
       specialOnly += (lockedSpecial.matchup_pick || "").split(",").filter(Boolean).length;
     }
-    if (isFilledStr(lockedSpecial.penalties_over_under)) specialOnly += 1;
 
     // Advancement section = 15 items (8 QF + 4 SF + 2 final + 1 winner)
     let advanceOnly = 0;
@@ -645,7 +644,7 @@ export function UserBetsEditor() {
                       <span className={`rounded px-1.5 py-0.5 font-bold ${row.knockout === 31 ? "bg-green-50 text-green-700" : "bg-amber-50 text-amber-700"}`}>
                         {row.knockout}/31
                       </span>
-                      <span className={`rounded px-1.5 py-0.5 font-bold ${row.specials >= 25 ? "bg-green-50 text-green-700" : "bg-amber-50 text-amber-700"}`}>
+                      <span className={`rounded px-1.5 py-0.5 font-bold ${row.specials >= 24 ? "bg-green-50 text-green-700" : "bg-amber-50 text-amber-700"}`}>
                         {row.specials}/25
                       </span>
                     </div>
@@ -772,7 +771,7 @@ export function UserBetsEditor() {
               <Badge variant="outline" className={completion.koFilled === 31 ? "text-green-700 bg-green-50" : "text-amber-700 bg-amber-50"}>
                 נוקאאוט {completion.koFilled}/31
               </Badge>
-              <Badge variant="outline" className={completion.specialsFilled === 25 ? "text-green-700 bg-green-50" : "text-amber-700 bg-amber-50"}>
+              <Badge variant="outline" className={completion.specialsFilled === 24 ? "text-green-700 bg-green-50" : "text-amber-700 bg-amber-50"}>
                 מיוחדים+עולות {completion.specialsFilled}/25
               </Badge>
               <Badge variant="outline" className={fullyComplete ? "text-green-700 bg-green-50" : ""}>

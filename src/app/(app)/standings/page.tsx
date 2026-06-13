@@ -106,7 +106,7 @@ function MissingBetsBanner({ matches }: { matches: { date: string; group?: strin
 
   const groupsDone = groupMatchesFilled === 72;
   const knockoutDone = knockoutFilled === 31;
-  const specialsDone = specialsFilled === 25;
+  const specialsDone = specialsFilled === 24;
   const allDone = groupsDone && knockoutDone && specialsDone;
 
   if (allDone) return null;
@@ -124,7 +124,7 @@ function MissingBetsBanner({ matches }: { matches: { date: string; group?: strin
       isDone: groupsDone,
     },
     { key: "knockout", label: "נוקאאוט", done: knockoutFilled, total: 31, extra: "", isDone: knockoutDone },
-    { key: "specials", label: "מיוחדים",  done: specialsFilled,  total: 25, extra: "", isDone: specialsDone },
+    { key: "specials", label: "מיוחדים",  done: specialsFilled,  total: 24, extra: "", isDone: specialsDone },
   ];
 
   return (
@@ -923,7 +923,6 @@ export default function StandingsPage() {
                 if (sb.driestGroup) specFilled++;
                 if (sb.dirtiestTeam) specFilled++;
                 if (sb.matchupPick) specFilled += sb.matchupPick.split(",").filter(Boolean).length;
-                if (sb.penaltiesOverUnder) specFilled++;
               }
               if (adv) {
                 specFilled += (adv.advanceToQF || []).filter(Boolean).length;

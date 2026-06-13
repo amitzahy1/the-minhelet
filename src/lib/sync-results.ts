@@ -6,9 +6,11 @@
 // null-goals guard, which is how the opening match got persisted as FINISHED
 // with no score.
 
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type { MatchResult } from "@/lib/api-football-data";
 import { toAppCode } from "@/lib/fd-team-mapping";
 import { normalizeGroupLetter } from "@/lib/results-hits";
+import { getTsdbCardBoard } from "@/lib/api-thesportsdb";
 
 // football-data WC2026 stage labels (verified live): GROUP_STAGE, LAST_32 (the
 // 48-team Round of 32), LAST_16 (Round of 16), QUARTER_FINALS, SEMI_FINALS,
@@ -76,4 +78,60 @@ export function buildResultRows(matches: MatchResult[], enteredBy: string): Demo
     });
   }
   return rows;
+}
+
+// ---------------------------------------------------------------------------
+// Cards board (the "dirtiest team" tally)
+// ---------------------------------------------------------------------------
+// football-data's free tier has NO bookings, so the card tally is pulled from
+// TheSportsDB match timelines. We write only `dirtiest_board` (the running
+// per-team tally) — the FINAL `dirtiest_team` answer stays admin-entered, so a
+// sync never prematurely "decides" the special bet.
+//
+// Called from /api/sync (daily cron + manual) AND the /api/matches self-heal
+// (so the board refreshes through the play day, not just once daily). A
+// null/empty board (source unreachable) is never written. Existing values are
+// MAX-merged so a manual admin correction is never lowered by a lagging feed.
+
+export interface CardRow { team: string; yellow: number; red: number }
+
+export async function syncCardBoard(supabase: SupabaseClient): Promise<number> {
+  const { data: tourn } = await supabase
+    .from("tournaments")
+    .select("id")
+    .eq("is_current", true)
+    .limit(1)
+    .maybeSingle();
+  if (!tourn?.id) return 0;
+
+  // Protective read — skip entirely on failure so we never overwrite a good
+  // board with a partial/empty one.
+  const { data: actuals, error: actualsErr } = await supabase
+    .from("tournament_actuals")
+    .select("dirtiest_board")
+    .eq("tournament_id", tourn.id)
+    .maybeSingle();
+  if (actualsErr) return 0;
+
+  const board = await getTsdbCardBoard();
+  if (!board || board.length === 0) return 0;
+
+  const existing = new Map(
+    ((actuals?.dirtiest_board as CardRow[] | null) || []).map((b) => [b.team, b])
+  );
+  const merged: CardRow[] = board.map((b) => {
+    const prev = existing.get(b.team);
+    existing.delete(b.team);
+    return { team: b.team, yellow: Math.max(b.yellow, prev?.yellow ?? 0), red: Math.max(b.red, prev?.red ?? 0) };
+  });
+  merged.push(...existing.values()); // admin-only teams the feed doesn't list
+  merged.sort((a, b) => (b.yellow + b.red * 3) - (a.yellow + a.red * 3));
+
+  const { error } = await supabase
+    .from("tournament_actuals")
+    .upsert(
+      { tournament_id: tourn.id, dirtiest_board: merged, entered_by: "tsdb-cards-sync", updated_at: new Date().toISOString() },
+      { onConflict: "tournament_id" }
+    );
+  return error ? 0 : merged.length;
 }

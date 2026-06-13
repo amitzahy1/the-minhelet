@@ -748,9 +748,6 @@ export default function StandingsPage() {
               <span className="w-12 text-center text-sm text-green-600 font-bold" style={{ fontFamily: "var(--font-inter)" }}>{p.today}</span>
               <span className="w-16 text-center font-black text-lg text-gray-900 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>
                 {p.total}
-                {p.maxPossible > p.total && (
-                  <span className="block text-[10px] font-normal text-gray-400 leading-none">מקס {p.maxPossible}</span>
-                )}
               </span>
               <span className={`w-8 text-center text-sm font-bold ${p.delta > 0 ? "text-green-500" : p.delta < 0 ? "text-red-400" : "text-gray-400"}`}>
                 {p.delta > 0 ? `▲${p.delta}` : p.delta < 0 ? `▼${Math.abs(p.delta)}` : "—"}

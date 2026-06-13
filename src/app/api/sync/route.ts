@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { getMatches } from "@/lib/api-football-data";
-import { buildResultRows, type DemoResultRow } from "@/lib/sync-results";
-import { getTsdbRecentResults, getTsdbCardBoard } from "@/lib/api-thesportsdb";
+import { buildResultRows, syncCardBoard, type DemoResultRow } from "@/lib/sync-results";
+import { getTsdbRecentResults } from "@/lib/api-thesportsdb";
 import { toAppCode } from "@/lib/fd-team-mapping";
 import { normalizeGroupLetter } from "@/lib/results-hits";
 
@@ -121,64 +121,9 @@ export async function GET() {
     else persisted = data?.length ?? 0;
   }
 
-  // ---- Cards board (the "dirtiest team" tally) ----
-  // football-data's free tier has NO bookings, so the card tally is pulled
-  // from TheSportsDB match timelines. Board only — the FINAL dirtiest_team
-  // answer stays admin-entered (setting it would prematurely finalize the
-  // special bet). A null/empty board (source unreachable) is never written.
-  // NOTE: this overwrites manual board edits on the next sync by design.
-  let cardsSynced = 0;
-  if (supabase && finished.length > 0) {
-    const { data: tourn } = await supabase
-      .from("tournaments")
-      .select("id")
-      .eq("is_current", true)
-      .limit(1)
-      .maybeSingle();
-    if (tourn?.id) {
-      // MAX-merge with the existing board: TheSportsDB undercounts sometimes
-      // and admins correct upward — per team we keep the higher of (feed,
-      // existing) for each card type, so a manual bump survives the next sync
-      // while a catching-up feed still raises the tally. Skip entirely when
-      // the protective read fails.
-      const { data: actuals, error: actualsErr } = await supabase
-        .from("tournament_actuals")
-        .select("dirtiest_board")
-        .eq("tournament_id", tourn.id)
-        .maybeSingle();
-      const board = actualsErr ? null : await getTsdbCardBoard();
-      if (board && board.length > 0) {
-        const existingBoard = new Map(
-          ((actuals?.dirtiest_board as { team: string; yellow: number; red: number }[] | null) || [])
-            .map((b) => [b.team, b])
-        );
-        const merged = board.map((b) => {
-          const prev = existingBoard.get(b.team);
-          existingBoard.delete(b.team);
-          return {
-            team: b.team,
-            yellow: Math.max(b.yellow, prev?.yellow ?? 0),
-            red: Math.max(b.red, prev?.red ?? 0),
-          };
-        });
-        // Teams only the admin entered (feed has nothing for them) survive too.
-        merged.push(...existingBoard.values());
-        merged.sort((a, b) => (b.yellow + b.red * 3) - (a.yellow + a.red * 3));
-        const { error: cardsErr } = await supabase
-          .from("tournament_actuals")
-          .upsert(
-            {
-              tournament_id: tourn.id,
-              dirtiest_board: merged,
-              entered_by: "tsdb-cards-sync",
-              updated_at: new Date().toISOString(),
-            },
-            { onConflict: "tournament_id" }
-          );
-        if (!cardsErr) cardsSynced = merged.length;
-      }
-    }
-  }
+  // ---- Cards board (the "dirtiest team" tally) ---- shared helper, also used
+  // by the /api/matches self-heal so the board refreshes through the day.
+  const cardsSynced = supabase && finished.length > 0 ? await syncCardBoard(supabase) : 0;
 
   return NextResponse.json({
     success: true,

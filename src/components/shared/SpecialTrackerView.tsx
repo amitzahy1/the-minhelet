@@ -576,10 +576,13 @@ export function SpecialTrackerView({
       },
       ranked({ title: "מלך שערים", points: `${sp.top_scorer_exact} / ${sp.top_scorer_relative} נק׳`, nameHeader: "שחקן", valueHeader: "שערים", updatedAt: liveAt, getPick: (b) => b.topScorerPlayer, list: scorerRanked, actualKey: actuals?.top_scorer_player ?? null, fuzzy: true, decidedLabel: actuals?.top_scorer_player ? `הוכרע: ${actuals.top_scorer_player}` : undefined }),
       ranked({ title: "מלך בישולים", points: `${sp.top_assists_exact} / ${sp.top_assists_relative} נק׳`, nameHeader: "שחקן", valueHeader: "בישולים", updatedAt: liveAt, getPick: (b) => b.topAssistsPlayer, list: assistRanked, actualKey: actuals?.top_assists_player ?? null, fuzzy: true, decidedLabel: actuals?.top_assists_player ? `הוכרע: ${actuals.top_assists_player}` : undefined }),
-      ranked({ title: "התקפה פורייה", points: `${sp.best_attack} נק׳`, nameHeader: "נבחרת", valueHeader: "שערים", updatedAt: actAt, getPick: (b) => b.bestAttack, list: attackRanked, actualKey: actuals?.best_attack_team ?? null, decidedLabel: "הוכרע" }),
+      // best-attack / prolific / driest are LIVE goal aggregates (computed from
+      // the results feed), so their freshness is the data-fetch time, not the
+      // admin-edit time. dirtiest is a synced board (its own write time = actAt).
+      ranked({ title: "התקפה פורייה", points: `${sp.best_attack} נק׳`, nameHeader: "נבחרת", valueHeader: "שערים", updatedAt: liveAt, getPick: (b) => b.bestAttack, list: attackRanked, actualKey: actuals?.best_attack_team ?? null, decidedLabel: "הוכרע" }),
       ranked({ title: "הנבחרת הכסחנית", points: `${sp.dirtiest_team} נק׳`, nameHeader: "נבחרת", valueHeader2: "ניקוד", valueHeader: "כרטיסים", updatedAt: actAt, getPick: (b) => b.dirtiestTeam, list: dirtyRanked, actualKey: actuals?.dirtiest_team ?? null, decidedLabel: "הוכרע", footNote: "ניקוד: צהוב = 1 · אדום = 3 · צהוב שני באותו משחק = אדום אחד" }),
-      ranked({ title: "הבית הפורה", points: `${sp.prolific_group} נק׳`, nameHeader: "בית", valueHeader: "שערים", updatedAt: actAt, getPick: (b) => b.prolificGroup, list: prolificRanked, actualKey: actuals?.most_prolific_group ?? null, decidedLabel: "הוכרע" }),
-      ranked({ title: "הבית היבש", points: `${sp.driest_group} נק׳`, nameHeader: "בית", valueHeader: "שערים", updatedAt: actAt, getPick: (b) => b.driestGroup, list: driestRanked, actualKey: actuals?.driest_group ?? null, decidedLabel: "הוכרע" }),
+      ranked({ title: "הבית הפורה", points: `${sp.prolific_group} נק׳`, nameHeader: "בית", valueHeader: "שערים", updatedAt: liveAt, getPick: (b) => b.prolificGroup, list: prolificRanked, actualKey: actuals?.most_prolific_group ?? null, decidedLabel: "הוכרע" }),
+      ranked({ title: "הבית היבש", points: `${sp.driest_group} נק׳`, nameHeader: "בית", valueHeader: "שערים", updatedAt: liveAt, getPick: (b) => b.driestGroup, list: driestRanked, actualKey: actuals?.driest_group ?? null, decidedLabel: "הוכרע" }),
       matchupCard(0, actuals?.matchup_result_1 ?? null),
       matchupCard(1, actuals?.matchup_result_2 ?? null),
       matchupCard(2, actuals?.matchup_result_3 ?? null),

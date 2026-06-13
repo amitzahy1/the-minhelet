@@ -2,7 +2,7 @@ import { NextResponse, after } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import fdMatchDetailsBundled from "@/lib/tournament/fd-match-details.json";
 import { toAppCode, findUnmappedTeams } from "@/lib/fd-team-mapping";
-import { buildResultRows } from "@/lib/sync-results";
+import { buildResultRows, syncCardBoard } from "@/lib/sync-results";
 import type { MatchResult } from "@/lib/api-football-data";
 
 interface FdDetails {
@@ -233,6 +233,12 @@ export async function GET() {
   // overwrite admin-entered corrections with FD data.
   if (!demoReadFailed) after(() => healFinishedResults(fdMatches, demoById));
 
+  // Cards board self-heal: the "dirtiest team" tally (TheSportsDB timelines)
+  // used to refresh only in the daily cron, so a night's bookings lagged ~a
+  // day. Refresh it here too — throttled per-instance to 15 min so the 60s
+  // client polling doesn't hammer TheSportsDB.
+  if (fdMatches.some((m) => m.status === "FINISHED")) after(() => healCardBoard());
+
   const payload: { matches: Match[]; error?: string; unmappedTeams?: string[] } = { matches: merged };
   if ("error" in fdResult && fdResult.error) payload.error = fdResult.error;
   if (unmappedTeams.length) payload.unmappedTeams = unmappedTeams;
@@ -280,5 +286,25 @@ async function healFinishedResults(
     }
   } catch (e) {
     console.error(`[/api/matches] auto-heal error: ${String(e)}`);
+  }
+}
+
+// Cards board refresh — separate, slower throttle (the TheSportsDB timeline
+// fetches are heavier than the results read). Per-instance; cold starts reset.
+let cardHealAt = 0;
+const CARD_HEAL_TTL_MS = 15 * 60_000;
+
+async function healCardBoard(): Promise<void> {
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!url || !serviceKey) return;
+  const now = Date.now();
+  if (now - cardHealAt < CARD_HEAL_TTL_MS) return;
+  cardHealAt = now; // claim the slot before the await so concurrent polls don't pile up
+  try {
+    const n = await syncCardBoard(createClient(url, serviceKey));
+    if (n > 0) console.log(`[/api/matches] card board synced (${n} teams)`);
+  } catch (e) {
+    console.error(`[/api/matches] card-heal error: ${String(e)}`);
   }
 }

@@ -519,6 +519,16 @@ export default function StandingsPage() {
     () => computeTodayScores(brackets, liveMatches, scoring),
     [brackets, liveMatches, scoring]
   );
+  // Finished-only baseline (no liveMatches). The PROVISIONAL "לייב" points a
+  // match in play is contributing = liveTotal − finishedTotal. Advancement and
+  // specials are frozen in both, so this isolates exactly the not-yet-final
+  // match points. Identical to liveScores whenever nothing is live (delta 0).
+  const finishedScores = useMemo(
+    () => computeLiveScores(brackets, finishedMatches, {
+      advancements, specialBets, tournamentActuals, playerStats, bestThirdsOverride, scoring,
+    }),
+    [brackets, finishedMatches, advancements, specialBets, tournamentActuals, playerStats, bestThirdsOverride, scoring]
+  );
   // Cumulative points per bettor across all finished matches — drives the sparkline.
   const playerHistories = useMemo(
     () => computePlayerHistories(brackets, finishedMatches, scoring),
@@ -582,6 +592,9 @@ export default function StandingsPage() {
       const specPts = live?.specPts ?? (breakdown.topScorer + breakdown.topAssists + breakdown.bestAttack + breakdown.specials);
       const total = matchPts + advPts + specPts;
       const specHasInterim = live?.specHasInterim ?? false;
+      // Provisional points from matches in play (0 unless a match is live).
+      const finishedTotal = finishedScores[profile.id]?.total ?? total;
+      const liveDelta = Math.max(0, total - finishedTotal);
 
       // Stats
       const exactHits = live?.exactHits ?? 0;
@@ -601,6 +614,7 @@ export default function StandingsPage() {
         maxPossible: total + (maxPossibleScores[profile.id] ?? 0),
         today: todayPts > 0 ? `+${todayPts}` : "0",
         delta: 0,
+        liveDelta,
         toto: `${totoPct}%`,
         exact: exactHits,
         streak: 0,
@@ -608,8 +622,8 @@ export default function StandingsPage() {
         isYou: profile.id === currentUserId,
         breakdown,
       };
-    }).filter(Boolean) as (typeof MOCK_PLAYERS[0] & { specHasInterim?: boolean })[];
-  }, [profiles, scoringLog, liveScores, todayScores, currentUserId, maxPossibleScores]);
+    }).filter(Boolean) as (typeof MOCK_PLAYERS[0] & { specHasInterim?: boolean; liveDelta: number })[];
+  }, [profiles, scoringLog, liveScores, finishedScores, todayScores, currentUserId, maxPossibleScores]);
 
   // Always use real data — never fall back to mock (prevents flash of fake names)
   const PLAYERS = realPlayers;
@@ -725,7 +739,7 @@ export default function StandingsPage() {
           <SortableHeader label={TABS.find(t => t.key === activeTab)?.label || ""} sortKey={activeTab} activeTab={activeTab} setActiveTab={setActiveTab} width="w-12" />
           <span className="w-12 text-center">היום</span>
           <SortableHeader label="סה״כ" sortKey="total" activeTab={activeTab} setActiveTab={setActiveTab} width="w-16" />
-          <span className="w-8 text-center">שינוי</span>
+          <span className={`w-8 text-center ${hasLiveMatch ? "text-amber-600 font-bold" : ""}`}>{hasLiveMatch ? "לייב" : "שינוי"}</span>
         </div>
         {/* Table header — desktop (clickable) */}
         <div className="hidden sm:flex items-center px-4 py-2 text-xs text-gray-500 bg-gray-50 border-b border-gray-200 font-semibold" style={{ fontFamily: "var(--font-inter)" }}>
@@ -738,7 +752,7 @@ export default function StandingsPage() {
           <span className="w-20 text-center">מגמה</span>
           <span className="w-12 text-center">היום</span>
           <SortableHeader label="סה״כ" sortKey="total" activeTab={activeTab} setActiveTab={setActiveTab} width="w-16" />
-          <span className="w-8 text-center">שינוי</span>
+          <span className={`w-8 text-center ${hasLiveMatch ? "text-amber-600 font-bold" : ""}`}>{hasLiveMatch ? "לייב" : "שינוי"}</span>
         </div>
 
         {[...PLAYERS].sort((a, b) => b[activeTab] - a[activeTab]).map((p, i) => {
@@ -786,9 +800,15 @@ export default function StandingsPage() {
               <span className="w-16 text-center font-black text-lg text-gray-900 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>
                 {p.total}
               </span>
-              <span className={`w-8 text-center text-sm font-bold ${p.delta > 0 ? "text-green-500" : p.delta < 0 ? "text-red-400" : "text-gray-400"}`}>
-                {p.delta > 0 ? `▲${p.delta}` : p.delta < 0 ? `▼${Math.abs(p.delta)}` : "—"}
-              </span>
+              {hasLiveMatch ? (
+                <span className={`w-8 text-center text-sm font-bold tabular-nums ${p.liveDelta > 0 ? "text-amber-600" : "text-gray-300"}`} style={{ fontFamily: "var(--font-inter)" }}>
+                  {p.liveDelta > 0 ? `+${p.liveDelta}` : "—"}
+                </span>
+              ) : (
+                <span className={`w-8 text-center text-sm font-bold ${p.delta > 0 ? "text-green-500" : p.delta < 0 ? "text-red-400" : "text-gray-400"}`}>
+                  {p.delta > 0 ? `▲${p.delta}` : p.delta < 0 ? `▼${Math.abs(p.delta)}` : "—"}
+                </span>
+              )}
             </div>
           );
         })}

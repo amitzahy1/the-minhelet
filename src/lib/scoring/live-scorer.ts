@@ -8,7 +8,7 @@
 import { computeGroupHits, type FinishedMatch } from "../results-hits";
 import type { BettorBracket, BettorAdvancement, BettorSpecialBets } from "../supabase/shared-data";
 import { GROUPS } from "../tournament/groups";
-import { getTodayIsrael, toIsraelDateKey } from "../timezone";
+import { matchDayKey } from "../tournament/group-live-state";
 import {
   resolveKnockoutTree,
   computeGroupOrders,
@@ -341,19 +341,31 @@ export function computeLiveScores(
   return byUser;
 }
 
-/** Compute today's points only — for the "+X היום" indicator on the leaderboard. */
+/**
+ * Compute the CURRENT day-of-play's points only — for the "+X היום" indicator.
+ *
+ * "Today" is the BETTING DAY (17:00→17:00 Israel bucket via `matchDayKey`), NOT
+ * the calendar date. WC matches run ~19:00→07:00 Israel, so a 04:00 kickoff and
+ * a 22:00 kickoff share a calendar date but belong to DIFFERENT days-of-play.
+ * Scoping by the day-of-play means an early-morning match from last night's
+ * batch no longer inflates "+היום" once tonight's games begin. `nowISO`
+ * overrides the clock (used by tests); defaults to the current instant.
+ */
 export function computeTodayScores(
   brackets: BettorBracket[],
   matches: FinishedMatch[],
   scoring: ScoringValues = SCORING,
+  nowISO?: string,
 ): Record<string, number> {
-  // Israel calendar day (not the runtime TZ) — matches the rest of the app, so
-  // a late kickoff (e.g. 23:00 UTC) is attributed to the day users see it on,
-  // and the value is identical whether computed in the browser or on a UTC server.
-  const todayIsrael = getTodayIsrael();
+  let todayKey: string;
+  try {
+    todayKey = matchDayKey(nowISO ?? new Date().toISOString());
+  } catch {
+    return Object.fromEntries(brackets.map((b) => [b.userId, 0]));
+  }
   const todayMatches = matches.filter((m) => {
     try {
-      return toIsraelDateKey(m.date) === todayIsrael;
+      return matchDayKey(m.date) === todayKey;
     } catch {
       return false;
     }

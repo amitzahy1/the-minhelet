@@ -6,11 +6,12 @@
 // see groups/page.tsx live mode). Editing locks PER MATCH-DAY: when a day's
 // FIRST match is 30 minutes away, every match of that day locks together.
 //
-// A "match day" is NOT a calendar date. WC2026 group matches run ~19:00→~07:00
+// A "match day" is NOT a calendar date. WC2026 matches run ~19:00→~07:00
 // Israel time, so a single day of play crosses midnight. We bucket each match
-// by a day boundary fixed at NOON Israel time — which sits squarely in the
-// daily "dead zone" (no group match kicks off ~07:00–19:00 Israel), so the
-// evening→early-morning block always lands in ONE bucket. This is gap-
+// by a day boundary fixed at 17:00 Israel time — which sits squarely in the
+// daily "dead zone" (nothing kicks off 08:00–18:59 Israel, verified across all
+// 104 fixtures), so the evening→early-morning block always lands in ONE bucket
+// and a "betting day" runs 17:00→17:00 the next day. This is gap-
 // independent (robust to sparse days, unlike gap-clustering) and DST-safe
 // (the whole tournament is within Israel's UTC+3 summer offset). Lock math is
 // timezone-agnostic (compares UTC instants); only DISPLAY localises further.
@@ -22,16 +23,29 @@ import { normalizeGroupLetter } from "@/lib/results-hits";
 /** Editing locks this many minutes before the match-day's first kickoff. */
 export const MATCHDAY_LOCK_BEFORE_MIN = 30;
 
-// Day boundary at 12:00 Israel time. Shifting a kickoff back by 12h and taking
-// its Israel date puts every match with Israel-time ≥ noon on its own date and
-// every after-midnight match (< noon) on the previous day-of-play — exactly the
+// Day boundary at 17:00 Israel time. Shifting a kickoff back by 17h and taking
+// its Israel date puts every match with Israel-time ≥ 17:00 on its own date and
+// every after-midnight match (< 17:00) on the previous day-of-play — exactly the
 // evening→morning grouping we want. The boundary never bisects a match because
-// nothing kicks off ~07:00–19:00 Israel.
-const MATCHDAY_BOUNDARY_SHIFT_MS = 12 * 60 * 60 * 1000;
+// nothing kicks off 08:00–18:59 Israel, and 17:00 sits inside that gap.
+const MATCHDAY_BOUNDARY_SHIFT_MS = 17 * 60 * 60 * 1000;
 
 /** The match-day bucket key (Israel date of the day-of-play) for a kickoff. */
 function matchDayKeyOf(kickoffMs: number): string {
   return toIsraelDateKey(new Date(kickoffMs - MATCHDAY_BOUNDARY_SHIFT_MS).toISOString());
+}
+
+/**
+ * The day-of-play bucket key for any ISO instant (kickoff OR "now"), using the
+ * 17:00-Israel boundary. Exported so scoring can scope "+היום" to the current
+ * betting day instead of the calendar date: a 04:00 kickoff and a 22:00 kickoff
+ * fall on the same calendar date but DIFFERENT days-of-play, and this collapses
+ * the whole 17:00→07:00 evening block to one key. Throws on an invalid date.
+ */
+export function matchDayKey(iso: string): string {
+  const t = new Date(iso).getTime();
+  if (!Number.isFinite(t)) throw new Error(`matchDayKey: invalid date "${iso}"`);
+  return matchDayKeyOf(t);
 }
 
 const LIVE_OR_DONE = new Set(["IN_PLAY", "PAUSED", "LIVE", "FINISHED"]);

@@ -459,8 +459,18 @@ export function SpecialTrackerView({
       </span>
     );
     // Live goals/assists for a matchup player (fuzzy name match against scorers).
+    // Accent-insensitive, surname-aware match so matchup configs like
+    // "Vinícius Jr." find ESPN's "Vinícius Júnior", and "Mbappé" matches
+    // regardless of how the feed accents it.
+    const deburr = (s: string) =>
+      s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z ]/g, " ").replace(/\s+/g, " ").trim();
     const playerStat = (name: string) => {
-      const s = stats.scorers.find((x) => x.name.toLowerCase().includes(name.toLowerCase()) || name.toLowerCase().includes(x.name.toLowerCase()));
+      const q = deburr(name);
+      const qTokens = q.split(" ").filter((t) => t.length >= 4);
+      const s = stats.scorers.find((x) => {
+        const n = deburr(x.name);
+        return n.includes(q) || q.includes(n) || qTokens.some((t) => n.includes(t));
+      });
       return { g: s?.goals ?? 0, a: s?.assists ?? 0 };
     };
     // Inline "Xש · Yב" breakdown for the matchup value column — ש (שערים) + ב

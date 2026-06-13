@@ -11,6 +11,7 @@ import type { MatchResult } from "@/lib/api-football-data";
 import { toAppCode } from "@/lib/fd-team-mapping";
 import { normalizeGroupLetter } from "@/lib/results-hits";
 import { getTsdbCardBoard } from "@/lib/api-thesportsdb";
+import { getEspnCardBoard } from "@/lib/api-espn";
 
 // football-data WC2026 stage labels (verified live): GROUP_STAGE, LAST_32 (the
 // 48-team Round of 32), LAST_16 (Round of 16), QUARTER_FINALS, SEMI_FINALS,
@@ -132,7 +133,10 @@ export async function syncCardBoard(
     if (age >= 0 && age < minIntervalMs) return 0;
   }
 
-  const board = await getTsdbCardBoard();
+  // ESPN's free API has ACCURATE, untruncated card counts (verified: Paraguay
+  // 5 yellows, RSA 2🟨2🟥) — use it first. TheSportsDB is the fallback only if
+  // ESPN is unreachable (it undercounts due to the 5-row free cap).
+  const board = (await getEspnCardBoard()) ?? (await getTsdbCardBoard());
   if (!board || board.length === 0) return 0;
 
   const existing = new Map(

@@ -43,3 +43,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 scripts/backup-user_brackets-*.json
+
+# Personal analysis + scratch (not for the shared repo)
+amitanalysis/
+test-debug.mjs

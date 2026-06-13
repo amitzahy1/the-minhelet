@@ -399,16 +399,18 @@ export function TodayMatches() {
                   const actual = (isLive || isFinished) && m.homeGoals !== null && m.awayGoals !== null
                     ? { home: m.homeGoals, away: m.awayGoals } : null;
                   const hit = myPick && actual ? classifyHit({ home: myPick.home, away: myPick.away }, actual) : null;
+                  // Graded (live/finished) → colored. Upcoming (no result yet) →
+                  // quiet gray, low emphasis: it's just a reminder of your pick.
                   const chip = hit === "exact" ? "bg-green-100 text-green-800 border-green-200"
                     : hit === "toto" ? "bg-amber-100 text-amber-800 border-amber-200"
                     : hit === "miss" ? "bg-red-50 text-red-600 border-red-200"
-                    : "bg-blue-50 text-blue-700 border-blue-200";
+                    : "bg-transparent text-gray-400 border-transparent";
                   return (
                     <div className="mt-auto pt-2 flex items-center justify-center gap-1.5 min-h-[28px]">
                       {myPick ? (
                         <span className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 ${chip}`}>
                           <span className="text-[8px] font-bold opacity-70">שלך</span>
-                          <span dir="ltr" className="text-[12px] font-black tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{myPick.away}-{myPick.home}</span>
+                          <span dir="ltr" className={`text-[12px] tabular-nums ${hit ? "font-black" : "font-semibold"}`} style={{ fontFamily: "var(--font-inter)" }}>{myPick.away}-{myPick.home}</span>
                           {hit === "exact" && <span className="text-[10px]">🎯</span>}
                           {hit === "toto" && <span className="text-[10px]">✓</span>}
                           {hit === "miss" && <span className="text-[10px]">✗</span>}

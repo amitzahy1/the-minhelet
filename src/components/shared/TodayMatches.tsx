@@ -423,12 +423,12 @@ export function TodayMatches() {
                           href={`/groups?group=${groupLetter}&match=${betPair!.pairIdx}`}
                           onClick={(e) => e.stopPropagation()}
                           title="שנה הימור"
-                          className="inline-flex items-center justify-center gap-0.5 rounded-md bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-500 hover:text-gray-700 text-[10px] font-bold px-1.5 py-0.5 transition-colors"
+                          aria-label="שנה הימור"
+                          className="text-gray-400 hover:text-blue-600 transition-colors"
                         >
-                          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                             <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
                           </svg>
-                          שנה
                         </Link>
                       )}
                     </div>

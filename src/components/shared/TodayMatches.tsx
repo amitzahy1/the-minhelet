@@ -228,7 +228,7 @@ export function TodayMatches() {
         {showToggle ? (
           // Underline tabs (Option B): manual switch, identical at all hours.
           <div className="flex items-center gap-3 text-[13px] font-bold ms-auto">
-            {([["upcoming", "הבאים"], ["finished", "אחרונים"]] as const).map(([v, label]) => (
+            {([["finished", "אחרונים"], ["upcoming", "הבאים"]] as const).map(([v, label]) => (
               <button key={v} onClick={() => setView(v)} className="relative pb-1">
                 <span className={effectiveView === v ? "text-gray-900" : "text-gray-400"}>{label}</span>
                 {effectiveView === v && <span className="absolute -bottom-0.5 inset-x-0 h-0.5 rounded-full bg-blue-600" />}

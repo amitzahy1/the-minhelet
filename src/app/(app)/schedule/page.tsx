@@ -6,6 +6,7 @@ import { isLocked, revealAtFor, LOCK_DEADLINE } from "@/lib/constants";
 import { getFlag, getTeamNameHe } from "@/lib/flags";
 import type { BettorSpecialBets, BettorAdvancement, BettorBracket } from "@/lib/supabase/shared-data";
 import { matchPairIndex, normalizeGroupLetter, classifyHit } from "@/lib/results-hits";
+import { MATCHUPS, parseMatchupPick } from "@/lib/matchups";
 import { computeMatchDays, dayLockAtForKickoff, type MatchDay } from "@/lib/tournament/group-live-state";
 
 import { useState, useEffect, useMemo } from "react";
@@ -103,6 +104,19 @@ function MatchBetsPanel({ match, brackets, specialBets, advancements, matchDays 
   if (myBets.dirtiestTeam && (myBets.dirtiestTeam === home || myBets.dirtiestTeam === away)) {
     relatedBets.push({ bettor: "אתה", type: "הכי כסחנית", detail: `${getFlag(myBets.dirtiestTeam)} ${getTeamNameHe(myBets.dirtiestTeam)}` });
   }
+  if (groupLetter && myBets.prolificGroup === groupLetter) {
+    relatedBets.push({ bettor: "אתה", type: "בית הכי פורה", detail: `בית ${groupLetter}` });
+  }
+  if (groupLetter && myBets.driestGroup === groupLetter) {
+    relatedBets.push({ bettor: "אתה", type: "בית הכי יבש", detail: `בית ${groupLetter}` });
+  }
+  MATCHUPS.forEach((mu, i) => {
+    const pick = myBets.matchups?.[i];
+    if (!pick) return;
+    if (mu.team1 !== home && mu.team1 !== away && mu.team2 !== home && mu.team2 !== away) return;
+    const backed = pick === "1" ? mu.p1Short : pick === "2" ? mu.p2Short : "תיקו";
+    relatedBets.push({ bettor: "אתה", type: "מאצ'אפ", detail: `${mu.p1Short}-${mu.p2Short}: ${backed}` });
+  });
 
   // Add real Supabase data for all bettors
   if (hasSpecialBets || hasAdvancements) {
@@ -150,6 +164,25 @@ function MatchBetsPanel({ match, brackets, specialBets, advancements, matchDays 
       // Dirtiest team
       if (sb.dirtiestTeam && (sb.dirtiestTeam === home || sb.dirtiestTeam === away)) {
         relatedBets.push({ bettor: bettorName, type: "הכי כסחנית", detail: `${getFlag(sb.dirtiestTeam)} ${getTeamNameHe(sb.dirtiestTeam)}` });
+      }
+
+      // Most prolific / driest group — relevant only on this group's own matches
+      if (groupLetter && sb.prolificGroup === groupLetter) {
+        relatedBets.push({ bettor: bettorName, type: "בית הכי פורה", detail: `בית ${groupLetter}` });
+      }
+      if (groupLetter && sb.driestGroup === groupLetter) {
+        relatedBets.push({ bettor: bettorName, type: "בית הכי יבש", detail: `בית ${groupLetter}` });
+      }
+
+      // Matchup duels — shown when either duelist's national team plays here
+      const picks = parseMatchupPick(sb.matchupPick);
+      for (let i = 0; i < MATCHUPS.length; i++) {
+        const pick = picks[i];
+        if (!pick) continue;
+        const mu = MATCHUPS[i];
+        if (mu.team1 !== home && mu.team1 !== away && mu.team2 !== home && mu.team2 !== away) continue;
+        const backed = pick === "1" ? mu.p1Short : pick === "2" ? mu.p2Short : "תיקו";
+        relatedBets.push({ bettor: bettorName, type: "מאצ'אפ", detail: `${mu.p1Short}-${mu.p2Short}: ${backed}` });
       }
     }
   }

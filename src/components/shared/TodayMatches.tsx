@@ -12,6 +12,7 @@ import { isLocked, revealAtFor, formatLockDeadline, LOCK_DEADLINE } from "@/lib/
 import { computeGroupHits, hitCounts, normalizeGroupLetter, matchPairIndex, classifyHit, type HitKind } from "@/lib/results-hits";
 import { computeMatchDays, dayLockAtForKickoff, type MatchDay } from "@/lib/tournament/group-live-state";
 import { anyMatchInPlayWindow, LIVE_REFRESH_MS } from "@/lib/live-window";
+import { MATCHUPS, parseMatchupPick } from "@/lib/matchups";
 
 interface Match {
   id: number;
@@ -181,13 +182,14 @@ export function TodayMatches() {
     : (upcomingList.length > 0 ? "upcoming" : "finished");
   const featured = effectiveView === "finished" ? finishedList : upcomingList;
 
-  // Build bettors' special bets relevant to a match's teams. Mirrors the
-  // schedule page's full "special bets related to match" set: champion (from
-  // advancements) + top scorer/assists + best attack + dirtiest team — every
-  // public special bet that names one of the two teams playing. Sorted by a
-  // fixed type order so same-type picks group together in the card.
-  function getRelatedBets(homeTla: string, awayTla: string) {
+  // Build EVERY public special bet that touches this match — by team (champion,
+  // top scorer/assists, best attack, dirtiest), by its group (most prolific /
+  // driest group, group-stage only), or by a matchup duel whose player plays in
+  // it. Mirrors (and extends) the schedule page's "related special bets" set.
+  // Sorted by a fixed type order so same-type picks group together in the card.
+  function getRelatedBets(homeTla: string, awayTla: string, matchGroup: string) {
     if (!locked) return [];
+    const groupLetter = normalizeGroupLetter(matchGroup); // "" for knockout
     const isTeam = (t: string | null) => t === homeTla || t === awayTla;
     const mentionsTeam = (s: string | null) => !!s && (s.includes(homeTla) || s.includes(awayTla));
     const names = Array.from(new Set([
@@ -210,10 +212,27 @@ export function TodayMatches() {
           bets.push({ name, type: "מלך בישולים", detail: sb.topAssistsPlayer!, order: 2 });
         }
         if (isTeam(sb.bestAttackTeam)) {
-          bets.push({ name, type: "התקפה", detail: getFlag(sb.bestAttackTeam!), order: 3 });
+          bets.push({ name, type: "התקפה פורייה", detail: getFlag(sb.bestAttackTeam!), order: 3 });
         }
         if (isTeam(sb.dirtiestTeam)) {
           bets.push({ name, type: "כסחנית", detail: getFlag(sb.dirtiestTeam!), order: 4 });
+        }
+        // Group-wide bets — relevant only on this match's own group-stage games.
+        if (groupLetter && sb.prolificGroup === groupLetter) {
+          bets.push({ name, type: "בית הכי פורה", detail: groupLetter, order: 5 });
+        }
+        if (groupLetter && sb.driestGroup === groupLetter) {
+          bets.push({ name, type: "בית הכי יבש", detail: groupLetter, order: 6 });
+        }
+        // Matchup duels — shown when either duelist's team is playing here.
+        const picks = parseMatchupPick(sb.matchupPick);
+        for (let i = 0; i < MATCHUPS.length; i++) {
+          const pick = picks[i];
+          if (!pick) continue;
+          const mu = MATCHUPS[i];
+          if (!isTeam(mu.team1) && !isTeam(mu.team2)) continue;
+          const backed = pick === "1" ? mu.p1Short : pick === "2" ? mu.p2Short : "תיקו";
+          bets.push({ name, type: "מאצ'אפ", detail: `${mu.p1Short}-${mu.p2Short}: ${backed}`, order: 7 });
         }
       }
     }
@@ -270,7 +289,7 @@ export function TodayMatches() {
           const isFinished = m.status === "FINISHED";
           const isLive = m.status === "IN_PLAY" || m.status === "PAUSED";
           const isExpanded = expandedId === m.id;
-          const relatedBets = getRelatedBets(m.homeTla, m.awayTla);
+          const relatedBets = getRelatedBets(m.homeTla, m.awayTla, m.group);
           // Score predictions are shown only for FINISHED group matches (below),
           // built from the redacted bracket data — never from an un-lock-gated
           // source, so an upcoming match's picks can't leak before it locks.
@@ -605,7 +624,7 @@ export function TodayMatches() {
                             <div>
                               <p className="text-[10px] font-bold text-gray-500 mb-1">הימורים מיוחדים</p>
                               {relatedBets.map((b, i) => (
-                                <div key={i} className="flex items-center gap-1 text-[11px] text-gray-600">
+                                <div key={i} className="flex flex-wrap items-center gap-x-1 text-[11px] text-gray-600">
                                   <span className="font-bold">{b.name}</span>
                                   <span className="text-gray-400">·</span>
                                   <span>{b.type}</span>

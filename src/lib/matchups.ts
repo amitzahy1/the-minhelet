@@ -15,6 +15,8 @@ export interface Matchup {
   flag2: string;
   name1: string;
   name2: string;
+  team1: string;       // p1's national-team TLA (for match-card relevance)
+  team2: string;       // p2's national-team TLA
 }
 
 export const MATCHUPS: Matchup[] = [
@@ -28,6 +30,8 @@ export const MATCHUPS: Matchup[] = [
     flag2: "🇵🇹",
     name1: "Messi",
     name2: "Ronaldo",
+    team1: "ARG",
+    team2: "POR",
   },
   {
     id: 1,
@@ -39,6 +43,8 @@ export const MATCHUPS: Matchup[] = [
     flag2: "🇧🇷",
     name1: "Raphinha",
     name2: "Vinícius Jr.",
+    team1: "BRA",
+    team2: "BRA",
   },
   {
     id: 2,
@@ -50,6 +56,8 @@ export const MATCHUPS: Matchup[] = [
     flag2: "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
     name1: "Mbappé",
     name2: "Harry Kane",
+    team1: "FRA",
+    team2: "ENG",
   },
 ];
 

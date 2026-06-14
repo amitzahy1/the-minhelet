@@ -62,7 +62,7 @@ export function TodayMatches() {
   const [matchDays, setMatchDays] = useState<MatchDay[]>([]);
   // Header toggle: "הבאים" (upcoming, default) ⇄ "אחרונים" (finished results).
   const [view, setView] = useState<"upcoming" | "finished">("upcoming");
-  const { specialBets, brackets, refetch } = useSharedData();
+  const { specialBets, brackets, advancements, refetch } = useSharedData();
   // The viewer's OWN picks (local store) — shown next to the edit-bet button.
   const myGroups = useBettingStore((s) => s.groups);
   const locked = isLocked();
@@ -181,19 +181,43 @@ export function TodayMatches() {
     : (upcomingList.length > 0 ? "upcoming" : "finished");
   const featured = effectiveView === "finished" ? finishedList : upcomingList;
 
-  // Build bettors' special bets relevant to a match's teams
+  // Build bettors' special bets relevant to a match's teams. Mirrors the
+  // schedule page's full "special bets related to match" set: champion (from
+  // advancements) + top scorer/assists + best attack + dirtiest team — every
+  // public special bet that names one of the two teams playing. Sorted by a
+  // fixed type order so same-type picks group together in the card.
   function getRelatedBets(homeTla: string, awayTla: string) {
-    if (!locked || specialBets.length === 0) return [];
-    const bets: { name: string; type: string; detail: string }[] = [];
-    for (const sb of specialBets) {
-      if (sb.bestAttackTeam === homeTla || sb.bestAttackTeam === awayTla) {
-        bets.push({ name: sb.displayName, type: "התקפה", detail: getFlag(sb.bestAttackTeam!) });
+    if (!locked) return [];
+    const isTeam = (t: string | null) => t === homeTla || t === awayTla;
+    const mentionsTeam = (s: string | null) => !!s && (s.includes(homeTla) || s.includes(awayTla));
+    const names = Array.from(new Set([
+      ...specialBets.map((s) => s.displayName),
+      ...advancements.map((a) => a.displayName),
+    ]));
+    const bets: { name: string; type: string; detail: string; order: number }[] = [];
+    for (const name of names) {
+      // אלוף (tournament champion) — lives in advancements, not specialBets.
+      const adv = advancements.find((a) => a.displayName === name);
+      if (adv && isTeam(adv.winner)) {
+        bets.push({ name, type: "אלוף", detail: getFlag(adv.winner), order: 0 });
       }
-      if (sb.dirtiestTeam === homeTla || sb.dirtiestTeam === awayTla) {
-        bets.push({ name: sb.displayName, type: "כסחנית", detail: getFlag(sb.dirtiestTeam!) });
+      const sb = specialBets.find((s) => s.displayName === name);
+      if (sb) {
+        if (mentionsTeam(sb.topScorerPlayer)) {
+          bets.push({ name, type: "מלך שערים", detail: sb.topScorerPlayer!, order: 1 });
+        }
+        if (mentionsTeam(sb.topAssistsPlayer)) {
+          bets.push({ name, type: "מלך בישולים", detail: sb.topAssistsPlayer!, order: 2 });
+        }
+        if (isTeam(sb.bestAttackTeam)) {
+          bets.push({ name, type: "התקפה", detail: getFlag(sb.bestAttackTeam!), order: 3 });
+        }
+        if (isTeam(sb.dirtiestTeam)) {
+          bets.push({ name, type: "כסחנית", detail: getFlag(sb.dirtiestTeam!), order: 4 });
+        }
       }
     }
-    return bets;
+    return bets.sort((a, b) => a.order - b.order);
   }
 
   function getGroupPredictions(
@@ -580,7 +604,7 @@ export function TodayMatches() {
                           {relatedBets.length > 0 && (
                             <div>
                               <p className="text-[10px] font-bold text-gray-500 mb-1">הימורים מיוחדים</p>
-                              {relatedBets.slice(0, 4).map((b, i) => (
+                              {relatedBets.map((b, i) => (
                                 <div key={i} className="flex items-center gap-1 text-[11px] text-gray-600">
                                   <span className="font-bold">{b.name}</span>
                                   <span className="text-gray-400">·</span>

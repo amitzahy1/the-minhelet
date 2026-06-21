@@ -66,6 +66,15 @@ export default function RulesPage() {
               ניחוש התוצאה נוגע ל<strong>90 הדקות בלבד</strong> — הארכה ודו-קרב פנדלים אינם נכללים בתוצאה.
               (ההעפלה/המנצח בנוק-אאוט נקבעים לפי התוצאה בפועל, כולל הארכה ופנדלים.)
             </p>
+            <div className="mt-3 rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-xs text-slate-700 leading-relaxed">
+              <p className="font-bold mb-1 text-slate-900">🥉 משחק המקום השלישי</p>
+              <p>
+                על משחק המקום השלישי (בין המפסידות בחצי הגמר) <strong>לא מהמרים</strong> טוטו או
+                תוצאה מדויקת — הוא אינו חלק מעץ הניחושים. אבל <strong>השערים, הבישולים והכרטיסים
+                שבו כן נספרים</strong> לכל ההימורים המיוחדים: מלך השערים, מלך הבישולים, ההתקפה
+                הטובה, הכסחנית והמאצ׳אפים.
+              </p>
+            </div>
           </div>
         </section>
 

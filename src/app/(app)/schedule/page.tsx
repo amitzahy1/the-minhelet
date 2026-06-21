@@ -9,7 +9,7 @@ import { matchPairIndex, normalizeGroupLetter, classifyHit } from "@/lib/results
 import { MATCHUPS, parseMatchupPick } from "@/lib/matchups";
 import { computeMatchDays, dayLockAtForKickoff, type MatchDay } from "@/lib/tournament/group-live-state";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { toIsraelTimeShort, toIsraelDate, toIsraelDateKey } from "@/lib/timezone";
@@ -31,6 +31,20 @@ interface Match {
   homeGoals?: number | null;
   awayGoals?: number | null;
 }
+
+// For a knockout match, which advancement set its winner joins (= reaching the
+// NEXT round). Both FD stage spellings are mapped. FINAL is handled separately
+// against each bettor's champion pick. THIRD_PLACE has no "advance" notion.
+const KO_ADVANCE_FIELD: Record<string, "advanceToR16" | "advanceToQF" | "advanceToSF" | "advanceToFinal"> = {
+  LAST_32: "advanceToR16",
+  ROUND_OF_32: "advanceToR16",
+  LAST_16: "advanceToQF",
+  ROUND_OF_16: "advanceToQF",
+  QUARTER_FINAL: "advanceToSF",
+  QUARTER_FINALS: "advanceToSF",
+  SEMI_FINAL: "advanceToFinal",
+  SEMI_FINALS: "advanceToFinal",
+};
 
 interface MatchBetsPanelProps {
   match: Match;
@@ -315,6 +329,46 @@ function MatchBetsPanel({ match, brackets, specialBets, advancements, matchDays 
             </div>
           </div>
         )}
+
+        {/* Knockout advancement (R32 and on) — which of the two teams each bettor
+            predicted to advance from THIS match. Stays hidden until the fixture
+            has real teams (TBD codes won't match anyone's advancement set). */}
+        {globalLocked && !groupLetter && hasAdvancements && (() => {
+          const stage = match.stage || "";
+          const field = KO_ADVANCE_FIELD[stage];
+          const isFinal = stage === "FINAL";
+          if (!field && !isFinal) return null;
+          const rows = advancements.flatMap((adv) => {
+            let code: string | null = null;
+            if (isFinal) {
+              code = adv.winner && (adv.winner === home || adv.winner === away) ? adv.winner : null;
+            } else {
+              const set = adv[field] || [];
+              code = set.includes(home) ? home : set.includes(away) ? away : null;
+            }
+            return code ? [{ userId: adv.userId, name: adv.displayName, code }] : [];
+          });
+          if (rows.length === 0) return null;
+          return (
+            <div>
+              <p className="text-xs font-bold text-gray-500 mb-2">את מי כל מהמר העלה</p>
+              <div className="bg-white rounded-lg border border-gray-200 px-3 py-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {rows.map((r) => (
+                    <div key={r.userId} className="text-xs border border-gray-100 rounded-lg p-2">
+                      <p className="font-bold text-gray-800 mb-1 truncate">{r.name}</p>
+                      <div className="flex items-center gap-1.5 text-green-700 font-medium">
+                        <span>{getFlag(r.code)}</span>
+                        <span className="truncate">{getTeamNameHe(r.code)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-[10px] text-gray-400 mt-1.5 text-center">העולה מהמשחק לדעת כל מהמר</p>
+              </div>
+            </div>
+          );
+        })()}
       </div>
     </motion.div>
   );
@@ -407,6 +461,36 @@ export default function SchedulePage() {
   const toggleDay = (date: string, currentlyCollapsed: boolean) =>
     setDayOverrides((prev) => ({ ...prev, [date]: !currentlyCollapsed }));
 
+  // Deep link from the home page ("כל ההימורים על המשחק") — ?match=<id> opens
+  // that match's detail, forces its (possibly collapsed) day open, and scrolls
+  // to it. Runs once the target match is present in the fetched list. State is
+  // set off the event loop so it doesn't fire synchronously during the effect.
+  const deepLinkedRef = useRef(false);
+  useEffect(() => {
+    if (deepLinkedRef.current || matches.length === 0) return;
+    const raw = new URLSearchParams(window.location.search).get("match");
+    if (!raw) {
+      deepLinkedRef.current = true;
+      return;
+    }
+    const id = Number(raw);
+    const target = Number.isFinite(id) ? matches.find((m) => m.id === id) : undefined;
+    if (!target) {
+      if (!Number.isFinite(id)) deepLinkedRef.current = true;
+      return; // valid id not loaded yet — retry when matches change
+    }
+    deepLinkedRef.current = true;
+    const dayKey = toIsraelDateKey(target.date);
+    const t = setTimeout(() => {
+      setExpandedMatch(id);
+      setDayOverrides((prev) => ({ ...prev, [dayKey]: false }));
+      setTimeout(() => {
+        document.getElementById(`sched-match-${id}`)?.scrollIntoView({ block: "center", behavior: "smooth" });
+      }, 80);
+    }, 0);
+    return () => clearTimeout(t);
+  }, [matches]);
+
   return (
     <div className="max-w-3xl mx-auto px-4 py-6 pb-24" dir="rtl">
       <div className="mb-5">
@@ -474,7 +558,7 @@ export default function SchedulePage() {
                   const isLive = m.status === "IN_PLAY" || m.status === "PAUSED";
                   const hasScore = (isFinished || isLive) && m.homeGoals != null && m.awayGoals != null;
                   return (
-                    <div key={m.id} className={`rounded-xl border shadow-sm overflow-hidden transition-all ${
+                    <div key={m.id} id={`sched-match-${m.id}`} className={`rounded-xl border shadow-sm overflow-hidden transition-all ${
                       isLive ? "bg-red-50/40 border-red-200" :
                       isFinished ? "bg-green-50/40 border-green-200" :
                       isExpanded ? "bg-white border-blue-300 shadow-md" : "bg-white border-gray-200 hover:border-gray-300"

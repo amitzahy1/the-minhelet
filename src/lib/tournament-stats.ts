@@ -131,7 +131,12 @@ export function aggregateGroupStats(rows: DemoResultRow[]): GroupGoalStats[] {
 
 // ---------- Football-Data scorers ----------
 
-async function fetchFdScorers(limit = 25): Promise<ScorerRow[]> {
+// `assistsKnown` flags rows where FD actually returned an assist count (vs null
+// on the free tier). When true, FD is authoritative for assists — its official
+// tally beats ESPN's goal-event heuristic, which over-credits the `participants[1]`
+// of a goal as an assist (e.g. Vinícius scored 2 + 1 real assist, but ESPN's
+// parse read 2 assists). When false, we still fall back to ESPN.
+async function fetchFdScorers(limit = 25): Promise<Array<ScorerRow & { assistsKnown: boolean }>> {
   const token = process.env.FOOTBALL_DATA_TOKEN;
   if (!token) return [];
   try {
@@ -155,6 +160,7 @@ async function fetchFdScorers(limit = 25): Promise<ScorerRow[]> {
         team: s.team?.tla || s.team?.name || "",
         goals: s.goals ?? 0,
         assists: s.assists ?? 0,
+        assistsKnown: typeof s.assists === "number",
         played: s.playedMatches ?? 0,
       }))
       .filter((s) => s.name !== "Unknown");
@@ -206,8 +212,14 @@ async function fetchActuals(): Promise<TournamentActuals | null> {
 
 // ---------- Public API ----------
 
+// Strip diacritics (NFD-decompose, then drop combining marks) BEFORE the
+// [^a-z] pass — otherwise accented letters get replaced by spaces, so FD's
+// "Vinícius Júnior" → "vin cius j nior" never matched ESPN's "Vinicius Junior"
+// → "vinicius junior" and the two feeds stayed as duplicate rows. Mirrors the
+// `deburr` the matchup card already uses, so merge key and lookup key agree.
 const normName = (s: string): string =>
-  s.toLowerCase().replace(/['’`´׳]/g, "").replace(/[^a-z ]+/g, " ").replace(/\s+/g, " ").trim();
+  s.normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .toLowerCase().replace(/['’`´׳]/g, "").replace(/[^a-z ]+/g, " ").replace(/\s+/g, " ").trim();
 
 export async function getTournamentStats(): Promise<TournamentStatsPayload> {
   const [fdScorers, espnPlayers, finishedMatches, actuals] = await Promise.all([
@@ -224,14 +236,23 @@ export async function getTournamentStats(): Promise<TournamentStatsPayload> {
   // ESPN also surfaces assist-only players football-data's scorer list omits —
   // important so the matchup duels (goals + assists) count those players too.
   const merged = new Map<string, ScorerRow>();
-  for (const s of fdScorers) merged.set(normName(s.name), { ...s });
+  const fdAssistsKnown = new Set<string>(); // keys where FD gave a real assist count → FD wins
+  for (const s of fdScorers) {
+    const key = normName(s.name);
+    const { assistsKnown, ...row } = s;
+    merged.set(key, row);
+    if (assistsKnown) fdAssistsKnown.add(key);
+  }
   for (const p of espnPlayers || []) {
     const key = normName(p.name);
     const ex = merged.get(key);
     if (ex) {
       ex.goals = Math.max(ex.goals, p.goals);
-      ex.assists = Math.max(ex.assists, p.assists);
+      // FD is authoritative for assists when it supplied a count (avoids ESPN's
+      // over-count); otherwise ESPN is the only source, so take its value.
+      if (!fdAssistsKnown.has(key)) ex.assists = Math.max(ex.assists, p.assists);
       if (!ex.team && p.team) ex.team = p.team;
+      ex.played = Math.max(ex.played, p.played); // FD's scorer row can lag at 0
     } else {
       merged.set(key, { name: p.name, team: p.team, goals: p.goals, assists: p.assists, played: p.played });
     }

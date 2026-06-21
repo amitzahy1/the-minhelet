@@ -389,6 +389,24 @@ export default function SchedulePage() {
     grouped[date].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }
 
+  // Day-groups whose matches ALL ended more than 24h ago start collapsed, so the
+  // user lands near today's + upcoming matches without scrolling past a wall of
+  // finished days. A match end is estimated as kickoff + 2h; a day is "old" once
+  // its latest match ended before the 24h cutoff (captured once at mount).
+  // Today's and future days never qualify (their end-times aren't in the past).
+  // The default is derived during render off the full match set, so it's stable
+  // across the group filter; `dayOverrides` records explicit user open/close
+  // choices, which win over the default.
+  const [mountNow] = useState(() => Date.now());
+  const [dayOverrides, setDayOverrides] = useState<Record<string, boolean>>({});
+  const isOldDay = (dayMatches: Match[]) => {
+    let lastEnd = 0;
+    for (const m of dayMatches) lastEnd = Math.max(lastEnd, new Date(m.date).getTime() + 2 * 60 * 60 * 1000);
+    return lastEnd < mountNow - 24 * 60 * 60 * 1000;
+  };
+  const toggleDay = (date: string, currentlyCollapsed: boolean) =>
+    setDayOverrides((prev) => ({ ...prev, [date]: !currentlyCollapsed }));
+
   return (
     <div className="max-w-3xl mx-auto px-4 py-6 pb-24" dir="rtl">
       <div className="mb-5">
@@ -418,9 +436,35 @@ export default function SchedulePage() {
         </div>
       ) : (
         <div className="space-y-6">
-          {Object.entries(grouped).sort().map(([date, dayMatches]) => (
+          {Object.entries(grouped).sort().map(([date, dayMatches]) => {
+            const collapsed = date in dayOverrides ? dayOverrides[date] : isOldDay(dayMatches);
+            if (collapsed) {
+              return (
+                <div key={date}>
+                  <button
+                    onClick={() => toggleDay(date, true)}
+                    className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl border border-gray-200 bg-white/60 hover:bg-gray-50 transition-colors"
+                  >
+                    <span className="flex items-center gap-2 min-w-0">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-gray-400 shrink-0 rotate-90" aria-hidden>
+                        <polyline points="6 9 12 15 18 9" />
+                      </svg>
+                      <span className="text-sm font-bold text-gray-600 truncate">{toIsraelDate(dayMatches[0].date)}</span>
+                    </span>
+                    <span className="text-[11px] text-gray-400 shrink-0 whitespace-nowrap">✓ {dayMatches.length} משחקים</span>
+                  </button>
+                </div>
+              );
+            }
+            return (
             <div key={date}>
-              <h2 className="text-base font-bold text-gray-800 mb-2 sticky top-28 bg-[#F8F9FB] py-1 z-10">
+              <h2
+                onClick={() => toggleDay(date, false)}
+                className="text-base font-bold text-gray-800 mb-2 sticky top-28 bg-[#F8F9FB] py-1 z-10 flex items-center gap-2 cursor-pointer"
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-gray-400 shrink-0" aria-hidden>
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
                 {toIsraelDate(dayMatches[0].date)}
               </h2>
               <div className="space-y-2">
@@ -534,7 +578,8 @@ export default function SchedulePage() {
                 })}
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

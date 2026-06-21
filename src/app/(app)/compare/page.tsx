@@ -166,6 +166,15 @@ export default function ComparePage() {
     });
   }, [finishedGroupMatches, brackets]);
 
+  // Finished-match count per group — the denominator behind each heatmap cell.
+  // Surfaced in the header ("N/6") + cell tooltips so a 0% over 2 games doesn't
+  // read the same as a 0% over 4.
+  const groupMatchCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const m of finishedGroupMatches) counts[m.group] = (counts[m.group] || 0) + 1;
+    return counts;
+  }, [finishedGroupMatches]);
+
   // Build real bettors from Supabase data
   const realBettors = useMemo((): Bettor[] => {
     if (brackets.length === 0) return [];
@@ -529,11 +538,11 @@ export default function ComparePage() {
         <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-200">
             <h3 className="text-lg font-bold text-gray-900">מפת חום — דיוק בניחושי התוצאות</h3>
-            <p className="text-sm text-gray-500">אחוז הפגיעות (טוטו/מדויקת) של כל מהמר בכל בית, לפי המשחקים שנגמרו</p>
+            <p className="text-sm text-gray-500">אחוז הפגיעות (טוטו/מדויקת) של כל מהמר בכל בית, לפי המשחקים שנגמרו. המספר בכותרת (למשל 2/6) הוא כמה משחקים כבר הסתיימו בבית.</p>
           </div>
           {heatmapData.length > 0 ? (
             <div className="p-4">
-              <PredictionHeatmap data={heatmapData} />
+              <PredictionHeatmap data={heatmapData} groupCounts={groupMatchCounts} />
             </div>
           ) : (
             <div className="p-8 text-center">

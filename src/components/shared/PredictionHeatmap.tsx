@@ -8,6 +8,10 @@ export interface HeatmapProps {
     // "A" -> 0-100 accuracy; null/undefined = no finished match yet (neutral).
     groups: Record<string, number | null>;
   }[];
+  /** Per-group count of finished matches (the denominator behind each %). When
+   *  provided, the column header shows "N/6" and each cell gets a "hit X of N"
+   *  tooltip — so a 0% over 2 games reads differently from a 0% over 4. */
+  groupCounts?: Record<string, number>;
 }
 
 const GROUPS = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"];
@@ -41,7 +45,13 @@ function getTextColor(value: number): string {
   return "#1f2937"; // gray-800
 }
 
-export function PredictionHeatmap({ data }: { data?: HeatmapProps["data"] }) {
+export function PredictionHeatmap({
+  data,
+  groupCounts,
+}: {
+  data?: HeatmapProps["data"];
+  groupCounts?: HeatmapProps["groupCounts"];
+}) {
   const rows = data ?? MOCK_DATA;
 
   return (
@@ -55,15 +65,24 @@ export function PredictionHeatmap({ data }: { data?: HeatmapProps["data"] }) {
       >
         {/* Header row */}
         <div className="sticky start-0 z-10 bg-white" />
-        {GROUPS.map((g) => (
-          <div
-            key={g}
-            className="text-center text-xs font-bold text-gray-600 py-2"
-            style={{ fontFamily: "var(--font-inter)" }}
-          >
-            בית {g}
-          </div>
-        ))}
+        {GROUPS.map((g) => {
+          const cnt = groupCounts?.[g];
+          return (
+            <div
+              key={g}
+              className="text-center text-xs font-bold text-gray-600 py-2 leading-tight"
+              style={{ fontFamily: "var(--font-inter)" }}
+              title={cnt != null ? `${cnt} מתוך 6 משחקים הסתיימו` : undefined}
+            >
+              בית {g}
+              {cnt != null && (
+                <span className="block text-[10px] font-medium text-gray-400">
+                  {cnt}/6
+                </span>
+              )}
+            </div>
+          );
+        })}
 
         {/* Data rows */}
         {rows.map((bettor) => (
@@ -78,9 +97,19 @@ export function PredictionHeatmap({ data }: { data?: HeatmapProps["data"] }) {
             {GROUPS.map((g) => {
               const val = bettor.groups[g];
               const hasData = val !== null && val !== undefined;
+              const total = groupCounts?.[g];
+              // Reconstruct the hit count from the rounded % and the shared
+              // denominator — exact for the 1–6 matches a WC group ever holds.
+              const hits = hasData && total != null ? Math.round((val / 100) * total) : null;
+              const title = !hasData
+                ? "אין עדיין משחק שהסתיים בבית זה"
+                : total != null
+                ? `${bettor.name} — פגע ב-${hits} מתוך ${total} משחקים`
+                : `${val}%`;
               return (
                 <div
                   key={`${bettor.name}-${g}`}
+                  title={title}
                   className="flex items-center justify-center rounded-md text-xs font-bold h-10 transition-colors"
                   style={{
                     backgroundColor: hasData ? getHeatColor(val) : "#f3f4f6",

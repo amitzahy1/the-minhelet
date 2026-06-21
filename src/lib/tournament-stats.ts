@@ -131,12 +131,13 @@ export function aggregateGroupStats(rows: DemoResultRow[]): GroupGoalStats[] {
 
 // ---------- Football-Data scorers ----------
 
-// `assistsKnown` flags rows where FD actually returned an assist count (vs null
-// on the free tier). When true, FD is authoritative for assists — its official
-// tally beats ESPN's goal-event heuristic, which over-credits the `participants[1]`
-// of a goal as an assist (e.g. Vinícius scored 2 + 1 real assist, but ESPN's
-// parse read 2 assists). When false, we still fall back to ESPN.
-async function fetchFdScorers(limit = 25): Promise<Array<ScorerRow & { assistsKnown: boolean }>> {
+// FD is authoritative for GOALS (its scorer list is complete and current; ESPN's
+// summary parser misses some — e.g. it under-counted Kane, Havertz, Embolo,
+// Depay). But FD's free tier supplies ASSISTS for only a handful of players
+// (most come back null) and omits assist-only players entirely, so ESPN is
+// authoritative for assists. See the merge in getTournamentStats. Limit 100
+// covers the whole FD scorer list (~81 players); a low limit truncated goals.
+async function fetchFdScorers(limit = 100): Promise<ScorerRow[]> {
   const token = process.env.FOOTBALL_DATA_TOKEN;
   if (!token) return [];
   try {
@@ -160,7 +161,6 @@ async function fetchFdScorers(limit = 25): Promise<Array<ScorerRow & { assistsKn
         team: s.team?.tla || s.team?.name || "",
         goals: s.goals ?? 0,
         assists: s.assists ?? 0,
-        assistsKnown: typeof s.assists === "number",
         played: s.playedMatches ?? 0,
       }))
       .filter((s) => s.name !== "Unknown");
@@ -223,7 +223,7 @@ const normName = (s: string): string =>
 
 export async function getTournamentStats(): Promise<TournamentStatsPayload> {
   const [fdScorers, espnPlayers, finishedMatches, actuals] = await Promise.all([
-    fetchFdScorers(25),
+    fetchFdScorers(100),
     getEspnPlayerStats(),
     fetchDemoResults(),
     fetchActuals(),
@@ -236,21 +236,19 @@ export async function getTournamentStats(): Promise<TournamentStatsPayload> {
   // ESPN also surfaces assist-only players football-data's scorer list omits —
   // important so the matchup duels (goals + assists) count those players too.
   const merged = new Map<string, ScorerRow>();
-  const fdAssistsKnown = new Set<string>(); // keys where FD gave a real assist count → FD wins
-  for (const s of fdScorers) {
-    const key = normName(s.name);
-    const { assistsKnown, ...row } = s;
-    merged.set(key, row);
-    if (assistsKnown) fdAssistsKnown.add(key);
-  }
+  for (const s of fdScorers) merged.set(normName(s.name), { ...s });
   for (const p of espnPlayers || []) {
     const key = normName(p.name);
     const ex = merged.get(key);
     if (ex) {
+      // GOALS: take the higher of the two — FD is the more complete feed, and
+      // max also catches the rare goal ESPN saw but FD hasn't ingested yet.
       ex.goals = Math.max(ex.goals, p.goals);
-      // FD is authoritative for assists when it supplied a count (avoids ESPN's
-      // over-count); otherwise ESPN is the only source, so take its value.
-      if (!fdAssistsKnown.has(key)) ex.assists = Math.max(ex.assists, p.assists);
+      // ASSISTS: ESPN is authoritative. FD's free tier returns assists for only
+      // a few players (most null) and over-states some (it had Vinícius at 2 vs
+      // the real 1); ESPN derives assists from actual goal events. FD's assists
+      // survive only for a player ESPN somehow lacks.
+      ex.assists = p.assists;
       if (!ex.team && p.team) ex.team = p.team;
       ex.played = Math.max(ex.played, p.played); // FD's scorer row can lag at 0
     } else {

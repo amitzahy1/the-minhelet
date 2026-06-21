@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { verifyAdmin } from "../../verify-admin";
 import { getFinishedMatches } from "@/lib/api-football-data";
-import { buildResultRows } from "@/lib/sync-results";
+import { buildResultRows, reconcileFinishedRows } from "@/lib/sync-results";
+import { getEspnResults } from "@/lib/api-espn";
 import { logAdminAction } from "@/lib/audit";
 
 /**
@@ -26,7 +27,14 @@ export async function POST() {
     return NextResponse.json({ error: `Football-Data API error: ${String(e)}` }, { status: 502 });
   }
 
-  const rows = buildResultRows(matches || [], adminEmail);
+  const fdRows = buildResultRows(matches || [], adminEmail);
+  // Reconcile against ESPN: a GROUP-stage FD-vs-ESPN disagreement is written as
+  // ESPN's score tagged "espn-corrected" (overwritable + surfaced for review),
+  // NOT as adminEmail — so this bulk pull can never silently lock in a phantom
+  // FD goal as a "confirmed" result. (Empty existing map: an explicit admin
+  // re-sync is allowed to overwrite automated rows.)
+  const espnResults = await getEspnResults().catch(() => null);
+  const { rows, disagreements } = reconcileFinishedRows(fdRows, {}, espnResults);
   // FD flips a match to FINISHED minutes before the score lands (free tier) —
   // surface that explicitly instead of silently "syncing" nothing.
   const pendingScore = (matches || []).length - rows.length;
@@ -51,7 +59,7 @@ export async function POST() {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   const synced = data?.length ?? 0;
-  await logAdminAction(adminEmail, "sync_results_from_api", { synced, total: matches.length, pendingScore });
+  await logAdminAction(adminEmail, "sync_results_from_api", { synced, total: matches.length, pendingScore, disagreements: disagreements.length });
 
-  return NextResponse.json({ success: true, synced, total: matches.length, pendingScore });
+  return NextResponse.json({ success: true, synced, total: matches.length, pendingScore, disagreements });
 }

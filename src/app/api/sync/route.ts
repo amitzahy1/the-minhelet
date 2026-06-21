@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { getMatches } from "@/lib/api-football-data";
-import { buildResultRows, syncCardBoard, type DemoResultRow } from "@/lib/sync-results";
+import { buildResultRows, syncCardBoard, reconcileFinishedRows, type DemoResultRow } from "@/lib/sync-results";
 import { getTsdbRecentResults } from "@/lib/api-thesportsdb";
 import { getEspnResults } from "@/lib/api-espn";
 import { toAppCode } from "@/lib/fd-team-mapping";
@@ -45,6 +45,20 @@ export async function GET() {
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const supabase = url && serviceKey ? createClient(url, serviceKey) : null;
 
+  // Read existing rows ONCE — used both to protect admin-confirmed scores from
+  // being overwritten (the guard the cron lacked) and to gate the fallback. A
+  // failed read → empty map: we still write, just without admin protection
+  // (no worse than the prior behaviour, which always overwrote).
+  let existingById: Record<string, { entered_by: string | null; home_goals: number | null; away_goals: number | null }> = {};
+  if (supabase) {
+    const { data, error } = await supabase
+      .from("demo_match_results")
+      .select("match_id, entered_by, home_goals, away_goals");
+    if (!error && data) {
+      existingById = Object.fromEntries(data.map((r) => [r.match_id, r]));
+    }
+  }
+
   // ---- Score fallback + cross-check (group stage only — KO needs FD's
   // ET/penalty breakdown). ESPN is the preferred source (accurate, untruncated);
   // TheSportsDB is the last resort only if ESPN is unreachable. Group pairs are
@@ -71,16 +85,12 @@ export async function GET() {
 
   if (fallbackCandidates.length > 0 && supabase && sources.length > 0) {
     // Never overwrite an existing usable row (admin-entered) with fallback data.
-    // A failed protective read → skip entirely (next cron retries).
-    const ids = fallbackCandidates.map((m) => String(m.id));
-    const { data: existing, error: existingErr } = await supabase
-      .from("demo_match_results")
-      .select("match_id, home_goals, away_goals")
-      .in("match_id", ids);
     const alreadyGood = new Set(
-      (existing || []).filter((r) => r.home_goals != null && r.away_goals != null).map((r) => r.match_id)
+      Object.entries(existingById)
+        .filter(([, r]) => r.home_goals != null && r.away_goals != null)
+        .map(([id]) => id)
     );
-    const open = existingErr ? [] : fallbackCandidates.filter((m) => !alreadyGood.has(String(m.id)));
+    const open = fallbackCandidates.filter((m) => !alreadyGood.has(String(m.id)));
     for (const m of open) {
       const home = toAppCode(m.homeTeam?.tla);
       const away = toAppCode(m.awayTeam?.tla);
@@ -105,29 +115,16 @@ export async function GET() {
     }
   }
 
-  // ---- Cross-check: where FD AND ESPN both have a group score, they must
-  // agree. A mismatch means one feed is wrong/stale — surface it (don't auto-
-  // "fix", since FD is the official 90' source) so the admin can verify.
-  const scoreDiscrepancies: { match: string; fd: string; espn: string }[] = [];
-  if (espnResults) {
-    for (const r of rows) {
-      if (r.stage !== "GROUP") continue;
-      const ev = espnResults.find(
-        (e) => (e.homeCode === r.home_team && e.awayCode === r.away_team) || (e.homeCode === r.away_team && e.awayCode === r.home_team)
-      );
-      if (!ev) continue;
-      const flipped = ev.homeCode === r.away_team;
-      const espnHome = flipped ? ev.awayGoals : ev.homeGoals;
-      const espnAway = flipped ? ev.homeGoals : ev.awayGoals;
-      if (espnHome !== r.home_goals || espnAway !== r.away_goals) {
-        const d = { match: `${r.home_team}-${r.away_team}`, fd: `${r.home_goals}-${r.away_goals}`, espn: `${espnHome}-${espnAway}` };
-        scoreDiscrepancies.push(d);
-        console.error(`[/api/sync] SCORE MISMATCH ${d.match}: football-data ${d.fd} vs ESPN ${d.espn}`);
-      }
-    }
+  // ---- Reconcile FD against ESPN: protect admin-confirmed rows, and on a
+  // GROUP-stage FD-vs-ESPN disagreement persist ESPN's score (the more reliable
+  // feed) tagged "espn-corrected" instead of FD's. Disagreements are returned
+  // so the admin panel can prompt for a one-click human confirmation.
+  const { rows: reconciledRows, disagreements } = reconcileFinishedRows(rows, existingById, espnResults);
+  for (const d of disagreements) {
+    console.error(`[/api/sync] SCORE MISMATCH ${d.home_team}-${d.away_team}: football-data ${d.fd} vs ESPN ${d.espn} → persisting ESPN, flagged for admin`);
   }
 
-  const allRows = [...rows, ...fallbackRows];
+  const allRows = [...reconciledRows, ...fallbackRows];
 
   // Persist (best-effort).
   let persisted = 0;
@@ -153,6 +150,7 @@ export async function GET() {
     pendingScore,
     fallbackUsed: fallbackRows.length,
     cardsSynced,
+    disagreements,
     ...(persistError ? { persistError } : {}),
     matches: allRows.map((r) => ({
       id: r.match_id,

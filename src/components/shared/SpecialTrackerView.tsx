@@ -226,6 +226,11 @@ function CategoryCard({
   );
 }
 
+// Strip diacritics + non-letters so "Vinícius Júnior" and "Vinicius Junior"
+// compare equal. Shared by buildRankedRows' `eq` and the matchup `playerStat`.
+const deburrName = (s: string) =>
+  s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z ]/g, " ").replace(/\s+/g, " ").trim();
+
 // Group bettors under each contender. Ranked categories (scorer, team, group)
 // pass the full standings; choice categories (matchups, penalties) pass fixed
 // options. Picks outside the top rows are appended so no participant is hidden.
@@ -238,8 +243,13 @@ function buildRankedRows(opts: {
   fuzzy?: boolean;
 }): { rows: OptionRow[]; notBet: number } {
   const { bettors, getPick, ranked, topN, actualKey, fuzzy } = opts;
+  // Accent-insensitive fuzzy compare. MUST deburr (strip diacritics), not just
+  // lowercase — a pick stored as "Vinícius Júnior" (í/ú) otherwise never matched
+  // the feed's "Vinicius Junior", so the pick was appended as a duplicate row
+  // with no goals while the real scorer sat below it. Mirrors `deburr`/`playerStat`
+  // used for the matchup cells, so every name match in this file agrees.
   const eq = (a: string, b: string) =>
-    fuzzy ? a.toLowerCase().includes(b.toLowerCase()) || b.toLowerCase().includes(a.toLowerCase()) : a === b;
+    fuzzy ? deburrName(a).includes(deburrName(b)) || deburrName(b).includes(deburrName(a)) : a === b;
   const rankOf = (key: string) => {
     const i = ranked.findIndex((r) => eq(r.key, key));
     return i >= 0 ? i + 1 : null;

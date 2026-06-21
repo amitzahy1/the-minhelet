@@ -14,8 +14,25 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { getFlag, getTeamNameHe } from "@/lib/flags";
 
 interface BackupEntry { name: string; created_at?: string }
+
+interface ConflictGoal { minute: string; teamCode: string; scorer: string; assist: string | null; ownGoal: boolean }
+interface MatchConflict {
+  match_id: string;
+  home_team: string;
+  away_team: string;
+  group_id: string | null;
+  fd: { home: number | null; away: number | null };
+  espn: { home: number; away: number };
+  stored: { home: number | null; away: number | null; source: string | null } | null;
+  confirmed: boolean;
+  detail: {
+    goals: ConflictGoal[];
+    cards: { homeYellow: number; homeRed: number; awayYellow: number; awayRed: number };
+  } | null;
+}
 
 function StatusLine({ status }: { status: string | null }) {
   if (!status) return null;
@@ -62,6 +79,45 @@ export function OperationsPanel() {
   const [healthLoading, setHealthLoading] = useState(false);
   const [revalReport, setRevalReport] = useState<{ totalUsers: number; affectedCount: number; totalPicksCleared: number; affected: { name: string; invalidSlots: string[]; clearedTeams: string[] }[] } | null>(null);
   const [revalLoading, setRevalLoading] = useState(false);
+  const [conflicts, setConflicts] = useState<MatchConflict[] | null>(null);
+  const [conflictsMeta, setConflictsMeta] = useState<{ espnAvailable: boolean } | null>(null);
+  const [conflictsLoading, setConflictsLoading] = useState(false);
+
+  async function fetchDiscrepancies() {
+    setConflictsLoading(true);
+    try {
+      const res = await fetch("/api/admin/match-discrepancies");
+      const data = await res.json();
+      if (res.ok) {
+        setConflicts(data.conflicts ?? []);
+        setConflictsMeta({ espnAvailable: data.espnAvailable !== false });
+      }
+    } catch { /* ignore */ } finally {
+      setConflictsLoading(false);
+    }
+  }
+
+  // Lock a result to the admin's chosen score. entered_by becomes the admin
+  // email, which the reconciler treats as confirmed and never auto-overwrites.
+  async function confirmResult(c: MatchConflict, home: number | null, away: number | null) {
+    await call(
+      `confirm_${c.match_id}`,
+      `אישור ${getTeamNameHe(c.home_team) || c.home_team}-${getTeamNameHe(c.away_team) || c.away_team}`,
+      "/api/admin/results",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          results: [{
+            match_id: c.match_id, stage: "GROUP", group_id: c.group_id,
+            home_team: c.home_team, away_team: c.away_team,
+            home_goals: home, away_goals: away, status: "FINISHED",
+          }],
+        }),
+      },
+    );
+    void fetchDiscrepancies();
+  }
 
   async function runRevalReport() {
     setRevalLoading(true);
@@ -90,6 +146,7 @@ export function OperationsPanel() {
 
   useEffect(() => {
     void runHealthCheck();
+    void fetchDiscrepancies();
     void (async () => {
       try {
         const [bRes, dRes] = await Promise.all([
@@ -182,6 +239,95 @@ export function OperationsPanel() {
               ))}
             </ul>
           )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center justify-between">
+            🔎 אימות תוצאות
+            {conflicts && (
+              conflicts.filter((c) => !c.confirmed).length > 0
+                ? <span className="text-xs font-normal text-red-700">⚠ {conflicts.filter((c) => !c.confirmed).length} סתירות</span>
+                : <span className="text-xs font-normal text-green-700">✓ הכל מאומת</span>
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <OpHelp
+            when={[
+              "כשמופיעה התראה אדומה כאן (סתירה בין מקורות)",
+              "אחרי ערב משחקים, לוודא שכל התוצאות נכונות",
+            ]}
+            why="הציון בכל האתר נשען על תוצאת המשחק. כשמקור אחד (Football-Data) חולק על מקור שני (ESPN) — למשל גול שנפסל ב-VAR שנשאר בסכום של FD (ESP-KSA היה 5-0 במקום 4-0) — האתר מציג בינתיים את ערך ESPN (המהימן יותר) ומסמן את המשחק כאן. אישור שלך כאן נועל את התוצאה כך שאף סנכרון אוטומטי לא ידרוס אותה."
+          />
+          <div className="flex gap-2 mb-3 flex-wrap">
+            <Button onClick={fetchDiscrepancies} disabled={conflictsLoading} variant="outline">
+              {conflictsLoading ? "בודק..." : "רענן בדיקה"}
+            </Button>
+          </div>
+          {conflictsMeta && !conflictsMeta.espnAvailable && (
+            <p className="text-xs text-amber-700 mb-2">⚠ ESPN לא זמין כרגע — לא ניתן להצליב תוצאות. נסה שוב בעוד מספר דקות.</p>
+          )}
+          {conflicts && conflicts.length === 0 && conflictsMeta?.espnAvailable && (
+            <p className="text-xs text-green-700">✓ כל התוצאות שנגמרו תואמות בין Football-Data ל-ESPN.</p>
+          )}
+          {conflicts && conflicts.map((c) => {
+            const homeHe = getTeamNameHe(c.home_team) || c.home_team;
+            const awayHe = getTeamNameHe(c.away_team) || c.away_team;
+            const score = (h: number | null, a: number | null) => <span dir="ltr">{a}-{h}</span>;
+            return (
+              <div key={c.match_id} className={`rounded-lg border px-3 py-2.5 mb-2.5 text-xs ${c.confirmed ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"}`}>
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="font-bold text-sm">
+                    {getFlag(c.home_team)} {homeHe} <span className="text-gray-400">נגד</span> {getFlag(c.away_team)} {awayHe}
+                  </span>
+                  {c.confirmed && <span className="text-green-700 text-[11px]">✓ אושר</span>}
+                </div>
+                <div className="grid grid-cols-2 gap-2 mb-2">
+                  <div className="rounded bg-white/70 border px-2 py-1.5">
+                    <p className="text-gray-500 mb-0.5">Football-Data</p>
+                    <p className="font-bold text-base">{score(c.fd.home, c.fd.away)}</p>
+                  </div>
+                  <div className="rounded bg-white/70 border px-2 py-1.5">
+                    <p className="text-gray-500 mb-0.5">ESPN (מומלץ)</p>
+                    <p className="font-bold text-base">{score(c.espn.home, c.espn.away)}</p>
+                  </div>
+                </div>
+                {c.detail && c.detail.goals.length > 0 && (
+                  <div className="mb-2">
+                    <p className="text-gray-500 mb-0.5">שערים (לפי ESPN):</p>
+                    <ul className="space-y-0.5">
+                      {c.detail.goals.map((g, i) => (
+                        <li key={i}>
+                          {getFlag(g.teamCode)} {g.minute && <span className="text-gray-400">{g.minute} </span>}
+                          {g.scorer}{g.ownGoal && <span className="text-gray-400"> (שער עצמי)</span>}
+                          {g.assist && <span className="text-gray-400"> · בישול: {g.assist}</span>}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {c.detail && (
+                  <p className="text-gray-500 mb-2">
+                    כרטיסים: {homeHe} {c.detail.cards.homeYellow}🟨 {c.detail.cards.homeRed}🟥 · {awayHe} {c.detail.cards.awayYellow}🟨 {c.detail.cards.awayRed}🟥
+                  </p>
+                )}
+                {c.stored && (
+                  <p className="text-gray-500 mb-2">כרגע מוצג באתר: {score(c.stored.home, c.stored.away)} <span className="text-[10px]">({c.stored.source})</span></p>
+                )}
+                <div className="flex gap-2 flex-wrap">
+                  <Button size="sm" disabled={busy === `confirm_${c.match_id}`} onClick={() => confirmResult(c, c.espn.home, c.espn.away)}>
+                    אשר לפי ESPN ({c.espn.away}-{c.espn.home})
+                  </Button>
+                  <Button size="sm" variant="outline" disabled={busy === `confirm_${c.match_id}`} onClick={() => confirmResult(c, c.fd.home, c.fd.away)}>
+                    אשר לפי FD ({c.fd.away}-{c.fd.home})
+                  </Button>
+                </div>
+                <StatusLine status={status[`confirm_${c.match_id}`]} />
+              </div>
+            );
+          })}
         </CardContent>
       </Card>
 

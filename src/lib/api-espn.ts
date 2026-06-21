@@ -194,3 +194,97 @@ export async function getEspnPlayerStats(): Promise<EspnPlayer[] | null> {
   }
   return Object.values(byPlayer).sort((a, b) => b.goals - a.goals || b.assists - a.assists);
 }
+
+// ---------------------------------------------------------------------------
+// Single-match detail (scorers + cards) for the admin verification alert.
+// Only called for the handful of matches whose feeds disagree, so the extra
+// summary fetch is cheap. Everything is oriented to the requested (home, away).
+// ---------------------------------------------------------------------------
+
+export interface EspnGoal {
+  minute: string;
+  teamCode: string;   // app code of the team CREDITED with the goal (own goals → beneficiary)
+  scorer: string;
+  assist: string | null;
+  ownGoal: boolean;
+}
+export interface EspnMatchDetail {
+  homeCode: string;
+  awayCode: string;
+  homeGoals: number;
+  awayGoals: number;
+  goals: EspnGoal[];
+  cards: { homeYellow: number; homeRed: number; awayYellow: number; awayRed: number };
+}
+
+interface EspnKeyEventFull extends EspnKeyEvent {
+  clock?: { displayValue?: string };
+}
+
+export async function getEspnMatchDetail(home: string, away: string): Promise<EspnMatchDetail | null> {
+  const board = await fetchJson(`${ESPN_BASE}/scoreboard?dates=${DATE_RANGE}&limit=${LIMIT}`, 300);
+  const events = (board as { events?: EspnEvent[] } | null)?.events;
+  if (!events) return null;
+
+  for (const e of events) {
+    const comp = e.competitions?.[0];
+    if (comp?.status?.type?.state !== "post") continue;
+    const hc = comp.competitors?.find((c) => c.homeAway === "home");
+    const ac = comp.competitors?.find((c) => c.homeAway === "away");
+    const espnHome = toCode(hc?.team?.abbreviation, hc?.team?.displayName);
+    const espnAway = toCode(ac?.team?.abbreviation, ac?.team?.displayName);
+    if (!espnHome || !espnAway) continue;
+    const matchesPair =
+      (espnHome === home && espnAway === away) || (espnHome === away && espnAway === home);
+    if (!matchesPair) continue;
+
+    const summary = await fetchJson(`${ESPN_BASE}/summary?event=${e.id}`, 300);
+    if (!summary) return null;
+    const homeName = hc?.team?.displayName;
+    const awayName = ac?.team?.displayName;
+
+    // Goals from keyEvents, oriented to the ESPN home/away (then re-orient to
+    // the requested home/away below).
+    const goals: EspnGoal[] = [];
+    let espnHomeGoals = 0, espnAwayGoals = 0;
+    for (const k of ((summary as { keyEvents?: EspnKeyEventFull[] }).keyEvents || [])) {
+      const text = (k.type?.text || "").toLowerCase();
+      if (!text.includes("goal") || k.shootout) continue;
+      const ownGoal = text.includes("own goal");
+      const creditedName = k.team?.displayName;
+      const creditedCode = toCode(undefined, creditedName) || "";
+      if (creditedName === homeName) espnHomeGoals += 1;
+      else if (creditedName === awayName) espnAwayGoals += 1;
+      goals.push({
+        minute: k.clock?.displayValue || "",
+        teamCode: creditedCode,
+        scorer: k.participants?.[0]?.athlete?.displayName || (ownGoal ? "Own goal" : "Unknown"),
+        assist: ownGoal ? null : (k.participants?.[1]?.athlete?.displayName ?? null),
+        ownGoal,
+      });
+    }
+
+    // Cards from boxscore aggregate.
+    const teams = (summary as { boxscore?: { teams?: EspnTeamBox[] } }).boxscore?.teams || [];
+    const cardFor = (name: string | undefined) => {
+      const t = teams.find((x) => x.team?.displayName === name);
+      return { yellow: statValue(t?.statistics || [], "yellowCards"), red: statValue(t?.statistics || [], "redCards") };
+    };
+    const espnHomeCards = cardFor(homeName);
+    const espnAwayCards = cardFor(awayName);
+
+    // Re-orient to the REQUESTED (home, away).
+    const flipped = espnHome === away; // ESPN home is the requested away team
+    return {
+      homeCode: home,
+      awayCode: away,
+      homeGoals: flipped ? espnAwayGoals : espnHomeGoals,
+      awayGoals: flipped ? espnHomeGoals : espnAwayGoals,
+      goals,
+      cards: flipped
+        ? { homeYellow: espnAwayCards.yellow, homeRed: espnAwayCards.red, awayYellow: espnHomeCards.yellow, awayRed: espnHomeCards.red }
+        : { homeYellow: espnHomeCards.yellow, homeRed: espnHomeCards.red, awayYellow: espnAwayCards.yellow, awayRed: espnAwayCards.red },
+    };
+  }
+  return null;
+}

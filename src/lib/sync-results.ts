@@ -11,7 +11,7 @@ import type { MatchResult } from "@/lib/api-football-data";
 import { toAppCode } from "@/lib/fd-team-mapping";
 import { normalizeGroupLetter } from "@/lib/results-hits";
 import { getTsdbCardBoard } from "@/lib/api-thesportsdb";
-import { getEspnCardBoard } from "@/lib/api-espn";
+import { getEspnCardBoard, type EspnResult } from "@/lib/api-espn";
 
 // football-data WC2026 stage labels (verified live): GROUP_STAGE, LAST_32 (the
 // 48-team Round of 32), LAST_16 (Round of 16), QUARTER_FINALS, SEMI_FINALS,
@@ -79,6 +79,87 @@ export function buildResultRows(matches: MatchResult[], enteredBy: string): Demo
     });
   }
   return rows;
+}
+
+// ---------------------------------------------------------------------------
+// Feed reconciliation (FD vs ESPN) + admin-edit protection
+// ---------------------------------------------------------------------------
+// Football-Data is authoritative for the 90' score EXCEPT when it carries a
+// phantom goal: ESP-KSA was published by FD as 5-0 when the real result (and
+// ESPN) was 4-0 — a disallowed goal FD never removed from its aggregate, and
+// the free tier exposes no goal/booking events to detect it locally. ESPN has
+// been right on every WC2026 match so far. So before persisting an automated
+// score we cross-check the two feeds: on a GROUP-stage disagreement we prefer
+// ESPN, tag the row "espn-corrected" (still auto-correctable), and SURFACE the
+// disagreement so an admin can lock the true result with one click.
+
+// entered_by values written by automated feeds — overwritable by a later sync.
+// Anything else (an admin email) is a HUMAN confirmation and is never
+// auto-overwritten.
+export const AUTO_SOURCES = new Set([
+  "football-data-sync", "auto-heal", "espn-fallback", "thesportsdb-fallback", "espn-corrected",
+]);
+export const isAdminConfirmed = (enteredBy: string | null | undefined): boolean =>
+  !!enteredBy && !AUTO_SOURCES.has(enteredBy);
+
+export interface ScoreDisagreement {
+  match_id: string;
+  home_team: string;
+  away_team: string;
+  fd: string;   // "home-away", oriented to the row
+  espn: string; // "home-away", oriented to the row
+}
+
+/** ESPN's score for a team pair, oriented to (home, away). null if absent. */
+export function espnScoreFor(
+  home: string, away: string, espn: EspnResult[] | null,
+): { home: number; away: number } | null {
+  if (!espn) return null;
+  const ev = espn.find(
+    (e) => (e.homeCode === home && e.awayCode === away) || (e.homeCode === away && e.awayCode === home),
+  );
+  if (!ev) return null;
+  const flipped = ev.homeCode === away;
+  return { home: flipped ? ev.awayGoals : ev.homeGoals, away: flipped ? ev.homeGoals : ev.awayGoals };
+}
+
+/**
+ * Reconcile FD-derived finished rows against ESPN before persisting.
+ *  - SKIPS any match a human admin has already confirmed (never clobbers it) —
+ *    this is also the missing guard that let the daily cron overwrite admin
+ *    corrections to a FINISHED match.
+ *  - GROUP-stage FD-vs-ESPN score disagreement → prefer ESPN, tag row
+ *    "espn-corrected", and record the disagreement for the admin alert.
+ *  - KO matches are NOT reconciled (ESPN's score can include extra time; FD's
+ *    regularTime/penalties split is authoritative there).
+ */
+export function reconcileFinishedRows(
+  fdRows: DemoResultRow[],
+  existingById: Record<string, { entered_by?: string | null } | undefined>,
+  espnResults: EspnResult[] | null,
+): { rows: DemoResultRow[]; disagreements: ScoreDisagreement[] } {
+  const disagreements: ScoreDisagreement[] = [];
+  const rows: DemoResultRow[] = [];
+  for (const row of fdRows) {
+    const existing = existingById[row.match_id];
+    if (existing && isAdminConfirmed(existing.entered_by)) continue; // protect human edits
+    if (row.stage === "GROUP") {
+      const espn = espnScoreFor(row.home_team, row.away_team, espnResults);
+      if (espn && (espn.home !== row.home_goals || espn.away !== row.away_goals)) {
+        disagreements.push({
+          match_id: row.match_id,
+          home_team: row.home_team,
+          away_team: row.away_team,
+          fd: `${row.home_goals}-${row.away_goals}`,
+          espn: `${espn.home}-${espn.away}`,
+        });
+        rows.push({ ...row, home_goals: espn.home, away_goals: espn.away, entered_by: "espn-corrected" });
+        continue;
+      }
+    }
+    rows.push(row);
+  }
+  return { rows, disagreements };
 }
 
 // ---------------------------------------------------------------------------

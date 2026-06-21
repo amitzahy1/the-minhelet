@@ -2,7 +2,8 @@ import { NextResponse, after } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import fdMatchDetailsBundled from "@/lib/tournament/fd-match-details.json";
 import { toAppCode, findUnmappedTeams } from "@/lib/fd-team-mapping";
-import { buildResultRows, syncCardBoard } from "@/lib/sync-results";
+import { buildResultRows, syncCardBoard, reconcileFinishedRows } from "@/lib/sync-results";
+import { getEspnResults } from "@/lib/api-espn";
 import type { MatchResult } from "@/lib/api-football-data";
 
 interface FdDetails {
@@ -89,6 +90,7 @@ interface Match {
 
 interface DemoResult {
   match_id: string;
+  entered_by: string | null;
   home_goals: number | null;
   away_goals: number | null;
   home_penalties: number | null;
@@ -135,7 +137,7 @@ export async function GET() {
           try {
             const { data, error } = await createClient(supabaseUrl, supabaseAnon)
               .from("demo_match_results")
-              .select("match_id, home_goals, away_goals, home_penalties, away_penalties, home_team, away_team, group_id, stage, status, scheduled_at");
+              .select("match_id, entered_by, home_goals, away_goals, home_penalties, away_penalties, home_team, away_team, group_id, stage, status, scheduled_at");
             if (error) return null;
             return (data as DemoResult[]) || [];
           } catch {
@@ -270,7 +272,19 @@ async function healFinishedResults(
 
   // buildResultRows applies the null-score guard, stage/TLA normalization and
   // the regularTime-vs-fullTime selection — identical to the sync routes.
-  const rows = buildResultRows(needHeal as unknown as MatchResult[], "auto-heal");
+  const fdRows = buildResultRows(needHeal as unknown as MatchResult[], "auto-heal");
+  if (fdRows.length === 0) return;
+
+  // Cross-check against ESPN before persisting so a phantom FD goal (e.g. the
+  // ESP-KSA 5-0 that should have been 4-0) is corrected on the way in instead
+  // of landing wrong and sitting until someone notices. demoById has no
+  // admin rows here (needHeal already excludes scored rows), so this only
+  // applies the ESPN preference; admin protection lives in /api/sync.
+  const espnResults = await getEspnResults().catch(() => null);
+  const { rows, disagreements } = reconcileFinishedRows(fdRows, demoById, espnResults);
+  for (const d of disagreements) {
+    console.error(`[/api/matches] SCORE MISMATCH ${d.home_team}-${d.away_team}: football-data ${d.fd} vs ESPN ${d.espn} → healing with ESPN, flagged for admin`);
+  }
   if (rows.length === 0) return;
 
   try {

@@ -22,7 +22,7 @@
 //     — nobody gets counted on picks others can't see yet.
 // ============================================================================
 
-import type { BettorBracket } from "@/lib/supabase/shared-data";
+import type { BettorBracket, BettorSpecialBets } from "@/lib/supabase/shared-data";
 import { computeGroupHits, normalizeTla, type FinishedMatch } from "@/lib/results-hits";
 import { calculateStandings } from "@/lib/tournament/standings";
 import { GROUPS } from "@/lib/tournament/groups";
@@ -134,6 +134,118 @@ export function agreementPct(a: BettorBracket, b: BettorBracket): number | null 
   if (a.champion && b.champion) {
     total++;
     if (a.champion === b.champion) same++;
+  }
+  if (total < 20) return null; // not enough shared picks to mean anything
+  return (same / total) * 100;
+}
+
+/**
+ * Score-prediction agreement: % of comparable group fixtures where both bettors
+ * guessed the EXACT same scoreline. Only pairs where BOTH have a non-null score
+ * count — which naturally scopes this to matches whose day has unlocked
+ * (future-match scores arrive redacted as {home:null, away:null} from
+ * /api/shared-bets, the same set of pairs for everyone, so it stays symmetric).
+ * Both brackets key scores.[i] by the same GROUP_MATCH_PAIRS index, so a direct
+ * index-to-index compare is the same fixture for both.
+ * Exported for the compare-page "ניחושי תוצאות" matrix.
+ */
+export function scoreAgreementPct(a: BettorBracket, b: BettorBracket): number | null {
+  let same = 0;
+  let total = 0;
+  for (const letter of Object.keys(GROUPS)) {
+    const sa = a.groupPredictions?.[letter]?.scores;
+    const sb = b.groupPredictions?.[letter]?.scores;
+    if (!Array.isArray(sa) || !Array.isArray(sb)) continue;
+    const n = Math.min(sa.length, sb.length);
+    for (let i = 0; i < n; i++) {
+      const pa = sa[i];
+      const pb = sb[i];
+      if (!pa || !pb) continue;
+      if (pa.home === null || pa.away === null || pb.home === null || pb.away === null) continue;
+      total++;
+      if (pa.home === pb.home && pa.away === pb.away) same++;
+    }
+  }
+  if (total < 8) return null; // too few shared revealed scores to mean anything
+  return (same / total) * 100;
+}
+
+const SPECIAL_BET_FIELDS: (keyof BettorSpecialBets)[] = [
+  "topScorerPlayer",
+  "topAssistsPlayer",
+  "bestAttackTeam",
+  "dirtiestTeam",
+  "prolificGroup",
+  "driestGroup",
+  "matchupPick",
+  "penaltiesOverUnder",
+];
+
+/**
+ * TOTAL pick-agreement across EVERY bet category: group order + group scores
+ * (exact) + Tree-1 knockout winners + champion + special bets. A superset of
+ * agreementPct (which the titles still use) — the compare-page "סה״כ" matrix
+ * reads this. As with the scores metric, only items both bettors actually filled
+ * count, so redacted future-match scores drop out symmetrically.
+ */
+export function totalAgreementPct(
+  a: BettorBracket,
+  b: BettorBracket,
+  sbA?: BettorSpecialBets | null,
+  sbB?: BettorSpecialBets | null,
+): number | null {
+  let same = 0;
+  let total = 0;
+  for (const letter of Object.keys(GROUPS)) {
+    // group order
+    const oa = a.groupPredictions?.[letter]?.order;
+    const ob = b.groupPredictions?.[letter]?.order;
+    if (Array.isArray(oa) && Array.isArray(ob)) {
+      for (let i = 0; i < 4; i++) {
+        if (oa[i] === undefined || ob[i] === undefined) continue;
+        total++;
+        if (oa[i] === ob[i]) same++;
+      }
+    }
+    // group scores (exact scoreline)
+    const sa = a.groupPredictions?.[letter]?.scores;
+    const sb = b.groupPredictions?.[letter]?.scores;
+    if (Array.isArray(sa) && Array.isArray(sb)) {
+      const n = Math.min(sa.length, sb.length);
+      for (let i = 0; i < n; i++) {
+        const pa = sa[i];
+        const pb = sb[i];
+        if (!pa || !pb) continue;
+        if (pa.home === null || pa.away === null || pb.home === null || pb.away === null) continue;
+        total++;
+        if (pa.home === pb.home && pa.away === pb.away) same++;
+      }
+    }
+  }
+  // knockout winners
+  const ta = a.knockoutTree || {};
+  const tb = b.knockoutTree || {};
+  for (const key of Object.keys(ta)) {
+    const wa = ta[key]?.winner;
+    const wb = tb[key]?.winner;
+    if (!wa || !wb) continue;
+    total++;
+    if (wa === wb) same++;
+  }
+  // champion
+  if (a.champion && b.champion) {
+    total++;
+    if (a.champion === b.champion) same++;
+  }
+  // special bets
+  if (sbA && sbB) {
+    for (const f of SPECIAL_BET_FIELDS) {
+      const va = sbA[f];
+      const vb = sbB[f];
+      if (!va || !vb) continue;
+      total++;
+      if (va === vb) same++;
+    }
   }
   if (total < 20) return null; // not enough shared picks to mean anything
   return (same / total) * 100;

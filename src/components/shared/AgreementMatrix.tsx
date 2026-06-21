@@ -1,12 +1,49 @@
 "use client";
 
 // Pairwise pick-agreement heatmap ("מי חושב כמו מי") — compare page tab.
-// Uses the SAME metric as the מתנשקים/המנותק titles (group order positions +
-// Tree-1 knockout winners + champion), so the matrix and the titles can never
-// disagree. Green = thinking alike, red = opposites; symmetric, diagonal is —.
+// Two modes:
+//   • "total"  — agreement across EVERY bet (group order + scores + knockout
+//                winners + champion + special bets). Superset of the metric the
+//                מתנשקים/המנותק titles use, so it can read a touch higher/lower
+//                than those titles — by design, the user wanted the matrix to
+//                reflect ALL bets, the titles stay on the never-redacted subset.
+//   • "scores" — agreement on group-stage SCORE guesses only (exact scoreline).
+// Green = thinking alike, red = opposites; symmetric, diagonal is —.
 
-import { agreementPct } from "@/lib/league-titles";
-import type { BettorBracket } from "@/lib/supabase/shared-data";
+import { scoreAgreementPct, totalAgreementPct } from "@/lib/league-titles";
+import type { BettorBracket, BettorSpecialBets } from "@/lib/supabase/shared-data";
+
+type Mode = "total" | "scores";
+
+const MODE_META: Record<
+  Mode,
+  { title: string; subtitle: React.ReactNode; headline: string }
+> = {
+  total: {
+    title: "מטריצת הסכמה — סה״כ",
+    subtitle: (
+      <>
+        כמה אחוז מכל ההימורים של כל זוג זהים (סדר בתים, ניחושי תוצאות, עץ נוקאאוט,
+        אלופה, הימורים מיוחדים) ·
+        <span className="text-green-700 font-bold"> ירוק = חושבים אותו דבר</span> ·
+        <span className="text-red-600 font-bold"> אדום = הפוכים</span>
+      </>
+    ),
+    headline: "🏅 הזוגות הכי קרובים:",
+  },
+  scores: {
+    title: "מטריצת הסכמה — ניחושי תוצאות",
+    subtitle: (
+      <>
+        כמה אחוז מניחושי התוצאות (תוצאה מדויקת) של כל זוג זהים — לפי המשחקים
+        שנחשפו ·
+        <span className="text-green-700 font-bold"> ירוק = מנחשים דומה</span> ·
+        <span className="text-red-600 font-bold"> אדום = שונים</span>
+      </>
+    ),
+    headline: "🎯 הניחושים הכי דומים:",
+  },
+};
 
 /**
  * Color scale NORMALIZED to the league's actual value range. Real agreement
@@ -23,10 +60,14 @@ function cellColor(v: number | null, min: number, max: number): React.CSSPropert
 
 export function AgreementMatrix({
   brackets,
+  specialBets,
   currentUserId,
+  mode = "total",
 }: {
   brackets: BettorBracket[];
+  specialBets?: BettorSpecialBets[];
   currentUserId?: string | null;
+  mode?: Mode;
 }) {
   const bettors = brackets.filter((b) => b.userId);
   if (bettors.length < 2) {
@@ -37,8 +78,15 @@ export function AgreementMatrix({
     );
   }
 
+  const meta = MODE_META[mode];
+  const sbByUser = new Map((specialBets || []).map((s) => [s.userId, s]));
+  const pct = (a: BettorBracket, b: BettorBracket): number | null =>
+    mode === "scores"
+      ? scoreAgreementPct(a, b)
+      : totalAgreementPct(a, b, sbByUser.get(a.userId), sbByUser.get(b.userId));
+
   const matrix = bettors.map((a) =>
-    bettors.map((b) => (a.userId === b.userId ? null : agreementPct(a, b))),
+    bettors.map((b) => (a.userId === b.userId ? null : pct(a, b))),
   );
   const values = matrix.flat().filter((v): v is number => v !== null);
   const minV = values.length ? Math.min(...values) : 0;
@@ -66,17 +114,13 @@ export function AgreementMatrix({
   return (
     <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
       <div className="px-5 py-3 bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/40 border-b border-blue-100/50">
-        <h3 className="text-lg font-bold text-gray-900">מטריצת הסכמה</h3>
-        <p className="text-xs text-gray-500 mt-0.5">
-          כמה אחוז מההימורים של כל זוג זהים (סדר בתים, עץ נוקאאוט, אלופה) ·
-          <span className="text-green-700 font-bold"> ירוק = חושבים אותו דבר</span> ·
-          <span className="text-red-600 font-bold"> אדום = הפוכים</span>
-        </p>
+        <h3 className="text-lg font-bold text-gray-900">{meta.title}</h3>
+        <p className="text-xs text-gray-500 mt-0.5">{meta.subtitle}</p>
       </div>
       {/* Top-5 closest pairs — one compact chip row (wraps on mobile) */}
       {closestPairs.length > 0 && (
         <div className="px-5 py-2.5 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2 flex-wrap">
-          <p className="text-xs font-bold text-gray-600 shrink-0">🏅 הזוגות הכי קרובים:</p>
+          <p className="text-xs font-bold text-gray-600 shrink-0">{meta.headline}</p>
           {closestPairs.map((p, i) => (
             <span
               key={`${p.a}-${p.b}`}

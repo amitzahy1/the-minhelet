@@ -380,9 +380,18 @@ export default function ComparePage() {
         />
       )}
 
-      {/* === MATRIX VIEW === pairwise agreement heatmap */}
+      {/* === MATRIX VIEW === pairwise agreement heatmaps: total (all bets) +
+          score-prediction agreement, side by side on wide screens */}
       {view === "matrix" && (
-        <AgreementMatrix brackets={fBrackets} currentUserId={currentUserId} />
+        <div className="grid grid-cols-1 2xl:grid-cols-2 gap-4 items-start">
+          <AgreementMatrix
+            mode="total"
+            brackets={fBrackets}
+            specialBets={fSpecialBets}
+            currentUserId={currentUserId}
+          />
+          <AgreementMatrix mode="scores" brackets={fBrackets} currentUserId={currentUserId} />
+        </div>
       )}
 
       {/* === ADVANCEMENT VIEW === transposed: bettors as columns, bet rows */}

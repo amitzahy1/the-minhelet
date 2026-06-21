@@ -47,7 +47,7 @@ export default function RulesPage() {
               <tbody className="font-medium">
                 {([
                   ["בתים", "GROUP"], ["שלב 32 הגדולות", "R32"], ["שמינית גמר", "R16"], ["רבע גמר", "QF"],
-                  ["חצי גמר", "SF"], ["משחק מקום 3", "THIRD"], ["גמר", "FINAL"],
+                  ["חצי גמר", "SF"], ["גמר", "FINAL"],
                 ] as [string, MatchStage][]).map(([stage, key]) => {
                   const toto = scoring.toto[key];
                   const exact = scoring.exact[key];

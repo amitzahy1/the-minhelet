@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { calculateKnockoutScore } from "@/lib/scoring/calculator";
-import { scoreSpecialBetsForUser, type TournamentActuals, type PlayerStat } from "@/lib/scoring/special-bets-scorer";
+import { scoreSpecialBetsForUser, computeSpecialBetsPool, type TournamentActuals, type PlayerStat } from "@/lib/scoring/special-bets-scorer";
 import type { BettorSpecialBets } from "@/lib/supabase/shared-data";
 import { SCORING } from "@/types";
 
@@ -140,13 +140,20 @@ describe("scoreSpecialBetsForUser — final outcome path", () => {
     expect(r.hasInterim).toBe(false);
   });
 
-  it("relative top-scorer pick (≥3 goals) awards top_scorer_relative (7)", () => {
-    const r = scoreSpecialBetsForUser(baseBet({ topScorerPlayer: "Haaland" }), actuals, stats);
+  it("relative top-scorer pick wins when pool reports a relative value (closest among bettors)", () => {
+    // Haaland has 6 goals; pool relative value = 6 → a Haaland pick wins relative.
+    const r = scoreSpecialBetsForUser(baseBet({ topScorerPlayer: "Haaland" }), actuals, stats, SCORING, { topScorerGoals: 6, topAssistsCount: null });
     expect(r.total).toBe(SCORING.specials.top_scorer_relative);
   });
 
-  it("under-threshold pick (1 goal) awards 0", () => {
-    const r = scoreSpecialBetsForUser(baseBet({ topScorerPlayer: "Pulisic" }), actuals, stats);
+  it("no relative when pool reports none (someone got the exact)", () => {
+    const r = scoreSpecialBetsForUser(baseBet({ topScorerPlayer: "Haaland" }), actuals, stats, SCORING, { topScorerGoals: null, topAssistsCount: null });
+    expect(r.total).toBe(0);
+  });
+
+  it("relative pick whose count doesn't match the pool value awards 0", () => {
+    // Pulisic has 1 goal — not the relative winner (6) → 0.
+    const r = scoreSpecialBetsForUser(baseBet({ topScorerPlayer: "Pulisic" }), actuals, stats, SCORING, { topScorerGoals: 6, topAssistsCount: null });
     expect(r.total).toBe(0);
   });
 
@@ -203,8 +210,9 @@ describe("scoreSpecialBetsForUser — live tentative path", () => {
     expect(r.lines[0].liveLeader).toBe("Mbappé");
   });
 
-  it("when not leading but ≥3 goals: relative tier with interim flag", () => {
-    const r = scoreSpecialBetsForUser(baseBet({ topScorerPlayer: "Haaland" }), null, stats);
+  it("when not leading but matching the pool relative value: relative tier with interim flag", () => {
+    // Haaland has 3 goals live; pool relative value = 3 → relative (interim).
+    const r = scoreSpecialBetsForUser(baseBet({ topScorerPlayer: "Haaland" }), null, stats, SCORING, { topScorerGoals: 3, topAssistsCount: null });
     expect(r.total).toBe(SCORING.specials.top_scorer_relative);
     expect(r.hasInterim).toBe(true);
   });
@@ -212,5 +220,58 @@ describe("scoreSpecialBetsForUser — live tentative path", () => {
   it("when player not in stats yet: zero", () => {
     const r = scoreSpecialBetsForUser(baseBet({ topScorerPlayer: "Random Guy" }), null, stats);
     expect(r.total).toBe(0);
+  });
+});
+
+describe("computeSpecialBetsPool — closest-among-bettors relative + void status", () => {
+  const stats: PlayerStat[] = [
+    { name: "Mbappé", goals: 8, assists: 3 },
+    { name: "Haaland", goals: 6, assists: 1 },
+    { name: "Lautaro", goals: 6, assists: 0 },
+    { name: "Kane", goals: 4, assists: 2 },
+  ];
+
+  it("nobody picked the exact winner → highest pick(s) get relative; ties share, lower gets 0", () => {
+    const bets = [
+      baseBet({ userId: "a", topScorerPlayer: "Haaland" }), // 6
+      baseBet({ userId: "b", topScorerPlayer: "Lautaro" }), // 6 (tie)
+      baseBet({ userId: "c", topScorerPlayer: "Kane" }),    // 4
+    ];
+    const actuals: TournamentActuals = { ...noActuals, top_scorer_player: "Mbappé" };
+    const pool = computeSpecialBetsPool(bets, actuals, stats);
+    expect(pool.relative.topScorerGoals).toBe(6);
+    expect(pool.status.topScorer).toBe("won");
+    expect(scoreSpecialBetsForUser(bets[0], actuals, stats, SCORING, pool.relative).total).toBe(SCORING.specials.top_scorer_relative);
+    expect(scoreSpecialBetsForUser(bets[1], actuals, stats, SCORING, pool.relative).total).toBe(SCORING.specials.top_scorer_relative);
+    expect(scoreSpecialBetsForUser(bets[2], actuals, stats, SCORING, pool.relative).total).toBe(0);
+  });
+
+  it("someone picked the exact winner → relative suppressed for everyone else", () => {
+    const bets = [
+      baseBet({ userId: "a", topScorerPlayer: "Mbappé" }),  // exact
+      baseBet({ userId: "b", topScorerPlayer: "Haaland" }), // 6, would-be closest
+    ];
+    const actuals: TournamentActuals = { ...noActuals, top_scorer_player: "Mbappé" };
+    const pool = computeSpecialBetsPool(bets, actuals, stats);
+    expect(pool.relative.topScorerGoals).toBeNull();
+    expect(scoreSpecialBetsForUser(bets[0], actuals, stats, SCORING, pool.relative).total).toBe(SCORING.specials.top_scorer_exact);
+    expect(scoreSpecialBetsForUser(bets[1], actuals, stats, SCORING, pool.relative).total).toBe(0);
+  });
+
+  it("no pick clears the floor → no relative, status void", () => {
+    const lowStats: PlayerStat[] = [{ name: "Mbappé", goals: 8, assists: 0 }, { name: "Sub", goals: 2, assists: 0 }];
+    const bets = [baseBet({ userId: "a", topScorerPlayer: "Sub" })]; // 2 < floor 3
+    const actuals: TournamentActuals = { ...noActuals, top_scorer_player: "Mbappé" };
+    const pool = computeSpecialBetsPool(bets, actuals, lowStats);
+    expect(pool.relative.topScorerGoals).toBeNull();
+    expect(pool.status.topScorer).toBe("void");
+  });
+
+  it("exact-only bet status: pending before result, void when resolved + nobody caught, won when caught", () => {
+    const missBets = [baseBet({ userId: "a", bestAttackTeam: "ARG" })]; // nobody picked BRA
+    expect(computeSpecialBetsPool(missBets, noActuals, stats).status.bestAttack).toBe("pending");
+    expect(computeSpecialBetsPool(missBets, { ...noActuals, best_attack_team: "BRA" }, stats).status.bestAttack).toBe("void");
+    const hitBets = [baseBet({ userId: "a", bestAttackTeam: "BRA" })];
+    expect(computeSpecialBetsPool(hitBets, { ...noActuals, best_attack_team: "BRA" }, stats).status.bestAttack).toBe("won");
   });
 });

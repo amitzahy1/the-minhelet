@@ -4,16 +4,22 @@
 // Two modes:
 //
 // 1. **Final** — admin entered the official outcome in `tournament_actuals`.
-//    Exact picks award the full point value (e.g. top scorer = 9). Top-scorer
-//    and top-assists also support "relative" credit when the user's pick
-//    scored ≥3 goals / ≥2 assists, even if they're not the eventual winner.
+//    Exact picks award the full point value (e.g. top scorer = 12). Top-scorer
+//    and top-assists also support "relative" credit, but it is **closest among
+//    bettors, gated on no exact**: relative is awarded ONLY when no bettor
+//    picked the exact winner, and then only to the bettor(s) whose picked player
+//    ranks highest in the actual chart (ties share), subject to a ≥3 goals /
+//    ≥2 assists qualifying floor. This cross-bettor decision is made once by
+//    `computeSpecialBetsPool` and passed in via the `relative` arg — the per-user
+//    scorer just checks `stat === relative.value`.
 //
 // 2. **Live tentative (during tournament)** — admin hasn't entered the final
 //    yet, but the cron-synced `player_stats` table records per-player goals /
 //    assists. We award the same point values the user would earn IF the
-//    tournament ended right now: pick === current leader → exact; pick scored
-//    ≥ threshold → relative. Every awarded line is flagged `interim: true`
-//    so the UI can mark it as "כרגע" / "זמני".
+//    tournament ended right now: pick === current leader → exact; otherwise the
+//    closest-among-bettors relative (same `relative` arg, computed off the live
+//    leader). Every awarded line is flagged `interim: true` so the UI can mark
+//    it as "כרגע" / "זמני".
 //
 // "Other" special bets (best-attack team, prolific group, …) work in both
 // modes too: when the admin has entered the actual value, exact match awards
@@ -70,6 +76,62 @@ export interface SpecialBetsBreakdown {
   /** True if **any** line is interim. */
   hasInterim: boolean;
   lines: SpecialBetLine[];
+}
+
+/** The 8 special-bet categories shown as their own row in the breakdown UI. */
+export type SpecialCategory =
+  | "topScorer"
+  | "topAssists"
+  | "bestAttack"
+  | "prolificGroup"
+  | "driestGroup"
+  | "dirtiestTeam"
+  | "matchups"
+  | "penalties";
+
+/**
+ * Pool-level "closest among bettors" relative winner values. A pick wins the
+ * relative line iff its stat EQUALS the value here. `null` means no relative is
+ * awarded for that category — either someone hit the exact winner (which
+ * suppresses relative entirely) or no pick cleared the qualifying floor.
+ */
+export interface SpecialBetsRelative {
+  topScorerGoals: number | null;
+  topAssistsCount: number | null;
+}
+
+/** Resolution state of a category across the whole pool (for display). */
+export type SpecialCatStatus = "won" | "void" | "pending";
+
+export interface SpecialBetsPool {
+  relative: SpecialBetsRelative;
+  status: Record<SpecialCategory, SpecialCatStatus>;
+}
+
+/** Map a special-bet score reason to its breakdown category (null = not special). */
+export function specialReasonToCategory(reason: ScoreReason): SpecialCategory | null {
+  switch (reason) {
+    case "TOP_SCORER_EXACT":
+    case "TOP_SCORER_RELATIVE":
+      return "topScorer";
+    case "TOP_ASSISTS_EXACT":
+    case "TOP_ASSISTS_RELATIVE":
+      return "topAssists";
+    case "BEST_ATTACK":
+      return "bestAttack";
+    case "PROLIFIC_GROUP":
+      return "prolificGroup";
+    case "DRIEST_GROUP":
+      return "driestGroup";
+    case "DIRTIEST_TEAM":
+      return "dirtiestTeam";
+    case "MATCHUP":
+      return "matchups";
+    case "PENALTIES_OVER_UNDER":
+      return "penalties";
+    default:
+      return null;
+  }
 }
 
 interface LiveLeaderInfo {
@@ -134,6 +196,11 @@ export function scoreSpecialBetsForUser(
   actuals: TournamentActuals | null,
   playerStats: PlayerStat[] = [],
   scoring: ScoringValues = SCORING,
+  // Pool-level relative winner values. Default = no relative awarded; the live
+  // path always passes the value from `computeSpecialBetsPool`. Relative is
+  // "closest among bettors, only if nobody got the exact" — so a pick wins the
+  // relative line iff its stat EQUALS the value here (see computeSpecialBetsPool).
+  relative: SpecialBetsRelative = { topScorerGoals: null, topAssistsCount: null },
 ): SpecialBetsBreakdown {
   const lines: SpecialBetLine[] = [];
   const leaders = computeLiveLeaders(playerStats);
@@ -152,7 +219,7 @@ export function scoreSpecialBetsForUser(
         });
       } else {
         const stat = findStat(playerStats, bets.topScorerPlayer);
-        if (stat && stat.goals >= scoring.relative_minimums.top_scorer_goals) {
+        if (relative.topScorerGoals != null && stat && stat.goals === relative.topScorerGoals) {
           lines.push({
             reason: "TOP_SCORER_RELATIVE",
             points: scoring.specials.top_scorer_relative,
@@ -172,7 +239,7 @@ export function scoreSpecialBetsForUser(
           liveLeader: leaders.topScorer.name,
           pick: bets.topScorerPlayer,
         });
-      } else if (stat && stat.goals >= scoring.relative_minimums.top_scorer_goals) {
+      } else if (relative.topScorerGoals != null && stat && stat.goals === relative.topScorerGoals) {
         lines.push({
           reason: "TOP_SCORER_RELATIVE",
           points: scoring.specials.top_scorer_relative,
@@ -197,7 +264,7 @@ export function scoreSpecialBetsForUser(
         });
       } else {
         const stat = findStat(playerStats, bets.topAssistsPlayer);
-        if (stat && stat.assists >= scoring.relative_minimums.top_assists) {
+        if (relative.topAssistsCount != null && stat && stat.assists === relative.topAssistsCount) {
           lines.push({
             reason: "TOP_ASSISTS_RELATIVE",
             points: scoring.specials.top_assists_relative,
@@ -216,7 +283,7 @@ export function scoreSpecialBetsForUser(
           liveLeader: leaders.topAssists.name,
           pick: bets.topAssistsPlayer,
         });
-      } else if (stat && stat.assists >= scoring.relative_minimums.top_assists) {
+      } else if (relative.topAssistsCount != null && stat && stat.assists === relative.topAssistsCount) {
         lines.push({
           reason: "TOP_ASSISTS_RELATIVE",
           points: scoring.specials.top_assists_relative,
@@ -290,4 +357,107 @@ export function scoreSpecialBetsForUser(
   const total = lines.reduce((sum, l) => sum + l.points, 0);
   const hasInterim = lines.some((l) => l.interim);
   return { total, hasInterim, lines };
+}
+
+/**
+ * Pool-level pass over EVERY bettor's special bets. Produces:
+ *
+ * - `relative` — the "closest among bettors, only if no exact" winner value for
+ *   top scorer / top assists. If any bettor picked the exact winner (or live
+ *   leader, mid-tournament), relative is `null` for that category (exact
+ *   suppresses relative). Otherwise it's the highest stat among all picks that
+ *   clear the qualifying floor; bettors whose pick EQUALS that value win the
+ *   relative line (ties share). Feed this into `scoreSpecialBetsForUser`.
+ *
+ * - `status` — per-category resolution state for the breakdown UI:
+ *   `pending` (result not entered yet), `won` (entered and ≥1 bettor scored),
+ *   `void` (entered and nobody scored → "אף אחד לא תפס").
+ */
+export function computeSpecialBetsPool(
+  allBets: BettorSpecialBets[],
+  actuals: TournamentActuals | null,
+  playerStats: PlayerStat[] = [],
+  scoring: ScoringValues = SCORING,
+): SpecialBetsPool {
+  const leaders = computeLiveLeaders(playerStats);
+
+  // "Winner" reference is the admin-entered actual when present, else the live
+  // leader (interim). Mirrors `scoreSpecialBetsForUser`'s exact-match basis
+  // (strict string equality on the stored pick).
+  const topScorerWinner = actuals?.top_scorer_player ?? leaders.topScorer?.name ?? null;
+  const topAssistsWinner = actuals?.top_assists_player ?? leaders.topAssists?.name ?? null;
+
+  const relativeValue = (
+    picks: (string | null)[],
+    winnerName: string | null,
+    statKey: "goals" | "assists",
+    floor: number,
+  ): number | null => {
+    if (!winnerName) return null;
+    // Exact suppresses relative entirely.
+    if (picks.some((p) => p != null && p === winnerName)) return null;
+    let best: number | null = null;
+    for (const p of picks) {
+      if (!p || p === winnerName) continue;
+      const st = findStat(playerStats, p);
+      const v = st ? st[statKey] : 0;
+      if (v >= floor && (best === null || v > best)) best = v;
+    }
+    return best;
+  };
+
+  const relative: SpecialBetsRelative = {
+    topScorerGoals: relativeValue(
+      allBets.map((b) => b.topScorerPlayer),
+      topScorerWinner,
+      "goals",
+      scoring.relative_minimums.top_scorer_goals,
+    ),
+    topAssistsCount: relativeValue(
+      allBets.map((b) => b.topAssistsPlayer),
+      topAssistsWinner,
+      "assists",
+      scoring.relative_minimums.top_assists,
+    ),
+  };
+
+  // Who scored each category? Reuse the per-user scorer with the pool relative.
+  const anyScored: Record<SpecialCategory, boolean> = {
+    topScorer: false, topAssists: false, bestAttack: false, prolificGroup: false,
+    driestGroup: false, dirtiestTeam: false, matchups: false, penalties: false,
+  };
+  for (const bets of allBets) {
+    const bd = scoreSpecialBetsForUser(bets, actuals, playerStats, scoring, relative);
+    for (const line of bd.lines) {
+      const cat = specialReasonToCategory(line.reason);
+      if (cat && line.points > 0) anyScored[cat] = true;
+    }
+  }
+
+  // A category is "resolved" once its actual is entered. Matchups resolve when
+  // any of the three duel results is entered.
+  const resolved: Record<SpecialCategory, boolean> = {
+    topScorer: actuals?.top_scorer_player != null,
+    topAssists: actuals?.top_assists_player != null,
+    bestAttack: actuals?.best_attack_team != null,
+    prolificGroup: actuals?.most_prolific_group != null,
+    driestGroup: actuals?.driest_group != null,
+    dirtiestTeam: actuals?.dirtiest_team != null,
+    matchups:
+      actuals?.matchup_result_1 != null ||
+      actuals?.matchup_result_2 != null ||
+      actuals?.matchup_result_3 != null,
+    penalties: actuals?.penalties_over_under != null,
+  };
+
+  const cats: SpecialCategory[] = [
+    "topScorer", "topAssists", "bestAttack", "prolificGroup",
+    "driestGroup", "dirtiestTeam", "matchups", "penalties",
+  ];
+  const status = {} as Record<SpecialCategory, SpecialCatStatus>;
+  for (const c of cats) {
+    status[c] = !resolved[c] ? "pending" : anyScored[c] ? "won" : "void";
+  }
+
+  return { relative, status };
 }

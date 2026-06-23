@@ -24,6 +24,7 @@ import {
 } from "./advancement-scorer";
 import {
   scoreSpecialBetsForUser,
+  computeSpecialBetsPool,
   type SpecialBetsBreakdown,
   type TournamentActuals,
   type PlayerStat,
@@ -323,10 +324,13 @@ export function computeLiveScores(
   if (options.specialBets && options.specialBets.length > 0) {
     const actuals = options.tournamentActuals ?? null;
     const stats = options.playerStats ?? [];
+    // One pool pass decides the "closest among bettors" relative winners (top
+    // scorer / assists) so the per-user scoring is consistent across everyone.
+    const pool = computeSpecialBetsPool(options.specialBets, actuals, stats, scoring);
     for (const bets of options.specialBets) {
       const score = byUser[bets.userId];
       if (!score) continue;
-      const breakdown = scoreSpecialBetsForUser(bets, actuals, stats, scoring);
+      const breakdown = scoreSpecialBetsForUser(bets, actuals, stats, scoring, pool.relative);
       score.specPts = breakdown.total;
       score.specBreakdown = breakdown;
       score.specHasInterim = breakdown.hasInterim;

@@ -47,3 +47,6 @@ scripts/backup-user_brackets-*.json
 # Personal analysis + scratch (not for the shared repo)
 amitanalysis/
 test-debug.mjs
+
+# stray empty sqlite artifact
+.sqlite

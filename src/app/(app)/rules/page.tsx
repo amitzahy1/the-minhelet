@@ -128,8 +128,8 @@ export default function RulesPage() {
               </thead>
               <tbody className="font-medium">
                 {[
-                  ["מלך שערים", `${sp.top_scorer_exact} / ${sp.top_scorer_relative}`, `מוחלט: ${sp.top_scorer_exact} · יחסי: ${sp.top_scorer_relative} (מינימום ${rm.top_scorer_goals} שערים)`],
-                  ["מלך בישולים", `${sp.top_assists_exact} / ${sp.top_assists_relative}`, `מוחלט: ${sp.top_assists_exact} · יחסי: ${sp.top_assists_relative} (מינימום ${rm.top_assists} בישולים)`],
+                  ["מלך שערים", `${sp.top_scorer_exact} / ${sp.top_scorer_relative}`, `מוחלט: ${sp.top_scorer_exact} למי שניחש את המלך. יחסי: ${sp.top_scorer_relative} — רק אם אף אחד לא ניחש את המלך, למי שניחש את השחקן עם הכי הרבה שערים מבין המהמרים (מינימום ${rm.top_scorer_goals} שערים)`],
+                  ["מלך בישולים", `${sp.top_assists_exact} / ${sp.top_assists_relative}`, `מוחלט: ${sp.top_assists_exact} למי שניחש את המלך. יחסי: ${sp.top_assists_relative} — רק אם אף אחד לא ניחש את המלך, למי שניחש את השחקן עם הכי הרבה בישולים מבין המהמרים (מינימום ${rm.top_assists} בישולים)`],
                   ["התקפה טובה", `${sp.best_attack}`, "הנבחרת עם הכי הרבה שערים בטורניר"],
                   ["בית פורה", `${sp.prolific_group}`, "הכי הרבה שערים בשלב הבתים"],
                   ["בית יבש", `${sp.driest_group}`, "הכי מעט שערים בשלב הבתים"],
@@ -145,7 +145,18 @@ export default function RulesPage() {
               </tbody>
             </table>
 
-            <div className="mt-5 rounded-xl bg-blue-50 border border-blue-200 px-4 py-3 text-xs text-blue-900 leading-relaxed">
+            <div className="mt-5 rounded-xl bg-rose-50 border border-rose-200 px-4 py-3 text-xs text-rose-900 leading-relaxed">
+              <p className="font-bold mb-1 text-rose-950">🚫 הימור שאף אחד לא תפס — מתבטל</p>
+              <p>
+                הימור מיוחד עם תוצאה אחת בלבד וללא ניקוד יחסי (התקפה טובה, בית פורה,
+                בית יבש, כסחנית, מאצ׳אפים, פנדלים) <strong>מתבטל אם אף אחד לא ניחש נכון</strong> —
+                אף מהמר לא מקבל ולא מפסיד נקודות עליו, והוא יסומן בטבלה כ&quot;אף אחד לא
+                תפס&quot;. מלך שערים ומלך בישולים לא מתבטלים: גם אם אף אחד לא תפס את המלך,
+                הניקוד היחסי עובר למי שניחש את השחקן הכי גבוה מבין המהמרים.
+              </p>
+            </div>
+
+            <div className="mt-3 rounded-xl bg-blue-50 border border-blue-200 px-4 py-3 text-xs text-blue-900 leading-relaxed">
               <p className="font-bold mb-1 text-blue-950">📋 איך נספרים שערים ובישולים</p>
               <ul className="space-y-1.5 list-disc pr-4">
                 <li>

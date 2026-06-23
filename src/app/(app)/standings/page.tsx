@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { Fragment, useEffect, useState, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { useBettingStore } from "@/stores/betting-store";
 import { shareLeaderboard, openWhatsApp } from "@/lib/share";
@@ -14,6 +14,7 @@ import { isLocked } from "@/lib/constants";
 import { GROUPS } from "@/lib/tournament/groups";
 import { TodayMatches } from "@/components/shared/TodayMatches";
 import { computeLiveScores, computeTodayScores, computePlayerHistories, koStageMaxPts } from "@/lib/scoring/live-scorer";
+import { computeSpecialBetsPool, specialReasonToCategory, type SpecialCategory, type SpecialCatStatus } from "@/lib/scoring/special-bets-scorer";
 import { normalizeGroupLetter, matchPairIndex, computeGroupHits, type FinishedMatch, GROUP_MATCH_PAIRS } from "@/lib/results-hits";
 import { computeMatchDays, dayLockAtForKickoff } from "@/lib/tournament/group-live-state";
 import { toIsraelTimeShort } from "@/lib/timezone";
@@ -184,8 +185,37 @@ function Sparkline({ data, highlight }: { data: number[]; highlight?: boolean })
   );
 }
 
+// Per-bucket points shown in the breakdown modal. Each special bet is its own
+// row (no more "אחרים" catch-all).
+type Breakdown = {
+  totoGroup: number; exactGroup: number; totoKnockout: number; exactKnockout: number;
+  groupAdvExact: number; groupAdvPartial: number; advR16: number; advQF: number;
+  advSF: number; advFinal: number; winner: number;
+  topScorer: number; topAssists: number; bestAttack: number;
+  prolificGroup: number; driestGroup: number; dirtiestTeam: number;
+  matchups: number; penalties: number;
+};
+// Player row type — reuse the mock's non-breakdown fields, swap in the real
+// Breakdown shape, and carry the "was this relative?" flags for the יחסי tag.
+type PlayerRow = Omit<(typeof MOCK_PLAYERS)[number], "breakdown"> & {
+  breakdown: Breakdown;
+  specRelative?: { topScorer: boolean; topAssists: boolean };
+};
+
+// The 8 special-bet rows, in display order.
+const SPECIAL_ROWS: [string, SpecialCategory][] = [
+  ["מלך שערים", "topScorer"],
+  ["מלך בישולים", "topAssists"],
+  ["התקפה טובה", "bestAttack"],
+  ["בית פורה", "prolificGroup"],
+  ["בית יבש", "driestGroup"],
+  ["כסחנית", "dirtiestTeam"],
+  ["מאצ׳אפים", "matchups"],
+  ["פנדלים", "penalties"],
+];
+
 // Tooltip — mobile: bottom sheet with close button, desktop: hover popup
-function PlayerTooltip({ player, visible, onClose }: { player: typeof MOCK_PLAYERS[0] & { specHasInterim?: boolean }; visible: boolean; onClose: () => void }) {
+function PlayerTooltip({ player, specStatus, visible, onClose }: { player: PlayerRow & { specHasInterim?: boolean }; specStatus: Record<SpecialCategory, SpecialCatStatus>; visible: boolean; onClose: () => void }) {
   if (!visible) return null;
   const b = player.breakdown;
   return (
@@ -233,10 +263,27 @@ function PlayerTooltip({ player, visible, onClose }: { player: typeof MOCK_PLAYE
             )}
           </p>
           <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-            <span className="text-gray-500">מלך שערים</span><span className="font-bold text-end text-gray-800" style={{ fontFamily: "var(--font-inter)" }}>{b.topScorer}</span>
-            <span className="text-gray-500">מלך בישולים</span><span className="font-bold text-end text-gray-800" style={{ fontFamily: "var(--font-inter)" }}>{b.topAssists}</span>
-            <span className="text-gray-500">התקפה טובה</span><span className="font-bold text-end text-gray-800" style={{ fontFamily: "var(--font-inter)" }}>{b.bestAttack}</span>
-            <span className="text-gray-500">אחרים</span><span className="font-bold text-end text-gray-800" style={{ fontFamily: "var(--font-inter)" }}>{b.specials}</span>
+            {SPECIAL_ROWS.map(([label, cat]) => {
+              const pts = b[cat];
+              const isRel =
+                pts > 0 &&
+                ((cat === "topScorer" && player.specRelative?.topScorer) ||
+                  (cat === "topAssists" && player.specRelative?.topAssists));
+              const isVoid = pts === 0 && specStatus[cat] === "void";
+              return (
+                <Fragment key={cat}>
+                  <span className="text-gray-500">
+                    {label}
+                    {isRel && <span className="text-[9px] text-blue-600 font-bold"> יחסי</span>}
+                  </span>
+                  {isVoid ? (
+                    <span className="text-[10px] text-gray-400 text-end self-center">אף אחד לא תפס</span>
+                  ) : (
+                    <span className="font-bold text-end text-gray-800" style={{ fontFamily: "var(--font-inter)" }}>{pts}</span>
+                  )}
+                </Fragment>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -277,8 +324,9 @@ function SortableHeader({
     </button>
   );
 }
-// --- Scoring reason → breakdown bucket mapping ---
-const REASON_TO_BUCKET: Record<string, keyof typeof MOCK_PLAYERS[0]["breakdown"]> = {
+// --- Scoring reason → breakdown bucket mapping (historic scoring_log base;
+// the live overlay below is authoritative and fills the per-special buckets). ---
+const REASON_TO_BUCKET: Record<string, keyof Breakdown> = {
   toto_group: "totoGroup",
   exact_group: "exactGroup",
   toto_knockout: "totoKnockout",
@@ -293,7 +341,11 @@ const REASON_TO_BUCKET: Record<string, keyof typeof MOCK_PLAYERS[0]["breakdown"]
   top_scorer: "topScorer",
   top_assists: "topAssists",
   best_attack: "bestAttack",
-  specials: "specials",
+  prolific_group: "prolificGroup",
+  driest_group: "driestGroup",
+  dirtiest_team: "dirtiestTeam",
+  matchup: "matchups",
+  penalties_over_under: "penalties",
 };
 
 // Map scoring reason to the high-level category
@@ -528,6 +580,13 @@ export default function StandingsPage() {
     [brackets, finishedMatches, scoring]
   );
 
+  // Pool-level special-bets status (won / void / pending per category) — shared
+  // by every bettor's breakdown modal to label bets nobody caught.
+  const specPool = useMemo(
+    () => computeSpecialBetsPool(specialBets, tournamentActuals, playerStats, scoring),
+    [specialBets, tournamentActuals, playerStats, scoring]
+  );
+
   // Build real players from Supabase profiles + live scoring
   const realPlayers = useMemo(() => {
     if (profiles.length === 0) return [];
@@ -538,12 +597,15 @@ export default function StandingsPage() {
       const live = liveScores[profile.id];
 
       // Start from scoring_log aggregates (historic/server scoring, if any)
-      const breakdown = {
+      const breakdown: Breakdown = {
         totoGroup: 0, exactGroup: 0, totoKnockout: 0, exactKnockout: 0,
         groupAdvExact: 0, groupAdvPartial: 0, advQF: 0, advSF: 0,
         advR16: 0, advFinal: 0, winner: 0, topScorer: 0, topAssists: 0,
-        bestAttack: 0, specials: 0,
+        bestAttack: 0, prolificGroup: 0, driestGroup: 0, dirtiestTeam: 0,
+        matchups: 0, penalties: 0,
       };
+      // Which relative lines were awarded (drives the "יחסי" tag in the modal).
+      const specRelative = { topScorer: false, topAssists: false };
       for (const entry of userEntries) {
         const bucket = REASON_TO_BUCKET[entry.reason];
         if (bucket) breakdown[bucket] += entry.points;
@@ -567,14 +629,16 @@ export default function StandingsPage() {
           breakdown.advFinal = live.advBreakdown.finalPts;
           breakdown.winner = live.advBreakdown.winnerPts;
         }
-        // Special bets — collapse the per-reason lines into the UI buckets.
+        // Special bets — map each per-reason line to its own UI bucket.
         if (live.specBreakdown) {
-          breakdown.topScorer = 0; breakdown.topAssists = 0; breakdown.bestAttack = 0; breakdown.specials = 0;
+          breakdown.topScorer = 0; breakdown.topAssists = 0; breakdown.bestAttack = 0;
+          breakdown.prolificGroup = 0; breakdown.driestGroup = 0; breakdown.dirtiestTeam = 0;
+          breakdown.matchups = 0; breakdown.penalties = 0;
           for (const line of live.specBreakdown.lines) {
-            if (line.reason === "TOP_SCORER_EXACT" || line.reason === "TOP_SCORER_RELATIVE") breakdown.topScorer += line.points;
-            else if (line.reason === "TOP_ASSISTS_EXACT" || line.reason === "TOP_ASSISTS_RELATIVE") breakdown.topAssists += line.points;
-            else if (line.reason === "BEST_ATTACK") breakdown.bestAttack += line.points;
-            else breakdown.specials += line.points;
+            const cat = specialReasonToCategory(line.reason);
+            if (cat) breakdown[cat] += line.points;
+            if (line.reason === "TOP_SCORER_RELATIVE") specRelative.topScorer = true;
+            if (line.reason === "TOP_ASSISTS_RELATIVE") specRelative.topAssists = true;
           }
         }
       }
@@ -582,7 +646,7 @@ export default function StandingsPage() {
       // Totals by bucket
       const matchPts = breakdown.totoGroup + breakdown.exactGroup + breakdown.totoKnockout + breakdown.exactKnockout;
       const advPts = live?.advPts ?? (breakdown.groupAdvExact + breakdown.groupAdvPartial + breakdown.advR16 + breakdown.advQF + breakdown.advSF + breakdown.advFinal + breakdown.winner);
-      const specPts = live?.specPts ?? (breakdown.topScorer + breakdown.topAssists + breakdown.bestAttack + breakdown.specials);
+      const specPts = live?.specPts ?? (breakdown.topScorer + breakdown.topAssists + breakdown.bestAttack + breakdown.prolificGroup + breakdown.driestGroup + breakdown.dirtiestTeam + breakdown.matchups + breakdown.penalties);
       const total = matchPts + advPts + specPts;
       const specHasInterim = live?.specHasInterim ?? false;
       // Provisional points from matches in play (0 unless a match is live).
@@ -614,8 +678,9 @@ export default function StandingsPage() {
         bestDay: `+${Math.max(todayPts, 0)}`,
         isYou: profile.id === currentUserId,
         breakdown,
+        specRelative,
       };
-    }).filter(Boolean) as (typeof MOCK_PLAYERS[0] & { specHasInterim?: boolean; liveDelta: number })[];
+    }).filter(Boolean) as (PlayerRow & { specHasInterim?: boolean; liveDelta: number })[];
   }, [profiles, scoringLog, liveScores, finishedScores, todayScores, currentUserId, maxPossibleScores]);
 
   // Always use real data — never fall back to mock (prevents flash of fake names)
@@ -775,7 +840,7 @@ export default function StandingsPage() {
                 {p.isYou && <span className="text-xs text-blue-500 ms-1.5 bg-blue-100 rounded px-1.5 py-0.5 font-bold">אתה</span>}
                 {p.id === lifterId && <span className="text-xs text-amber-700 ms-1.5 bg-amber-100 border border-amber-200 rounded px-1.5 py-0.5 font-bold whitespace-nowrap">🏆 מניף</span>}
                 {p.id === sheepId && <span className="text-xs text-gray-600 ms-1.5 bg-gray-100 border border-gray-200 rounded px-1.5 py-0.5 font-bold whitespace-nowrap">🐑 הכבש?</span>}
-                <PlayerTooltip player={p} visible={hoveredPlayer === p.id} onClose={() => setHoveredPlayer(null)} />
+                <PlayerTooltip player={p} specStatus={specPool.status} visible={hoveredPlayer === p.id} onClose={() => setHoveredPlayer(null)} />
               </div>
               {/* Desktop: show all 3 + sparkline */}
               <span className={`w-14 text-center text-sm font-medium hidden sm:block ${activeTab === "matchPts" ? "text-blue-600 font-bold" : "text-gray-600"}`} style={{ fontFamily: "var(--font-inter)" }}>{p.matchPts}</span>

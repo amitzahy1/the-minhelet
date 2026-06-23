@@ -6,6 +6,9 @@ import {
   buildR32Matchups,
 } from "@/lib/tournament/knockout-derivation";
 import { resolveKnockoutTree } from "@/lib/scoring/knockout-resolver";
+import { computeLiveScores } from "@/lib/scoring/live-scorer";
+import { SCORING } from "@/types";
+import type { BettorBracket, BettorAdvancement } from "@/lib/supabase/shared-data";
 import type { FinishedMatch } from "@/lib/results-hits";
 
 // ============================================================================
@@ -124,5 +127,44 @@ describe("resolveKnockoutTree honours the feeder map argument", () => {
     const tree = resolveKnockoutTree(matches, null); // default = LATER_FEEDERS
     expect([tree.r16l_1.team1, tree.r16l_1.team2].sort()).toEqual(["BRA", "NED"]);
     expect(tree.r16l_1.winner).toBeNull(); // NED–BRA never played
+  });
+});
+
+describe("advancement scoring reads reachers from the LIVE (official) bracket", () => {
+  // Groups A,B,C,F complete → r32l_0 (A2·B2 → KOR), r32l_2 (F1·C2 → NED),
+  // r32l_3 (C1·F2 → BRA) resolve. The R16 match KOR–NED is the LIVE pairing for
+  // r16l_1 ([r32l_0, r32l_2]); KOR wins it → KOR reached the QF, NED did not.
+  const matches: FinishedMatch[] = [
+    ...groupMatches("A", ["MEX", "KOR", "CZE", "RSA"]), // A2 = KOR
+    ...groupMatches("B", ["CAN", "QAT", "SUI", "BIH"]), // B2 = QAT
+    ...groupMatches("C", ["BRA", "MAR", "SCO", "HAI"]), // C1 = BRA, C2 = MAR
+    ...groupMatches("F", ["NED", "JPN", "SWE", "TUN"]), // F1 = NED, F2 = JPN
+    gm("KOR", "QAT", 1, 0, "", "LAST_32", { winner: "HOME_TEAM" }), // r32l_0 → KOR
+    gm("NED", "MAR", 1, 0, "", "LAST_32", { winner: "HOME_TEAM" }), // r32l_2 → NED
+    gm("BRA", "JPN", 1, 0, "", "LAST_32", { winner: "HOME_TEAM" }), // r32l_3 → BRA
+    gm("KOR", "NED", 2, 1, "", "LAST_16", { winner: "HOME_TEAM" }), // r16l_1 (LIVE): KOR beats NED
+  ];
+  const brk = (id: string): BettorBracket => ({
+    userId: id, displayName: id, groupPredictions: {}, knockoutTree: {}, knockoutTreeLive: {}, champion: null, lockedAt: null,
+  });
+  const adv = (id: string, over: Partial<BettorAdvancement>): BettorAdvancement => ({
+    userId: id, displayName: id, groupQualifiers: {}, advanceToR16: [], advanceToQF: [], advanceToSF: [], advanceToFinal: [], winner: "", ...over,
+  });
+
+  it("credits QF advancement for a team that WON its R16, but not for one that lost", () => {
+    const scores = computeLiveScores(
+      [brk("win"), brk("lose")],
+      matches,
+      {
+        advancements: [
+          adv("win", { advanceToR16: ["KOR"], advanceToQF: ["KOR"] }), // R32 win + R16 win
+          adv("lose", { advanceToR16: ["NED"], advanceToQF: ["NED"] }), // R32 win, R16 loss
+        ],
+      },
+    );
+    // Reached R16 (won R32) AND QF (won R16):
+    expect(scores.win.advPts).toBe(SCORING.advancement.r16 + SCORING.advancement.qf);
+    // Reached R16 only — the QF pick must NOT score (this is the bug being fixed):
+    expect(scores.lose.advPts).toBe(SCORING.advancement.r16);
   });
 });

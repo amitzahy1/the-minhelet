@@ -280,12 +280,14 @@ export function computeLiveScores(
   // the bracket. (When no liveMatches were passed this is the same tree as
   // above, so behavior is unchanged.)
   if (options.advancements && options.advancements.length > 0) {
-    // Advancement (the pre-tournament "advancers" bets) is resolved on the
-    // FINISHED `matches` with the LEGACY LATER_FEEDERS (default) — UNCHANGED from
-    // before. It intentionally does NOT reuse the live tree above, so correcting
-    // the real-data bracket can't alter how advancement scores. (Known: this path
-    // is still on the old wiring and is handled separately.)
-    const advSlotTree = resolveKnockoutTree(matches, options.bestThirdsOverride ?? null, fairPlay);
+    // Advancement reachers (advance-to-R16/QF/SF/Final + champion) are resolved
+    // on the FINISHED `matches` with LIVE_FEEDERS — the official FIFA bracket —
+    // so "who reached each stage" is read from the REAL results via the same
+    // tested engine as the live tree (matched by team pair, not by stage label).
+    // Stays on FINISHED matches (never `liveMatches`), so an in-play game can
+    // never advance a team early. Group-position + best-thirds scoring below is
+    // group-level and feeder-independent, so it is unchanged either way.
+    const advSlotTree = resolveKnockoutTree(matches, options.bestThirdsOverride ?? null, fairPlay, LIVE_FEEDERS);
     const groupOrders = computeGroupOrders(matches, fairPlay);
     const actualGroupOrders = deriveActualGroupOrders(advSlotTree, groupOrders, GROUPS);
     // 3rd-place qualifiers = teams currently appearing as `?3` resolved slots

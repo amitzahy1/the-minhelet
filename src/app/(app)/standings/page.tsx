@@ -993,6 +993,7 @@ export default function StandingsPage() {
                 <th className="py-3 px-3 text-center font-bold">סה״כ</th>
                 <th className="py-3 px-3 text-center">% טוטו</th>
                 <th className="py-3 px-3 text-center">מדויקות</th>
+                <th className="py-3 px-3 text-center">מיוחדים</th>
                 <th className="py-3 px-3 text-center">רצף</th>
                 <th className="py-3 px-3 text-center">יום טוב</th>
               </tr>
@@ -1006,6 +1007,7 @@ export default function StandingsPage() {
                     <span className={`font-bold ${parseInt(p.toto) >= 60 ? "text-green-600" : parseInt(p.toto) >= 55 ? "text-amber-600" : "text-red-500"}`}>{p.toto}</span>
                   </td>
                   <td className="py-3 px-3 text-center font-medium" style={{ fontFamily: "var(--font-inter)" }}>{p.exact}</td>
+                  <td className="py-3 px-3 text-center font-medium text-indigo-600" style={{ fontFamily: "var(--font-inter)" }}>{p.specPts}</td>
                   <td className="py-3 px-3 text-center text-amber-600 font-bold">{p.streak} 🔥</td>
                   <td className="py-3 px-3 text-center text-green-600 font-bold" style={{ fontFamily: "var(--font-inter)" }}>{p.bestDay}</td>
                 </tr>

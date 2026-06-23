@@ -277,7 +277,7 @@ function PlayerTooltip({ player, specStatus, visible, onClose }: { player: Playe
                     {isRel && <span className="text-[9px] text-blue-600 font-bold"> יחסי</span>}
                   </span>
                   {isVoid ? (
-                    <span className="text-[10px] text-gray-400 text-end self-center">אף אחד לא תפס</span>
+                    <span className="text-[10px] text-gray-400 text-end self-center">אף אחד לא תופס</span>
                   ) : (
                     <span className="font-bold text-end text-gray-800" style={{ fontFamily: "var(--font-inter)" }}>{pts}</span>
                   )}

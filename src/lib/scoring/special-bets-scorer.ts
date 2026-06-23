@@ -183,6 +183,22 @@ function findStat(stats: PlayerStat[], name: string | null | undefined): PlayerS
 }
 
 /**
+ * Current live result of a player-duel by total goals + assists, or null when
+ * neither duel player has any stat yet. Drives the matchup live-tentative path:
+ * whoever leads the duel right now "catches" it for bettors who picked that side.
+ */
+function liveMatchupResult(stats: PlayerStat[], mu: (typeof MATCHUPS)[number]): "1" | "X" | "2" | null {
+  const s1 = findStat(stats, mu.name1);
+  const s2 = findStat(stats, mu.name2);
+  const t1 = (s1?.goals ?? 0) + (s1?.assists ?? 0);
+  const t2 = (s2?.goals ?? 0) + (s2?.assists ?? 0);
+  if (t1 === 0 && t2 === 0) return null;
+  if (t1 > t2) return "1";
+  if (t2 > t1) return "2";
+  return "X";
+}
+
+/**
  * Score one user's special-bets entry.
  *
  * - `actuals` may be partially-filled — each field is scored independently.
@@ -319,7 +335,9 @@ export function scoreSpecialBetsForUser(
   // -- Matchups (3 player duels) --
   // The user's pick is stored as a comma-joined "1,X,2" string; the admin
   // enters one result per duel (matchup_result_1..3). Each duel is scored
-  // independently at scoring.specials.matchup. Exact-only (no live tentative).
+  // independently at scoring.specials.matchup. When the admin hasn't entered a
+  // duel's result yet, it's scored LIVE-tentatively from the current
+  // goals+assists of the two duel players (interim) — whoever leads catches it.
   const matchupPicks = parseMatchupPick(bets.matchupPick);
   const matchupActuals = [
     actuals?.matchup_result_1 ?? null,
@@ -328,15 +346,30 @@ export function scoreSpecialBetsForUser(
   ];
   for (let i = 0; i < MATCHUPS.length; i++) {
     const pick = matchupPicks[i];
+    if (!pick) continue;
+    const mu = MATCHUPS[i];
     const actual = matchupActuals[i];
-    if (pick && actual && pick === actual) {
-      const mu = MATCHUPS[i];
-      lines.push({
-        reason: "MATCHUP",
-        points: scoring.specials.matchup,
-        interim: false,
-        pick: `${mu.p1Short} vs ${mu.p2Short}: ${pick}`,
-      });
+    if (actual) {
+      if (pick === actual) {
+        lines.push({
+          reason: "MATCHUP",
+          points: scoring.specials.matchup,
+          interim: false,
+          pick: `${mu.p1Short} vs ${mu.p2Short}: ${pick}`,
+        });
+      }
+    } else {
+      // Live tentative: whoever currently leads the duel catches it.
+      const live = liveMatchupResult(playerStats, mu);
+      if (live && pick === live) {
+        lines.push({
+          reason: "MATCHUP",
+          points: scoring.specials.matchup,
+          interim: true,
+          liveLeader: live === "X" ? "תיקו" : live === "1" ? mu.p1Short : mu.p2Short,
+          pick: `${mu.p1Short} vs ${mu.p2Short}: ${pick}`,
+        });
+      }
     }
   }
 
@@ -456,7 +489,14 @@ export function computeSpecialBetsPool(
   ];
   const status = {} as Record<SpecialCategory, SpecialCatStatus>;
   for (const c of cats) {
-    status[c] = !resolved[c] ? "pending" : anyScored[c] ? "won" : "void";
+    // Top scorer / assists carry RELATIVE scoring — there's always a current
+    // catcher (the closest bettor among those with goals/assists), so they're
+    // never "void". They're "won" once anyone scores, else "pending".
+    if (c === "topScorer" || c === "topAssists") {
+      status[c] = anyScored[c] ? "won" : "pending";
+    } else {
+      status[c] = !resolved[c] ? "pending" : anyScored[c] ? "won" : "void";
+    }
   }
 
   return { relative, status };

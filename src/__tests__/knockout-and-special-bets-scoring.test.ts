@@ -190,9 +190,32 @@ describe("scoreSpecialBetsForUser — matchups (3 duels, scored independently)",
     expect(r.total).toBe(SCORING.specials.matchup);
   });
 
-  it("no actuals entered → zero (exact-only, no live tentative)", () => {
+  it("no actuals and no live stats → zero", () => {
     const r = scoreSpecialBetsForUser(baseBet({ matchupPick: "1,X,2" }), noActuals);
     expect(r.total).toBe(0);
+  });
+
+  it("live tentative: whoever leads the duel right now catches it (interim)", () => {
+    // Duel 0 = Messi vs Ronaldo. Messi leads on goals+assists → result "1".
+    const stats: PlayerStat[] = [
+      { name: "Messi", goals: 3, assists: 2 },   // 5
+      { name: "Ronaldo", goals: 1, assists: 0 }, // 1
+    ];
+    const win = scoreSpecialBetsForUser(baseBet({ matchupPick: "1" }), noActuals, stats);
+    expect(win.total).toBe(SCORING.specials.matchup);
+    expect(win.hasInterim).toBe(true);
+    const lose = scoreSpecialBetsForUser(baseBet({ matchupPick: "2" }), noActuals, stats);
+    expect(lose.total).toBe(0);
+  });
+
+  it("final result overrides the live duel state (no double-count)", () => {
+    const stats: PlayerStat[] = [{ name: "Messi", goals: 5, assists: 1 }];
+    const r = scoreSpecialBetsForUser(
+      baseBet({ matchupPick: "1" }),
+      { ...noActuals, matchup_result_1: "2" }, // admin says Ronaldo won duel 1
+      stats,
+    );
+    expect(r.total).toBe(0); // pick "1" no longer matches the final "2"
   });
 });
 
@@ -258,13 +281,13 @@ describe("computeSpecialBetsPool — closest-among-bettors relative + void statu
     expect(scoreSpecialBetsForUser(bets[1], actuals, stats, SCORING, pool.relative).total).toBe(0);
   });
 
-  it("no pick clears the floor → no relative, status void", () => {
+  it("no pick clears the floor → no relative; top-scorer is never 'void' (pending, has a catcher in principle)", () => {
     const lowStats: PlayerStat[] = [{ name: "Mbappé", goals: 8, assists: 0 }, { name: "Sub", goals: 2, assists: 0 }];
     const bets = [baseBet({ userId: "a", topScorerPlayer: "Sub" })]; // 2 < floor 3
     const actuals: TournamentActuals = { ...noActuals, top_scorer_player: "Mbappé" };
     const pool = computeSpecialBetsPool(bets, actuals, lowStats);
     expect(pool.relative.topScorerGoals).toBeNull();
-    expect(pool.status.topScorer).toBe("void");
+    expect(pool.status.topScorer).toBe("pending"); // relative categories never read "אף אחד לא תופס"
   });
 
   it("exact-only bet status: pending before result, void when resolved + nobody caught, won when caught", () => {

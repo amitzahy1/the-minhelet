@@ -166,16 +166,11 @@ export function renderLeaderboardImage(rows: ShareImageRow[], dateLabel: string,
 export type ShareImageOutcome = "shared" | "copied" | "downloaded";
 
 /**
- * Share the rendered leaderboard PNG. Returns how it was delivered so the
- * caller can show the right hint ("copied — paste in WhatsApp").
+ * Deliver a PNG blob to the user: native share sheet (mobile → straight into
+ * the WhatsApp group), else clipboard (desktop → paste), else download.
  */
-export async function shareLeaderboardImage(
-  rows: ShareImageRow[],
-  dateLabel: string,
-  opts: ShareImageOptions = {},
-): Promise<ShareImageOutcome> {
-  const blob = await renderLeaderboardImage(rows, dateLabel, opts);
-  const file = new File([blob], "minhelet-standings.png", { type: "image/png" });
+async function deliverImageBlob(blob: Blob, filename = "minhelet-standings.png"): Promise<ShareImageOutcome> {
+  const file = new File([blob], filename, { type: "image/png" });
 
   // 1. Native share with file (mobile — straight into the WhatsApp group)
   if (typeof navigator !== "undefined" && navigator.canShare?.({ files: [file] })) {
@@ -200,8 +195,41 @@ export async function shareLeaderboardImage(
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "minhelet-standings.png";
+  a.download = filename;
   a.click();
   URL.revokeObjectURL(url);
   return "downloaded";
+}
+
+/**
+ * Screenshot the ACTUAL rendered leaderboard node to a PNG and share it — a
+ * true "exactly what's on the site" capture: same columns, styling, order,
+ * RTL, emojis and medals as displayed. Rasterized via modern-screenshot's
+ * foreignObject path, so Tailwind v4 `oklch()` colors, gradients and web fonts
+ * render through the browser's own engine (html2canvas can't parse oklch).
+ *
+ * `node` should be the leaderboard card element. Whatever columns are visible
+ * at the current viewport (mobile vs desktop) are exactly what gets captured.
+ */
+export async function shareLeaderboardNodeImage(node: HTMLElement): Promise<ShareImageOutcome> {
+  const { domToBlob } = await import("modern-screenshot");
+  const blob = await domToBlob(node, {
+    scale: 2,                    // retina-crisp
+    backgroundColor: "#ffffff",  // fill the card's rounded-corner gaps (matches the page bg)
+  });
+  return deliverImageBlob(blob);
+}
+
+/**
+ * Fallback share: the hand-rendered canvas card. Used only if the live-DOM
+ * screenshot (`shareLeaderboardNodeImage`) is unavailable or fails. Returns how
+ * it was delivered so the caller can show the right hint.
+ */
+export async function shareLeaderboardImage(
+  rows: ShareImageRow[],
+  dateLabel: string,
+  opts: ShareImageOptions = {},
+): Promise<ShareImageOutcome> {
+  const blob = await renderLeaderboardImage(rows, dateLabel, opts);
+  return deliverImageBlob(blob);
 }

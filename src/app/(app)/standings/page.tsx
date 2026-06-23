@@ -1,10 +1,10 @@
 "use client";
 
-import { Fragment, useEffect, useState, useMemo, useCallback } from "react";
+import { Fragment, useEffect, useState, useMemo, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useBettingStore } from "@/stores/betting-store";
 import { shareLeaderboard, openWhatsApp } from "@/lib/share";
-import { shareLeaderboardImage } from "@/lib/share-image";
+import { shareLeaderboardImage, shareLeaderboardNodeImage } from "@/lib/share-image";
 import { CompletionTracker, type PlayerCompletion } from "@/components/shared/CompletionTracker";
 import { HeroRoast } from "@/components/shared/HeroRoast";
 import { LeaderboardRace } from "@/components/shared/LeaderboardRace";
@@ -374,6 +374,8 @@ export default function StandingsPage() {
   const totalFilled = useBettingStore((s) => s.getTotalFilledMatches());
   const [hoveredPlayer, setHoveredPlayer] = useState<string | null>(null);
   const [shareHint, setShareHint] = useState<string | null>(null);
+  // The actual leaderboard card — captured as-is for the WhatsApp share image.
+  const tableRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<SortKey>("total");
   const currentUserId = useCurrentUser();
   // Load real data from Supabase (falls back to empty arrays if not configured)
@@ -749,36 +751,40 @@ export default function StandingsPage() {
             </span>
           )}
           <button onClick={async () => {
-            // Primary share: render the table to a PNG. Emojis live inside
-            // the image, so WhatsApp's URL-text mangling can't touch them.
             if (PLAYERS.length === 0) return;
             const sorted = [...PLAYERS].sort((a, b) => b.total - a.total);
             const dateLabel = new Intl.DateTimeFormat("he-IL", { day: "2-digit", month: "2-digit", timeZone: "Asia/Jerusalem" }).format(new Date());
-            try {
-              const outcome = await shareLeaderboardImage(
-                sorted.map((p, i) => ({
-                  rank: i + 1,
-                  name: p.name,
-                  total: p.total,
-                  today: p.today,
-                  exacts: Number(p.exact) || 0,
-                  isLifter: p.id === lifterId,
-                  isSheep: p.id === sheepId,
-                })),
-                dateLabel,
-                { matchesPlayed: finishedMatches.length },
-              );
+            const hintFor = (outcome: "shared" | "copied" | "downloaded") => {
               if (outcome === "copied") setShareHint("התמונה הועתקה — הדביקו בקבוצה 📋");
               else if (outcome === "downloaded") setShareHint("התמונה ירדה — שתפו אותה מההורדות");
               else setShareHint(null);
+            };
+            // Close any open row tooltip so it isn't captured, then let it unmount.
+            setHoveredPlayer(null);
+            await new Promise((r) => requestAnimationFrame(() => r(null)));
+            try {
+              // Primary: a true screenshot of the table EXACTLY as shown on the site.
+              if (!tableRef.current) throw new Error("no table node");
+              hintFor(await shareLeaderboardNodeImage(tableRef.current));
             } catch {
-              // Canvas/share failed — fall back to the text share
-              const text = shareLeaderboard(
-                sorted.map((p, i) => ({ rank: i + 1, name: p.name, total: p.total, today: p.today })),
-                PLAYERS.find((p) => p.id === sheepId)?.name ?? null,
-                PLAYERS.find((p) => p.id === lifterId)?.name ?? null,
-              );
-              openWhatsApp(text);
+              try {
+                // Fallback 1: the hand-rendered card image (emojis baked in).
+                hintFor(await shareLeaderboardImage(
+                  sorted.map((p, i) => ({
+                    rank: i + 1, name: p.name, total: p.total, today: p.today,
+                    exacts: Number(p.exact) || 0, isLifter: p.id === lifterId, isSheep: p.id === sheepId,
+                  })),
+                  dateLabel,
+                  { matchesPlayed: finishedMatches.length },
+                ));
+              } catch {
+                // Fallback 2: text share.
+                openWhatsApp(shareLeaderboard(
+                  sorted.map((p, i) => ({ rank: i + 1, name: p.name, total: p.total, today: p.today })),
+                  PLAYERS.find((p) => p.id === sheepId)?.name ?? null,
+                  PLAYERS.find((p) => p.id === lifterId)?.name ?? null,
+                ));
+              }
             }
             window.setTimeout(() => setShareHint(null), 6000);
           }} disabled={PLAYERS.length === 0} className="px-3 py-2 rounded-lg bg-green-500 text-white text-xs font-bold hover:bg-green-600 transition-colors flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed">
@@ -789,7 +795,7 @@ export default function StandingsPage() {
       </div>
 
       {/* Main leaderboard — FIRST and most prominent */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-visible hover:shadow-lg transition-all mb-6">
+      <div ref={tableRef} className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-visible hover:shadow-lg transition-all mb-6">
         <div className="px-5 py-3 bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/40 border-b border-blue-100/50">
           <div className="flex items-center gap-2">
             <h2 className="text-base font-bold text-gray-800">טבלת דירוג</h2>

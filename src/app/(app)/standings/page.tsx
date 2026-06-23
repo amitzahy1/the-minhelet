@@ -16,7 +16,7 @@ import { TodayMatches } from "@/components/shared/TodayMatches";
 import { computeLiveScores, computeTodayScores, computePlayerHistories, koStageMaxPts } from "@/lib/scoring/live-scorer";
 import { computeSpecialBetsPool, specialReasonToCategory, type SpecialCategory, type SpecialCatStatus } from "@/lib/scoring/special-bets-scorer";
 import { normalizeGroupLetter, matchPairIndex, computeGroupHits, type FinishedMatch, GROUP_MATCH_PAIRS } from "@/lib/results-hits";
-import { computeMatchDays, dayLockAtForKickoff } from "@/lib/tournament/group-live-state";
+import { computeMatchDays, dayLockAtForKickoff, matchDayKey } from "@/lib/tournament/group-live-state";
 import { toIsraelTimeShort } from "@/lib/timezone";
 import { computeLeagueTitles } from "@/lib/league-titles";
 import { LeagueTitles } from "@/components/shared/LeagueTitles";
@@ -564,6 +564,23 @@ export default function StandingsPage() {
     () => computeTodayScores(brackets, liveMatches, scoring),
     [brackets, liveMatches, scoring]
   );
+  // Per-user TODAY hit counts (exact vs toto-only) — drives the accurate
+  // "מצטיין היום" highlight. Same day-of-play scoping as computeTodayScores.
+  const todayHits = useMemo(() => {
+    let todayKey: string;
+    try { todayKey = matchDayKey(new Date().toISOString()); } catch { return {} as Record<string, { exact: number; toto: number }>; }
+    const todayMatches = liveMatches.filter((m) => {
+      try { return matchDayKey(m.date) === todayKey; } catch { return false; }
+    });
+    const scores = computeLiveScores(brackets, todayMatches, { scoring });
+    const out: Record<string, { exact: number; toto: number }> = {};
+    for (const [uid, s] of Object.entries(scores)) {
+      // computeLiveScores counts an exact hit in BOTH totoHits and exactHits;
+      // toto-only = totoHits − exactHits.
+      out[uid] = { exact: s.exactHits, toto: Math.max(0, s.totoHits - s.exactHits) };
+    }
+    return out;
+  }, [brackets, liveMatches, scoring]);
   // Finished-only baseline (no liveMatches). The PROVISIONAL "לייב" points a
   // match in play is contributing = liveTotal − finishedTotal. Advancement and
   // specials are frozen in both, so this isolates exactly the not-yet-final
@@ -899,7 +916,15 @@ export default function StandingsPage() {
               name: joinNames(heroes.map((h) => h.name)),
               points: topToday,
               plural: heroes.length > 1,
-              highlight: heroes.length === 1 ? `${heroes[0].exact} מדויקות!` : undefined,
+              // Accurate TODAY breakdown: exact vs toto-only (e.g. "2 מדויקות ו-2 כיוון!").
+              highlight: heroes.length === 1 ? (() => {
+                const h = todayHits[heroes[0].id];
+                if (!h) return undefined;
+                const parts: string[] = [];
+                if (h.exact > 0) parts.push(`${h.exact} מדויקות`);
+                if (h.toto > 0) parts.push(`${h.toto} כיוון`);
+                return parts.length ? `${parts.join(" ו-")}!` : undefined;
+              })() : undefined,
             }}
             roast={{
               name: joinNames(roasts.map((r) => r.name)),

@@ -414,11 +414,17 @@ export function computeSpecialBetsPool(
 ): SpecialBetsPool {
   const leaders = computeLiveLeaders(playerStats);
 
+  // Treat empty strings as "unset" — the actuals row stores "" (not null) for
+  // fields the admin hasn't filled, so a raw `?? leaders…` would wrongly keep
+  // "" and skip the live-leader fallback (relative would never resolve).
+  const set = (v: string | null | undefined): boolean => v != null && v !== "";
+  const orNull = (v: string | null | undefined): string | null => (set(v) ? (v as string) : null);
+
   // "Winner" reference is the admin-entered actual when present, else the live
   // leader (interim). Mirrors `scoreSpecialBetsForUser`'s exact-match basis
   // (strict string equality on the stored pick).
-  const topScorerWinner = actuals?.top_scorer_player ?? leaders.topScorer?.name ?? null;
-  const topAssistsWinner = actuals?.top_assists_player ?? leaders.topAssists?.name ?? null;
+  const topScorerWinner = orNull(actuals?.top_scorer_player) ?? leaders.topScorer?.name ?? null;
+  const topAssistsWinner = orNull(actuals?.top_assists_player) ?? leaders.topAssists?.name ?? null;
 
   const relativeValue = (
     picks: (string | null)[],
@@ -467,20 +473,20 @@ export function computeSpecialBetsPool(
     }
   }
 
-  // A category is "resolved" once its actual is entered. Matchups resolve when
-  // any of the three duel results is entered.
+  // A category is "resolved" once its actual is entered (empty string = unset).
+  // Matchups resolve when any of the three duel results is entered.
   const resolved: Record<SpecialCategory, boolean> = {
-    topScorer: actuals?.top_scorer_player != null,
-    topAssists: actuals?.top_assists_player != null,
-    bestAttack: actuals?.best_attack_team != null,
-    prolificGroup: actuals?.most_prolific_group != null,
-    driestGroup: actuals?.driest_group != null,
-    dirtiestTeam: actuals?.dirtiest_team != null,
+    topScorer: set(actuals?.top_scorer_player),
+    topAssists: set(actuals?.top_assists_player),
+    bestAttack: set(actuals?.best_attack_team),
+    prolificGroup: set(actuals?.most_prolific_group),
+    driestGroup: set(actuals?.driest_group),
+    dirtiestTeam: set(actuals?.dirtiest_team),
     matchups:
-      actuals?.matchup_result_1 != null ||
-      actuals?.matchup_result_2 != null ||
-      actuals?.matchup_result_3 != null,
-    penalties: actuals?.penalties_over_under != null,
+      set(actuals?.matchup_result_1) ||
+      set(actuals?.matchup_result_2) ||
+      set(actuals?.matchup_result_3),
+    penalties: set(actuals?.penalties_over_under),
   };
 
   const cats: SpecialCategory[] = [

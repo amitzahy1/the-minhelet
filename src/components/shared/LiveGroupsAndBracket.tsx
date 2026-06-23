@@ -12,7 +12,7 @@ import { GROUPS, GROUP_LETTERS, getTeamByCode } from "@/lib/tournament/groups";
 import { getFlag } from "@/lib/flags";
 import {
   buildR32Matchups,
-  LATER_FEEDERS,
+  LIVE_FEEDERS,
   resolveGroupSlot,
 } from "@/lib/tournament/knockout-derivation";
 import { getThirdsAssignment, DEFAULT_ASSIGNMENT } from "@/lib/tournament/annex-c";
@@ -206,8 +206,8 @@ function deriveKoMatch(
     const groupState = asGroupState(groups);
     team1 = resolveGroupSlot(h, groupState);
     team2 = resolveGroupSlot(a, groupState);
-  } else if (key in LATER_FEEDERS) {
-    const [f1, f2] = LATER_FEEDERS[key];
+  } else if (key in LIVE_FEEDERS) {
+    const [f1, f2] = LIVE_FEEDERS[key];
     team1 = knockoutWinners[f1] ?? null;
     team2 = knockoutWinners[f2] ?? null;
   }

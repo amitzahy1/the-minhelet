@@ -17,6 +17,7 @@ import {
   type KoSlotKey,
 } from "@/lib/scoring/knockout-resolver";
 import { slotStatus } from "@/lib/tournament/ko-live-state";
+import { LIVE_FEEDERS } from "@/lib/tournament/knockout-derivation";
 import { useBettingStore } from "@/stores/betting-store";
 import type { FinishedMatch } from "@/lib/results-hits";
 
@@ -57,7 +58,7 @@ export function useRealKnockoutStatus(): RealKnockoutStatus {
     const schedule: ScheduleMatch[] = fixtures.map((m) => ({ homeTla: m.homeTla, awayTla: m.awayTla, date: m.date, status: m.status ?? null }));
     const groupStageComplete = Object.keys(computeGroupOrders(scored)).length === 12;
     if (!groupStageComplete) return { loading: false, groupStageComplete: false, openCount: 0, unfilledOpenCount: 0 };
-    const tree = resolveKnockoutTree(scored, null);
+    const tree = resolveKnockoutTree(scored, null, undefined, LIVE_FEEDERS);
     let openCount = 0;
     let unfilledOpenCount = 0;
     for (const k of KO_SLOT_KEYS as readonly KoSlotKey[]) {

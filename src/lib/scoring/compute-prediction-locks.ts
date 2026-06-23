@@ -20,6 +20,7 @@ import {
   type ScheduleMatch,
 } from "@/lib/scoring/knockout-resolver";
 import { lockAtFor } from "@/lib/tournament/ko-live-state";
+import { LIVE_FEEDERS } from "@/lib/tournament/knockout-derivation";
 
 /** Knockout per-match lock window (minutes before kickoff). Mirrors Tree 2. */
 const KO_LOCK_BEFORE_MIN = 30;
@@ -105,7 +106,7 @@ export function computePredictionLockRows(
     date: m.date,
     status: m.status ?? null,
   }));
-  const tree = resolveKnockoutTree(finished, thirdsOverride ?? null);
+  const tree = resolveKnockoutTree(finished, thirdsOverride ?? null, undefined, LIVE_FEEDERS);
   for (const key of KO_SLOT_KEYS) {
     const lockAt = lockAtFor(key, tree, schedule, KO_LOCK_BEFORE_MIN);
     if (!lockAt) continue; // slot not resolved yet → no row → save fails closed

@@ -233,6 +233,12 @@ export function resolveKnockoutTree(
   matches: FinishedMatch[],
   thirdsOverride?: string[] | null,
   fairPlay?: Record<string, number>,
+  /**
+   * R16→Final progression map. Defaults to `LATER_FEEDERS` (the legacy map the
+   * pre-tournament simulation tree + advancement scoring use). The real-data
+   * tree, its scorer and locks pass `LIVE_FEEDERS` (the official FIFA bracket).
+   */
+  feeders: Record<string, [string, string]> = LATER_FEEDERS,
 ): Record<KoSlotKey, SlotState> {
   const groupOrders = computeGroupOrders(matches, fairPlay);
   const groupState = asGroupState(groupOrders);
@@ -261,8 +267,8 @@ export function resolveKnockoutTree(
       const { h, a } = r32Matchups[key];
       team1 = resolveGroupSlot(h, groupState);
       team2 = resolveGroupSlot(a, groupState);
-    } else if (key in LATER_FEEDERS) {
-      const [f1, f2] = LATER_FEEDERS[key];
+    } else if (key in feeders) {
+      const [f1, f2] = feeders[key];
       team1 = out[f1]?.winner ?? null;
       team2 = out[f2]?.winner ?? null;
     }

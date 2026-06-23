@@ -71,6 +71,51 @@ export const LATER_FEEDERS: Record<string, [string, string]> = {
   final: ["sfl_0", "sfr_0"],
 };
 
+/**
+ * Official FIFA 2026 R16→Final feeder map for the REAL bracket
+ * ("עץ נתוני אמת" / the real-data live tree). Use this — NOT `LATER_FEEDERS` —
+ * anywhere the app must mirror the actual tournament bracket: the live tree
+ * display, its scorer (Tree-2 toto/exact), its per-match locks, the live status
+ * badges, and the public /live bracket.
+ *
+ * It differs from `LATER_FEEDERS` ONLY in the 8 Round-of-16 pairings, corrected
+ * to the official bracket (QF/SF/final groupings are identical). The pre-tournament
+ * simulation tree + advancement bets deliberately keep using `LATER_FEEDERS`, so
+ * none of the locked pre-tournament data is affected by this map.
+ *
+ *   r16l_0 = M89 (W r32l_1 vs W r32r_0)   r16r_0 = M91 (W r32l_3 vs W r32r_6)
+ *   r16l_1 = M90 (W r32l_0 vs W r32l_2)   r16r_1 = M92 (W r32l_4 vs W r32r_5)
+ *   r16l_2 = M93 (W r32r_2 vs W r32l_5)   r16r_2 = M95 (W r32r_3 vs W r32l_7)
+ *   r16l_3 = M94 (W r32r_4 vs W r32r_1)   r16r_3 = M96 (W r32l_6 vs W r32r_7)
+ */
+export const LIVE_FEEDERS: Record<string, [string, string]> = {
+  r16l_0: ["r32l_1", "r32r_0"],
+  r16l_1: ["r32l_0", "r32l_2"],
+  r16l_2: ["r32r_2", "r32l_5"],
+  r16l_3: ["r32r_4", "r32r_1"],
+  r16r_0: ["r32l_3", "r32r_6"],
+  r16r_1: ["r32l_4", "r32r_5"],
+  r16r_2: ["r32r_3", "r32l_7"],
+  r16r_3: ["r32l_6", "r32r_7"],
+  qfl_0: ["r16l_0", "r16l_1"],
+  qfl_1: ["r16l_2", "r16l_3"],
+  qfr_0: ["r16r_0", "r16r_1"],
+  qfr_1: ["r16r_2", "r16r_3"],
+  sfl_0: ["qfl_0", "qfl_1"],
+  sfr_0: ["qfr_0", "qfr_1"],
+  final: ["sfl_0", "sfr_0"],
+};
+
+/** slot → the downstream slot it feeds, derived from LIVE_FEEDERS (real-data tree). */
+export const LIVE_NEXT_MATCH: Record<string, string> = (() => {
+  const out: Record<string, string> = {};
+  for (const [downstream, [f1, f2]] of Object.entries(LIVE_FEEDERS)) {
+    out[f1] = downstream;
+    out[f2] = downstream;
+  }
+  return out;
+})();
+
 export const ALL_KO_KEYS = [
   ...Object.keys(R32_MATCHUPS),
   "r16l_0", "r16l_1", "r16l_2", "r16l_3",

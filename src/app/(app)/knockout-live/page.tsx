@@ -24,7 +24,7 @@ import {
   type ScheduleMatch,
 } from "@/lib/scoring/knockout-resolver";
 import { lockAtFor } from "@/lib/tournament/ko-live-state";
-import { LATER_FEEDERS } from "@/lib/tournament/knockout-derivation";
+import { LIVE_FEEDERS } from "@/lib/tournament/knockout-derivation";
 import { BracketLayout, BracketMatchCell, type KOValue, type SlotTeams, type SlotStatus } from "@/components/knockout/BracketLayout";
 import type { FinishedMatch } from "@/lib/results-hits";
 import { saveLiveKnockout } from "@/lib/supabase/sync";
@@ -44,12 +44,18 @@ interface ApiMatch {
   winner?: "HOME_TEAM" | "AWAY_TEAM" | "DRAW" | null;
 }
 
-// slot → the downstream match it feeds (derived from the feeder map).
+// slot → the downstream match it feeds (derived from the REAL-bracket feeder map).
 const NEXT_MATCH: Record<string, string> = {};
-for (const [downstream, [f1, f2]] of Object.entries(LATER_FEEDERS)) {
+for (const [downstream, [f1, f2]] of Object.entries(LIVE_FEEDERS)) {
   NEXT_MATCH[f1] = downstream;
   NEXT_MATCH[f2] = downstream;
 }
+
+// R32 column draw-order so the official (cross-side) R16 pairings render as a
+// clean tree: each consecutive R32 pair feeds the R16 slot beside it. Display
+// only — slot keys / stored data are unchanged.
+const LIVE_R32L = ["r32l_1", "r32r_0", "r32l_0", "r32l_2", "r32r_2", "r32l_5", "r32r_4", "r32r_1"];
+const LIVE_R32R = ["r32l_3", "r32r_6", "r32l_4", "r32r_5", "r32r_3", "r32l_7", "r32l_6", "r32r_7"];
 
 export default function KnockoutLivePage() {
   const knockoutLive = useBettingStore((s) => s.knockoutLive);
@@ -122,7 +128,7 @@ export default function KnockoutLivePage() {
   // Card data (admin dirtiest board) so a card-decided group tie seeds the real
   // bracket the same way the scorer does. Undefined when none entered.
   const fairPlay = useMemo(() => fairPlayFromBoard(dirtyBoard), [dirtyBoard]);
-  const tree = useMemo(() => resolveKnockoutTree(scored, thirdsOverride, fairPlay), [scored, thirdsOverride, fairPlay]);
+  const tree = useMemo(() => resolveKnockoutTree(scored, thirdsOverride, fairPlay, LIVE_FEEDERS), [scored, thirdsOverride, fairPlay]);
   const groupStageComplete = useMemo(() => Object.keys(computeGroupOrders(scored, fairPlay)).length === 12, [scored, fairPlay]);
   const champion = tree.final?.winner ?? knockoutLive.final?.winner ?? null;
   const filled = Object.values(knockoutLive).filter((m) => m.winner).length;
@@ -134,7 +140,7 @@ export default function KnockoutLivePage() {
   // predicted one and the user can re-edit (still editable until 30 min pre-kickoff).
   const getTeams = (key: string): SlotTeams => {
     const slot = tree[key as KoSlotKey];
-    const feeders = LATER_FEEDERS[key];
+    const feeders = LIVE_FEEDERS[key];
     const team1 = slot?.team1 ?? (feeders ? knockoutLive[feeders[0]]?.winner ?? null : null);
     const team2 = slot?.team2 ?? (feeders ? knockoutLive[feeders[1]]?.winner ?? null : null);
     return { team1, team2 };
@@ -219,7 +225,7 @@ export default function KnockoutLivePage() {
               </div>
               <p className="text-sm text-gray-500">לחצו על נבחרת לבחירת העולה, +/- לתוצאה</p>
             </div>
-            <BracketLayout getTeams={getTeams} renderMatch={renderMatch} champion={champion} />
+            <BracketLayout getTeams={getTeams} renderMatch={renderMatch} champion={champion} r32LeftOrder={LIVE_R32L} r32RightOrder={LIVE_R32R} />
           </>
         )}
       </div>

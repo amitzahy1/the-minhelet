@@ -14,6 +14,7 @@ import {
   syncAdvancementPicks,
 } from "@/lib/tournament/bracket-cascade";
 import { revalidateTree1 } from "@/lib/tournament/revalidate-bracket";
+import { LIVE_NEXT_MATCH } from "@/lib/tournament/knockout-derivation";
 import { isLocked } from "@/lib/constants";
 
 // --- Types ---
@@ -249,7 +250,7 @@ export const useBettingStore = create<BettingState & BettingActions>()(
           // so the bracket the user fills forward stays consistent. No
           // advancement-sync here — Tree 2 doesn't feed advancement bets.
           if (oldWinner && oldWinner !== newWinner) {
-            cascadeClear(state.knockoutLive, matchKey, oldWinner);
+            cascadeClear(state.knockoutLive, matchKey, oldWinner, LIVE_NEXT_MATCH);
           }
           state.lastUpdated = new Date().toISOString();
         }),

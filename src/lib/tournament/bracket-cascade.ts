@@ -61,13 +61,16 @@ export function cascadeClear(
   knockout: Record<string, KoMatch>,
   matchKey: string,
   oldWinner: string,
+  /** slot→downstream map. Defaults to NEXT_MATCH (simulation tree). The real-data
+   *  tree passes LIVE_NEXT_MATCH so its cascade follows the official bracket. */
+  nextMap: Record<string, string> = NEXT_MATCH,
 ): number {
-  const nextKey = NEXT_MATCH[matchKey];
+  const nextKey = nextMap[matchKey];
   if (!nextKey) return 0;
   const nextMatch = knockout[nextKey];
   if (nextMatch?.winner === oldWinner) {
     knockout[nextKey] = { score1: null, score2: null, winner: null };
-    return 1 + cascadeClear(knockout, nextKey, oldWinner);
+    return 1 + cascadeClear(knockout, nextKey, oldWinner, nextMap);
   }
   return 0;
 }

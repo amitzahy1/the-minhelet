@@ -173,11 +173,20 @@ export interface BracketLayoutProps {
   renderMatch: (slotKey: string, teams: SlotTeams, size: "sm" | "md") => React.ReactNode;
   /** Champion (winner of `final`) for the trophy card. */
   champion: string | null;
+  /**
+   * Draw-order of the left/right R32 columns. Defaults to `R32L`/`R32R`. The
+   * real-data tree passes a reordered list so the official (cross-side) R16
+   * pairings render as a clean tree — purely presentational, no data impact.
+   */
+  r32LeftOrder?: string[];
+  r32RightOrder?: string[];
 }
 
 /** Desktop full tree + mobile round tabs. Both trees share this. */
-export function BracketLayout({ getTeams, renderMatch, champion }: BracketLayoutProps) {
+export function BracketLayout({ getTeams, renderMatch, champion, r32LeftOrder, r32RightOrder }: BracketLayoutProps) {
   const cell = (key: string, size: "sm" | "md") => renderMatch(key, getTeams(key), size);
+  const r32Left = r32LeftOrder ?? R32L;
+  const r32Right = r32RightOrder ?? R32R;
 
   return (
     <>
@@ -192,7 +201,7 @@ export function BracketLayout({ getTeams, renderMatch, champion }: BracketLayout
             it scrolls from the left edge instead of centering and clipping the
             left side off-screen (which `mx-auto`/`justify-center` did). */}
         <div className="flex items-stretch justify-center gap-0 min-w-max" style={{ minHeight: "700px" }}>
-          <RoundCol label="R32" width="w-[120px]">{R32L.map((k) => cell(k, "sm"))}</RoundCol>
+          <RoundCol label="R32" width="w-[120px]">{r32Left.map((k) => cell(k, "sm"))}</RoundCol>
           <Connector />
           <RoundCol label="R16" width="w-[130px]">{R16L.map((k) => cell(k, "md"))}</RoundCol>
           <Connector />
@@ -229,7 +238,7 @@ export function BracketLayout({ getTeams, renderMatch, champion }: BracketLayout
           <Connector />
           <RoundCol label="R16" width="w-[130px]">{R16R.map((k) => cell(k, "md"))}</RoundCol>
           <Connector />
-          <RoundCol label="R32" width="w-[120px]">{R32R.map((k) => cell(k, "sm"))}</RoundCol>
+          <RoundCol label="R32" width="w-[120px]">{r32Right.map((k) => cell(k, "sm"))}</RoundCol>
         </div>
       </div>
     </>

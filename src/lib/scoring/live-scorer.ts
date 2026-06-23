@@ -8,6 +8,7 @@
 import { computeGroupHits, type FinishedMatch } from "../results-hits";
 import type { BettorBracket, BettorAdvancement, BettorSpecialBets } from "../supabase/shared-data";
 import { GROUPS } from "../tournament/groups";
+import { LIVE_FEEDERS } from "../tournament/knockout-derivation";
 import { matchDayKey } from "../tournament/group-live-state";
 import {
   resolveKnockoutTree,
@@ -199,14 +200,16 @@ export function computeLiveScores(
     }
   }
 
-  // -------- Knockout scoring --------
+  // -------- Knockout scoring (real-data tree, "עץ נתוני אמת") --------
   // Resolve from the match-result set (live-inclusive) so an in-play KO match's
   // current score grades its own toto/exact. Downstream slots without a score
   // are skipped below, so a live result can't mis-score a not-yet-played round.
-  const slotTree = resolveKnockoutTree(matchResults, options.bestThirdsOverride ?? null, fairPlay);
+  // Uses LIVE_FEEDERS (the official FIFA bracket) so each slot maps to the real
+  // R16→Final matchup — NOT the legacy LATER_FEEDERS used by advancement below.
+  const liveTree = resolveKnockoutTree(matchResults, options.bestThirdsOverride ?? null, fairPlay, LIVE_FEEDERS);
   const thirdPlace = findThirdPlaceMatch(matchResults);
 
-  for (const slot of Object.values(slotTree)) {
+  for (const slot of Object.values(liveTree)) {
     if (slot.score1 === null || slot.score2 === null || !slot.team1 || !slot.team2) continue;
     const stage = stageForSlot(slot.key);
     const actualDraw = slot.score1 === slot.score2;
@@ -277,9 +280,12 @@ export function computeLiveScores(
   // the bracket. (When no liveMatches were passed this is the same tree as
   // above, so behavior is unchanged.)
   if (options.advancements && options.advancements.length > 0) {
-    const advSlotTree = options.liveMatches
-      ? resolveKnockoutTree(matches, options.bestThirdsOverride ?? null, fairPlay)
-      : slotTree;
+    // Advancement (the pre-tournament "advancers" bets) is resolved on the
+    // FINISHED `matches` with the LEGACY LATER_FEEDERS (default) — UNCHANGED from
+    // before. It intentionally does NOT reuse the live tree above, so correcting
+    // the real-data bracket can't alter how advancement scores. (Known: this path
+    // is still on the old wiring and is handled separately.)
+    const advSlotTree = resolveKnockoutTree(matches, options.bestThirdsOverride ?? null, fairPlay);
     const groupOrders = computeGroupOrders(matches, fairPlay);
     const actualGroupOrders = deriveActualGroupOrders(advSlotTree, groupOrders, GROUPS);
     // 3rd-place qualifiers = teams currently appearing as `?3` resolved slots

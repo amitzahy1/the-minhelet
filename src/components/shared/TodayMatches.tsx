@@ -17,6 +17,15 @@ import { resolveKnockoutTree } from "@/lib/scoring/knockout-resolver";
 import { LIVE_FEEDERS } from "@/lib/tournament/knockout-derivation";
 import { pairKey } from "@/lib/fixtures-client";
 
+// For a knockout match, which advancement set its winner joins (= reaching the
+// NEXT stage). Stage-generic — works for R32→R16, R16→QF, … (mirrors schedule).
+const KO_ADV_FIELD: Record<string, "advanceToR16" | "advanceToQF" | "advanceToSF" | "advanceToFinal"> = {
+  LAST_32: "advanceToR16", ROUND_OF_32: "advanceToR16",
+  LAST_16: "advanceToQF", ROUND_OF_16: "advanceToQF",
+  QUARTER_FINAL: "advanceToSF", QUARTER_FINALS: "advanceToSF",
+  SEMI_FINAL: "advanceToFinal", SEMI_FINALS: "advanceToFinal",
+};
+
 interface Match {
   id: number;
   date: string;
@@ -729,10 +738,76 @@ export function TodayMatches() {
                             </div>
                           )}
 
-                          {/* Nothing to show at all — KO match with no related bets,
-                              or a finished group match nobody predicted. Upcoming
-                              group matches always render a reveal/lock section above. */}
-                          {relatedBets.length === 0 && groupHits.length === 0 && (isFinished || !groupLetter) && (
+                          {/* Knockout match — everyone's 90' score predictions + who they
+                              advanced. Source is the lock-redacted /api/shared-bets, so a
+                              slot's picks appear only once it has LOCKED. Stage-generic. */}
+                          {!groupLetter && (() => {
+                            const slot = koSlotByPair.get(pairKey(m.homeTla, m.awayTla));
+                            if (!slot) return null;
+                            const koActual = (isLive || isFinished) && m.homeGoals !== null && m.awayGoals !== null
+                              ? { home: m.homeGoals, away: m.awayGoals } : null;
+                            const scorePicks = brackets.flatMap((b) => {
+                              const v = b.knockoutTreeLive?.[slot.key];
+                              if (!v || v.score1 == null || v.score2 == null) return [];
+                              const pick = m.homeTla === slot.team1 ? { home: v.score1, away: v.score2 } : { home: v.score2, away: v.score1 };
+                              return [{ userId: b.userId, name: b.displayName, ...pick }];
+                            });
+                            const field = KO_ADV_FIELD[m.stage || ""];
+                            const advRows = field ? advancements.flatMap((adv) => {
+                              const set = (adv[field] as string[]) || [];
+                              const codes: string[] = [];
+                              if (set.includes(m.homeTla)) codes.push(m.homeTla);
+                              if (set.includes(m.awayTla)) codes.push(m.awayTla);
+                              return codes.length ? [{ userId: adv.userId, name: adv.displayName, codes }] : [];
+                            }) : [];
+                            if (scorePicks.length === 0 && advRows.length === 0) {
+                              return <p className="text-[11px] text-gray-400 text-center py-1">אין הימורים למשחק הזה</p>;
+                            }
+                            return (
+                              <div className="space-y-2">
+                                {scorePicks.length > 0 && (
+                                  <div>
+                                    <p className="text-[10px] font-bold text-gray-500 mb-1">ניחושי התוצאה</p>
+                                    <div className="grid grid-cols-1 gap-1">
+                                      {scorePicks.map((p) => {
+                                        const hit = koActual ? classifyHit({ home: p.home, away: p.away }, koActual) : null;
+                                        const bg = hit === "exact" ? "bg-green-50 border-green-300" : hit === "toto" ? "bg-amber-50 border-amber-300" : hit === "miss" ? "bg-red-50 border-red-200" : "bg-white border-gray-200";
+                                        const icon = hit === "exact" ? "🎯" : hit === "toto" ? "✓" : hit === "miss" ? "✗" : "";
+                                        return (
+                                          <div key={p.userId} className={`flex items-center justify-between rounded-lg px-2 py-1 border ${bg}`}>
+                                            <span className="text-[11px] font-bold text-gray-800 truncate">{p.name}</span>
+                                            <span className="flex items-center gap-1 shrink-0">
+                                              <span dir="ltr" className="text-[11px] font-black tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{p.away}-{p.home}</span>
+                                              {icon && <span className="text-xs">{icon}</span>}
+                                            </span>
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+                                )}
+                                {advRows.length > 0 && (
+                                  <div>
+                                    <p className="text-[10px] font-bold text-gray-500 mb-1">את מי כל מהמר העלה</p>
+                                    <div className="grid grid-cols-2 gap-1">
+                                      {advRows.map((r) => (
+                                        <div key={r.userId} className="flex items-center justify-between rounded-lg px-2 py-1 border border-gray-200 bg-white text-[11px]">
+                                          <span className="font-bold text-gray-800 truncate">{r.name}</span>
+                                          <span className="flex items-center gap-1 shrink-0 text-green-700 font-medium">
+                                            {r.codes.map((c) => <span key={c}>{getFlag(c)} {c}</span>)}
+                                          </span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })()}
+
+                          {/* Finished GROUP match nobody predicted. (KO matches are handled
+                              by the block above; upcoming group matches show reveal/lock.) */}
+                          {relatedBets.length === 0 && groupHits.length === 0 && isFinished && groupLetter && (
                             <p className="text-[11px] text-gray-400 text-center py-1">
                               אין הימורים למשחק הזה
                             </p>

@@ -48,10 +48,11 @@ export interface RealKnockoutStatus {
   /** Hebrew name of the current open stage REGARDLESS of fill state — drives the
    *  banner's "we're in stage X" text even after the viewer has bet. */
   currentStageLabel: string | null;
-  /** The next match still to be PLAYED by kickoff (open OR locked — NOT finished),
-   *  for the banner's "next match …" line. A locked/in-play match stays "next"
-   *  until it ends, then the following one takes over. `locked` = betting closed. */
-  nextMatch: { team1: string; team2: string; kickoff: string; lockAt: string; locked: boolean } | null;
+  /** The next match(es) still to be PLAYED by kickoff (open OR locked — NOT
+   *  finished). ALL matches sharing the earliest kickoff are listed, so two
+   *  simultaneous matches both show. A locked/in-play match stays "next" until
+   *  it ends, then the following kickoff takes over. `locked` = betting closed. */
+  nextMatch: { matches: { team1: string; team2: string }[]; kickoff: string; lockAt: string; locked: boolean } | null;
 }
 
 // Stage prefix → display order + Hebrew label. The real-data tree fills one
@@ -143,9 +144,16 @@ export function useRealKnockoutStatus(): RealKnockoutStatus {
         const ko = findKickoffForSlot(k, tree, schedule);
         if (ko && slot?.team1 && slot?.team2) {
           const t = Date.parse(ko.date);
-          if (!Number.isNaN(t) && t < nextKo) {
-            nextKo = t;
-            nextMatch = { team1: slot.team1, team2: slot.team2, kickoff: ko.date, lockAt: new Date(t - LOCK_BEFORE_MIN * 60_000).toISOString(), locked: st === "locked" };
+          if (!Number.isNaN(t)) {
+            if (t < nextKo) {
+              // Earlier kickoff → starts a fresh "next" group.
+              nextKo = t;
+              nextMatch = { matches: [{ team1: slot.team1, team2: slot.team2 }], kickoff: ko.date, lockAt: new Date(t - LOCK_BEFORE_MIN * 60_000).toISOString(), locked: st === "locked" };
+            } else if (t === nextKo && nextMatch) {
+              // Same kickoff → another simultaneous match; list it too.
+              nextMatch.matches.push({ team1: slot.team1, team2: slot.team2 });
+              if (st === "locked") nextMatch.locked = true;
+            }
           }
         }
       }

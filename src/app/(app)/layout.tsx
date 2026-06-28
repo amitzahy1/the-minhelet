@@ -589,9 +589,12 @@ function ProgressBanner() {
           ) : inStage ? (
             <>
               <span className="text-green-700 font-bold shrink-0">{koStatus.currentStageLabel ?? "עץ נתוני אמת"} בעיצומו!</span>
-              {nm && (
+              {nm && nm.matches.length > 0 && (
                 <span className="text-gray-600 shrink-0">
-                  המשחק הבא: <span className="font-bold text-gray-800">{getTeamNameHe(nm.team1) || nm.team1}–{getTeamNameHe(nm.team2) || nm.team2}</span>
+                  {nm.matches.length > 1 ? "המשחקים הבאים: " : "המשחק הבא: "}
+                  <span className="font-bold text-gray-800">
+                    {nm.matches.map((mt) => `${getTeamNameHe(mt.team1) || mt.team1}–${getTeamNameHe(mt.team2) || mt.team2}`).join(" · ")}
+                  </span>
                   {" · בעיטה "}<span dir="ltr" className="tabular-nums">{toIsraelTimeShort(nm.kickoff)}</span>
                   {nm.locked
                     ? <> · <span className="text-gray-500 font-bold">🔒 ההימור ננעל</span></>

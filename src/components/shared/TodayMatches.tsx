@@ -274,7 +274,8 @@ export function TodayMatches() {
           const mu = MATCHUPS[i];
           if (!isTeam(mu.team1) && !isTeam(mu.team2)) continue;
           const backed = pick === "1" ? mu.p1Short : pick === "2" ? mu.p2Short : "תיקו";
-          bets.push({ name, type: "מאצ'אפ", detail: `${mu.p1Short}-${mu.p2Short}: ${backed}`, order: 7 });
+          // Just the picked player's name — short and clear (not "A-B: X").
+          bets.push({ name, type: "מאצ'אפ", detail: backed, order: 7 });
         }
       }
     }
@@ -791,11 +792,13 @@ export function TodayMatches() {
                                     <p className="text-[10px] font-bold text-gray-500 mb-1">את מי כל מהמר העלה</p>
                                     <div className="grid grid-cols-2 gap-1">
                                       {advRows.map((r) => (
-                                        <div key={r.userId} className="flex items-center justify-between rounded-lg px-2 py-1 border border-gray-200 bg-white text-[11px]">
-                                          <span className="font-bold text-gray-800 truncate">{r.name}</span>
-                                          <span className="flex items-center gap-1 shrink-0 text-green-700 font-medium">
+                                        // Stack name over team(s) so a double-pick (both teams) never
+                                        // squeezes/truncates the bettor name.
+                                        <div key={r.userId} className="rounded-lg px-2 py-1 border border-gray-200 bg-white text-[11px]">
+                                          <p className="font-bold text-gray-800 truncate">{r.name}</p>
+                                          <div className="flex flex-wrap items-center gap-x-1.5 text-green-700 font-medium">
                                             {r.codes.map((c) => <span key={c}>{getFlag(c)} {c}</span>)}
-                                          </span>
+                                          </div>
                                         </div>
                                       ))}
                                     </div>

@@ -5,9 +5,12 @@ import { useBettingStore } from "@/stores/betting-store";
 import { isLocked, revealAtFor, LOCK_DEADLINE } from "@/lib/constants";
 import { getFlag, getTeamNameHe } from "@/lib/flags";
 import type { BettorSpecialBets, BettorAdvancement, BettorBracket } from "@/lib/supabase/shared-data";
-import { matchPairIndex, normalizeGroupLetter, classifyHit } from "@/lib/results-hits";
+import { matchPairIndex, normalizeGroupLetter, normalizeTla, classifyHit, type FinishedMatch } from "@/lib/results-hits";
 import { MATCHUPS, parseMatchupPick } from "@/lib/matchups";
 import { computeMatchDays, dayLockAtForKickoff, type MatchDay } from "@/lib/tournament/group-live-state";
+import { resolveKnockoutTree } from "@/lib/scoring/knockout-resolver";
+import { LIVE_FEEDERS } from "@/lib/tournament/knockout-derivation";
+import { pairKey } from "@/lib/fixtures-client";
 
 import { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
@@ -52,9 +55,12 @@ interface MatchBetsPanelProps {
   specialBets: BettorSpecialBets[];
   advancements: BettorAdvancement[];
   matchDays: MatchDay[];
+  /** Resolved bracket slot for a knockout match (key + teams) — drives the
+   *  knockout score-distribution. undefined for group matches / unresolved. */
+  koSlot?: { key: string; team1: string; team2: string };
 }
 
-function MatchBetsPanel({ match, brackets, specialBets, advancements, matchDays }: MatchBetsPanelProps) {
+function MatchBetsPanel({ match, brackets, specialBets, advancements, matchDays, koSlot }: MatchBetsPanelProps) {
   const home = match.homeTla;
   const away = match.awayTla;
   const groupLetter = normalizeGroupLetter(match.group);
@@ -333,6 +339,45 @@ function MatchBetsPanel({ match, brackets, specialBets, advancements, matchDays 
         {/* Knockout advancement (R32 and on) — which of the two teams each bettor
             predicted to advance from THIS match. Stays hidden until the fixture
             has real teams (TBD codes won't match anyone's advancement set). */}
+        {/* Knockout SCORE distribution — everyone's 90' predictions for this real
+            match, from the lock-redacted source (only shown once the slot locks).
+            Oriented to this fixture's home/away; graded once there's a result. */}
+        {globalLocked && !groupLetter && koSlot && (() => {
+          const koActual = (match.status === "FINISHED" || match.status === "IN_PLAY" || match.status === "PAUSED")
+            && match.homeGoals != null && match.awayGoals != null
+            ? { home: match.homeGoals, away: match.awayGoals } : null;
+          const picks = brackets.flatMap((b) => {
+            const v = b.knockoutTreeLive?.[koSlot.key];
+            if (!v || v.score1 == null || v.score2 == null) return [];
+            const p = home === koSlot.team1 ? { home: v.score1, away: v.score2 } : { home: v.score2, away: v.score1 };
+            return [{ userId: b.userId, name: b.displayName, ...p }];
+          });
+          if (picks.length === 0) return null;
+          return (
+            <div>
+              <p className="text-xs font-bold text-gray-500 mb-2">ניחושי התוצאה</p>
+              <div className="bg-white rounded-lg border border-gray-200 px-3 py-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {picks.map((p) => {
+                    const hit = koActual ? classifyHit({ home: p.home, away: p.away }, koActual) : null;
+                    const bg = hit === "exact" ? "border-green-300 bg-green-50" : hit === "toto" ? "border-amber-300 bg-amber-50" : hit === "miss" ? "border-red-200 bg-red-50" : "border-gray-100";
+                    const icon = hit === "exact" ? "🎯" : hit === "toto" ? "✓" : hit === "miss" ? "✗" : "";
+                    return (
+                      <div key={p.userId} className={`text-xs border rounded-lg p-2 ${bg}`}>
+                        <p className="font-bold text-gray-800 mb-0.5 truncate">{p.name}</p>
+                        <span className="flex items-center gap-1">
+                          <span dir="ltr" className="font-black tabular-nums text-gray-800" style={{ fontFamily: "var(--font-inter)" }}>{p.away}-{p.home}</span>
+                          {icon && <span>{icon}</span>}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+
         {globalLocked && !groupLetter && hasAdvancements && (() => {
           const stage = match.stage || "";
           const field = KO_ADVANCE_FIELD[stage];
@@ -422,6 +467,31 @@ export default function SchedulePage() {
     () => computeMatchDays(matches.map((m) => ({ date: m.date, group: m.group, stage: m.stage }))),
     [matches],
   );
+
+  // Resolve the real bracket so each knockout fixture maps to its slot key —
+  // used to pull everyone's score predictions (keyed by slot) for that match.
+  const koSlotByPair = useMemo(() => {
+    const map = new Map<string, { key: string; team1: string; team2: string }>();
+    const scored: FinishedMatch[] = matches
+      .filter((m) => m.homeGoals != null && m.awayGoals != null)
+      .map((m) => ({
+        id: m.id, date: m.date,
+        homeTla: normalizeTla(m.homeTla), awayTla: normalizeTla(m.awayTla),
+        group: normalizeGroupLetter(m.group) || "", stage: m.stage ?? "",
+        homeGoals: m.homeGoals as number, awayGoals: m.awayGoals as number,
+        homePenalties: null, awayPenalties: null,
+        winner: (m.homeGoals as number) > (m.awayGoals as number) ? "HOME_TEAM"
+          : (m.awayGoals as number) > (m.homeGoals as number) ? "AWAY_TEAM" : "DRAW",
+      }));
+    if (scored.length === 0) return map;
+    try {
+      const tree = resolveKnockoutTree(scored, null, undefined, LIVE_FEEDERS);
+      for (const slot of Object.values(tree)) {
+        if (slot.team1 && slot.team2) map.set(pairKey(normalizeTla(slot.team1), normalizeTla(slot.team2)), { key: slot.key, team1: slot.team1, team2: slot.team2 });
+      }
+    } catch { /* never block the schedule on a resolution hiccup */ }
+    return map;
+  }, [matches]);
 
   // When the next reveal boundary (global lock or a match-day lock, + the
   // 1-min grace) passes while the page is open, force-refresh the shared data
@@ -665,6 +735,7 @@ export default function SchedulePage() {
                             specialBets={specialBets}
                             advancements={advancements}
                             matchDays={matchDays}
+                            koSlot={koSlotByPair.get(pairKey(normalizeTla(m.homeTla), normalizeTla(m.awayTla)))}
                           />
                         )}
                       </AnimatePresence>

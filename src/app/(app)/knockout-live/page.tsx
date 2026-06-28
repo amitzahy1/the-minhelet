@@ -29,6 +29,7 @@ import { BracketLayout, BracketMatchCell, type KOValue, type SlotTeams, type Slo
 import type { FinishedMatch } from "@/lib/results-hits";
 import { saveLiveKnockout } from "@/lib/supabase/sync";
 import { useToastStore } from "@/stores/toast-store";
+import { createClient } from "@/lib/supabase/client";
 
 interface ApiMatch {
   id: number;
@@ -133,6 +134,43 @@ export default function KnockoutLivePage() {
   const groupStageComplete = useMemo(() => Object.keys(computeGroupOrders(scored, fairPlay)).length === 12, [scored, fairPlay]);
   const champion = tree.final?.winner ?? null;
   const filled = Object.values(knockoutLive).filter((m) => m.winner).length;
+
+  // ── Auto-recover local-only picks ──────────────────────────────────────────
+  // Many picks were saved to the local store but never reached the DB (the
+  // prediction_locks gap rejected them server-side). Now that locks self-heal,
+  // re-save any pick the user has locally for an OPEN slot the DB is missing —
+  // so everyone's picks recover automatically, no re-entering. Retries across
+  // the periodic refresh until every recoverable slot is persisted (handles the
+  // window where locks are still healing on the first load).
+  const reconcileDone = useRef(false);
+  useEffect(() => {
+    if (loading || reconcileDone.current || Object.keys(tree).length === 0) return;
+    (async () => {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+        const { data } = await supabase
+          .from("user_brackets").select("knockout_tree_live").eq("user_id", user.id).maybeSingle();
+        const dbSaved = (data?.knockout_tree_live || {}) as Record<string, { winner?: string | null }>;
+        const local = useBettingStore.getState().knockoutLive;
+        const candidates = Object.keys(local).filter((k) => {
+          if (!local[k]?.winner) return false;          // nothing to persist
+          if (dbSaved[k]?.winner) return false;          // already saved
+          const la = lockAtFor(k as KoSlotKey, tree, schedule);
+          return !!la && Date.now() <= new Date(la).getTime(); // only OPEN slots
+        });
+        if (candidates.length === 0) { reconcileDone.current = true; return; }
+        let ok = 0;
+        for (const k of candidates) {
+          const res = await saveLiveKnockout(k, local[k], lockAtFor(k as KoSlotKey, tree, schedule));
+          if (res.success) ok++;
+        }
+        if (ok > 0) useToastStore.getState().push(`שוחזרו ${ok} הימורים ששמורים אצלך אך לא נשמרו בשרת ✓`, "success", 6000);
+        if (ok === candidates.length) reconcileDone.current = true; // all done → stop retrying
+      } catch { /* never block the page on the reconcile */ }
+    })();
+  }, [loading, tree, schedule]);
 
   // Teams for a slot: ONLY the REAL team, resolved from actual results. This is
   // the real-data tree — you bet one stage at a time on the match that ACTUALLY

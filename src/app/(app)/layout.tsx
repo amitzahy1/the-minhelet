@@ -615,7 +615,7 @@ function ProgressBanner() {
             <div className="max-w-7xl mx-auto px-3 sm:px-4 py-1.5 text-[11px] sm:text-xs font-bold flex items-center gap-2">
               {koStatus.dbUnfilledOpenCount > 0 ? (
                 <Link href="/knockout-live" className="text-red-700 hover:underline">
-                  ⚠️ נשמרו לך {koStatus.dbSavedOpenCount}/{koStatus.openCount} (לפי הדאטהבייס) — חסרים {koStatus.dbUnfilledOpenCount} משחקים ב{koStatus.currentStageLabel ?? "שלב הנוכחי"} ←
+                  ⚠️ נשמרו לך {koStatus.dbSavedOpenCount}/{koStatus.openCount} — חסרים {koStatus.dbUnfilledOpenCount} משחקים ב{koStatus.currentStageLabel ?? "שלב הנוכחי"} ←
                 </Link>
               ) : (
                 <span className="text-emerald-700">✓ כל {koStatus.openCount} המשחקים בשלב הנוכחי נשמרו בדאטהבייס</span>

@@ -172,8 +172,10 @@ export async function GET(req: Request) {
           let filledCount = 0;
           for (const profile of allProfiles || []) {
             const b = brackets?.find((br) => br.user_id === profile.id);
-            const kl = (b?.knockout_tree_live || {}) as Record<string, { winner: string | null }>;
-            if (kl[k]?.winner) filledCount++;
+            const kl = (b?.knockout_tree_live || {}) as Record<string, { score1?: number | null; score2?: number | null }>;
+            const s = kl[k];
+            // Filled = both 90' scores entered (a draw is complete without a winner pick).
+            if (s && s.score1 != null && s.score2 != null) filledCount++;
             else missing.push(profile.display_name || "ללא שם");
           }
           return { slotKey: k, team1: slot?.team1 || "", team2: slot?.team2 || "", kickoff: ko?.date ?? null, total: (allProfiles || []).length, filledCount, missing };

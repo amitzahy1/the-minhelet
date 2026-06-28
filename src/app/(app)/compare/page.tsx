@@ -266,6 +266,21 @@ export default function ComparePage() {
       return next;
     });
 
+  // Team filter for the advancement view — highlights one team's cells across
+  // the table and dims the rest. Options are every team anyone advanced/picked,
+  // sorted by Hebrew name (א→ת).
+  const [advTeamFilter, setAdvTeamFilter] = useState("");
+  const advTeamOptions = useMemo(() => {
+    const set = new Set<string>();
+    for (const b of BETTORS) {
+      if (b.winner) set.add(b.winner);
+      if (b.finalist1) set.add(b.finalist1);
+      if (b.finalist2) set.add(b.finalist2);
+      for (const t of [...b.sf, ...b.qf, ...b.r16]) if (t) set.add(t);
+    }
+    return [...set].sort((a, b) => (getTeamNameHe(a) || a).localeCompare(getTeamNameHe(b) || b, "he"));
+  }, [BETTORS]);
+
   // Build color maps for each category
   const advColors = useMemo(() => buildColorMap([
     ...BETTORS.map(b=>b.winner), ...BETTORS.flatMap(b=>[b.finalist1,b.finalist2]),
@@ -409,9 +424,28 @@ export default function ComparePage() {
       {/* === ADVANCEMENT VIEW === transposed: bettors as columns, bet rows */}
       {view === "advancement" && (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
+          <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-2 flex-wrap">
+            <span className="text-xs font-bold text-gray-500">סנן לפי נבחרת:</span>
+            <select
+              value={advTeamFilter}
+              onChange={(e) => setAdvTeamFilter(e.target.value)}
+              className="px-3 py-1.5 rounded-lg border border-gray-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">כל הנבחרות</option>
+              {advTeamOptions.map((t) => (
+                <option key={t} value={t}>{getTeamNameHe(t) || t} ({t})</option>
+              ))}
+            </select>
+            {advTeamFilter && (
+              <button onClick={() => setAdvTeamFilter("")} className="text-xs font-bold text-blue-600 hover:text-blue-800">
+                נקה סינון ✕
+              </button>
+            )}
+          </div>
           <TransposedBetTable
             bettors={fBettors}
             colorMap={advColors}
+            highlightTeam={advTeamFilter}
             rows={[
               { label: "זוכה", section: "winner" as const, render: (b) => ({ val: b.winner, node: <span className="font-bold text-amber-700">{F[b.winner]} {b.winner}</span> }), highlight: true },
               { label: "גמר 1", section: "final" as const, render: (b) => ({ val: b.finalist1, node: <span className="text-gray-700">{F[b.finalist1]} {b.finalist1}</span> }) },
@@ -697,10 +731,13 @@ function TransposedBetTable({
   bettors,
   rows,
   colorMap,
+  highlightTeam = "",
 }: {
   bettors: Bettor[];
   rows: TransposedRow[];
   colorMap: Record<string, string>;
+  /** When set, cells matching this team code are ringed and the rest dimmed. */
+  highlightTeam?: string;
 }) {
   return (
     <div className="overflow-x-auto">
@@ -757,12 +794,14 @@ function TransposedBetTable({
               </th>
               {bettors.map((b) => {
                 const { val, node } = row.render(b);
+                const isHit = highlightTeam !== "" && val === highlightTeam;
+                const isDim = highlightTeam !== "" && val !== highlightTeam;
                 return (
                   <td
                     key={b.name}
                     className={`py-1.5 px-2 text-center text-xs border-e border-gray-100 last:border-e-0 ${getValueColor(val, colorMap)} ${
                       b.isYou ? "ring-1 ring-inset ring-blue-200" : ""
-                    }`}
+                    } ${isHit ? "ring-2 ring-inset ring-amber-500 font-black" : ""} ${isDim ? "opacity-25" : ""}`}
                   >
                     {node}
                   </td>

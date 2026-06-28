@@ -133,7 +133,8 @@ export default function KnockoutLivePage() {
   const tree = useMemo(() => resolveKnockoutTree(scored, thirdsOverride, fairPlay, LIVE_FEEDERS), [scored, thirdsOverride, fairPlay]);
   const groupStageComplete = useMemo(() => Object.keys(computeGroupOrders(scored, fairPlay)).length === 12, [scored, fairPlay]);
   const champion = tree.final?.winner ?? null;
-  const filled = Object.values(knockoutLive).filter((m) => m.winner).length;
+  // "Filled" = both scores entered (a 90' draw is complete without a winner pick).
+  const filled = Object.values(knockoutLive).filter((m) => m.score1 != null && m.score2 != null).length;
 
   // ── Auto-recover local-only picks ──────────────────────────────────────────
   // Many picks were saved to the local store but never reached the DB (the
@@ -152,11 +153,12 @@ export default function KnockoutLivePage() {
         if (!user) return;
         const { data } = await supabase
           .from("user_brackets").select("knockout_tree_live").eq("user_id", user.id).maybeSingle();
-        const dbSaved = (data?.knockout_tree_live || {}) as Record<string, { winner?: string | null }>;
+        const dbSaved = (data?.knockout_tree_live || {}) as Record<string, { score1?: number | null; score2?: number | null }>;
         const local = useBettingStore.getState().knockoutLive;
+        const isSet = (v?: { score1?: number | null; score2?: number | null } | null) => !!v && v.score1 != null && v.score2 != null;
         const candidates = Object.keys(local).filter((k) => {
-          if (!local[k]?.winner) return false;          // nothing to persist
-          if (dbSaved[k]?.winner) return false;          // already saved
+          if (!isSet(local[k])) return false;            // nothing entered → nothing to persist
+          if (isSet(dbSaved[k])) return false;           // already saved
           const la = lockAtFor(k as KoSlotKey, tree, schedule);
           return !!la && Date.now() <= new Date(la).getTime(); // only OPEN slots
         });

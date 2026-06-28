@@ -79,7 +79,10 @@ export const BracketMatchCell = memo(function BracketMatchCell({
   };
 
   const selectWinner = (code: string) => {
-    if (!editable || !onChange) return;
+    // Only Tree-1 (simulation, winner-only) uses a row click to choose a winner.
+    // On the scored real-data tree the winner is derived from the score, and a
+    // 90' draw needs NO "who advances" pick — penalties don't affect this page.
+    if (!editable || !onChange || !scoreless) return;
     onChange({ winner: code });
   };
 
@@ -94,22 +97,36 @@ export const BracketMatchCell = memo(function BracketMatchCell({
   const isWinner1 = value?.winner === team1Code;
   const isWinner2 = value?.winner === team2Code;
   const isTie = !scoreless && value?.score1 != null && value?.score2 != null && value.score1 === value.score2;
+  // A pick is "filled" when both scores are entered (scored real-data tree) or a
+  // winner is chosen (Tree-1). A 90' draw is complete with NO who-advances pick.
+  const isFilled = scoreless ? !!value?.winner : (value?.score1 != null && value?.score2 != null);
   const clickable = editable && !!onChange;
 
-  // Hit indicator for finished Tree-2 matches.
+  // Hit indicator for finished Tree-2 matches — graded on the 90' result type
+  // (toto) + exact score, mirroring the calculator. A 90' draw vs a draw pick is
+  // a toto regardless of who advanced on penalties.
   let hit: "exact" | "toto" | "miss" | "empty" | null = null;
   if (realResult && realResult.winner) {
-    if (value?.winner == null && value?.score1 == null) hit = "empty";
-    else if (!scoreless && value?.score1 === realResult.score1 && value?.score2 === realResult.score2) hit = "exact";
-    else if (value?.winner === realResult.winner) hit = "toto";
-    else hit = "miss";
+    const rt = (a: number | null, b: number | null) =>
+      a == null || b == null ? null : a > b ? "1" : a < b ? "2" : "X";
+    if (scoreless) {
+      hit = value?.winner == null ? "empty" : value.winner === realResult.winner ? "toto" : "miss";
+    } else if (value?.score1 == null || value?.score2 == null) {
+      hit = "empty";
+    } else if (value.score1 === realResult.score1 && value.score2 === realResult.score2) {
+      hit = "exact";
+    } else if (rt(value.score1, value.score2) === rt(realResult.score1, realResult.score2)) {
+      hit = "toto";
+    } else {
+      hit = "miss";
+    }
   }
 
   const rowCls = (isW: boolean) =>
     `flex items-center gap-1.5 px-2 ${py} w-full ${clickable ? "cursor-pointer" : ""} transition-colors ${isW ? "bg-green-50" : clickable ? "hover:bg-gray-50" : ""}`;
 
   return (
-    <div className={`bg-white rounded-lg border overflow-hidden transition-all ${value?.winner ? "border-green-300 shadow-sm" : "border-gray-200 shadow-sm"}`}>
+    <div className={`bg-white rounded-lg border overflow-hidden transition-all ${isFilled ? "border-green-300 shadow-sm" : "border-gray-200 shadow-sm"}`}>
       <div onClick={() => selectWinner(team1Code)} className={`${rowCls(isWinner1)} border-b border-gray-100`}>
         <span className="text-sm">{getFlag(team1Code)}</span>
         <span className={`text-sm font-bold flex-1 ${isWinner1 ? "text-green-700" : "text-gray-800"}`}>{team1Code}</span>
@@ -123,15 +140,11 @@ export const BracketMatchCell = memo(function BracketMatchCell({
         {isWinner2 && <span className="text-green-500 text-xs font-bold ms-0.5">✓</span>}
       </div>
       {isTie && editable && (
-        value?.winner ? (
-          <div className="text-center py-1 bg-green-50 border-t border-green-200">
-            <span className="text-[10px] text-green-700 font-bold">תיקו · עולה: {value.winner} ✓</span>
-          </div>
-        ) : (
-          <div className="text-center py-1 bg-amber-50 border-t border-amber-200">
-            <span className="text-[10px] text-amber-700 font-bold">תיקו — לחצו על מי שעולה</span>
-          </div>
-        )
+        // 90' draw — complete as-is. No "who advances" pick: this page scores the
+        // 90' result only (penalties / who advances aren't part of it).
+        <div className="text-center py-1 bg-green-50 border-t border-green-200">
+          <span className="text-[10px] text-green-700 font-bold">תיקו ✓ · ניקוד לפי 90 דק׳</span>
+        </div>
       )}
       {status === "locked" && !realResult && (
         <div className="text-center py-1 bg-gray-50 border-t border-gray-200">

@@ -54,7 +54,7 @@ describe("calculateKnockoutScore — penalties + exact + toto", () => {
     expect(r.exact).toBe(SCORING.exact.R32);
   });
 
-  it("regulation draw + correct penalty pick: full toto", () => {
+  it("90' draw predicted as a draw → toto + exact (who advances on penalties is irrelevant)", () => {
     const r = calculateKnockoutScore(
       "R16",
       { homeGoals: 1, awayGoals: 1, penaltyWinner: "BRA", team1: "BRA", team2: "JPN" },
@@ -64,14 +64,24 @@ describe("calculateKnockoutScore — penalties + exact + toto", () => {
     expect(r.exact).toBe(SCORING.exact.R16);
   });
 
-  it("regulation draw + WRONG penalty pick: zero toto, but exact bonus still applies", () => {
+  it("90' draw predicted as a draw with NO winner pick → STILL toto (90' result only)", () => {
     const r = calculateKnockoutScore(
       "QF",
       { homeGoals: 0, awayGoals: 0, penaltyWinner: "JPN", team1: "BRA", team2: "JPN" },
-      { score1: 0, score2: 0, winner: "BRA" }, // predicted BRA wins pens, but JPN actually did
+      { score1: 0, score2: 0, winner: null }, // no who-advances pick — doesn't matter anymore
+    );
+    expect(r.toto).toBe(SCORING.toto.QF);
+    expect(r.exact).toBe(SCORING.exact.QF);
+  });
+
+  it("predicted a decisive winner but the 90' result was a draw → no toto, no exact", () => {
+    const r = calculateKnockoutScore(
+      "QF",
+      { homeGoals: 1, awayGoals: 1, penaltyWinner: "JPN", team1: "BRA", team2: "JPN" },
+      { score1: 2, score2: 1, winner: "BRA" }, // predicted BRA 2-1, real 90' was 1-1
     );
     expect(r.toto).toBe(0);
-    expect(r.exact).toBe(SCORING.exact.QF);
+    expect(r.exact).toBe(0);
   });
 
   it("null prediction → zero", () => {

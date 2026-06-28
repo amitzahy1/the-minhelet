@@ -58,6 +58,11 @@ const STAGE_LABEL: Record<string, string> = {
   sf: "חצי גמר",
   final: "הגמר",
 };
+// A slot is "filled" when both 90' scores are entered. A draw is complete with
+// no winner pick (penalties / who advances aren't part of the real-data tree).
+const slotHasScores = (v?: { score1?: number | null; score2?: number | null } | null): boolean =>
+  !!v && v.score1 != null && v.score2 != null;
+
 function stageOf(key: string): string {
   if (key.startsWith("r32")) return "r32";
   if (key.startsWith("r16")) return "r16";
@@ -72,11 +77,11 @@ export function useRealKnockoutStatus(): RealKnockoutStatus {
   const [now, setNow] = useState(() => Date.now());
   // The viewer's OWN saved picks straight from the DB (RLS lets them read their
   // row) — the authoritative "what actually saved", separate from the local store.
-  const [dbSaved, setDbSaved] = useState<Record<string, { winner: string | null }> | null>(null);
+  const [dbSaved, setDbSaved] = useState<Record<string, { score1?: number | null; score2?: number | null }> | null>(null);
 
   useEffect(() => {
     let alive = true;
-    const fetchSaved = async (): Promise<Record<string, { winner: string | null }> | null> => {
+    const fetchSaved = async (): Promise<Record<string, { score1?: number | null; score2?: number | null }> | null> => {
       try {
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
@@ -86,7 +91,7 @@ export function useRealKnockoutStatus(): RealKnockoutStatus {
           .select("knockout_tree_live")
           .eq("user_id", user.id)
           .maybeSingle();
-        return (data?.knockout_tree_live || {}) as Record<string, { winner: string | null }>;
+        return (data?.knockout_tree_live || {}) as Record<string, { score1?: number | null; score2?: number | null }>;
       } catch {
         return null;
       }
@@ -125,7 +130,7 @@ export function useRealKnockoutStatus(): RealKnockoutStatus {
     for (const k of KO_SLOT_KEYS as readonly KoSlotKey[]) {
       if (slotStatus(k, tree, schedule, now) !== "open") continue;
       openCount++;
-      if (dbSaved && dbSaved[k]?.winner) dbSavedOpenCount++;
+      if (slotHasScores(dbSaved?.[k])) dbSavedOpenCount++;
       const sIdx = (STAGE_ORDER as readonly string[]).indexOf(stageOf(k));
       if (sIdx >= 0 && sIdx < earliestOpenStageIdx) earliestOpenStageIdx = sIdx;
       // Track the earliest-kickoff open match for the banner's "next match" line.
@@ -138,7 +143,7 @@ export function useRealKnockoutStatus(): RealKnockoutStatus {
           nextMatch = { team1: slot.team1, team2: slot.team2, kickoff: ko.date, lockAt: new Date(t - LOCK_BEFORE_MIN * 60_000).toISOString() };
         }
       }
-      if (!knockoutLive[k]?.winner) {
+      if (!slotHasScores(knockoutLive[k])) {
         unfilledOpenCount++;
         if (sIdx >= 0 && sIdx < earliestUnfilledStageIdx) earliestUnfilledStageIdx = sIdx;
       }

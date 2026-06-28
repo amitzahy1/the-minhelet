@@ -66,17 +66,13 @@ export function calculateKnockoutScore(
     toto = scoring.toto[stage];
     reasons.push({ reason: "TOTO", points: toto });
   }
-  // Regulation draw on both sides → penalty pick determines toto credit.
+  // Regulation draw on both sides → toto for correctly calling the draw. The
+  // shootout winner (who advances) is NOT required: the real-data tree scores
+  // the 90' result only (toto + exact, per its own header). Who advances on
+  // penalties is the separate, pre-tournament advancement bet — not this page.
   else if (actualType === "X" && predictedType === "X") {
-    const predictedPenaltyWinner = prediction.winner;
-    if (
-      actual.penaltyWinner &&
-      predictedPenaltyWinner &&
-      predictedPenaltyWinner === actual.penaltyWinner
-    ) {
-      toto = scoring.toto[stage];
-      reasons.push({ reason: "TOTO", points: toto });
-    }
+    toto = scoring.toto[stage];
+    reasons.push({ reason: "TOTO", points: toto });
   }
 
   // Exact bonus: regulation goals match exactly.

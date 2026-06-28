@@ -11,8 +11,17 @@ interface UserCompletion {
   totalPct: number;
 }
 
+interface KoStage {
+  stage: string;
+  label: string;
+  openCount: number;
+  users: { name: string; email: string; filled: number }[];
+}
+interface KoLive { open: boolean; stages: KoStage[] }
+
 export function CompletionMatrix() {
   const [users, setUsers] = useState<UserCompletion[]>([]);
+  const [koLive, setKoLive] = useState<KoLive | null>(null);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
 
@@ -22,6 +31,7 @@ export function CompletionMatrix() {
         const res = await fetch("/api/admin/completion");
         const data = await res.json();
         if (data.users) setUsers(data.users);
+        if (data.koLive) setKoLive(data.koLive);
       } catch { /* ignore */ }
       setLoading(false);
     })();
@@ -58,6 +68,48 @@ export function CompletionMatrix() {
 
   return (
     <div className="space-y-4">
+      {/* Real-data tree (עץ נתוני אמת): per-stage completion of the matches that
+          are OPEN right now — so the admin knows who still needs to bet. */}
+      {koLive?.open && koLive.stages.map((stage) => {
+        const missing = stage.users.filter((u) => u.filled < stage.openCount);
+        return (
+          <div key={stage.stage} className="rounded-xl border border-emerald-300 bg-emerald-50/50 p-4">
+            <div className="flex items-start justify-between gap-3 mb-3">
+              <div>
+                <h3 className="text-base font-bold text-gray-900 mb-0.5">🟢 עץ נתוני אמת — {stage.label}</h3>
+                <p className="text-xs text-gray-500" style={{ fontFamily: "var(--font-inter)" }}>{stage.openCount} משחקים פתוחים כרגע · {missing.length} מהמרים טרם השלימו</p>
+              </div>
+              {missing.length > 0 && (
+                <button
+                  onClick={() => {
+                    const text = `תזכורת: נפתחו ${stage.openCount} משחקים ב${stage.label} בעץ נתוני אמת. טרם מילאו: ${missing.map((u) => u.name).join(", ")}. בואו נשלים לפני הנעילה! ⚽`;
+                    navigator.clipboard.writeText(text);
+                    alert("התזכורת הועתקה!");
+                  }}
+                  className="shrink-0 text-[11px] font-bold text-blue-600 hover:text-blue-800 whitespace-nowrap"
+                  title="העתק תזכורת לכל מי שחסר"
+                >
+                  📋 תזכורת לחסרים
+                </button>
+              )}
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {stage.users.map((u, i) => {
+                const done = u.filled >= stage.openCount;
+                return (
+                  <div key={i} className={`flex items-center justify-between gap-2 rounded-lg border px-2.5 py-1.5 text-xs ${done ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"}`}>
+                    <span className="font-bold text-gray-800 truncate">{u.name}</span>
+                    <span className="shrink-0 font-bold tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>
+                      {done ? <span className="text-green-600">✓</span> : <span className="text-red-500">{u.filled}/{stage.openCount}</span>}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+
       <div className="flex items-start justify-between gap-3">
         <div>
           <h3 className="text-lg font-bold text-gray-900 mb-1">סטטוס מילוי הימורים</h3>

@@ -28,6 +28,7 @@ import { LIVE_FEEDERS } from "@/lib/tournament/knockout-derivation";
 import { BracketLayout, BracketMatchCell, type KOValue, type SlotTeams, type SlotStatus } from "@/components/knockout/BracketLayout";
 import type { FinishedMatch } from "@/lib/results-hits";
 import { saveLiveKnockout } from "@/lib/supabase/sync";
+import { useToastStore } from "@/stores/toast-store";
 
 interface ApiMatch {
   id: number;
@@ -148,9 +149,19 @@ export default function KnockoutLivePage() {
   const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
   const scheduleSave = (key: string) => {
     if (timers.current[key]) clearTimeout(timers.current[key]);
-    timers.current[key] = setTimeout(() => {
+    timers.current[key] = setTimeout(async () => {
       const v = useBettingStore.getState().knockoutLive[key] || { score1: null, score2: null, winner: null };
-      saveLiveKnockout(key, v, lockAtFor(key as KoSlotKey, tree, schedule));
+      // CHECK the result — a fire-and-forget save hid failures, leaving a pick
+      // in local cache that looks saved but never reached the DB (so it won't
+      // score). Surface any failure loudly so the bettor knows to retry.
+      const res = await saveLiveKnockout(key, v, lockAtFor(key as KoSlotKey, tree, schedule));
+      if (!res.success) {
+        useToastStore.getState().push(
+          `⚠️ ההימור לא נשמר! ${res.error || "נסו שוב"}`,
+          "error",
+          8000,
+        );
+      }
     }, 800);
   };
   const onChange = (key: string, data: Partial<KOValue>) => {

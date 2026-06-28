@@ -478,6 +478,30 @@ export function TodayMatches() {
                   );
                 })()}
 
+                {/* Knockout cards have no group bet-pair — give them a direct
+                    link to the real-data tree (עץ נתוני אמת) so EVERY match box
+                    on the home page has a bet action. mt-auto + min-h match the
+                    group footer so all cards keep equal height (mobile + desktop). */}
+                {!groupLetter && (() => {
+                  const isReal = !!m.homeTla && !!m.awayTla && m.homeTla !== "TBD" && m.awayTla !== "TBD";
+                  const editable = !isFinished && !isLive && isReal;
+                  return (
+                    <div className="mt-auto pt-2 flex items-center justify-center min-h-[28px]">
+                      {editable ? (
+                        <Link
+                          href="/knockout-live"
+                          onClick={(e) => e.stopPropagation()}
+                          className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-0.5 hover:bg-emerald-100 transition-colors"
+                        >
+                          ✏️ מלאו הימור ←
+                        </Link>
+                      ) : (
+                        <span className="text-[10px] text-gray-300">{isReal ? "" : "ממתין ליריבה"}</span>
+                      )}
+                    </div>
+                  );
+                })()}
+
                 {/* Venue + referee (populated automatically ~24-48h pre-kickoff via the cron) */}
                 {(m.venue || (m.referees && m.referees.length > 0)) && (
                   <div className="mt-1.5 pt-1.5 border-t border-gray-100 text-[9px] text-gray-500 leading-tight space-y-0.5">

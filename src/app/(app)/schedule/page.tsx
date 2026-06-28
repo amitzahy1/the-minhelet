@@ -339,14 +339,19 @@ function MatchBetsPanel({ match, brackets, specialBets, advancements, matchDays 
           const isFinal = stage === "FINAL";
           if (!field && !isFinal) return null;
           const rows = advancements.flatMap((adv) => {
-            let code: string | null = null;
+            const codes: string[] = [];
             if (isFinal) {
-              code = adv.winner && (adv.winner === home || adv.winner === away) ? adv.winner : null;
+              if (adv.winner === home) codes.push(home);
+              else if (adv.winner === away) codes.push(away);
             } else {
+              // A past bug let some bettors advance BOTH teams of a future
+              // matchup. Surface BOTH so the double-pick is visible (only one
+              // of them can actually win this fixture).
               const set = adv[field] || [];
-              code = set.includes(home) ? home : set.includes(away) ? away : null;
+              if (set.includes(home)) codes.push(home);
+              if (set.includes(away)) codes.push(away);
             }
-            return code ? [{ userId: adv.userId, name: adv.displayName, code }] : [];
+            return codes.length ? [{ userId: adv.userId, name: adv.displayName, codes }] : [];
           });
           if (rows.length === 0) return null;
           return (
@@ -356,11 +361,16 @@ function MatchBetsPanel({ match, brackets, specialBets, advancements, matchDays 
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {rows.map((r) => (
                     <div key={r.userId} className="text-xs border border-gray-100 rounded-lg p-2">
-                      <p className="font-bold text-gray-800 mb-1 truncate">{r.name}</p>
-                      <div className="flex items-center gap-1.5 text-green-700 font-medium">
-                        <span>{getFlag(r.code)}</span>
-                        <span className="truncate">{getTeamNameHe(r.code)}</span>
-                      </div>
+                      <p className="font-bold text-gray-800 mb-1 truncate">
+                        {r.name}
+                        {r.codes.length > 1 && <span className="ms-1 text-[9px] text-amber-600 font-bold">(שתיים)</span>}
+                      </p>
+                      {r.codes.map((code) => (
+                        <div key={code} className="flex items-center gap-1.5 text-green-700 font-medium">
+                          <span>{getFlag(code)}</span>
+                          <span className="truncate">{getTeamNameHe(code)}</span>
+                        </div>
+                      ))}
                     </div>
                   ))}
                 </div>

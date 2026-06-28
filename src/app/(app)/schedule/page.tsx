@@ -338,7 +338,7 @@ function MatchBetsPanel({ match, brackets, specialBets, advancements, matchDays 
           const field = KO_ADVANCE_FIELD[stage];
           const isFinal = stage === "FINAL";
           if (!field && !isFinal) return null;
-          const rows = advancements.flatMap((adv) => {
+          const rows = advancements.map((adv) => {
             const codes: string[] = [];
             if (isFinal) {
               if (adv.winner === home) codes.push(home);
@@ -351,21 +351,30 @@ function MatchBetsPanel({ match, brackets, specialBets, advancements, matchDays 
               if (set.includes(home)) codes.push(home);
               if (set.includes(away)) codes.push(away);
             }
-            return codes.length ? [{ userId: adv.userId, name: adv.displayName, codes }] : [];
+            return { userId: adv.userId, name: adv.displayName, codes };
           });
           if (rows.length === 0) return null;
+          // Show EVERY bettor — those who advanced one (or both) of these two
+          // teams first, then those who advanced NEITHER (their pre-tournament
+          // bracket had other teams in this slot), so it's clear who's who.
+          rows.sort((a, b) => (b.codes.length > 0 ? 1 : 0) - (a.codes.length > 0 ? 1 : 0));
           return (
             <div>
               <p className="text-xs font-bold text-gray-500 mb-2">את מי כל מהמר העלה</p>
               <div className="bg-white rounded-lg border border-gray-200 px-3 py-2">
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {rows.map((r) => (
-                    <div key={r.userId} className="text-xs border border-gray-100 rounded-lg p-2">
-                      <p className="font-bold text-gray-800 mb-1 truncate">
+                    <div key={r.userId} className={`text-xs border rounded-lg p-2 ${r.codes.length === 0 ? "border-gray-100 bg-gray-50/60" : "border-gray-100"}`}>
+                      <p className={`font-bold mb-1 truncate ${r.codes.length === 0 ? "text-gray-400" : "text-gray-800"}`}>
                         {r.name}
                         {r.codes.length > 1 && <span className="ms-1 text-[9px] text-amber-600 font-bold">(שתיים)</span>}
                       </p>
-                      {r.codes.map((code) => (
+                      {r.codes.length === 0 ? (
+                        <div className="flex items-center gap-1.5 text-gray-400 font-medium">
+                          <span>—</span>
+                          <span className="truncate text-[11px]">לא העלה אף אחת</span>
+                        </div>
+                      ) : r.codes.map((code) => (
                         <div key={code} className="flex items-center gap-1.5 text-green-700 font-medium">
                           <span>{getFlag(code)}</span>
                           <span className="truncate">{getTeamNameHe(code)}</span>

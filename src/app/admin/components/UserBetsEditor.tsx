@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GROUPS, GROUP_LETTERS, ALL_TEAMS } from "@/lib/tournament/groups";
-import { getFlag } from "@/lib/flags";
+import { getFlag, getTeamNameHe } from "@/lib/flags";
 import { MATCHUPS, parseMatchupPick, joinMatchupPicks } from "@/lib/matchups";
 import { PENALTIES_LINE } from "@/lib/constants";
+import { toIsraelTimeShort } from "@/lib/timezone";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -241,6 +242,19 @@ interface CompletionRow {
   totalPct: number;
 }
 
+// Real-data tree (עץ נתוני אמת) live completion — PER MATCH, knockout stages only.
+interface KoLiveMatch {
+  slotKey: string;
+  team1: string;
+  team2: string;
+  kickoff: string | null;
+  total: number;
+  filledCount: number;
+  missing: string[];
+}
+interface KoLiveStage { stage: string; label: string; matches: KoLiveMatch[] }
+interface KoLive { open: boolean; stages: KoLiveStage[] }
+
 export function UserBetsEditor() {
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string>("");
@@ -249,6 +263,7 @@ export function UserBetsEditor() {
   const [message, setMessage] = useState<string | null>(null);
   const [note, setNote] = useState<string>("");
   const [overview, setOverview] = useState<CompletionRow[]>([]);
+  const [koLive, setKoLive] = useState<KoLive | null>(null);
   const [overviewLoading, setOverviewLoading] = useState(true);
 
   // Snapshot of what's LOCKED (what the DB had when we loaded)
@@ -280,8 +295,10 @@ export function UserBetsEditor() {
       const res = await fetch("/api/admin/completion");
       const data = await res.json();
       setOverview((data.users as CompletionRow[]) || []);
+      setKoLive((data.koLive as KoLive) ?? null);
     } catch {
       setOverview([]);
+      setKoLive(null);
     }
     setOverviewLoading(false);
   }
@@ -598,6 +615,59 @@ export function UserBetsEditor() {
   // ---------------------------------------------------------------------
   return (
     <div className="space-y-4">
+      {/* Real-data tree (עץ נתוני אמת) — PER-MATCH completion, knockout stages
+          ONLY (R32 onward). Shows, for each open match, who still hasn't bet,
+          with a one-tap reminder. Group-stage status is the X/12 column below. */}
+      {koLive?.open && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">🟢 מי הימר על השלב הנוכחי — פר משחק</CardTitle>
+            <p className="text-xs text-gray-500">עץ נתוני אמת (משלב 32 הגדולות ומעלה). שלב הבתים — בעמודת ״בתים״ למטה.</p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {koLive.stages.map((stage) => (
+              <div key={stage.stage}>
+                <p className="text-sm font-bold text-gray-700 mb-1.5">{stage.label} · {stage.matches.length} משחקים פתוחים</p>
+                <div className="space-y-1.5">
+                  {stage.matches.map((mt) => {
+                    const done = mt.missing.length === 0;
+                    return (
+                      <div key={mt.slotKey} className={`rounded-lg border px-3 py-2 ${done ? "border-green-200 bg-green-50/50" : "border-red-200 bg-red-50/40"}`}>
+                        <div className="flex items-center justify-between gap-2 text-sm">
+                          <span className="font-bold text-gray-800">
+                            {getTeamNameHe(mt.team1) || mt.team1} – {getTeamNameHe(mt.team2) || mt.team2}
+                            {mt.kickoff && <span className="ms-2 text-[11px] text-gray-400" dir="ltr" style={{ fontFamily: "var(--font-inter)" }}>{toIsraelTimeShort(mt.kickoff)}</span>}
+                          </span>
+                          <span className={`text-xs font-bold shrink-0 ${done ? "text-green-700" : "text-red-600"}`} style={{ fontFamily: "var(--font-inter)" }}>
+                            {done ? "✓ כולם" : `${mt.filledCount}/${mt.total}`}
+                          </span>
+                        </div>
+                        {!done && (
+                          <div className="mt-1 flex items-start justify-between gap-2">
+                            <span className="text-[11px] text-red-600">חסרים: {mt.missing.join(", ")}</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const t = `${getTeamNameHe(mt.team1) || mt.team1}–${getTeamNameHe(mt.team2) || mt.team2}`;
+                                navigator.clipboard.writeText(`תזכורת: עוד לא הימרתם על ${t} בעץ נתוני אמת: ${mt.missing.join(", ")}. בואו נשלים לפני הנעילה! ⚽`);
+                                setMessage("התזכורת הועתקה!");
+                              }}
+                              className="text-[10px] font-bold text-blue-600 hover:text-blue-800 whitespace-nowrap shrink-0"
+                            >
+                              📋 תזכורת
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Users overview — click a row to select that user for editing below */}
       <Card>
         <CardHeader>

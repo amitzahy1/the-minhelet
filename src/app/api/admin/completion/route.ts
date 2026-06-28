@@ -4,6 +4,7 @@ import { verifyAdmin } from "../verify-admin";
 import {
   resolveKnockoutTree,
   computeGroupOrders,
+  findKickoffForSlot,
   KO_SLOT_KEYS,
   type ScheduleMatch,
   type KoSlotKey,
@@ -129,7 +130,14 @@ export async function GET(req: Request) {
   // Reuses the SAME resolver + slotStatus the client nudge uses, over the live
   // fixtures from /api/matches, so the admin sees exactly who still has open
   // knockout matches to bet on (per stage) and can ping them.
-  let koLive: { open: boolean; stages: { stage: string; label: string; openCount: number; users: { name: string; email: string; filled: number }[] }[] } | null = null;
+  let koLive: {
+    open: boolean;
+    stages: {
+      stage: string;
+      label: string;
+      matches: { slotKey: string; team1: string; team2: string; kickoff: string | null; total: number; filledCount: number; missing: string[] }[];
+    }[];
+  } | null = null;
   try {
     const origin = new URL(req.url).origin;
     const fxRes = await fetch(`${origin}/api/matches`, { cache: "no-store" });
@@ -151,17 +159,26 @@ export async function GET(req: Request) {
           (openByStage[st] = openByStage[st] || []).push(k);
         }
       }
+      // PER-MATCH breakdown, knockout stages ONLY (KO_SLOT_KEYS never includes
+      // group-stage games). Each open match lists who's still missing a pick.
       const stages = [];
       for (const st of KO_STAGE_ORDER) {
         const open = openByStage[st];
         if (!open || open.length === 0) continue;
-        const usersArr = (allProfiles || []).map((profile) => {
-          const b = brackets?.find((br) => br.user_id === profile.id);
-          const kl = (b?.knockout_tree_live || {}) as Record<string, { winner: string | null }>;
-          const filled = open.filter((k) => kl[k]?.winner).length;
-          return { name: profile.display_name || "ללא שם", email: emailMap[profile.id] || "", filled };
-        }).sort((a, b) => a.filled - b.filled);
-        stages.push({ stage: st, label: KO_STAGE_LABEL[st], openCount: open.length, users: usersArr });
+        const matches = open.map((k) => {
+          const slot = tree[k as KoSlotKey];
+          const ko = findKickoffForSlot(k as KoSlotKey, tree, schedule);
+          const missing: string[] = [];
+          let filledCount = 0;
+          for (const profile of allProfiles || []) {
+            const b = brackets?.find((br) => br.user_id === profile.id);
+            const kl = (b?.knockout_tree_live || {}) as Record<string, { winner: string | null }>;
+            if (kl[k]?.winner) filledCount++;
+            else missing.push(profile.display_name || "ללא שם");
+          }
+          return { slotKey: k, team1: slot?.team1 || "", team2: slot?.team2 || "", kickoff: ko?.date ?? null, total: (allProfiles || []).length, filledCount, missing };
+        }).sort((a, b) => (a.kickoff || "").localeCompare(b.kickoff || ""));
+        stages.push({ stage: st, label: KO_STAGE_LABEL[st], matches });
       }
       koLive = { open: stages.length > 0, stages };
     } else {

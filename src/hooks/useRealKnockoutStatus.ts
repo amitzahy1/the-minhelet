@@ -20,6 +20,7 @@ import {
 import { slotStatus, LOCK_BEFORE_MIN } from "@/lib/tournament/ko-live-state";
 import { LIVE_FEEDERS } from "@/lib/tournament/knockout-derivation";
 import { useBettingStore } from "@/stores/betting-store";
+import { createClient } from "@/lib/supabase/client";
 import type { FinishedMatch } from "@/lib/results-hits";
 
 export interface RealKnockoutStatus {
@@ -28,8 +29,14 @@ export interface RealKnockoutStatus {
   groupStageComplete: boolean;
   /** Slots currently editable (teams known, >30 min before kickoff). */
   openCount: number;
-  /** Open slots the user hasn't predicted a winner for yet. */
+  /** Open slots the user hasn't predicted a winner for yet (LOCAL store). */
   unfilledOpenCount: number;
+  /** Open slots NOT yet SAVED to the DB (authoritative — independent of the
+   *  local cache). null until the DB read returns. This is what the bettor
+   *  should trust: "X matches still missing in the current stage". */
+  dbUnfilledOpenCount: number | null;
+  /** Open slots already saved to the DB (for "X/Y saved"). */
+  dbSavedOpenCount: number;
   /** Hebrew name of the stage to fill now (earliest stage with unfilled open
    *  matches) — e.g. "שלב 32 הגדולות", then "שמינית הגמר". null when nothing open. */
   openStageLabel: string | null;
@@ -63,17 +70,38 @@ export function useRealKnockoutStatus(): RealKnockoutStatus {
   const knockoutLive = useBettingStore((s) => s.knockoutLive);
   const [fixtures, setFixtures] = useState<RealFixture[] | null>(null);
   const [now, setNow] = useState(() => Date.now());
+  // The viewer's OWN saved picks straight from the DB (RLS lets them read their
+  // row) — the authoritative "what actually saved", separate from the local store.
+  const [dbSaved, setDbSaved] = useState<Record<string, { winner: string | null }> | null>(null);
 
   useEffect(() => {
     let alive = true;
-    const refresh = () => loadRealFixtures().then((f) => { if (alive) { setFixtures(f); setNow(Date.now()); } });
+    const fetchSaved = async (): Promise<Record<string, { winner: string | null }> | null> => {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return null;
+        const { data } = await supabase
+          .from("user_brackets")
+          .select("knockout_tree_live")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        return (data?.knockout_tree_live || {}) as Record<string, { winner: string | null }>;
+      } catch {
+        return null;
+      }
+    };
+    const refresh = () => {
+      loadRealFixtures().then((f) => { if (alive) { setFixtures(f); setNow(Date.now()); } });
+      fetchSaved().then((s) => { if (alive && s) setDbSaved(s); });
+    };
     refresh();
     const id = setInterval(refresh, 120_000);
     return () => { alive = false; clearInterval(id); };
   }, []);
 
   return useMemo<RealKnockoutStatus>(() => {
-    if (fixtures === null) return { loading: true, groupStageComplete: false, openCount: 0, unfilledOpenCount: 0, openStageLabel: null, currentStageLabel: null, nextMatch: null };
+    if (fixtures === null) return { loading: true, groupStageComplete: false, openCount: 0, unfilledOpenCount: 0, dbUnfilledOpenCount: null, dbSavedOpenCount: 0, openStageLabel: null, currentStageLabel: null, nextMatch: null };
     const scored: FinishedMatch[] = fixtures
       .filter((m) => m.homeGoals != null && m.awayGoals != null)
       .map((m) => ({
@@ -85,10 +113,11 @@ export function useRealKnockoutStatus(): RealKnockoutStatus {
       }));
     const schedule: ScheduleMatch[] = fixtures.map((m) => ({ homeTla: m.homeTla, awayTla: m.awayTla, date: m.date, status: m.status ?? null }));
     const groupStageComplete = Object.keys(computeGroupOrders(scored)).length === 12;
-    if (!groupStageComplete) return { loading: false, groupStageComplete: false, openCount: 0, unfilledOpenCount: 0, openStageLabel: null, currentStageLabel: null, nextMatch: null };
+    if (!groupStageComplete) return { loading: false, groupStageComplete: false, openCount: 0, unfilledOpenCount: 0, dbUnfilledOpenCount: null, dbSavedOpenCount: 0, openStageLabel: null, currentStageLabel: null, nextMatch: null };
     const tree = resolveKnockoutTree(scored, null, undefined, LIVE_FEEDERS);
     let openCount = 0;
     let unfilledOpenCount = 0;
+    let dbSavedOpenCount = 0;
     let earliestUnfilledStageIdx = Infinity;
     let earliestOpenStageIdx = Infinity;
     let nextMatch: RealKnockoutStatus["nextMatch"] = null;
@@ -96,6 +125,7 @@ export function useRealKnockoutStatus(): RealKnockoutStatus {
     for (const k of KO_SLOT_KEYS as readonly KoSlotKey[]) {
       if (slotStatus(k, tree, schedule, now) !== "open") continue;
       openCount++;
+      if (dbSaved && dbSaved[k]?.winner) dbSavedOpenCount++;
       const sIdx = (STAGE_ORDER as readonly string[]).indexOf(stageOf(k));
       if (sIdx >= 0 && sIdx < earliestOpenStageIdx) earliestOpenStageIdx = sIdx;
       // Track the earliest-kickoff open match for the banner's "next match" line.
@@ -119,6 +149,7 @@ export function useRealKnockoutStatus(): RealKnockoutStatus {
     const currentStageLabel = earliestOpenStageIdx < STAGE_ORDER.length
       ? STAGE_LABEL[STAGE_ORDER[earliestOpenStageIdx]]
       : null;
-    return { loading: false, groupStageComplete: true, openCount, unfilledOpenCount, openStageLabel, currentStageLabel, nextMatch };
-  }, [fixtures, now, knockoutLive]);
+    const dbUnfilledOpenCount = dbSaved ? Math.max(0, openCount - dbSavedOpenCount) : null;
+    return { loading: false, groupStageComplete: true, openCount, unfilledOpenCount, dbUnfilledOpenCount, dbSavedOpenCount, openStageLabel, currentStageLabel, nextMatch };
+  }, [fixtures, now, knockoutLive, dbSaved]);
 }

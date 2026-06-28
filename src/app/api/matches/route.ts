@@ -8,6 +8,7 @@ import type { MatchResult } from "@/lib/api-football-data";
 import { resolveKnockoutTree, type KoSlotKey } from "@/lib/scoring/knockout-resolver";
 import { LIVE_FEEDERS } from "@/lib/tournament/knockout-derivation";
 import { normalizeTla, normalizeGroupLetter, type FinishedMatch } from "@/lib/results-hits";
+import { computePredictionLockRows, type LockSyncMatch } from "@/lib/scoring/compute-prediction-locks";
 
 interface FdDetails {
   syncedAt?: string;
@@ -251,6 +252,15 @@ export async function GET() {
   // client polling doesn't hammer TheSportsDB.
   if (fdMatches.some((m) => m.status === "FINISHED")) after(() => healCardBoard());
 
+  // Prediction-locks self-heal: the save RPCs REJECT any slot missing from the
+  // `prediction_locks` table, and the 3h sync-locks cron can't run on Vercel
+  // Hobby (daily crons only). So a stage whose fixtures resolved AFTER the last
+  // sync (R32 best-thirds, then R16/QF/…) would be silently UNSAVEABLE — bettors
+  // couldn't place picks on it. Refresh the lock table here from the already-
+  // resolved `merged` schedule (identical to what /api/sync-locks computes), so
+  // every open slot is always saveable, every stage, with no manual action.
+  if (!demoReadFailed) after(() => healPredictionLocks(merged));
+
   const payload: { matches: Match[]; error?: string; unmappedTeams?: string[] } = { matches: merged };
   if ("error" in fdResult && fdResult.error) payload.error = fdResult.error;
   if (unmappedTeams.length) payload.unmappedTeams = unmappedTeams;
@@ -378,5 +388,36 @@ async function healCardBoard(): Promise<void> {
     if (n > 0) console.log(`[/api/matches] card board synced (${n} teams)`);
   } catch (e) {
     console.error(`[/api/matches] card-heal error: ${String(e)}`);
+  }
+}
+
+// Prediction-locks refresh — per-instance throttle (cold starts reset; the
+// upsert is idempotent). Mirrors /api/sync-locks exactly: it passes the same
+// /api/matches schedule into computePredictionLockRows. Done in-process here so
+// the locks can never lag behind the resolved fixtures (no cron dependency).
+let locksHealAt = 0;
+const LOCKS_HEAL_TTL_MS = 10 * 60_000;
+
+async function healPredictionLocks(merged: Match[]): Promise<void> {
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!url || !serviceKey) return;
+  const now = Date.now();
+  if (now - locksHealAt < LOCKS_HEAL_TTL_MS) return;
+  locksHealAt = now; // claim before the await so concurrent polls don't pile up
+  try {
+    // `merged` already carries resolved R32 opponents (fillKnockoutOpponents) and
+    // matches LockSyncMatch's shape, so this is byte-for-byte what sync-locks does.
+    const rows = computePredictionLockRows(merged as unknown as LockSyncMatch[], null);
+    if (!rows.length) return; // never wipe last-good rows on an empty/odd feed
+    const stamped = new Date().toISOString();
+    const supabase = createClient(url, serviceKey);
+    const { error } = await supabase
+      .from("prediction_locks")
+      .upsert(rows.map((r) => ({ ...r, updated_at: stamped })), { onConflict: "scope,lock_key" });
+    if (error) console.error(`[/api/matches] locks-heal failed: ${error.message}`);
+    else console.log(`[/api/matches] prediction_locks healed: ${rows.filter((r) => r.scope === "ko").length} KO + ${rows.filter((r) => r.scope === "group").length} group`);
+  } catch (e) {
+    console.error(`[/api/matches] locks-heal error: ${String(e)}`);
   }
 }

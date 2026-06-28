@@ -161,6 +161,9 @@ export default function KnockoutLivePage() {
           "error",
           8000,
         );
+      } else {
+        // Confirm the save reached the DB — the bettor asked to KNOW it stuck.
+        useToastStore.getState().push("✓ ההימור נשמר", "success", 1800);
       }
     }, 800);
   };

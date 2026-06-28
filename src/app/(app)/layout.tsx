@@ -607,6 +607,22 @@ function ProgressBanner() {
             </>
           )}
         </div>
+        {/* Second row — DB-AUTHORITATIVE shortfall for THIS user: how many open
+            matches in the current stage aren't saved to the database (not the
+            local cache). This is the number the bettor should trust. */}
+        {inStage && koStatus.dbUnfilledOpenCount !== null && (
+          <div className={`border-t ${koStatus.dbUnfilledOpenCount > 0 ? "bg-red-50/70 border-red-200/60" : "bg-emerald-50/60 border-emerald-200/50"}`}>
+            <div className="max-w-7xl mx-auto px-3 sm:px-4 py-1.5 text-[11px] sm:text-xs font-bold flex items-center gap-2">
+              {koStatus.dbUnfilledOpenCount > 0 ? (
+                <Link href="/knockout-live" className="text-red-700 hover:underline">
+                  ⚠️ נשמרו לך {koStatus.dbSavedOpenCount}/{koStatus.openCount} (לפי הדאטהבייס) — חסרים {koStatus.dbUnfilledOpenCount} משחקים ב{koStatus.currentStageLabel ?? "שלב הנוכחי"} ←
+                </Link>
+              ) : (
+                <span className="text-emerald-700">✓ כל {koStatus.openCount} המשחקים בשלב הנוכחי נשמרו בדאטהבייס</span>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     );
   }

@@ -163,6 +163,53 @@ describe("scoreSpecialBetsForUser — final outcome path", () => {
   });
 });
 
+describe("scoreSpecialBetsForUser — best-attack / dirtiest LIVE tentative path", () => {
+  const REL = { topScorerGoals: null, topAssistsCount: null };
+
+  it("best-attack: no final → current top-scoring team scores INTERIM", () => {
+    const r = scoreSpecialBetsForUser(baseBet({ bestAttackTeam: "GER" }), noActuals, [], SCORING, REL, { GER: 10, FRA: 8, BRA: 7 });
+    expect(r.total).toBe(SCORING.specials.best_attack);
+    expect(r.hasInterim).toBe(true);
+  });
+
+  it("best-attack: a non-leading pick scores 0 while live", () => {
+    const r = scoreSpecialBetsForUser(baseBet({ bestAttackTeam: "BRA" }), noActuals, [], SCORING, REL, { GER: 10, FRA: 8, BRA: 7 });
+    expect(r.total).toBe(0);
+  });
+
+  it("best-attack: a TIE for most goals → every co-leader's pick catches it", () => {
+    const ger = scoreSpecialBetsForUser(baseBet({ bestAttackTeam: "GER" }), noActuals, [], SCORING, REL, { GER: 10, FRA: 10, BRA: 7 });
+    const fra = scoreSpecialBetsForUser(baseBet({ bestAttackTeam: "FRA" }), noActuals, [], SCORING, REL, { GER: 10, FRA: 10, BRA: 7 });
+    expect(ger.total).toBe(SCORING.specials.best_attack);
+    expect(fra.total).toBe(SCORING.specials.best_attack);
+    expect(ger.lines[0].interim).toBe(true);
+  });
+
+  it("best-attack: an entered FINAL overrides the live leader (exact, not interim)", () => {
+    const fin: TournamentActuals = { ...noActuals, best_attack_team: "BRA" };
+    const hit = scoreSpecialBetsForUser(baseBet({ bestAttackTeam: "BRA" }), fin, [], SCORING, REL, { GER: 10 });
+    expect(hit.total).toBe(SCORING.specials.best_attack);
+    expect(hit.hasInterim).toBe(false);
+    // the live leader (GER) no longer scores once the final is in
+    const miss = scoreSpecialBetsForUser(baseBet({ bestAttackTeam: "GER" }), fin, [], SCORING, REL, { GER: 10 });
+    expect(miss.total).toBe(0);
+  });
+
+  it("dirtiest: no final → current card-board leader scores INTERIM", () => {
+    const withBoard: TournamentActuals = { ...noActuals, dirtiest_board: [{ team: "RSA", yellow: 5, red: 2 }, { team: "PAR", yellow: 7, red: 1 }] };
+    const lead = scoreSpecialBetsForUser(baseBet({ dirtiestTeam: "RSA" }), withBoard, [], SCORING, REL);
+    expect(lead.total).toBe(SCORING.specials.dirtiest_team);
+    expect(lead.hasInterim).toBe(true);
+    const other = scoreSpecialBetsForUser(baseBet({ dirtiestTeam: "PAR" }), withBoard, [], SCORING, REL);
+    expect(other.total).toBe(0);
+  });
+
+  it("best-attack / dirtiest: no live data and no final → 0 (unchanged legacy behavior)", () => {
+    const r = scoreSpecialBetsForUser(baseBet({ bestAttackTeam: "BRA", dirtiestTeam: "RSA" }), noActuals, []);
+    expect(r.total).toBe(0);
+  });
+});
+
 describe("scoreSpecialBetsForUser — matchups (3 duels, scored independently)", () => {
   // matchupPick is stored as a comma-joined "1,X,2" string (slot 0..2 = duel 1..3).
   it("all three duels correct → 3 × matchup points", () => {

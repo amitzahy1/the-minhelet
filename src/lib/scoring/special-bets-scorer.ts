@@ -187,6 +187,38 @@ function findStat(stats: PlayerStat[], name: string | null | undefined): PlayerS
  * neither duel player has any stat yet. Drives the matchup live-tentative path:
  * whoever leads the duel right now "catches" it for bettors who picked that side.
  */
+/**
+ * Teams currently TIED for the most goals scored (tournament-cumulative) —
+ * the live "best attack" leaders. Empty when no goals/data. Ties all count, so
+ * a bettor who picked any co-leader catches it (mirrors how a tie would
+ * tentatively resolve). Used for the best-attack live-tentative path.
+ */
+function bestAttackLeaderSet(goalsByTeam: Record<string, number> | undefined): Set<string> {
+  const s = new Set<string>();
+  if (!goalsByTeam) return s;
+  const vals = Object.values(goalsByTeam);
+  if (!vals.length) return s;
+  const max = Math.max(...vals);
+  if (max <= 0) return s;
+  for (const [team, g] of Object.entries(goalsByTeam)) if (g === max) s.add(team);
+  return s;
+}
+
+/**
+ * Teams currently TIED for the most cards (weighted yellow=1, red=3) on the
+ * admin/feed-maintained dirtiest board — the live "dirtiest team" leaders.
+ * Used for the dirtiest-team live-tentative path.
+ */
+function dirtiestLeaderSet(board: TournamentActuals["dirtiest_board"]): Set<string> {
+  const s = new Set<string>();
+  if (!board || !board.length) return s;
+  const w = (c: { yellow: number; red: number }) => c.yellow + c.red * 3;
+  const max = Math.max(...board.map(w));
+  if (max <= 0) return s;
+  for (const c of board) if (w(c) === max) s.add(c.team);
+  return s;
+}
+
 function liveMatchupResult(stats: PlayerStat[], mu: (typeof MATCHUPS)[number]): "1" | "X" | "2" | null {
   const s1 = findStat(stats, mu.name1);
   const s2 = findStat(stats, mu.name2);
@@ -217,9 +249,16 @@ export function scoreSpecialBetsForUser(
   // "closest among bettors, only if nobody got the exact" — so a pick wins the
   // relative line iff its stat EQUALS the value here (see computeSpecialBetsPool).
   relative: SpecialBetsRelative = { topScorerGoals: null, topAssistsCount: null },
+  // Tournament-cumulative goals-for per team — drives the best-attack LIVE
+  // tentative path (current top-scoring team). Empty = no live path (best
+  // attack then only scores once the admin enters the final). Dirtiest's live
+  // leader comes from `actuals.dirtiest_board` (already on `actuals`).
+  liveTeamGoals: Record<string, number> = {},
 ): SpecialBetsBreakdown {
   const lines: SpecialBetLine[] = [];
   const leaders = computeLiveLeaders(playerStats);
+  const bestAttackLeaders = bestAttackLeaderSet(liveTeamGoals);
+  const dirtiestLeaders = dirtiestLeaderSet(actuals?.dirtiest_board);
 
   // -- Top scorer --
   const finalScorer = actuals?.top_scorer_player ?? null;
@@ -311,24 +350,45 @@ export function scoreSpecialBetsForUser(
     }
   }
 
-  // -- Best attack team / Most prolific group / Driest group / Dirtiest team --
-  // These are exact-only and resolve cleanly when the admin enters the value.
+  // -- Most prolific group / Driest group --
+  // Group bets are mathematically DECIDED at the end of the group stage; the
+  // actual is filled (admin or auto-derived) so they score exact & final.
   const simpleExact: [keyof BettorSpecialBets, keyof TournamentActuals, ScoreReason, keyof typeof SCORING.specials][] = [
-    ["bestAttackTeam", "best_attack_team", "BEST_ATTACK", "best_attack"],
     ["prolificGroup", "most_prolific_group", "PROLIFIC_GROUP", "prolific_group"],
     ["driestGroup", "driest_group", "DRIEST_GROUP", "driest_group"],
-    ["dirtiestTeam", "dirtiest_team", "DIRTIEST_TEAM", "dirtiest_team"],
   ];
   for (const [betField, actualField, reason, scoringField] of simpleExact) {
     const pick = bets[betField] as string | null;
     const actual = actuals?.[actualField] as string | null | undefined;
     if (pick && actual && pick === actual) {
-      lines.push({
-        reason,
-        points: scoring.specials[scoringField],
-        interim: false,
-        pick,
-      });
+      lines.push({ reason, points: scoring.specials[scoringField], interim: false, pick });
+    }
+  }
+
+  // -- Best attack team & Dirtiest team --
+  // Tournament-long bets: FINAL when the admin enters the value (exact), else
+  // LIVE-tentative against the current leader (top-scoring team / most-carded
+  // team). Whoever picked a current co-leader catches it for now (interim);
+  // it flips as the standings move and locks when the admin enters the final.
+  const nonEmpty = (v: string | null | undefined): boolean => v != null && v !== "";
+  if (bets.bestAttackTeam) {
+    const finalBA = actuals?.best_attack_team;
+    if (nonEmpty(finalBA)) {
+      if (bets.bestAttackTeam === finalBA) {
+        lines.push({ reason: "BEST_ATTACK", points: scoring.specials.best_attack, interim: false, pick: bets.bestAttackTeam });
+      }
+    } else if (bestAttackLeaders.has(bets.bestAttackTeam)) {
+      lines.push({ reason: "BEST_ATTACK", points: scoring.specials.best_attack, interim: true, liveLeader: [...bestAttackLeaders].join("/"), pick: bets.bestAttackTeam });
+    }
+  }
+  if (bets.dirtiestTeam) {
+    const finalDT = actuals?.dirtiest_team;
+    if (nonEmpty(finalDT)) {
+      if (bets.dirtiestTeam === finalDT) {
+        lines.push({ reason: "DIRTIEST_TEAM", points: scoring.specials.dirtiest_team, interim: false, pick: bets.dirtiestTeam });
+      }
+    } else if (dirtiestLeaders.has(bets.dirtiestTeam)) {
+      lines.push({ reason: "DIRTIEST_TEAM", points: scoring.specials.dirtiest_team, interim: true, liveLeader: [...dirtiestLeaders].join("/"), pick: bets.dirtiestTeam });
     }
   }
 
@@ -411,6 +471,7 @@ export function computeSpecialBetsPool(
   actuals: TournamentActuals | null,
   playerStats: PlayerStat[] = [],
   scoring: ScoringValues = SCORING,
+  liveTeamGoals: Record<string, number> = {},
 ): SpecialBetsPool {
   const leaders = computeLiveLeaders(playerStats);
 
@@ -466,7 +527,7 @@ export function computeSpecialBetsPool(
     driestGroup: false, dirtiestTeam: false, matchups: false, penalties: false,
   };
   for (const bets of allBets) {
-    const bd = scoreSpecialBetsForUser(bets, actuals, playerStats, scoring, relative);
+    const bd = scoreSpecialBetsForUser(bets, actuals, playerStats, scoring, relative, liveTeamGoals);
     for (const line of bd.lines) {
       const cat = specialReasonToCategory(line.reason);
       if (cat && line.points > 0) anyScored[cat] = true;

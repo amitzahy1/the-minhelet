@@ -5,7 +5,7 @@
 // a proper server-side scoring pipeline writes to the scoring_log table.
 // ============================================================================
 
-import { computeGroupHits, type FinishedMatch } from "../results-hits";
+import { computeGroupHits, normalizeTla, type FinishedMatch } from "../results-hits";
 import type { BettorBracket, BettorAdvancement, BettorSpecialBets } from "../supabase/shared-data";
 import { GROUPS } from "../tournament/groups";
 import { LIVE_FEEDERS } from "../tournament/knockout-derivation";
@@ -332,13 +332,26 @@ export function computeLiveScores(
   if (options.specialBets && options.specialBets.length > 0) {
     const actuals = options.tournamentActuals ?? null;
     const stats = options.playerStats ?? [];
+    // Tournament-cumulative goals-for per team (from FINISHED matches) — feeds
+    // the best-attack LIVE tentative path. Uses `matches` (finished), not the
+    // live-inclusive set, so an in-play goal doesn't flicker the bet.
+    const teamGoals: Record<string, number> = {};
+    for (const m of matches) {
+      if (m.homeGoals == null || m.awayGoals == null) continue;
+      // Defensive double-normalization, like the group-scoring path: map any ISO
+      // TLA (ZAF/CHE/DEU/…) the upstream toAppCode didn't catch into the app code
+      // space, so goals bucket under the SAME code as the bettor's pick.
+      const h = normalizeTla(m.homeTla), a = normalizeTla(m.awayTla);
+      teamGoals[h] = (teamGoals[h] ?? 0) + m.homeGoals;
+      teamGoals[a] = (teamGoals[a] ?? 0) + m.awayGoals;
+    }
     // One pool pass decides the "closest among bettors" relative winners (top
     // scorer / assists) so the per-user scoring is consistent across everyone.
-    const pool = computeSpecialBetsPool(options.specialBets, actuals, stats, scoring);
+    const pool = computeSpecialBetsPool(options.specialBets, actuals, stats, scoring, teamGoals);
     for (const bets of options.specialBets) {
       const score = byUser[bets.userId];
       if (!score) continue;
-      const breakdown = scoreSpecialBetsForUser(bets, actuals, stats, scoring, pool.relative);
+      const breakdown = scoreSpecialBetsForUser(bets, actuals, stats, scoring, pool.relative, teamGoals);
       score.specPts = breakdown.total;
       score.specBreakdown = breakdown;
       score.specHasInterim = breakdown.hasInterim;

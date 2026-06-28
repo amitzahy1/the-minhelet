@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { getFlag, getTeamNameHe } from "@/lib/flags";
@@ -13,6 +13,9 @@ import { computeGroupHits, hitCounts, normalizeGroupLetter, matchPairIndex, clas
 import { computeMatchDays, dayLockAtForKickoff, type MatchDay } from "@/lib/tournament/group-live-state";
 import { anyMatchInPlayWindow, LIVE_REFRESH_MS } from "@/lib/live-window";
 import { MATCHUPS, parseMatchupPick } from "@/lib/matchups";
+import { resolveKnockoutTree } from "@/lib/scoring/knockout-resolver";
+import { LIVE_FEEDERS } from "@/lib/tournament/knockout-derivation";
+import { pairKey } from "@/lib/fixtures-client";
 
 interface Match {
   id: number;
@@ -26,6 +29,9 @@ interface Match {
   status: string;
   homeGoals: number | null;
   awayGoals: number | null;
+  homePenalties?: number | null;
+  awayPenalties?: number | null;
+  winner?: "HOME_TEAM" | "AWAY_TEAM" | "DRAW" | null;
   venue?: string | null;
   referees?: { name: string; role: string; nationality: string | null }[];
 }
@@ -66,7 +72,34 @@ export function TodayMatches() {
   const { specialBets, brackets, advancements, refetch } = useSharedData();
   // The viewer's OWN picks (local store) — shown next to the edit-bet button.
   const myGroups = useBettingStore((s) => s.groups);
+  const myKoLive = useBettingStore((s) => s.knockoutLive);
   const locked = isLocked();
+
+  // Map each REAL knockout fixture (by team-pair) → its bracket slot key, so a
+  // KO card can show the viewer's own pick from the real-data tree store
+  // (keyed by slot, not by team pair). Resolved from the live results with the
+  // same engine the knockout-live page uses (group stage must be complete for
+  // R32 slots to carry teams).
+  const koSlotByPair = useMemo(() => {
+    const map = new Map<string, { key: string; team1: string; team2: string }>();
+    const scored = allMatches
+      .filter((m) => m.homeGoals != null && m.awayGoals != null)
+      .map((m) => ({
+        id: m.id, date: m.date, homeTla: m.homeTla, awayTla: m.awayTla,
+        group: m.group ?? "", stage: m.stage ?? "",
+        homeGoals: m.homeGoals as number, awayGoals: m.awayGoals as number,
+        homePenalties: m.homePenalties ?? null, awayPenalties: m.awayPenalties ?? null,
+        winner: m.winner ?? null,
+      }));
+    if (scored.length === 0) return map;
+    try {
+      const tree = resolveKnockoutTree(scored, null, undefined, LIVE_FEEDERS);
+      for (const slot of Object.values(tree)) {
+        if (slot.team1 && slot.team2) map.set(pairKey(slot.team1, slot.team2), { key: slot.key, team1: slot.team1, team2: slot.team2 });
+      }
+    } catch { /* ignore */ }
+    return map;
+  }, [allMatches]);
 
   // State-backed "now" so reveal gates stay pure during render; bumped by the
   // boundary timer below (and seeded once per mount).
@@ -485,18 +518,42 @@ export function TodayMatches() {
                 {!groupLetter && (() => {
                   const isReal = !!m.homeTla && !!m.awayTla && m.homeTla !== "TBD" && m.awayTla !== "TBD";
                   const editable = !isFinished && !isLive && isReal;
+                  // The viewer's OWN real-tree pick: map fixture → slot → store,
+                  // then orient the slot's score1/score2 (team1/team2) to the
+                  // card's home/away so the digits read correctly.
+                  const slot = isReal ? koSlotByPair.get(pairKey(m.homeTla, m.awayTla)) : undefined;
+                  const kp = slot ? myKoLive[slot.key] : undefined;
+                  const myPick = kp && kp.score1 !== null && kp.score2 !== null && slot
+                    ? (m.homeTla === slot.team1 ? { home: kp.score1, away: kp.score2 } : { home: kp.score2, away: kp.score1 })
+                    : null;
+                  const actual = (isLive || isFinished) && m.homeGoals !== null && m.awayGoals !== null
+                    ? { home: m.homeGoals, away: m.awayGoals } : null;
+                  const hit = myPick && actual ? classifyHit(myPick, actual) : null;
+                  const chip = hit === "exact" ? "bg-green-100 text-green-800 border-green-200"
+                    : hit === "toto" ? "bg-amber-100 text-amber-800 border-amber-200"
+                    : hit === "miss" ? "bg-red-50 text-red-600 border-red-200"
+                    : "bg-transparent text-gray-400 border-transparent";
                   return (
-                    <div className="mt-auto pt-2 flex items-center justify-center min-h-[28px]">
-                      {editable ? (
+                    <div className="mt-auto pt-2 flex items-center justify-center gap-1.5 min-h-[28px]">
+                      {myPick ? (
+                        <span className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 ${chip}`}>
+                          <span className="text-[8px] font-bold opacity-70">שלך</span>
+                          <span dir="ltr" className={`text-[12px] tabular-nums ${hit ? "font-black" : "font-semibold"}`} style={{ fontFamily: "var(--font-inter)" }}>{myPick.away}-{myPick.home}</span>
+                          {hit === "exact" && <span className="text-[10px]">🎯</span>}
+                          {hit === "toto" && <span className="text-[10px]">✓</span>}
+                          {hit === "miss" && <span className="text-[10px]">✗</span>}
+                        </span>
+                      ) : !editable && (
+                        <span className="text-[10px] text-gray-300">{isReal ? "לא הימרת" : "ממתין ליריבה"}</span>
+                      )}
+                      {editable && (
                         <Link
                           href="/knockout-live"
                           onClick={(e) => e.stopPropagation()}
                           className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-0.5 hover:bg-emerald-100 transition-colors"
                         >
-                          ✏️ מלאו הימור ←
+                          {myPick ? "✏️ שנה" : "✏️ מלאו הימור ←"}
                         </Link>
-                      ) : (
-                        <span className="text-[10px] text-gray-300">{isReal ? "" : "ממתין ליריבה"}</span>
                       )}
                     </div>
                   );

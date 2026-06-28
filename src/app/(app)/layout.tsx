@@ -593,7 +593,9 @@ function ProgressBanner() {
                 <span className="text-gray-600 shrink-0">
                   המשחק הבא: <span className="font-bold text-gray-800">{getTeamNameHe(nm.team1) || nm.team1}–{getTeamNameHe(nm.team2) || nm.team2}</span>
                   {" · בעיטה "}<span dir="ltr" className="tabular-nums">{toIsraelTimeShort(nm.kickoff)}</span>
-                  {" · ננעל "}<span dir="ltr" className="tabular-nums font-bold">{toIsraelTimeShort(nm.lockAt)}</span>
+                  {nm.locked
+                    ? <> · <span className="text-gray-500 font-bold">🔒 ההימור ננעל</span></>
+                    : <> · ננעל <span dir="ltr" className="tabular-nums font-bold">{toIsraelTimeShort(nm.lockAt)}</span></>}
                 </span>
               )}
               <Link href="/knockout-live" className={`ms-auto flex items-center gap-1.5 rounded-full px-3 py-1 shadow-sm font-bold shrink-0 transition-colors ${needsFill ? "bg-emerald-600 text-white hover:bg-emerald-700 animate-pulse" : "bg-white text-emerald-700 border border-emerald-200 hover:bg-emerald-50"}`}>
@@ -610,19 +612,24 @@ function ProgressBanner() {
         {/* Second row — DB-AUTHORITATIVE shortfall for THIS user: how many open
             matches in the current stage aren't saved to the database (not the
             local cache). This is the number the bettor should trust. */}
-        {inStage && koStatus.dbUnfilledOpenCount !== null && (
-          <div className={`border-t ${koStatus.dbUnfilledOpenCount > 0 ? "bg-red-50/70 border-red-200/60" : "bg-emerald-50/60 border-emerald-200/50"}`}>
-            <div className="max-w-7xl mx-auto px-3 sm:px-4 py-1.5 text-[11px] sm:text-xs font-bold flex items-center gap-2">
-              {koStatus.dbUnfilledOpenCount > 0 ? (
-                <Link href="/knockout-live" className="text-red-700 hover:underline">
-                  ⚠️ נשמרו לך {koStatus.dbSavedOpenCount}/{koStatus.openCount} — חסרים {koStatus.dbUnfilledOpenCount} משחקים ב{koStatus.currentStageLabel ?? "שלב הנוכחי"} ←
-                </Link>
-              ) : (
-                <span className="text-emerald-700">✓ כל {koStatus.openCount} המשחקים בשלב הנוכחי נשמרו בדאטהבייס</span>
-              )}
+        {inStage && koStatus.dbUnfilledOpenCount !== null && koStatus.stageTotal > 0 && (() => {
+          // Count the WHOLE stage (16 in R32) so the total doesn't shrink as
+          // matches lock — a locked-but-saved match still counts as saved.
+          const missing = koStatus.stageTotal - koStatus.dbSavedStage;
+          return (
+            <div className={`border-t ${missing > 0 ? "bg-red-50/70 border-red-200/60" : "bg-emerald-50/60 border-emerald-200/50"}`}>
+              <div className="max-w-7xl mx-auto px-3 sm:px-4 py-1.5 text-[11px] sm:text-xs font-bold flex items-center gap-2">
+                {missing > 0 ? (
+                  <Link href="/knockout-live" className="text-red-700 hover:underline">
+                    ⚠️ נשמרו לך {koStatus.dbSavedStage}/{koStatus.stageTotal} — חסרים {missing} משחקים ב{koStatus.currentStageLabel ?? "שלב הנוכחי"} ←
+                  </Link>
+                ) : (
+                  <span className="text-emerald-700">✓ כל {koStatus.stageTotal} המשחקים בשלב הנוכחי נשמרו בדאטהבייס</span>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
     );
   }

@@ -409,14 +409,12 @@ export function scoreSpecialBetsForUser(
     if (!pick) continue;
     const mu = MATCHUPS[i];
     const actual = matchupActuals[i];
+    // Show just the player the bettor picked (or "תיקו") — short and clear,
+    // instead of the long "A vs B: 1" string.
+    const sideName = pick === "1" ? mu.p1Short : pick === "2" ? mu.p2Short : "תיקו";
     if (actual) {
       if (pick === actual) {
-        lines.push({
-          reason: "MATCHUP",
-          points: scoring.specials.matchup,
-          interim: false,
-          pick: `${mu.p1Short} vs ${mu.p2Short}: ${pick}`,
-        });
+        lines.push({ reason: "MATCHUP", points: scoring.specials.matchup, interim: false, pick: sideName });
       }
     } else {
       // Live tentative: whoever currently leads the duel catches it.
@@ -427,7 +425,7 @@ export function scoreSpecialBetsForUser(
           points: scoring.specials.matchup,
           interim: true,
           liveLeader: live === "X" ? "תיקו" : live === "1" ? mu.p1Short : mu.p2Short,
-          pick: `${mu.p1Short} vs ${mu.p2Short}: ${pick}`,
+          pick: sideName,
         });
       }
     }

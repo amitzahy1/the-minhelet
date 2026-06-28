@@ -35,17 +35,23 @@ export interface RealKnockoutStatus {
    *  local cache). null until the DB read returns. This is what the bettor
    *  should trust: "X matches still missing in the current stage". */
   dbUnfilledOpenCount: number | null;
-  /** Open slots already saved to the DB (for "X/Y saved"). */
+  /** Open slots already saved to the DB. */
   dbSavedOpenCount: number;
+  /** Total resolved matches in the current stage (16 in R32), incl. locked —
+   *  stays constant as matches lock so the saved count doesn't shrink. */
+  stageTotal: number;
+  /** How many of the current stage's matches are saved to the DB (0..stageTotal). */
+  dbSavedStage: number;
   /** Hebrew name of the stage to fill now (earliest stage with unfilled open
    *  matches) — e.g. "שלב 32 הגדולות", then "שמינית הגמר". null when nothing open. */
   openStageLabel: string | null;
   /** Hebrew name of the current open stage REGARDLESS of fill state — drives the
    *  banner's "we're in stage X" text even after the viewer has bet. */
   currentStageLabel: string | null;
-  /** The next open match by kickoff (teams + kickoff ISO + lock ISO) — for the
-   *  banner's "next match … locks at …" line. null when nothing open. */
-  nextMatch: { team1: string; team2: string; kickoff: string; lockAt: string } | null;
+  /** The next match still to be PLAYED by kickoff (open OR locked — NOT finished),
+   *  for the banner's "next match …" line. A locked/in-play match stays "next"
+   *  until it ends, then the following one takes over. `locked` = betting closed. */
+  nextMatch: { team1: string; team2: string; kickoff: string; lockAt: string; locked: boolean } | null;
 }
 
 // Stage prefix → display order + Hebrew label. The real-data tree fills one
@@ -106,7 +112,7 @@ export function useRealKnockoutStatus(): RealKnockoutStatus {
   }, []);
 
   return useMemo<RealKnockoutStatus>(() => {
-    if (fixtures === null) return { loading: true, groupStageComplete: false, openCount: 0, unfilledOpenCount: 0, dbUnfilledOpenCount: null, dbSavedOpenCount: 0, openStageLabel: null, currentStageLabel: null, nextMatch: null };
+    if (fixtures === null) return { loading: true, groupStageComplete: false, openCount: 0, unfilledOpenCount: 0, dbUnfilledOpenCount: null, dbSavedOpenCount: 0, stageTotal: 0, dbSavedStage: 0, openStageLabel: null, currentStageLabel: null, nextMatch: null };
     const scored: FinishedMatch[] = fixtures
       .filter((m) => m.homeGoals != null && m.awayGoals != null)
       .map((m) => ({
@@ -118,7 +124,7 @@ export function useRealKnockoutStatus(): RealKnockoutStatus {
       }));
     const schedule: ScheduleMatch[] = fixtures.map((m) => ({ homeTla: m.homeTla, awayTla: m.awayTla, date: m.date, status: m.status ?? null }));
     const groupStageComplete = Object.keys(computeGroupOrders(scored)).length === 12;
-    if (!groupStageComplete) return { loading: false, groupStageComplete: false, openCount: 0, unfilledOpenCount: 0, dbUnfilledOpenCount: null, dbSavedOpenCount: 0, openStageLabel: null, currentStageLabel: null, nextMatch: null };
+    if (!groupStageComplete) return { loading: false, groupStageComplete: false, openCount: 0, unfilledOpenCount: 0, dbUnfilledOpenCount: null, dbSavedOpenCount: 0, stageTotal: 0, dbSavedStage: 0, openStageLabel: null, currentStageLabel: null, nextMatch: null };
     const tree = resolveKnockoutTree(scored, null, undefined, LIVE_FEEDERS);
     let openCount = 0;
     let unfilledOpenCount = 0;
@@ -128,24 +134,44 @@ export function useRealKnockoutStatus(): RealKnockoutStatus {
     let nextMatch: RealKnockoutStatus["nextMatch"] = null;
     let nextKo = Infinity;
     for (const k of KO_SLOT_KEYS as readonly KoSlotKey[]) {
-      if (slotStatus(k, tree, schedule, now) !== "open") continue;
+      const st = slotStatus(k, tree, schedule, now);
+      // "Next match" = earliest-kickoff match still to be PLAYED (open OR locked,
+      // i.e. NOT finished/waiting) — so tonight's locked/in-play match stays the
+      // "next match" until it actually ends, then the following one takes over.
+      if (st === "open" || st === "locked") {
+        const slot = tree[k];
+        const ko = findKickoffForSlot(k, tree, schedule);
+        if (ko && slot?.team1 && slot?.team2) {
+          const t = Date.parse(ko.date);
+          if (!Number.isNaN(t) && t < nextKo) {
+            nextKo = t;
+            nextMatch = { team1: slot.team1, team2: slot.team2, kickoff: ko.date, lockAt: new Date(t - LOCK_BEFORE_MIN * 60_000).toISOString(), locked: st === "locked" };
+          }
+        }
+      }
+      // The remaining counts are about BETTING — open (editable) slots only.
+      if (st !== "open") continue;
       openCount++;
       if (slotHasScores(dbSaved?.[k])) dbSavedOpenCount++;
       const sIdx = (STAGE_ORDER as readonly string[]).indexOf(stageOf(k));
       if (sIdx >= 0 && sIdx < earliestOpenStageIdx) earliestOpenStageIdx = sIdx;
-      // Track the earliest-kickoff open match for the banner's "next match" line.
-      const slot = tree[k];
-      const ko = findKickoffForSlot(k, tree, schedule);
-      if (ko && slot?.team1 && slot?.team2) {
-        const t = Date.parse(ko.date);
-        if (!Number.isNaN(t) && t < nextKo) {
-          nextKo = t;
-          nextMatch = { team1: slot.team1, team2: slot.team2, kickoff: ko.date, lockAt: new Date(t - LOCK_BEFORE_MIN * 60_000).toISOString() };
-        }
-      }
       if (!slotHasScores(knockoutLive[k])) {
         unfilledOpenCount++;
         if (sIdx >= 0 && sIdx < earliestUnfilledStageIdx) earliestUnfilledStageIdx = sIdx;
+      }
+    }
+    // Stage totals (C): count the WHOLE current stage's matches (16 in R32),
+    // incl. locked/finished, so "saved X/Y" doesn't shrink as matches lock.
+    const currentStageKey = earliestOpenStageIdx < STAGE_ORDER.length ? STAGE_ORDER[earliestOpenStageIdx] : null;
+    let stageTotal = 0;
+    let dbSavedStage = 0;
+    if (currentStageKey) {
+      for (const k of KO_SLOT_KEYS as readonly KoSlotKey[]) {
+        if (stageOf(k) !== currentStageKey) continue;
+        const slot = tree[k];
+        if (!slot?.team1 || !slot?.team2) continue; // resolved matches only
+        stageTotal++;
+        if (slotHasScores(dbSaved?.[k])) dbSavedStage++;
       }
     }
     const openStageLabel = earliestUnfilledStageIdx < STAGE_ORDER.length
@@ -155,6 +181,6 @@ export function useRealKnockoutStatus(): RealKnockoutStatus {
       ? STAGE_LABEL[STAGE_ORDER[earliestOpenStageIdx]]
       : null;
     const dbUnfilledOpenCount = dbSaved ? Math.max(0, openCount - dbSavedOpenCount) : null;
-    return { loading: false, groupStageComplete: true, openCount, unfilledOpenCount, dbUnfilledOpenCount, dbSavedOpenCount, openStageLabel, currentStageLabel, nextMatch };
+    return { loading: false, groupStageComplete: true, openCount, unfilledOpenCount, dbUnfilledOpenCount, dbSavedOpenCount, stageTotal, dbSavedStage, openStageLabel, currentStageLabel, nextMatch };
   }, [fixtures, now, knockoutLive, dbSaved]);
 }

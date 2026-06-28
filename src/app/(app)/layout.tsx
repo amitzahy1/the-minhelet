@@ -579,7 +579,9 @@ function ProgressBanner() {
           <span className="text-green-700 font-bold shrink-0">הטורניר בעיצומו!</span>
           {needsLive ? (
             <Link href="/knockout-live" className="ms-auto flex items-center gap-1.5 bg-emerald-600 text-white font-bold rounded-full px-3 py-1 shadow-sm hover:bg-emerald-700 transition-colors animate-pulse shrink-0">
-              🟢 עץ אמת — נותרו {koStatus.unfilledOpenCount} משחקים להימור ←
+              {/* Name the stage that's open NOW (32 הגדולות → שמינית → …) — the
+                  one-time modal nudge wasn't enough, so keep it in the top bar. */}
+              🟢 מלאו את {koStatus.openStageLabel ?? "עץ נתוני אמת"} — נותרו {koStatus.unfilledOpenCount} משחקים ←
             </Link>
           ) : (
             <Link href="/live" className="text-green-600 font-bold hover:underline ms-auto">צפו בלייב ←</Link>

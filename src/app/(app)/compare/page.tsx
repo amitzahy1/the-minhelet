@@ -64,6 +64,7 @@ interface Bettor {
   finalist2: string;
   sf: string[];
   qf: string[];
+  r16: string[];
   topScorer: string;
   topAssists: string;
   bestAttack: string;
@@ -209,6 +210,7 @@ export default function ComparePage() {
       const advToFinal = adv?.advanceToFinal || [];
       const advToSF = adv?.advanceToSF || [];
       const advToQF = adv?.advanceToQF || [];
+      const advToR16 = adv?.advanceToR16 || [];
 
       // Determine finalist pair: champion + the other finalist
       const finalist1 = champion;
@@ -228,6 +230,7 @@ export default function ComparePage() {
         finalist2,
         sf,
         qf,
+        r16: advToR16.slice(0, 16),
         topScorer: sb?.topScorerPlayer || "",
         topAssists: sb?.topAssistsPlayer || "",
         bestAttack: sb?.bestAttackTeam || "",
@@ -266,7 +269,7 @@ export default function ComparePage() {
   // Build color maps for each category
   const advColors = useMemo(() => buildColorMap([
     ...BETTORS.map(b=>b.winner), ...BETTORS.flatMap(b=>[b.finalist1,b.finalist2]),
-    ...BETTORS.flatMap(b=>b.sf), ...BETTORS.flatMap(b=>b.qf),
+    ...BETTORS.flatMap(b=>b.sf), ...BETTORS.flatMap(b=>b.qf), ...BETTORS.flatMap(b=>b.r16),
   ]), [BETTORS]);
   const specColors = useMemo(() => buildColorMap([
     ...BETTORS.map(b=>b.topScorer), ...BETTORS.map(b=>b.topAssists),
@@ -415,6 +418,7 @@ export default function ComparePage() {
               { label: "גמר 2", section: "final" as const, render: (b) => ({ val: b.finalist2, node: <span className="text-gray-700">{F[b.finalist2]} {b.finalist2}</span> }) },
               ...[0, 1, 2, 3].map((i) => ({ label: `חצי ${i + 1}`, section: "semi" as const, render: (b: Bettor) => ({ val: b.sf[i] || "", node: <span className="text-gray-700">{F[b.sf[i]]} {b.sf[i]}</span> }) })),
               ...[0, 1, 2, 3, 4, 5, 6, 7].map((i) => ({ label: `רבע ${i + 1}`, section: "quarter" as const, render: (b: Bettor) => ({ val: b.qf[i] || "", node: <span className="text-gray-700">{F[b.qf[i]]} {b.qf[i]}</span> }) })),
+              ...Array.from({ length: 16 }, (_, i) => ({ label: `שמינית ${i + 1}`, section: "r16" as const, render: (b: Bettor) => ({ val: b.r16[i] || "", node: <span className="text-gray-700">{F[b.r16[i]]} {b.r16[i]}</span> }) })),
             ]}
           />
           {/* Popular picks — computed from real data */}
@@ -675,7 +679,7 @@ interface TransposedRow {
   render: (b: Bettor) => { val: string; node: React.ReactNode };
   highlight?: boolean;
   /** Stage group — a tinted divider row is rendered whenever it changes. */
-  section?: "winner" | "final" | "semi" | "quarter";
+  section?: "winner" | "final" | "semi" | "quarter" | "r16";
 }
 
 /** Stage titles for the advancement table. The divider design is NEUTRAL
@@ -686,6 +690,7 @@ const SECTION_META: Record<NonNullable<TransposedRow["section"]>, { title: strin
   final:   { title: "עולות לגמר" },
   semi:    { title: "חצי גמר" },
   quarter: { title: "רבע גמר" },
+  r16:     { title: "עולות לשמינית הגמר" },
 };
 
 function TransposedBetTable({

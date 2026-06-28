@@ -130,20 +130,18 @@ export default function KnockoutLivePage() {
   const fairPlay = useMemo(() => fairPlayFromBoard(dirtyBoard), [dirtyBoard]);
   const tree = useMemo(() => resolveKnockoutTree(scored, thirdsOverride, fairPlay, LIVE_FEEDERS), [scored, thirdsOverride, fairPlay]);
   const groupStageComplete = useMemo(() => Object.keys(computeGroupOrders(scored, fairPlay)).length === 12, [scored, fairPlay]);
-  const champion = tree.final?.winner ?? knockoutLive.final?.winner ?? null;
+  const champion = tree.final?.winner ?? null;
   const filled = Object.values(knockoutLive).filter((m) => m.winner).length;
 
-  // Teams for a slot: prefer the REAL team (once the feeding real match has
-  // finished), otherwise fall back to the winner the user PICKED in the feeding
-  // match — so the bracket fills forward exactly like the simulation tree, and
-  // tie-winners advance. As real results land, the real team replaces the
-  // predicted one and the user can re-edit (still editable until 30 min pre-kickoff).
+  // Teams for a slot: ONLY the REAL team, resolved from actual results. This is
+  // the real-data tree — you bet one stage at a time on the match that ACTUALLY
+  // exists. A slot whose feeding real matches haven't finished stays "waiting":
+  // we deliberately do NOT fill it with the winner the user PICKED upstream, so
+  // if you guessed the wrong advancer the next round still shows the REAL
+  // matchup once that real result lands — never your prediction.
   const getTeams = (key: string): SlotTeams => {
     const slot = tree[key as KoSlotKey];
-    const feeders = LIVE_FEEDERS[key];
-    const team1 = slot?.team1 ?? (feeders ? knockoutLive[feeders[0]]?.winner ?? null : null);
-    const team2 = slot?.team2 ?? (feeders ? knockoutLive[feeders[1]]?.winner ?? null : null);
-    return { team1, team2 };
+    return { team1: slot?.team1 ?? null, team2: slot?.team2 ?? null };
   };
 
   // Debounced per-slot save (Supabase enforces the per-match lock).

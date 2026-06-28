@@ -5,6 +5,9 @@ import { toAppCode, findUnmappedTeams } from "@/lib/fd-team-mapping";
 import { buildResultRows, syncCardBoard, reconcileFinishedRows } from "@/lib/sync-results";
 import { getEspnResults } from "@/lib/api-espn";
 import type { MatchResult } from "@/lib/api-football-data";
+import { resolveKnockoutTree, type KoSlotKey } from "@/lib/scoring/knockout-resolver";
+import { LIVE_FEEDERS } from "@/lib/tournament/knockout-derivation";
+import { normalizeTla, normalizeGroupLetter, type FinishedMatch } from "@/lib/results-hits";
 
 interface FdDetails {
   syncedAt?: string;
@@ -213,6 +216,13 @@ export async function GET() {
     });
   }
 
+  // 5. Knockout opponent resolution. FD leaves the best-third side of each R32
+  //    fixture as "TBD" until the official draw assigns it — but we already
+  //    resolve the real bracket from finished group results. Overlay the
+  //    resolved opponent so the schedule shows the true matchup (e.g. "Germany
+  //    vs Paraguay") instead of "Germany vs TBD".
+  fillKnockoutOpponents(merged, ourResults ?? []);
+
   // Loud identity guard: any real (non-TBD) team whose code the app doesn't
   // recognise means a missing TLA alias — the bug that scrambled the matchday
   // order. Surface it in the payload (admin SystemStatus shows it) and log it,
@@ -245,6 +255,54 @@ export async function GET() {
   if ("error" in fdResult && fdResult.error) payload.error = fdResult.error;
   if (unmappedTeams.length) payload.unmappedTeams = unmappedTeams;
   return NextResponse.json(payload);
+}
+
+/**
+ * Fill the best-third opponent FD leaves as "TBD" on R32 fixtures, using the
+ * real bracket resolved from finished group results. ONLY R32 fixtures with
+ * exactly one known team (the group-winner side) are filled; later rounds keep
+ * their TBD until the feeding matches are played — you bet one stage at a time
+ * on the match that actually exists. Never throws — a resolution hiccup must
+ * not blank the schedule.
+ */
+function fillKnockoutOpponents(merged: Match[], ourResults: DemoResult[]): void {
+  try {
+    const finishedGroup: FinishedMatch[] = [];
+    let idc = 1;
+    for (const r of ourResults) {
+      const isGroup = r.stage === "GROUP" || r.stage === "GROUP_STAGE";
+      if (!isGroup || r.status !== "FINISHED") continue;
+      if (r.home_goals == null || r.away_goals == null || !r.home_team || !r.away_team) continue;
+      finishedGroup.push({
+        id: idc++, date: r.scheduled_at || "",
+        homeTla: normalizeTla(r.home_team), awayTla: normalizeTla(r.away_team),
+        group: normalizeGroupLetter(r.group_id) || (r.group_id || "").toUpperCase(), stage: "GROUP",
+        homeGoals: r.home_goals, awayGoals: r.away_goals,
+        homePenalties: r.home_penalties, awayPenalties: r.away_penalties,
+      });
+    }
+    // Resolve R32 only once the whole group stage is in — a partial set would
+    // mis-seed the best-thirds and show a wrong opponent.
+    if (finishedGroup.length < 72) return;
+    const tree = resolveKnockoutTree(finishedGroup, null, undefined, LIVE_FEEDERS);
+    const oppByTeam: Record<string, string> = {};
+    for (const k of Object.keys(tree)) {
+      if (!k.startsWith("r32")) continue;
+      const s = tree[k as KoSlotKey];
+      if (s.team1 && s.team2) { oppByTeam[s.team1] = s.team2; oppByTeam[s.team2] = s.team1; }
+    }
+    for (const m of merged) {
+      if (m.stage !== "LAST_32" && m.stage !== "ROUND_OF_32") continue;
+      const homeTBD = !m.homeTla || m.homeTla === "TBD";
+      const awayTBD = !m.awayTla || m.awayTla === "TBD";
+      if (homeTBD === awayTBD) continue; // need exactly one resolved side
+      const known = homeTBD ? m.awayTla : m.homeTla;
+      const opp = oppByTeam[known];
+      if (!opp) continue;
+      if (homeTBD) { m.homeTla = opp; m.homeTeam = opp; }
+      else { m.awayTla = opp; m.awayTeam = opp; }
+    }
+  } catch { /* never block the schedule on a resolution hiccup */ }
 }
 
 // Per-instance throttle so the 60s polling doesn't re-upsert the same rows on

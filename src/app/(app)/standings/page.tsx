@@ -200,6 +200,9 @@ type Breakdown = {
 type PlayerRow = Omit<(typeof MOCK_PLAYERS)[number], "breakdown"> & {
   breakdown: Breakdown;
   specRelative?: { topScorer: boolean; topAssists: boolean };
+  /** Per-category: true = score still TENTATIVE (can change), false = DECIDED
+   *  (locked, can't change). Absent = no scored line for that bet. */
+  specInterim?: Partial<Record<SpecialCategory, boolean>>;
 };
 
 // The 8 special-bet rows, in display order.
@@ -269,12 +272,26 @@ function PlayerTooltip({ player, specStatus, visible, onClose }: { player: Playe
                 pts > 0 &&
                 ((cat === "topScorer" && player.specRelative?.topScorer) ||
                   (cat === "topAssists" && player.specRelative?.topAssists));
-              const isVoid = pts === 0 && specStatus[cat] === "void";
+              const st = specStatus[cat];
+              const interim = player.specInterim?.[cat];
+              const isVoid = pts === 0 && st === "void";
+              // DECIDED = the bet is locked and can no longer change (group bets
+              // after the group stage, any bet whose actual is in). TENTATIVE =
+              // still in play (e.g. top scorer mid-tournament). interim is the
+              // authoritative per-line signal; fall back to the pool status.
+              const decided = interim === false || (interim === undefined && (st === "won" || st === "void"));
+              const tentative = interim === true || (interim === undefined && st === "pending");
               return (
                 <Fragment key={cat}>
-                  <span className="text-gray-500">
-                    {label}
-                    {isRel && <span className="text-[9px] text-blue-600 font-bold"> יחסי</span>}
+                  <span className="text-gray-500 flex flex-wrap items-center gap-1">
+                    <span>{label}</span>
+                    {isRel && <span className="text-[9px] text-blue-600 font-bold">יחסי</span>}
+                    {tentative && (
+                      <span className="text-[8px] text-amber-700 bg-amber-100 rounded px-1 font-bold" title="ניקוד זמני — עדיין יכול להשתנות">⏱ זמני</span>
+                    )}
+                    {decided && !isVoid && (
+                      <span className="text-[8px] text-emerald-700 bg-emerald-100 rounded px-1 font-bold" title="נקבע סופית — לא ישתנה">🔒 נסגר</span>
+                    )}
                   </span>
                   {isVoid ? (
                     <span className="text-[10px] text-gray-400 text-end self-center">אף אחד לא תופס</span>
@@ -625,6 +642,10 @@ export default function StandingsPage() {
       };
       // Which relative lines were awarded (drives the "יחסי" tag in the modal).
       const specRelative = { topScorer: false, topAssists: false };
+      // Per-category interim flag — true while a bet can still change (e.g. top
+      // scorer), false once it's locked (e.g. most-prolific group after the
+      // group stage). Drives the "זמני / נסגר" marker in the modal.
+      const specInterim: Partial<Record<SpecialCategory, boolean>> = {};
       for (const entry of userEntries) {
         const bucket = REASON_TO_BUCKET[entry.reason];
         if (bucket) breakdown[bucket] += entry.points;
@@ -655,7 +676,10 @@ export default function StandingsPage() {
           breakdown.matchups = 0; breakdown.penalties = 0;
           for (const line of live.specBreakdown.lines) {
             const cat = specialReasonToCategory(line.reason);
-            if (cat) breakdown[cat] += line.points;
+            if (cat) {
+              breakdown[cat] += line.points;
+              specInterim[cat] = (specInterim[cat] ?? false) || line.interim;
+            }
             if (line.reason === "TOP_SCORER_RELATIVE") specRelative.topScorer = true;
             if (line.reason === "TOP_ASSISTS_RELATIVE") specRelative.topAssists = true;
           }
@@ -698,6 +722,7 @@ export default function StandingsPage() {
         isYou: profile.id === currentUserId,
         breakdown,
         specRelative,
+        specInterim,
       };
     }).filter(Boolean) as (PlayerRow & { specHasInterim?: boolean; liveDelta: number })[];
   }, [profiles, scoringLog, liveScores, finishedScores, todayScores, currentUserId, maxPossibleScores]);

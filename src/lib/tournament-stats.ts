@@ -129,6 +129,35 @@ export function aggregateGroupStats(rows: DemoResultRow[]): GroupGoalStats[] {
   return Array.from(map.values()).sort((a, b) => b.goals - a.goals);
 }
 
+/**
+ * Most-prolific / driest GROUP are mathematically DECIDED the instant the group
+ * stage ends — yet `tournament_actuals` stores them as admin-entered columns
+ * that nobody fills in, so the bet silently scored 0 for everyone. Derive them
+ * from the computed group-goal totals, but ONLY once every group has played all
+ * 6 matches (so a mid-stage leader is never locked in prematurely). Returns null
+ * until the whole group stage is complete. Admin-entered values still win — the
+ * caller only fills a null field.
+ */
+export function deriveGroupExtremes(
+  groupStats: GroupGoalStats[],
+): { prolific: GroupGoalStats; driest: GroupGoalStats } | null {
+  if (groupStats.length < 12) return null;
+  if (!groupStats.every((g) => g.matches >= 6)) return null;
+  const sorted = [...groupStats].sort((a, b) => b.goals - a.goals);
+  return { prolific: sorted[0], driest: sorted[sorted.length - 1] };
+}
+
+const EMPTY_ACTUALS: TournamentActuals = {
+  top_scorer_player: null, top_scorer_team: null, top_scorer_goals: null,
+  top_assists_player: null, top_assists_team: null, top_assists_count: null,
+  best_attack_team: null, best_attack_goals: null,
+  dirtiest_team: null, dirtiest_team_cards: null, dirtiest_board: null,
+  most_prolific_group: null, most_prolific_goals: null,
+  driest_group: null, driest_group_goals: null,
+  matchup_result_1: null, matchup_result_2: null, matchup_result_3: null,
+  total_penalties: null, penalties_over_under: null, champion: null,
+};
+
 // ---------- Football-Data scorers ----------
 
 // FD is authoritative for GOALS (its scorer list is complete and current; ESPN's
@@ -261,12 +290,30 @@ export async function getTournamentStats(): Promise<TournamentStatsPayload> {
   const groupStats = aggregateGroupStats(finishedMatches);
   const assistsLeaders = [...scorers].sort((a, b) => b.assists - a.assists);
 
+  // Group-based bets (most-prolific / driest group) lock the moment the group
+  // stage ends. Derive them from the computed group totals when the admin hasn't
+  // entered them, so they score and show as DECIDED automatically. Only fires
+  // once all 12 groups have finished — and never overwrites an admin entry.
+  let resolvedActuals = actuals;
+  const ext = deriveGroupExtremes(groupStats);
+  if (ext) {
+    resolvedActuals = { ...EMPTY_ACTUALS, ...(actuals ?? {}) };
+    if (!resolvedActuals.most_prolific_group) {
+      resolvedActuals.most_prolific_group = ext.prolific.letter;
+      resolvedActuals.most_prolific_goals = ext.prolific.goals;
+    }
+    if (!resolvedActuals.driest_group) {
+      resolvedActuals.driest_group = ext.driest.letter;
+      resolvedActuals.driest_group_goals = ext.driest.goals;
+    }
+  }
+
   return {
     scorers: [...scorers].sort((a, b) => b.goals - a.goals),
     assistsLeaders,
     teamStats,
     groupStats,
-    actuals,
+    actuals: resolvedActuals,
     finishedCount: finishedMatches.filter((r) => r.status === "FINISHED").length,
   };
 }

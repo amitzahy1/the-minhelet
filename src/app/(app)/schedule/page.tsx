@@ -462,21 +462,13 @@ export default function SchedulePage() {
     grouped[date].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }
 
-  // Day-groups whose matches ALL ended more than 24h ago start collapsed, so the
-  // user lands near today's + upcoming matches without scrolling past a wall of
-  // finished days. A match end is estimated as kickoff + 2h; a day is "old" once
-  // its latest match ended before the 24h cutoff (captured once at mount).
-  // Today's and future days never qualify (their end-times aren't in the past).
-  // The default is derived during render off the full match set, so it's stable
-  // across the group filter; `dayOverrides` records explicit user open/close
-  // choices, which win over the default.
-  const [mountNow] = useState(() => Date.now());
+  // A day starts COLLAPSED once ALL its matches are FINISHED — so the whole
+  // group stage (every day done) folds away, and each knockout stage collapses
+  // as its day completes, leaving only days with upcoming/in-progress matches
+  // open. `dayOverrides` records explicit user open/close choices, which win.
   const [dayOverrides, setDayOverrides] = useState<Record<string, boolean>>({});
-  const isOldDay = (dayMatches: Match[]) => {
-    let lastEnd = 0;
-    for (const m of dayMatches) lastEnd = Math.max(lastEnd, new Date(m.date).getTime() + 2 * 60 * 60 * 1000);
-    return lastEnd < mountNow - 24 * 60 * 60 * 1000;
-  };
+  const isOldDay = (dayMatches: Match[]) =>
+    dayMatches.length > 0 && dayMatches.every((m) => m.status === "FINISHED");
   const toggleDay = (date: string, currentlyCollapsed: boolean) =>
     setDayOverrides((prev) => ({ ...prev, [date]: !currentlyCollapsed }));
 

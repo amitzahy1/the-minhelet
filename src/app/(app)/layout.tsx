@@ -19,6 +19,8 @@ import { useSharedData } from "@/hooks/useSharedData";
 import { useScoring } from "@/hooks/useScoring";
 import { useRealKnockoutStatus } from "@/hooks/useRealKnockoutStatus";
 import { formatLockDeadline, isLocked } from "@/lib/constants";
+import { getTeamNameHe } from "@/lib/flags";
+import { toIsraelTimeShort } from "@/lib/timezone";
 
 const Icons = {
   bets: (a: boolean) => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={a ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6M9 15l3 3 3-3"/></svg>,
@@ -571,25 +573,38 @@ function ProgressBanner() {
   // During tournament: show a live banner; once the group stage ends, nudge the
   // bettor to fill the real-data tree (עץ נתוני אמת) whenever open matches remain.
   if (preLockPassed && tournamentStarted) {
-    const needsLive = koStatus.groupStageComplete && koStatus.unfilledOpenCount > 0;
+    // We're inside an active knockout stage when the group stage is done AND at
+    // least one match is currently open. Gate the rich banner on openCount (not
+    // the per-user unfilled count) so it ALWAYS shows the stage + next match,
+    // even after the viewer has bet — and even if the store's pick count is off.
+    const inStage = koStatus.groupStageComplete && koStatus.openCount > 0;
+    const needsFill = koStatus.unfilledOpenCount > 0;
+    const nm = koStatus.nextMatch;
     return (
-      <div className={`border-b ${needsLive ? "bg-gradient-to-l from-emerald-50 to-green-100/70 border-emerald-300/70" : "bg-gradient-to-l from-green-50 to-emerald-50/70 border-green-200/60"}`}>
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2 flex items-center gap-3 text-xs sm:text-sm">
+      <div className={`border-b ${inStage && needsFill ? "bg-gradient-to-l from-emerald-50 to-green-100/70 border-emerald-300/70" : "bg-gradient-to-l from-green-50 to-emerald-50/70 border-green-200/60"}`}>
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm">
           <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse shrink-0"></span>
-          <span className="text-green-700 font-bold shrink-0">הטורניר בעיצומו!</span>
           {koStatus.loading ? (
-            // Don't assert "צפו בלייב" before the fixtures load — that hides a
-            // pending "fill the stage" CTA (the bug seen on mobile, where a slow
-            // /api/matches left the bar stuck on watch-live). Stay neutral until known.
-            <span className="ms-auto text-green-600/60 font-bold shrink-0">טוען מצב…</span>
-          ) : needsLive ? (
-            <Link href="/knockout-live" className="ms-auto flex items-center gap-1.5 bg-emerald-600 text-white font-bold rounded-full px-3 py-1 shadow-sm hover:bg-emerald-700 transition-colors animate-pulse shrink-0">
-              {/* Name the stage that's open NOW (32 הגדולות → שמינית → …) — the
-                  one-time modal nudge wasn't enough, so keep it in the top bar. */}
-              🟢 מלאו את {koStatus.openStageLabel ?? "עץ נתוני אמת"} — נותרו {koStatus.unfilledOpenCount} משחקים ←
-            </Link>
+            <span className="text-green-700 font-bold">הטורניר בעיצומו! <span className="text-green-600/60 font-normal">טוען מצב…</span></span>
+          ) : inStage ? (
+            <>
+              <span className="text-green-700 font-bold shrink-0">{koStatus.currentStageLabel ?? "עץ נתוני אמת"} בעיצומו!</span>
+              {nm && (
+                <span className="text-gray-600 shrink-0">
+                  המשחק הבא: <span className="font-bold text-gray-800">{getTeamNameHe(nm.team1) || nm.team1}–{getTeamNameHe(nm.team2) || nm.team2}</span>
+                  {" · בעיטה "}<span dir="ltr" className="tabular-nums">{toIsraelTimeShort(nm.kickoff)}</span>
+                  {" · ננעל "}<span dir="ltr" className="tabular-nums font-bold">{toIsraelTimeShort(nm.lockAt)}</span>
+                </span>
+              )}
+              <Link href="/knockout-live" className={`ms-auto flex items-center gap-1.5 rounded-full px-3 py-1 shadow-sm font-bold shrink-0 transition-colors ${needsFill ? "bg-emerald-600 text-white hover:bg-emerald-700 animate-pulse" : "bg-white text-emerald-700 border border-emerald-200 hover:bg-emerald-50"}`}>
+                {needsFill ? `🟢 מלאו הימור — נותרו ${koStatus.unfilledOpenCount} ←` : "לעץ נתוני אמת ←"}
+              </Link>
+            </>
           ) : (
-            <Link href="/live" className="text-green-600 font-bold hover:underline ms-auto">צפו בלייב ←</Link>
+            <>
+              <span className="text-green-700 font-bold shrink-0">הטורניר בעיצומו!</span>
+              <Link href="/live" className="text-green-600 font-bold hover:underline ms-auto">צפו בלייב ←</Link>
+            </>
           )}
         </div>
       </div>

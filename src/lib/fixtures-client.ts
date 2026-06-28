@@ -49,7 +49,9 @@ export async function loadRealFixtures(force = false): Promise<RealFixture[]> {
         awayPenalties: m.awayPenalties ?? null,
         winner: m.winner ?? null,
       }));
-      _cache = { ts: Date.now(), matches };
+      // Cache only a NON-empty result — caching [] (a transient/early empty
+      // response) would poison the live-status bar for the 2-min TTL.
+      if (matches.length > 0) _cache = { ts: Date.now(), matches };
       return matches;
     } catch {
       if (attempt === 0) continue;

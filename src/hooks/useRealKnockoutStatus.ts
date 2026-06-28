@@ -12,11 +12,12 @@ import { loadRealFixtures, type RealFixture } from "@/lib/fixtures-client";
 import {
   resolveKnockoutTree,
   computeGroupOrders,
+  findKickoffForSlot,
   KO_SLOT_KEYS,
   type ScheduleMatch,
   type KoSlotKey,
 } from "@/lib/scoring/knockout-resolver";
-import { slotStatus } from "@/lib/tournament/ko-live-state";
+import { slotStatus, LOCK_BEFORE_MIN } from "@/lib/tournament/ko-live-state";
 import { LIVE_FEEDERS } from "@/lib/tournament/knockout-derivation";
 import { useBettingStore } from "@/stores/betting-store";
 import type { FinishedMatch } from "@/lib/results-hits";
@@ -32,6 +33,12 @@ export interface RealKnockoutStatus {
   /** Hebrew name of the stage to fill now (earliest stage with unfilled open
    *  matches) — e.g. "שלב 32 הגדולות", then "שמינית הגמר". null when nothing open. */
   openStageLabel: string | null;
+  /** Hebrew name of the current open stage REGARDLESS of fill state — drives the
+   *  banner's "we're in stage X" text even after the viewer has bet. */
+  currentStageLabel: string | null;
+  /** The next open match by kickoff (teams + kickoff ISO + lock ISO) — for the
+   *  banner's "next match … locks at …" line. null when nothing open. */
+  nextMatch: { team1: string; team2: string; kickoff: string; lockAt: string } | null;
 }
 
 // Stage prefix → display order + Hebrew label. The real-data tree fills one
@@ -66,7 +73,7 @@ export function useRealKnockoutStatus(): RealKnockoutStatus {
   }, []);
 
   return useMemo<RealKnockoutStatus>(() => {
-    if (fixtures === null) return { loading: true, groupStageComplete: false, openCount: 0, unfilledOpenCount: 0, openStageLabel: null };
+    if (fixtures === null) return { loading: true, groupStageComplete: false, openCount: 0, unfilledOpenCount: 0, openStageLabel: null, currentStageLabel: null, nextMatch: null };
     const scored: FinishedMatch[] = fixtures
       .filter((m) => m.homeGoals != null && m.awayGoals != null)
       .map((m) => ({
@@ -78,24 +85,40 @@ export function useRealKnockoutStatus(): RealKnockoutStatus {
       }));
     const schedule: ScheduleMatch[] = fixtures.map((m) => ({ homeTla: m.homeTla, awayTla: m.awayTla, date: m.date, status: m.status ?? null }));
     const groupStageComplete = Object.keys(computeGroupOrders(scored)).length === 12;
-    if (!groupStageComplete) return { loading: false, groupStageComplete: false, openCount: 0, unfilledOpenCount: 0, openStageLabel: null };
+    if (!groupStageComplete) return { loading: false, groupStageComplete: false, openCount: 0, unfilledOpenCount: 0, openStageLabel: null, currentStageLabel: null, nextMatch: null };
     const tree = resolveKnockoutTree(scored, null, undefined, LIVE_FEEDERS);
     let openCount = 0;
     let unfilledOpenCount = 0;
     let earliestUnfilledStageIdx = Infinity;
+    let earliestOpenStageIdx = Infinity;
+    let nextMatch: RealKnockoutStatus["nextMatch"] = null;
+    let nextKo = Infinity;
     for (const k of KO_SLOT_KEYS as readonly KoSlotKey[]) {
-      if (slotStatus(k, tree, schedule, now) === "open") {
-        openCount++;
-        if (!knockoutLive[k]?.winner) {
-          unfilledOpenCount++;
-          const idx = (STAGE_ORDER as readonly string[]).indexOf(stageOf(k));
-          if (idx >= 0 && idx < earliestUnfilledStageIdx) earliestUnfilledStageIdx = idx;
+      if (slotStatus(k, tree, schedule, now) !== "open") continue;
+      openCount++;
+      const sIdx = (STAGE_ORDER as readonly string[]).indexOf(stageOf(k));
+      if (sIdx >= 0 && sIdx < earliestOpenStageIdx) earliestOpenStageIdx = sIdx;
+      // Track the earliest-kickoff open match for the banner's "next match" line.
+      const slot = tree[k];
+      const ko = findKickoffForSlot(k, tree, schedule);
+      if (ko && slot?.team1 && slot?.team2) {
+        const t = Date.parse(ko.date);
+        if (!Number.isNaN(t) && t < nextKo) {
+          nextKo = t;
+          nextMatch = { team1: slot.team1, team2: slot.team2, kickoff: ko.date, lockAt: new Date(t - LOCK_BEFORE_MIN * 60_000).toISOString() };
         }
+      }
+      if (!knockoutLive[k]?.winner) {
+        unfilledOpenCount++;
+        if (sIdx >= 0 && sIdx < earliestUnfilledStageIdx) earliestUnfilledStageIdx = sIdx;
       }
     }
     const openStageLabel = earliestUnfilledStageIdx < STAGE_ORDER.length
       ? STAGE_LABEL[STAGE_ORDER[earliestUnfilledStageIdx]]
       : null;
-    return { loading: false, groupStageComplete: true, openCount, unfilledOpenCount, openStageLabel };
+    const currentStageLabel = earliestOpenStageIdx < STAGE_ORDER.length
+      ? STAGE_LABEL[STAGE_ORDER[earliestOpenStageIdx]]
+      : null;
+    return { loading: false, groupStageComplete: true, openCount, unfilledOpenCount, openStageLabel, currentStageLabel, nextMatch };
   }, [fixtures, now, knockoutLive]);
 }

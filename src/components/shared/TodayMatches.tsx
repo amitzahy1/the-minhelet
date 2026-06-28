@@ -546,15 +546,29 @@ export function TodayMatches() {
                       ) : !editable && (
                         <span className="text-[10px] text-gray-300">{isReal ? "לא הימרת" : "ממתין ליריבה"}</span>
                       )}
-                      {editable && (
+                      {editable && (myPick ? (
+                        // Already bet → subtle gray pencil, like the group-stage card.
+                        <Link
+                          href="/knockout-live"
+                          onClick={(e) => e.stopPropagation()}
+                          title="שנה הימור"
+                          aria-label="שנה הימור"
+                          className="text-gray-400 hover:text-blue-600 transition-colors"
+                        >
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                          </svg>
+                        </Link>
+                      ) : (
+                        // No bet yet → prominent green CTA.
                         <Link
                           href="/knockout-live"
                           onClick={(e) => e.stopPropagation()}
                           className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-0.5 hover:bg-emerald-100 transition-colors"
                         >
-                          {myPick ? "✏️ שנה" : "✏️ מלאו הימור ←"}
+                          ✏️ מלאו הימור ←
                         </Link>
-                      )}
+                      ))}
                     </div>
                   );
                 })()}

@@ -28,28 +28,35 @@ const TTL = 120_000; // 2 min — refresh fast enough for live knockout state
 
 export async function loadRealFixtures(force = false): Promise<RealFixture[]> {
   if (!force && _cache && Date.now() - _cache.ts < TTL) return _cache.matches;
-  try {
-    const res = await fetch("/api/matches");
-    const data = await res.json();
-    const matches: RealFixture[] = (data.matches || []).map((m: RealFixture) => ({
-      id: m.id,
-      date: m.date,
-      homeTla: m.homeTla,
-      awayTla: m.awayTla,
-      group: m.group,
-      stage: m.stage,
-      status: m.status ?? null,
-      homeGoals: m.homeGoals ?? null,
-      awayGoals: m.awayGoals ?? null,
-      homePenalties: m.homePenalties ?? null,
-      awayPenalties: m.awayPenalties ?? null,
-      winner: m.winner ?? null,
-    }));
-    _cache = { ts: Date.now(), matches };
-    return matches;
-  } catch {
-    return _cache?.matches ?? [];
+  // One retry — a flaky mobile network can drop the first /api/matches call,
+  // which otherwise leaves the live-status bar stuck on its loading fallback
+  // (showing "watch live" instead of the "fill the stage" CTA).
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await fetch("/api/matches");
+      const data = await res.json();
+      const matches: RealFixture[] = (data.matches || []).map((m: RealFixture) => ({
+        id: m.id,
+        date: m.date,
+        homeTla: m.homeTla,
+        awayTla: m.awayTla,
+        group: m.group,
+        stage: m.stage,
+        status: m.status ?? null,
+        homeGoals: m.homeGoals ?? null,
+        awayGoals: m.awayGoals ?? null,
+        homePenalties: m.homePenalties ?? null,
+        awayPenalties: m.awayPenalties ?? null,
+        winner: m.winner ?? null,
+      }));
+      _cache = { ts: Date.now(), matches };
+      return matches;
+    } catch {
+      if (attempt === 0) continue;
+      return _cache?.matches ?? [];
+    }
   }
+  return _cache?.matches ?? [];
 }
 
 /** Order-independent key for a team pairing (the betting page may list the two

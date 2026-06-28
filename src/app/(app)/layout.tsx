@@ -577,7 +577,12 @@ function ProgressBanner() {
         <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2 flex items-center gap-3 text-xs sm:text-sm">
           <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse shrink-0"></span>
           <span className="text-green-700 font-bold shrink-0">הטורניר בעיצומו!</span>
-          {needsLive ? (
+          {koStatus.loading ? (
+            // Don't assert "צפו בלייב" before the fixtures load — that hides a
+            // pending "fill the stage" CTA (the bug seen on mobile, where a slow
+            // /api/matches left the bar stuck on watch-live). Stay neutral until known.
+            <span className="ms-auto text-green-600/60 font-bold shrink-0">טוען מצב…</span>
+          ) : needsLive ? (
             <Link href="/knockout-live" className="ms-auto flex items-center gap-1.5 bg-emerald-600 text-white font-bold rounded-full px-3 py-1 shadow-sm hover:bg-emerald-700 transition-colors animate-pulse shrink-0">
               {/* Name the stage that's open NOW (32 הגדולות → שמינית → …) — the
                   one-time modal nudge wasn't enough, so keep it in the top bar. */}

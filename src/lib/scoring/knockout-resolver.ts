@@ -383,38 +383,60 @@ export interface ReachableStages {
 
 /**
  * Collision-aware count of how many of a bettor's per-stage picks can STILL
- * reach each stage, given the REAL (LIVE_FEEDERS) bracket.
+ * reach each stage, given the REAL (LIVE_FEEDERS) bracket — i.e. points still
+ * CATCHABLE, NOT points already banked.
  *
- * Advancement is scored by set-membership ("did team T reach round X"), so the
- * naive count is "picks not yet eliminated". But the official bracket can force
- * two of a bettor's picks to meet BEFORE the round they both predicted — at
- * which point only one can get there. (This is real here: the pre-tournament
- * bets were placed on LATER_FEEDERS, whose R16 pairings differ from the live
- * bracket.) So instead of counting surviving picks we count the DISTINCT bracket
- * regions they occupy — the sub-tree that funnels into a single stage slot:
- *   reach R16  ← win your R32 match     → region = the R32 match
- *   reach QF   ← win your R16 match     → region = the R16 match
- *   reach SF   ← win your QF match      → region = the QF match
- *   reach Final← win your SF match      → region = the SF match
- * Two alive picks sharing a region collapse to 1 — they're destined to meet.
+ * Two refinements over a naive "not eliminated" count:
+ *  1. COLLISIONS — the official bracket can force two picks to meet before the
+ *     round they both predicted, so only one can get there. (Real here: the
+ *     pre-tournament bets used LATER_FEEDERS, whose R16 pairings differ.) We
+ *     count DISTINCT bracket REGIONS, not picks — the sub-tree funneling into a
+ *     single stage slot:
+ *       reach R16  ← win your R32 match  → region = the R32 match
+ *       reach QF   ← win your R16 match  → region = the R16 match
+ *       reach SF   ← win your QF match   → region = the QF match
+ *       reach Final← win your SF match   → region = the SF match
+ *     Two alive picks sharing a region collapse to 1.
+ *  2. ALREADY-REACHED — a team that has ALREADY reached a stage banked those
+ *     points; they're no longer "catchable", so that team is excluded from that
+ *     stage's count (it still counts toward the deeper stages it hasn't reached).
  *
- * `tree` is a LIVE_FEEDERS-resolved tree (see resolveKnockoutTree). A pick whose
- * bracket position can't be resolved (tree not built yet) degrades gracefully to
- * its own unique region, i.e. the plain not-eliminated count.
+ * `tree` is a LIVE_FEEDERS-resolved tree. A pick whose bracket position can't be
+ * resolved yet degrades to its own unique region (plain not-eliminated count).
  */
-export function computeReachableStages(
+export function computeCatchableStages(
   picks: { r16: string[]; qf: string[]; sf: string[]; final: string[]; champion: string },
   tree: Record<KoSlotKey, SlotState>,
   eliminated: Set<string>,
 ): ReachableStages {
-  // team code → its R32 match slot (the bracket leaf it entered at).
+  // team code → its R32 match slot, plus the set of teams that have ALREADY
+  // reached each stage (occupy that round's slots).
   const teamToR32: Record<string, string> = {};
+  const reachedR16 = new Set<string>();
+  const reachedQF = new Set<string>();
+  const reachedSF = new Set<string>();
+  const reachedFinal = new Set<string>();
   for (const key of KO_SLOT_KEYS) {
-    if (!key.startsWith("r32")) continue;
     const s = tree[key];
-    if (s?.team1) teamToR32[s.team1] = key;
-    if (s?.team2) teamToR32[s.team2] = key;
+    if (!s) continue;
+    if (key.startsWith("r32")) {
+      if (s.team1) teamToR32[s.team1] = key;
+      if (s.team2) teamToR32[s.team2] = key;
+    } else if (key.startsWith("r16")) {
+      if (s.team1) reachedR16.add(s.team1);
+      if (s.team2) reachedR16.add(s.team2);
+    } else if (key.startsWith("qf")) {
+      if (s.team1) reachedQF.add(s.team1);
+      if (s.team2) reachedQF.add(s.team2);
+    } else if (key.startsWith("sf")) {
+      if (s.team1) reachedSF.add(s.team1);
+      if (s.team2) reachedSF.add(s.team2);
+    } else if (key === "final") {
+      if (s.team1) reachedFinal.add(s.team1);
+      if (s.team2) reachedFinal.add(s.team2);
+    }
   }
+  const champion = tree["final"]?.winner ?? null;
   // Region id for `team` at a given depth above its R32 match (0=R32 match,
   // 1=R16 match, 2=QF match, 3=SF match). Unknown position → unique per team.
   const regionAt = (team: string, depth: number): string => {
@@ -423,20 +445,24 @@ export function computeReachableStages(
     for (let i = 0; i < depth; i++) region = PARENT_OF[region] ?? region;
     return region;
   };
-  const distinct = (codes: string[], depth: number): number => {
+  // Distinct still-catchable regions: alive picks that haven't ALREADY reached
+  // this stage (those banked it). A region whose stage team is already decided
+  // contributes 0 here — its other teams are eliminated, the reacher is excluded.
+  const distinct = (codes: string[], depth: number, reached: Set<string>): number => {
     const regions = new Set<string>();
     for (const t of codes) {
-      if (!t || eliminated.has(t)) continue;
+      if (!t || eliminated.has(t) || reached.has(t)) continue;
       regions.add(regionAt(t, depth));
     }
     return regions.size;
   };
   return {
-    r16: distinct(picks.r16, 0),
-    qf: distinct(picks.qf, 1),
-    sf: distinct(picks.sf, 2),
-    final: distinct(picks.final, 3),
-    champion: picks.champion && !eliminated.has(picks.champion) ? 1 : 0,
+    r16: distinct(picks.r16, 0, reachedR16),
+    qf: distinct(picks.qf, 1, reachedQF),
+    sf: distinct(picks.sf, 2, reachedSF),
+    final: distinct(picks.final, 3, reachedFinal),
+    // Champion is catchable while the pick is alive AND hasn't already won it.
+    champion: picks.champion && !eliminated.has(picks.champion) && champion !== picks.champion ? 1 : 0,
   };
 }
 

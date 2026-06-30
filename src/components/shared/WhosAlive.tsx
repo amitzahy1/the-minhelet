@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { getFlag, getTeamNameHe } from "@/lib/flags";
 import { SCORING, type ScoringValues } from "@/types";
-import { computeReachableStages, type KoSlotKey, type SlotState } from "@/lib/scoring/knockout-resolver";
+import { computeCatchableStages, type KoSlotKey, type SlotState } from "@/lib/scoring/knockout-resolver";
 
 interface SpecialBets {
   topScorer: { player: string; team: string };
@@ -249,7 +249,9 @@ export default function WhosAlive({
   const rows = useMemo(() => {
     const safeTree = (tree ?? {}) as Record<KoSlotKey, SlotState>;
     const mapped = bettors.map((b) => {
-      const reach = computeReachableStages(
+      // Catchable = stages a pick can STILL reach (collision-aware, excluding
+      // stages already reached/banked). This is the "can still happen" view.
+      const reach = computeCatchableStages(
         { r16: b.r16, qf: b.qf, sf: b.sf, final: b.final, champion: b.champion },
         safeTree,
         eliminated,
@@ -259,8 +261,10 @@ export default function WhosAlive({
       const sf = { alive: reach.sf, total: b.sf.length };
       const fin = { alive: reach.final, total: b.final.length };
       const championPicked = !!b.champion;
-      const championAlive = reach.champion === 1;
-      // Advancement (team-reaching): alive = still reachable (collision-aware);
+      // Chip ✓/💀 shows whether the champion is still STANDING (not eliminated),
+      // even once crowned — separate from whether its points are still catchable.
+      const championAlive = championPicked && !eliminated.has(b.champion);
+      // Advancement: alive = points still catchable (can still reach a new stage);
       // pot = the full value of his picks (max if every pick had come true).
       const advPoints =
         reach.r16 * weights.r16 +
@@ -310,7 +314,7 @@ export default function WhosAlive({
           מי עוד בחיים?
         </h2>
         <p className="text-base text-gray-600 mt-1">
-          הנקודות שעוד אפשר לתפוס לכל מהמר (לא מה שכבר נתפס) — עולות (לפי הבראקט הרשמי; נבחרות שנפגשות נספרות פעם אחת) + נוקאאוט (כל המשחקים שעוד לפנינו — פתוחים לכולם באותה מידה) + מיוחדים שנתפסים כרגע. מדורג מהכי חי
+          הנקודות שעוד אפשר לתפוס לכל מהמר (לא מה שכבר נתפס) — עולות (נבחרות שעוד יכולות להעפיל לשלב שלא הגיעו אליו; לפי הבראקט הרשמי, נבחרות שנפגשות נספרות פעם אחת) + נוקאאוט (כל המשחקים שעוד לפנינו — פתוחים לכולם באותה מידה) + מיוחדים שנתפסים כרגע. מדורג מהכי חי
         </p>
         {leaguePot > 0 && (
           <p className="text-sm text-gray-500 mt-1.5">

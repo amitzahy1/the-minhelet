@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   computeEliminatedTeams,
-  computeReachableStages,
+  computeCatchableStages,
   type KoSlotKey,
   type SlotState,
 } from "@/lib/scoring/knockout-resolver";
@@ -61,30 +61,45 @@ const TREE = {
   r32l_2: r32Slot("r32l_2" as KoSlotKey, "BBB", "bbb"),
 } as Record<KoSlotKey, SlotState>;
 
-describe("computeReachableStages (collision-aware)", () => {
-  it("two QF picks that share an R16 match collapse to one reachable QF", () => {
+describe("computeCatchableStages (collision-aware, catchable-only)", () => {
+  it("two QF picks that share an R16 match collapse to one catchable QF", () => {
     const picks = { r16: ["AAA", "BBB"], qf: ["AAA", "BBB"], sf: [], final: [], champion: "" };
-    const reach = computeReachableStages(picks, TREE, new Set());
+    const reach = computeCatchableStages(picks, TREE, new Set());
     expect(reach.r16).toBe(2); // distinct R32 matches → both can reach R16
     expect(reach.qf).toBe(1); // both feed r16l_1 → only one can reach the QF
   });
 
   it("an eliminated pick drops out before the collision is counted", () => {
     const picks = { r16: ["AAA", "BBB"], qf: ["AAA", "BBB"], sf: [], final: [], champion: "" };
-    const reach = computeReachableStages(picks, TREE, new Set(["AAA"]));
+    const reach = computeCatchableStages(picks, TREE, new Set(["AAA"]));
     expect(reach.r16).toBe(1);
     expect(reach.qf).toBe(1);
   });
 
-  it("champion counts 1 while alive, 0 once eliminated", () => {
+  it("a team that ALREADY reached a stage is no longer catchable there (banked), but still catchable deeper", () => {
+    // AAA already reached the R16 (sits in an r16 slot) → R16 is banked; it can
+    // still catch the QF. BBB is still in its R32 match → can still reach R16.
+    const tree = {
+      ...TREE,
+      r16l_1: { key: "r16l_1" as KoSlotKey, team1: "AAA", team2: null, score1: null, score2: null, winner: null, stage: "R16" as const, isThirdPlace: false as const },
+    } as Record<KoSlotKey, SlotState>;
+    const picks = { r16: ["AAA", "BBB"], qf: ["AAA"], sf: [], final: [], champion: "" };
+    const reach = computeCatchableStages(picks, tree, new Set());
+    expect(reach.r16).toBe(1); // only BBB can still reach R16; AAA already banked it
+    expect(reach.qf).toBe(1); // AAA hasn't reached the QF yet → still catchable
+  });
+
+  it("champion counts 1 while alive & uncrowned, 0 once eliminated or crowned", () => {
     const base = { r16: [], qf: [], sf: [], final: [], champion: "AAA" };
-    expect(computeReachableStages(base, TREE, new Set()).champion).toBe(1);
-    expect(computeReachableStages(base, TREE, new Set(["AAA"])).champion).toBe(0);
+    expect(computeCatchableStages(base, TREE, new Set()).champion).toBe(1);
+    expect(computeCatchableStages(base, TREE, new Set(["AAA"])).champion).toBe(0);
+    const crowned = { ...TREE, final: { key: "final" as KoSlotKey, team1: "AAA", team2: "BBB", score1: 1, score2: 0, winner: "AAA", stage: "FINAL" as const, isThirdPlace: false as const } } as Record<KoSlotKey, SlotState>;
+    expect(computeCatchableStages(base, crowned, new Set()).champion).toBe(0); // already won → banked
   });
 
   it("with no tree it degrades to the plain not-eliminated count", () => {
     const picks = { r16: [], qf: ["AAA", "BBB"], sf: [], final: [], champion: "" };
-    const reach = computeReachableStages(picks, {} as Record<KoSlotKey, SlotState>, new Set());
+    const reach = computeCatchableStages(picks, {} as Record<KoSlotKey, SlotState>, new Set());
     expect(reach.qf).toBe(2); // no bracket info → no collision detection
   });
 });

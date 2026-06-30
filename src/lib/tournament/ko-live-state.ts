@@ -7,7 +7,8 @@
 //              gating falls out automatically from resolveKnockoutTree.
 //   open     — teams known, more than `lockBeforeMin` before kickoff. EDITABLE.
 //   locked   — teams known, within `lockBeforeMin` of kickoff (or live). Read-only.
-//   finished — the real match has a winner. Show result + the user's pick.
+//   finished — the real match is OVER (status FINISHED, or a winner is known).
+//              Show result + the user's pick.
 //
 // Times are compared in UTC (Date math is timezone-agnostic); only DISPLAY
 // should localise to Asia/Jerusalem.
@@ -39,6 +40,12 @@ export function slotStatus(
   if (slot.winner) return "finished";
   const ko = findKickoffForSlot(slotKey, tree, schedule);
   if (!ko) return "waiting"; // teams known but no scheduled match found yet
+  // A FINISHED real match is OVER even before we resolve a winner: a knockout
+  // tie flips to FINISHED at 90' BEFORE the free FD tier publishes the shootout
+  // winner/penalties, so slot.winner stays null for a window. Treat FINISHED as
+  // "finished" (not "locked") so the match drops out of the "next match" banner
+  // immediately instead of staying it until the shootout result lands.
+  if (ko.status === "FINISHED") return "finished";
   if (ko.status && LIVE_OR_DONE.has(ko.status)) return "locked";
   const lockAt = new Date(ko.date).getTime() - lockBeforeMin * 60_000;
   return now >= lockAt ? "locked" : "open";

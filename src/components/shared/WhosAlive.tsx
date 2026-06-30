@@ -27,8 +27,12 @@ interface WhosAliveBettor {
   final: string[]; // 2 → final
   /** KO match-points still live (caught on played + open on unplayed), precomputed. */
   koPoints?: number;
+  /** Max KO points still on the table for this bettor (the pot). Defaults to koPoints. */
+  koPot?: number;
   /** Special-bet points the bettor is currently on track for (tentative + final). */
   specialPoints?: number;
+  /** Max special-bet points the bettor could win (their picks at full value). */
+  specialPot?: number;
   specialBets?: SpecialBets;
 }
 
@@ -256,29 +260,40 @@ export default function WhosAlive({
       const fin = { alive: reach.final, total: b.final.length };
       const championPicked = !!b.champion;
       const championAlive = reach.champion === 1;
-      // Advancement (team-reaching) points still reachable, collision-aware.
+      // Advancement (team-reaching): alive = still reachable (collision-aware);
+      // pot = the full value of his picks (max if every pick had come true).
       const advPoints =
         reach.r16 * weights.r16 +
         reach.qf * weights.qf +
         reach.sf * weights.sf +
         reach.final * weights.final +
         reach.champion * weights.winner;
+      const advPot =
+        b.r16.length * weights.r16 +
+        b.qf.length * weights.qf +
+        b.sf.length * weights.sf +
+        b.final.length * weights.final +
+        (championPicked ? weights.winner : 0);
       const koPoints = b.koPoints ?? 0;
       const specialPoints = b.specialPoints ?? 0;
       const grandTotal = advPoints + koPoints + specialPoints;
-      return { b, r16, qf, sf, fin, championAlive, championPicked, advPoints, koPoints, specialPoints, grandTotal };
+      // Pot = the most still on the table for this bettor (alive + what could
+      // still flip their way), so the bar reads "how much of your pot is alive".
+      const grandPot = advPot + (b.koPot ?? koPoints) + (b.specialPot ?? specialPoints);
+      const pct = grandPot ? Math.round((grandTotal / grandPot) * 100) : 0;
+      return { b, r16, qf, sf, fin, championAlive, championPicked, advPoints, koPoints, specialPoints, grandTotal, grandPot, pct };
     });
-    // Bar is relative to the most-alive bettor, so the longest bar = leader.
-    const maxGrand = Math.max(1, ...mapped.map((m) => m.grandTotal));
-    return mapped
-      .map((m) => ({ ...m, pct: Math.round((m.grandTotal / maxGrand) * 100) }))
-      .sort(
-        (a, z) =>
-          z.grandTotal - a.grandTotal ||
-          Number(z.championAlive) - Number(a.championAlive) ||
-          a.b.name.localeCompare(z.b.name, "he"),
-      );
+    return mapped.sort(
+      (a, z) =>
+        z.grandTotal - a.grandTotal ||
+        Number(z.championAlive) - Number(a.championAlive) ||
+        a.b.name.localeCompare(z.b.name, "he"),
+    );
   }, [bettors, eliminated, tree, weights]);
+
+  // League pot: the biggest "max possible" among bettors — shown in the header
+  // so the per-row X/Y has context ("how many points are even in play").
+  const leaguePot = useMemo(() => Math.max(0, ...rows.map((r) => r.grandPot)), [rows]);
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6">
@@ -297,6 +312,13 @@ export default function WhosAlive({
         <p className="text-base text-gray-600 mt-1">
           הנקודות שעוד &quot;חיות&quot; לכל מהמר — עולות (לפי הבראקט הרשמי; נבחרות שנפגשות נספרות פעם אחת) + נוקאאוט (תוצאות שנתפסו + כל המשחקים שעוד לפנינו, פתוחים לכולם) + מיוחדים שנתפסים כרגע. מדורג מהכי חי
         </p>
+        {leaguePot > 0 && (
+          <p className="text-sm text-gray-500 mt-1.5">
+            סה״כ בקופה (מקסימום שעוד אפשר לגרוף):{" "}
+            <b className="text-gray-700 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{leaguePot}</b>{" "}
+            נק׳ · אצל כל מהמר מוצג כמה מתוכן עדיין חיות
+          </p>
+        )}
       </motion.div>
 
       {/* Bettors list */}
@@ -306,7 +328,7 @@ export default function WhosAlive({
         animate="show"
         className="space-y-3"
       >
-        {rows.map(({ b, r16, qf, sf, fin, championAlive, championPicked, advPoints, koPoints, specialPoints, grandTotal, pct }) => (
+        {rows.map(({ b, r16, qf, sf, fin, championAlive, championPicked, advPoints, koPoints, specialPoints, grandTotal, grandPot, pct }) => (
           <motion.div
             key={b.name}
             variants={item}
@@ -340,7 +362,7 @@ export default function WhosAlive({
                   className="text-sm font-black text-gray-900 whitespace-nowrap tabular-nums"
                   style={{ fontFamily: "var(--font-inter)" }}
                 >
-                  {grandTotal}
+                  {grandTotal}<span className="text-gray-400 font-bold">/{grandPot}</span>
                 </span>
                 <span className="text-[11px] text-gray-400 whitespace-nowrap">נק׳ חיות</span>
               </div>

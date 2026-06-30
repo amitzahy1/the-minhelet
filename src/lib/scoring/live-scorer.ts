@@ -157,9 +157,15 @@ function knockoutPick(bracket: BettorBracket, slotKey: string): KnockoutPick | n
 export interface KnockoutCeiling {
   /** Points already CAUGHT on played KO matches the bettor predicted (secured). */
   caught: number;
-  /** Max points still OPEN on unplayed KO matches the bettor predicted. */
+  /** Max points still OPEN on set-but-unplayed matchups (equal for all bettors). */
   open: number;
+  /** Alive = caught + open. */
   total: number;
+  /** Max the bettor could have scored on the PLAYED matches they predicted
+   *  (stage max each, whether nailed or missed). pot = caughtMax + open. */
+  caughtMax: number;
+  /** Pot = the most KO points still on the table for this bettor (caughtMax + open). */
+  pot: number;
 }
 
 /**
@@ -182,13 +188,16 @@ export function computeKnockoutCeiling(
   scoring: ScoringValues = SCORING,
 ): KnockoutCeiling {
   let caught = 0;
+  let caughtMax = 0;
   let open = 0;
   for (const key of KO_SLOT_KEYS) {
     const slot = tree[key];
     if (!slot || !slot.team1 || !slot.team2) continue; // matchup not set yet → not bettable
     const stage = stageForSlot(key);
+    const stageMax = (scoring.toto[stage] ?? 0) + (scoring.exact[stage] ?? 0);
     if (slot.score1 !== null && slot.score2 !== null) {
-      // Played — only the bettor's own prediction earns.
+      // Played — only the bettor's own prediction earns; pot counts the max they
+      // COULD have scored on matches they actually bet.
       const pick = knockoutPick(bracket, key);
       if (pick) {
         const penaltyWinner = slot.score1 === slot.score2 ? slot.winner : null;
@@ -198,13 +207,14 @@ export function computeKnockoutCeiling(
           pick,
           scoring,
         ).total;
+        caughtMax += stageMax;
       }
     } else {
       // Set matchup, not yet played → everyone can still bet it → equal for all.
-      open += (scoring.toto[stage] ?? 0) + (scoring.exact[stage] ?? 0);
+      open += stageMax;
     }
   }
-  return { caught, open, total: caught + open };
+  return { caught, open, total: caught + open, caughtMax, pot: caughtMax + open };
 }
 
 /** Compute points for all bettors from the given brackets and finished matches. */

@@ -55,9 +55,19 @@ describe("computeKnockoutCeiling — caught on played + open on unplayed", () =>
   } as Record<string, SlotState>;
   const KO_R32 = SCORING.toto.R32 + SCORING.exact.R32;
 
-  it("caught counts only the bettor's prediction on a played match", () => {
+  it("caught counts only the bettor's prediction on a played match; pot = caughtMax + open", () => {
     const b = bracket({ knockoutTreeLive: { r32l_0: { score1: 2, score2: 1, winner: "KOR" } } }); // exact hit
-    expect(computeKnockoutCeiling(b, tree, SCORING).caught).toBe(KO_R32);
+    const c = computeKnockoutCeiling(b, tree, SCORING);
+    expect(c.caught).toBe(KO_R32); // nailed the played match
+    expect(c.pot).toBe(KO_R32 + KO_R32); // caughtMax (r32l_0) + open (r32l_1)
+  });
+
+  it("missing a played match you bet keeps pot above alive", () => {
+    const b = bracket({ knockoutTreeLive: { r32l_0: { score1: 0, score2: 3, winner: "CAN" } } }); // wrong
+    const c = computeKnockoutCeiling(b, tree, SCORING);
+    expect(c.caught).toBe(0); // missed it
+    expect(c.total).toBe(KO_R32); // alive = open only
+    expect(c.pot).toBe(KO_R32 + KO_R32); // pot still counts the max he could have had
   });
 
   it("open is EQUAL regardless of whether the bettor pre-filled it (equal opportunity)", () => {

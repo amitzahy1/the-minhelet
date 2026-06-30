@@ -688,19 +688,37 @@ function WhosAliveFromAdvancements({
   const scoring = useScoring();
   const { actuals, playerStats } = useLiveSpecials();
 
-  // KO match-points still live per bettor (caught on played + open on unplayed).
+  // KO match-points per bettor: alive (caught + open) and pot (the most still
+  // on the table for them — caughtMax + open).
   const koByUser = useMemo(() => {
-    const m: Record<string, number> = {};
-    if (tree) for (const br of brackets) m[br.userId] = computeKnockoutCeiling(br, tree, scoring).total;
+    const m: Record<string, { alive: number; pot: number }> = {};
+    if (tree) for (const br of brackets) {
+      const c = computeKnockoutCeiling(br, tree, scoring);
+      m[br.userId] = { alive: c.total, pot: c.pot };
+    }
     return m;
   }, [brackets, tree, scoring]);
 
-  // Special-bet points each bettor is currently on track for (tentative + final).
+  // Special-bet points: alive = currently on track (tentative + final); pot =
+  // the full value of the categories they picked (max if every one came true).
   const specByUser = useMemo(() => {
-    const m: Record<string, number> = {};
+    const sp = scoring.specials;
+    const potOf = (sb: BettorSpecialBets): number =>
+      (sb.topScorerPlayer ? sp.top_scorer_exact : 0) +
+      (sb.topAssistsPlayer ? sp.top_assists_exact : 0) +
+      (sb.bestAttackTeam ? sp.best_attack : 0) +
+      (sb.prolificGroup ? sp.prolific_group : 0) +
+      (sb.driestGroup ? sp.driest_group : 0) +
+      (sb.dirtiestTeam ? sp.dirtiest_team : 0) +
+      (sb.penaltiesOverUnder ? sp.penalties_over_under : 0) +
+      (sb.matchupPick || "").split(",").filter(Boolean).length * sp.matchup;
+    const m: Record<string, { alive: number; pot: number }> = {};
     const pool = computeSpecialBetsPool(specialBets, actuals, playerStats, scoring);
     for (const sb of specialBets) {
-      m[sb.userId] = scoreSpecialBetsForUser(sb, actuals, playerStats, scoring, pool.relative).total;
+      m[sb.userId] = {
+        alive: scoreSpecialBetsForUser(sb, actuals, playerStats, scoring, pool.relative).total,
+        pot: potOf(sb),
+      };
     }
     return m;
   }, [specialBets, actuals, playerStats, scoring]);
@@ -714,8 +732,10 @@ function WhosAliveFromAdvancements({
         qf: a.advanceToQF,
         sf: a.advanceToSF,
         final: a.advanceToFinal,
-        koPoints: koByUser[a.userId] ?? 0,
-        specialPoints: specByUser[a.userId] ?? 0,
+        koPoints: koByUser[a.userId]?.alive ?? 0,
+        koPot: koByUser[a.userId]?.pot ?? 0,
+        specialPoints: specByUser[a.userId]?.alive ?? 0,
+        specialPot: specByUser[a.userId]?.pot ?? 0,
       })),
     [advancements, koByUser, specByUser],
   );

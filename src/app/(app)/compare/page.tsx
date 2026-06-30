@@ -688,13 +688,15 @@ function WhosAliveFromAdvancements({
   const scoring = useScoring();
   const { actuals, playerStats } = useLiveSpecials();
 
-  // KO match-points per bettor: alive (caught + open) and pot (the most still
-  // on the table for them — caughtMax + open).
+  // KO match-points: only what's still CATCHABLE — the set-but-unplayed matchups
+  // (c.open), which everyone can bet, so it's identical for every bettor. Points
+  // already CAUGHT on played matches are banked in the total/leaderboard, not
+  // here ("alive" is about what you can still grab, not what you already have).
   const koByUser = useMemo(() => {
     const m: Record<string, { alive: number; pot: number }> = {};
     if (tree) for (const br of brackets) {
       const c = computeKnockoutCeiling(br, tree, scoring);
-      m[br.userId] = { alive: c.total, pot: c.pot };
+      m[br.userId] = { alive: c.open, pot: c.open };
     }
     return m;
   }, [brackets, tree, scoring]);

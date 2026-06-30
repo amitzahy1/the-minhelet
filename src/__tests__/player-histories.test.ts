@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { computePlayerHistories, computeKnockoutCeiling } from "@/lib/scoring/live-scorer";
+import { computePlayerHistories, computeKnockoutCeiling, computeRankHistories } from "@/lib/scoring/live-scorer";
 import type { BettorBracket } from "@/lib/supabase/shared-data";
 import type { FinishedMatch } from "@/lib/results-hits";
 import type { SlotState } from "@/lib/scoring/knockout-resolver";
@@ -69,5 +69,23 @@ describe("computeKnockoutCeiling — caught on played + open on unplayed", () =>
   it("ignores slots with no prediction", () => {
     const c = computeKnockoutCeiling(bracket(), tree, SCORING);
     expect(c.total).toBe(0);
+  });
+});
+
+describe("computeRankHistories — rank moves up/down (not a flat ramp)", () => {
+  it("a bettor who scores at the KO climbs above a blank one by the end", () => {
+    const a = bracket({ userId: "a", knockoutTreeLive: { r32l_0: { score1: 2, score2: 1, winner: "KOR" } } });
+    const z = bracket({ userId: "z" });
+    const rh = computeRankHistories([a, z], MATCHES, { scoring: SCORING }, 10);
+
+    // Equal-length comparable series.
+    expect(rh["a"].length).toBe(rh["z"].length);
+    expect(rh["a"].length).toBeGreaterThanOrEqual(2);
+    // Tied at 0 through the group prefixes → both rank 1.
+    expect(rh["a"][0]).toBe(1);
+    expect(rh["z"][0]).toBe(1);
+    // After the KO, "a" stays #1 and "z" drops to #2 (a distinct trajectory).
+    expect(rh["a"][rh["a"].length - 1]).toBe(1);
+    expect(rh["z"][rh["z"].length - 1]).toBe(2);
   });
 });

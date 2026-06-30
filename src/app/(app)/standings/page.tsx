@@ -13,7 +13,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { isLocked } from "@/lib/constants";
 import { GROUPS } from "@/lib/tournament/groups";
 import { TodayMatches } from "@/components/shared/TodayMatches";
-import { computeLiveScores, computeTodayScores, computePlayerHistories, koStageMaxPts } from "@/lib/scoring/live-scorer";
+import { computeLiveScores, computeTodayScores, computeRankHistories, koStageMaxPts } from "@/lib/scoring/live-scorer";
 import { computeSpecialBetsPool, specialReasonToCategory, type SpecialCategory, type SpecialCatStatus } from "@/lib/scoring/special-bets-scorer";
 import { normalizeGroupLetter, matchPairIndex, computeGroupHits, type FinishedMatch, GROUP_MATCH_PAIRS } from "@/lib/results-hits";
 import { computeMatchDays, dayLockAtForKickoff, matchDayKey } from "@/lib/tournament/group-live-state";
@@ -173,11 +173,11 @@ function MissingBetsBanner({ matches }: { matches: { date: string; group?: strin
   );
 }
 
-// Trend sparkline. Uses a SHARED y-scale (0…scaleMax across all bettors) so a
-// leader's line literally sits higher than a laggard's — instead of each line
-// being stretched to its own min/max, which made every climb look identical.
-// The colour encodes RECENT momentum (gain over the last ~20% of matches):
-// green = heating up, slate = flat lately. "You" stays blue.
+// Rank-trajectory sparkline. `data` is plot height (rank 1 → top), on a shared
+// y-scale of 1…scaleMax (the field size) so every line is comparable: a climber
+// rises, a faller drops, the leader sits flat at the top — genuinely distinct
+// per bettor, unlike the old monotonic points ramp. Colour encodes the recent
+// move: green = climbing, red = dropping, slate = steady. "You" stays blue.
 function Sparkline({ data, scaleMax, highlight }: { data: number[]; scaleMax: number; highlight?: boolean }) {
   const w = 80, h = 24, pad = 2;
   const top = Math.max(1, scaleMax);
@@ -186,10 +186,10 @@ function Sparkline({ data, scaleMax, highlight }: { data: number[]; scaleMax: nu
   const y = (v: number) => h - pad - Math.min(1, Math.max(0, v / top)) * (h - pad * 2);
   const pts = data.map((v, i) => `${x(i)},${y(v)}`);
   const line = pts.join(" ");
-  // Recent momentum: points gained over the last ~20% of the series.
-  const back = Math.max(1, Math.floor((n - 1) * 0.2));
+  // Recent move over the last ~30% of the window (rising plot = rank improving).
+  const back = Math.max(1, Math.floor((n - 1) * 0.3));
   const recentGain = data[n - 1] - data[Math.max(0, n - 1 - back)];
-  const color = highlight ? "#3B82F6" : recentGain > 0 ? "#16A34A" : "#94A3B8";
+  const color = highlight ? "#3B82F6" : recentGain > 0 ? "#16A34A" : recentGain < 0 ? "#DC2626" : "#94A3B8";
   const lastY = y(data[n - 1]);
   const gid = `spark-${highlight ? "you" : "x"}-${Math.round(top)}`;
   return (
@@ -632,18 +632,18 @@ export default function StandingsPage() {
     }),
     [brackets, finishedMatches, advancements, specialBets, tournamentActuals, playerStats, bestThirdsOverride, scoring]
   );
-  // Cumulative points per bettor across all finished matches — drives the sparkline.
-  const playerHistories = useMemo(
-    () => computePlayerHistories(brackets, finishedMatches, scoring),
-    [brackets, finishedMatches, scoring]
+  // RANK trajectory per bettor — drives the "מגמה" sparkline. Cumulative points
+  // are monotonic and look identical for everyone; rank moves up/down so each
+  // line is distinct. Ranked by group+KO+advancement (specials excluded).
+  const rankHistories = useMemo(
+    () => computeRankHistories(brackets, finishedMatches, { advancements, bestThirdsOverride, scoring }, 10),
+    [brackets, finishedMatches, advancements, bestThirdsOverride, scoring]
   );
-  // Shared y-scale for every trend line, so line height reflects real standing
-  // (not each line stretched to its own range → all looking identical).
-  const trendMax = useMemo(() => {
-    let m = 0;
-    for (const h of Object.values(playerHistories)) m = Math.max(m, h[h.length - 1] || 0);
-    return m || 1;
-  }, [playerHistories]);
+  // Number of ranked bettors — the trend's y-scale (rank 1 → top, rank N → bottom).
+  const trendPlayers = useMemo(
+    () => Math.max(1, Object.keys(rankHistories).length),
+    [rankHistories]
+  );
 
   // Pool-level special-bets status (won / void / pending per category) — shared
   // by every bettor's breakdown modal to label bets nobody caught.
@@ -890,12 +890,12 @@ export default function StandingsPage() {
         </div>
 
         {[...PLAYERS].sort((a, b) => b[activeTab] - a[activeTab]).map((p, i) => {
-          // Real cumulative history from finished matches. Fallback to a flat
-          // [0, total] when no matches are finished yet so the line renders.
-          const realHistory = playerHistories[p.id];
-          const history = realHistory && realHistory.length >= 2
-            ? realHistory
-            : [0, p.total || 0];
+          // Rank trajectory → plot value (rank 1 → top). Higher line = better
+          // rank; the line rises when the bettor climbs, falls when they drop.
+          const ranks = rankHistories[p.id];
+          const history = ranks && ranks.length >= 2
+            ? ranks.map((r) => trendPlayers + 1 - r)
+            : [1, 1];
           return (
             <div key={p.id}
               className={`relative flex items-center px-4 py-3 border-b border-gray-100 last:border-0 transition-colors ${
@@ -924,7 +924,7 @@ export default function StandingsPage() {
               <span className={`w-14 text-center text-sm font-medium hidden sm:block ${activeTab === "advPts" ? "text-blue-600 font-bold" : "text-gray-600"}`} style={{ fontFamily: "var(--font-inter)" }}>{p.advPts}</span>
               <span className={`w-14 text-center text-sm font-medium hidden sm:block ${activeTab === "specPts" ? "text-blue-600 font-bold" : "text-gray-600"}`} style={{ fontFamily: "var(--font-inter)" }}>{p.specPts}</span>
               <div className="w-20 hidden sm:flex justify-center">
-                <Sparkline data={history} scaleMax={trendMax} highlight={!!p.isYou} />
+                <Sparkline data={history} scaleMax={trendPlayers} highlight={!!p.isYou} />
               </div>
               <span className="w-12 text-center text-sm text-green-600 font-bold" style={{ fontFamily: "var(--font-inter)" }}>{p.today}</span>
               <span className="w-16 text-center font-black text-lg text-gray-900 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>

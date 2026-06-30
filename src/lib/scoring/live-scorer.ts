@@ -519,6 +519,53 @@ export function computePlayerHistories(
   return cumulative;
 }
 
+/**
+ * Per-user RANK trajectory (1 = top) sampled at ~`samples` points in time.
+ * Cumulative points are monotonic and look near-identical for everyone, so the
+ * trend sparkline draws this instead: rank moves UP and DOWN, so each bettor's
+ * line is genuinely distinct (a climber rises, a faller drops, the leader sits
+ * flat at the top). Ranked by group + KO + advancement points — specials are
+ * excluded (tentative/end-game, not a per-match trajectory). Tied totals share a
+ * rank. Every series has equal length so they're directly comparable.
+ */
+export function computeRankHistories(
+  brackets: BettorBracket[],
+  matches: FinishedMatch[],
+  options: LiveScoringOptions = {},
+  samples = 10,
+): Record<string, number[]> {
+  const sorted = [...matches].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const n = sorted.length;
+  const out: Record<string, number[]> = {};
+  for (const b of brackets) out[b.userId] = [];
+  if (n === 0 || brackets.length === 0) return out;
+
+  // Trajectory excludes specials (omit specialBets/actuals/playerStats) so it's
+  // time-honest — every prefix scores only what had actually happened by then.
+  const opts: LiveScoringOptions = {
+    advancements: options.advancements,
+    bestThirdsOverride: options.bestThirdsOverride,
+    scoring: options.scoring,
+  };
+
+  const count = Math.min(samples, n);
+  const lengths = [...new Set(
+    Array.from({ length: count }, (_, i) => Math.max(1, Math.round(((i + 1) / count) * n))),
+  )];
+
+  for (const len of lengths) {
+    const scores = computeLiveScores(brackets, sorted.slice(0, len), opts);
+    const totals = brackets.map((b) => ({ uid: b.userId, total: scores[b.userId]?.total ?? 0 }));
+    for (const t of totals) {
+      out[t.uid].push(1 + totals.filter((o) => o.total > t.total).length); // ties share a rank
+    }
+  }
+  for (const uid of Object.keys(out)) {
+    if (out[uid].length < 2) out[uid] = [out[uid][0] ?? brackets.length, out[uid][0] ?? brackets.length];
+  }
+  return out;
+}
+
 // Max pts per knockout bracket key prefix (built-in defaults). Display code
 // that must reflect admin-edited values should call koStageMaxPts(scoring).
 export const KO_STAGE_MAX_PTS: Record<string, number> = {

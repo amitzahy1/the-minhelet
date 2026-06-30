@@ -279,11 +279,11 @@ export default function WhosAlive({
         b.final.length * weights.final +
         (championPicked ? weights.winner : 0);
       const koPoints = b.koPoints ?? 0;
+      // Specials are shown on the side, NOT folded into the נק׳ חיות total — the
+      // total is only advancement + knockout (toto/exact).
       const specialPoints = b.specialPoints ?? 0;
-      const grandTotal = advPoints + koPoints + specialPoints;
-      // Pot = the most still on the table for this bettor (alive + what could
-      // still flip their way), so the bar reads "how much of your pot is alive".
-      const grandPot = advPot + (b.koPot ?? koPoints) + (b.specialPot ?? specialPoints);
+      const grandTotal = advPoints + koPoints;
+      const grandPot = advPot + (b.koPot ?? koPoints);
       const pct = grandPot ? Math.round((grandTotal / grandPot) * 100) : 0;
       return { b, r16, qf, sf, fin, championAlive, championPicked, advPoints, koPoints, specialPoints, grandTotal, grandPot, pct };
     });
@@ -314,7 +314,7 @@ export default function WhosAlive({
           מי עוד בחיים?
         </h2>
         <p className="text-base text-gray-600 mt-1">
-          הנקודות שעוד אפשר לתפוס לכל מהמר (לא מה שכבר נתפס) — עולות (נבחרות שעוד יכולות להעפיל לשלב שלא הגיעו אליו; לפי הבראקט הרשמי, נבחרות שנפגשות נספרות פעם אחת) + נוקאאוט (כל המשחקים שעוד לפנינו — פתוחים לכולם באותה מידה) + מיוחדים שנתפסים כרגע. מדורג מהכי חי
+          הנקודות שעוד אפשר לתפוס לכל מהמר (לא מה שכבר נתפס) — עולות (נבחרות שעוד יכולות להעפיל לשלב שלא הגיעו אליו; לפי הבראקט הרשמי, נבחרות שנפגשות נספרות פעם אחת) + נוקאאוט (טוטו ומדויקת — כל המשחקים שעוד לפנינו, פתוחים לכולם). מדורג מהכי חי. ההימורים המיוחדים שנתפסים כרגע מוצגים בנפרד בצד ואינם נכללים בסכום
         </p>
         {leaguePot > 0 && (
           <p className="text-sm text-gray-500 mt-1.5">
@@ -392,13 +392,15 @@ export default function WhosAlive({
               )}
             </div>
 
-            {/* Points breakdown: where the "נק׳ חיות" total comes from. */}
+            {/* Breakdown of the נק׳ חיות total (עולות + נוקאאוט), with the
+                currently-on-track specials shown SEPARATELY on the side. */}
             <div className="px-4 pb-2.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-gray-400">
               <span>עולות <b className="text-gray-600 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{advPoints}</b></span>
               <span className="text-gray-300">·</span>
               <span>נוקאאוט <b className="text-gray-600 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{koPoints}</b></span>
-              <span className="text-gray-300">·</span>
-              <span>מיוחדים שנתפסים כרגע <b className="text-gray-600 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{specialPoints}</b></span>
+              <span className="ms-auto inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-violet-50 border border-violet-100 text-violet-600 whitespace-nowrap">
+                מיוחדים שנתפסים כרגע <b className="tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{specialPoints}</b>
+              </span>
             </div>
 
             {/* Special bets (only when provided) */}

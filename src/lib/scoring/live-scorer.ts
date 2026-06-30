@@ -15,6 +15,7 @@ import {
   computeGroupOrders,
   findThirdPlaceMatch,
   fairPlayFromBoard,
+  KO_SLOT_KEYS,
   type SlotState,
 } from "./knockout-resolver";
 import { calculateKnockoutScore } from "./calculator";
@@ -151,6 +152,49 @@ function knockoutPick(bracket: BettorBracket, slotKey: string): KnockoutPick | n
   const v = tree[slotKey];
   if (!v || (v.score1 === null && v.score2 === null && v.winner === null)) return null;
   return v;
+}
+
+export interface KnockoutCeiling {
+  /** Points already CAUGHT on played KO matches the bettor predicted (secured). */
+  caught: number;
+  /** Max points still OPEN on unplayed KO matches the bettor predicted. */
+  open: number;
+  total: number;
+}
+
+/**
+ * Best-case knockout MATCH-points for one bettor given the real bracket `tree`:
+ * for every slot they predicted (Tree 2), the points already caught (match
+ * played) plus the full toto+exact still open (match not played). Drives the
+ * "still live" KO portion of the who's-alive page — caught points can't be
+ * lost, open matches can still be hit. Stage point values are DB-driven.
+ */
+export function computeKnockoutCeiling(
+  bracket: BettorBracket,
+  tree: Record<string, SlotState>,
+  scoring: ScoringValues = SCORING,
+): KnockoutCeiling {
+  let caught = 0;
+  let open = 0;
+  for (const key of KO_SLOT_KEYS) {
+    const pick = knockoutPick(bracket, key);
+    if (!pick) continue;
+    const slot = tree[key];
+    const stage = stageForSlot(key);
+    const played = !!slot && slot.score1 !== null && slot.score2 !== null && !!slot.team1 && !!slot.team2;
+    if (played) {
+      const penaltyWinner = slot.score1 === slot.score2 ? slot.winner : null;
+      caught += calculateKnockoutScore(
+        stage,
+        { homeGoals: slot.score1 as number, awayGoals: slot.score2 as number, penaltyWinner, team1: slot.team1 as string, team2: slot.team2 as string },
+        pick,
+        scoring,
+      ).total;
+    } else {
+      open += (scoring.toto[stage] ?? 0) + (scoring.exact[stage] ?? 0);
+    }
+  }
+  return { caught, open, total: caught + open };
 }
 
 /** Compute points for all bettors from the given brackets and finished matches. */

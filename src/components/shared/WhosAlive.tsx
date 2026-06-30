@@ -25,6 +25,10 @@ interface WhosAliveBettor {
   qf: string[]; // 8 → quarterfinal
   sf: string[]; // 4 → semifinal
   final: string[]; // 2 → final
+  /** KO match-points still live (caught on played + open on unplayed), precomputed. */
+  koPoints?: number;
+  /** Special-bet points the bettor is currently on track for (tentative + final). */
+  specialPoints?: number;
   specialBets?: SpecialBets;
 }
 
@@ -240,38 +244,37 @@ export default function WhosAlive({
   // computeReachableStages). That weighted "points alive" is the ranking key.
   const rows = useMemo(() => {
     const safeTree = (tree ?? {}) as Record<KoSlotKey, SlotState>;
-    return bettors
-      .map((b) => {
-        const reach = computeReachableStages(
-          { r16: b.r16, qf: b.qf, sf: b.sf, final: b.final, champion: b.champion },
-          safeTree,
-          eliminated,
-        );
-        const r16 = { alive: reach.r16, total: b.r16.length };
-        const qf = { alive: reach.qf, total: b.qf.length };
-        const sf = { alive: reach.sf, total: b.sf.length };
-        const fin = { alive: reach.final, total: b.final.length };
-        const championPicked = !!b.champion;
-        const championAlive = reach.champion === 1;
-        const alivePoints =
-          reach.r16 * weights.r16 +
-          reach.qf * weights.qf +
-          reach.sf * weights.sf +
-          reach.final * weights.final +
-          reach.champion * weights.winner;
-        const totalPoints =
-          b.r16.length * weights.r16 +
-          b.qf.length * weights.qf +
-          b.sf.length * weights.sf +
-          b.final.length * weights.final +
-          (championPicked ? weights.winner : 0);
-        const pct = totalPoints ? Math.round((alivePoints / totalPoints) * 100) : 0;
-        return { b, r16, qf, sf, fin, championAlive, championPicked, alivePoints, totalPoints, pct };
-      })
+    const mapped = bettors.map((b) => {
+      const reach = computeReachableStages(
+        { r16: b.r16, qf: b.qf, sf: b.sf, final: b.final, champion: b.champion },
+        safeTree,
+        eliminated,
+      );
+      const r16 = { alive: reach.r16, total: b.r16.length };
+      const qf = { alive: reach.qf, total: b.qf.length };
+      const sf = { alive: reach.sf, total: b.sf.length };
+      const fin = { alive: reach.final, total: b.final.length };
+      const championPicked = !!b.champion;
+      const championAlive = reach.champion === 1;
+      // Advancement (team-reaching) points still reachable, collision-aware.
+      const advPoints =
+        reach.r16 * weights.r16 +
+        reach.qf * weights.qf +
+        reach.sf * weights.sf +
+        reach.final * weights.final +
+        reach.champion * weights.winner;
+      const koPoints = b.koPoints ?? 0;
+      const specialPoints = b.specialPoints ?? 0;
+      const grandTotal = advPoints + koPoints + specialPoints;
+      return { b, r16, qf, sf, fin, championAlive, championPicked, advPoints, koPoints, specialPoints, grandTotal };
+    });
+    // Bar is relative to the most-alive bettor, so the longest bar = leader.
+    const maxGrand = Math.max(1, ...mapped.map((m) => m.grandTotal));
+    return mapped
+      .map((m) => ({ ...m, pct: Math.round((m.grandTotal / maxGrand) * 100) }))
       .sort(
         (a, z) =>
-          z.alivePoints - a.alivePoints ||
-          z.pct - a.pct ||
+          z.grandTotal - a.grandTotal ||
           Number(z.championAlive) - Number(a.championAlive) ||
           a.b.name.localeCompare(z.b.name, "he"),
       );
@@ -292,7 +295,7 @@ export default function WhosAlive({
           מי עוד בחיים?
         </h2>
         <p className="text-base text-gray-600 mt-1">
-          כמה מהניחושים של כל מהמר עוד יכולים להתממש, לפי הבראקט הרשמי — שתי נבחרות שנפגשות בדרך נספרות פעם אחת. מדורג לפי הנקודות שעוד פתוחות
+          הנקודות שעוד &quot;חיות&quot; לכל מהמר — עולות (לפי הבראקט הרשמי; נבחרות שנפגשות נספרות פעם אחת) + נוקאאוט (תוצאות שנתפסו ומשחקים שעוד פתוחים) + מיוחדים שאתה בדרך אליהם. מדורג מהכי חי
         </p>
       </motion.div>
 
@@ -303,7 +306,7 @@ export default function WhosAlive({
         animate="show"
         className="space-y-3"
       >
-        {rows.map(({ b, r16, qf, sf, fin, championAlive, championPicked, alivePoints, totalPoints, pct }) => (
+        {rows.map(({ b, r16, qf, sf, fin, championAlive, championPicked, advPoints, koPoints, specialPoints, grandTotal, pct }) => (
           <motion.div
             key={b.name}
             variants={item}
@@ -334,10 +337,10 @@ export default function WhosAlive({
                   />
                 </div>
                 <span
-                  className="text-xs font-bold text-gray-700 whitespace-nowrap tabular-nums"
+                  className="text-sm font-black text-gray-900 whitespace-nowrap tabular-nums"
                   style={{ fontFamily: "var(--font-inter)" }}
                 >
-                  {alivePoints}/{totalPoints}
+                  {grandTotal}
                 </span>
                 <span className="text-[11px] text-gray-400 whitespace-nowrap">נק׳ חיות</span>
               </div>
@@ -361,6 +364,15 @@ export default function WhosAlive({
                   <span>{championAlive ? "✓" : "💀"}</span>
                 </span>
               )}
+            </div>
+
+            {/* Points breakdown: where the "נק׳ חיות" total comes from. */}
+            <div className="px-4 pb-2.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-gray-400">
+              <span>עולות <b className="text-gray-600 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{advPoints}</b></span>
+              <span className="text-gray-300">·</span>
+              <span>נוקאאוט <b className="text-gray-600 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{koPoints}</b></span>
+              <span className="text-gray-300">·</span>
+              <span>מיוחדים <b className="text-gray-600 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{specialPoints}</b></span>
             </div>
 
             {/* Special bets (only when provided) */}

@@ -1,7 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { computePlayerHistories } from "@/lib/scoring/live-scorer";
+import { computePlayerHistories, computeKnockoutCeiling } from "@/lib/scoring/live-scorer";
 import type { BettorBracket } from "@/lib/supabase/shared-data";
 import type { FinishedMatch } from "@/lib/results-hits";
+import type { SlotState } from "@/lib/scoring/knockout-resolver";
 import { SCORING } from "@/types";
 
 // Groups A + B fully played (clean home-wins-1-0 ladder) so r32l_0 = A2 v B2
@@ -40,5 +41,33 @@ describe("computePlayerHistories — knockout matches now move the trend", () =>
     // ...while the blank bracket flatlines across the KO match.
     const b = hist["b"];
     expect(b[b.length - 1]).toBe(b[b.length - 2]);
+  });
+});
+
+describe("computeKnockoutCeiling — caught on played + open on unplayed", () => {
+  const slot = (over: Partial<SlotState>): SlotState => ({
+    key: "r32l_0", team1: null, team2: null, score1: null, score2: null, winner: null, stage: "R32", isThirdPlace: false, ...over,
+  });
+  const tree = {
+    r32l_0: slot({ key: "r32l_0", team1: "KOR", team2: "CAN", score1: 2, score2: 1, winner: "KOR" }), // played
+    r32l_1: slot({ key: "r32l_1", team1: "GER", team2: "PAR" }), // resolved but not played
+  } as Record<string, SlotState>;
+
+  it("counts caught points on a played match and full toto+exact on an unplayed one", () => {
+    const b = bracket({
+      knockoutTreeLive: {
+        r32l_0: { score1: 2, score2: 1, winner: "KOR" }, // exact hit → toto+exact
+        r32l_1: { score1: 1, score2: 0, winner: "GER" }, // unplayed → full value open
+      },
+    });
+    const c = computeKnockoutCeiling(b, tree, SCORING);
+    expect(c.caught).toBe(SCORING.toto.R32 + SCORING.exact.R32);
+    expect(c.open).toBe(SCORING.toto.R32 + SCORING.exact.R32);
+    expect(c.total).toBe(c.caught + c.open);
+  });
+
+  it("ignores slots with no prediction", () => {
+    const c = computeKnockoutCeiling(bracket(), tree, SCORING);
+    expect(c.total).toBe(0);
   });
 });

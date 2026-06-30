@@ -12,7 +12,10 @@ import { SpecialTrackerView } from "@/components/shared/SpecialTrackerView";
 import { AgreementMatrix } from "@/components/shared/AgreementMatrix";
 import WhosAlive from "@/components/shared/WhosAlive";
 import { useEliminatedTeams } from "@/hooks/useEliminatedTeams";
-import type { BettorAdvancement } from "@/lib/supabase/shared-data";
+import { useLiveSpecials } from "@/hooks/useLiveSpecials";
+import { computeKnockoutCeiling } from "@/lib/scoring/live-scorer";
+import { computeSpecialBetsPool, scoreSpecialBetsForUser } from "@/lib/scoring/special-bets-scorer";
+import type { BettorAdvancement, BettorBracket, BettorSpecialBets } from "@/lib/supabase/shared-data";
 import { formatLockDeadline } from "@/lib/constants";
 import Link from "next/link";
 
@@ -552,7 +555,7 @@ export default function ComparePage() {
             <p className="text-xs text-gray-500 mt-0.5">הנבחרות שכל מהמר ניחש שיעלו — כמה עדיין בטורניר וכמה יצאו</p>
           </div>
           <div className="p-4">
-            <WhosAliveFromAdvancements advancements={fAdvancements} />
+            <WhosAliveFromAdvancements advancements={fAdvancements} brackets={fBrackets} specialBets={specialBets} />
           </div>
         </div>
       )}
@@ -672,9 +675,36 @@ function ResultsView({ matches, brackets, currentUserId, loading }: ResultsViewP
 // reads dead rather than everyone showing fully alive.
 // ---------------------------------------------------------------------------
 
-function WhosAliveFromAdvancements({ advancements }: { advancements: BettorAdvancement[] }) {
+function WhosAliveFromAdvancements({
+  advancements,
+  brackets,
+  specialBets,
+}: {
+  advancements: BettorAdvancement[];
+  brackets: BettorBracket[];
+  specialBets: BettorSpecialBets[];
+}) {
   const { eliminated, tree } = useEliminatedTeams();
   const scoring = useScoring();
+  const { actuals, playerStats } = useLiveSpecials();
+
+  // KO match-points still live per bettor (caught on played + open on unplayed).
+  const koByUser = useMemo(() => {
+    const m: Record<string, number> = {};
+    if (tree) for (const br of brackets) m[br.userId] = computeKnockoutCeiling(br, tree, scoring).total;
+    return m;
+  }, [brackets, tree, scoring]);
+
+  // Special-bet points each bettor is currently on track for (tentative + final).
+  const specByUser = useMemo(() => {
+    const m: Record<string, number> = {};
+    const pool = computeSpecialBetsPool(specialBets, actuals, playerStats, scoring);
+    for (const sb of specialBets) {
+      m[sb.userId] = scoreSpecialBetsForUser(sb, actuals, playerStats, scoring, pool.relative).total;
+    }
+    return m;
+  }, [specialBets, actuals, playerStats, scoring]);
+
   const bettors = useMemo(
     () =>
       advancements.map((a) => ({
@@ -684,8 +714,10 @@ function WhosAliveFromAdvancements({ advancements }: { advancements: BettorAdvan
         qf: a.advanceToQF,
         sf: a.advanceToSF,
         final: a.advanceToFinal,
+        koPoints: koByUser[a.userId] ?? 0,
+        specialPoints: specByUser[a.userId] ?? 0,
       })),
-    [advancements],
+    [advancements, koByUser, specByUser],
   );
 
   if (bettors.length === 0) {

@@ -163,11 +163,18 @@ export interface KnockoutCeiling {
 }
 
 /**
- * Best-case knockout MATCH-points for one bettor given the real bracket `tree`:
- * for every slot they predicted (Tree 2), the points already caught (match
- * played) plus the full toto+exact still open (match not played). Drives the
- * "still live" KO portion of the who's-alive page — caught points can't be
- * lost, open matches can still be hit. Stage point values are DB-driven.
+ * "Still live" knockout MATCH-points for one bettor given the real bracket `tree`:
+ *
+ *   caught — points already secured on PLAYED matches the bettor predicted.
+ *            Per-bettor (depends on their Tree-2 score guesses).
+ *   open   — every SET-BUT-UNPLAYED matchup (teams resolved, not yet played),
+ *            at full toto+exact. EQUAL for all bettors: KO bets are placed on the
+ *            real matchups regardless of whose advancement picks reached them, so
+ *            everyone has the same remaining opportunity. (Future rounds whose
+ *            teams aren't drawn yet aren't bettable yet, so they're excluded
+ *            until they resolve.) NOT gated on whether the bettor pre-filled it.
+ *
+ * Stage point values are DB-driven.
  */
 export function computeKnockoutCeiling(
   bracket: BettorBracket,
@@ -177,20 +184,23 @@ export function computeKnockoutCeiling(
   let caught = 0;
   let open = 0;
   for (const key of KO_SLOT_KEYS) {
-    const pick = knockoutPick(bracket, key);
-    if (!pick) continue;
     const slot = tree[key];
+    if (!slot || !slot.team1 || !slot.team2) continue; // matchup not set yet → not bettable
     const stage = stageForSlot(key);
-    const played = !!slot && slot.score1 !== null && slot.score2 !== null && !!slot.team1 && !!slot.team2;
-    if (played) {
-      const penaltyWinner = slot.score1 === slot.score2 ? slot.winner : null;
-      caught += calculateKnockoutScore(
-        stage,
-        { homeGoals: slot.score1 as number, awayGoals: slot.score2 as number, penaltyWinner, team1: slot.team1 as string, team2: slot.team2 as string },
-        pick,
-        scoring,
-      ).total;
+    if (slot.score1 !== null && slot.score2 !== null) {
+      // Played — only the bettor's own prediction earns.
+      const pick = knockoutPick(bracket, key);
+      if (pick) {
+        const penaltyWinner = slot.score1 === slot.score2 ? slot.winner : null;
+        caught += calculateKnockoutScore(
+          stage,
+          { homeGoals: slot.score1, awayGoals: slot.score2, penaltyWinner, team1: slot.team1, team2: slot.team2 },
+          pick,
+          scoring,
+        ).total;
+      }
     } else {
+      // Set matchup, not yet played → everyone can still bet it → equal for all.
       open += (scoring.toto[stage] ?? 0) + (scoring.exact[stage] ?? 0);
     }
   }

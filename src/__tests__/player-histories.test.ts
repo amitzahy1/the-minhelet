@@ -50,25 +50,29 @@ describe("computeKnockoutCeiling — caught on played + open on unplayed", () =>
   });
   const tree = {
     r32l_0: slot({ key: "r32l_0", team1: "KOR", team2: "CAN", score1: 2, score2: 1, winner: "KOR" }), // played
-    r32l_1: slot({ key: "r32l_1", team1: "GER", team2: "PAR" }), // resolved but not played
+    r32l_1: slot({ key: "r32l_1", team1: "GER", team2: "PAR" }), // set matchup, not played
+    r16l_0: slot({ key: "r16l_0", stage: "R16" }), // future round — teams not drawn yet
   } as Record<string, SlotState>;
+  const KO_R32 = SCORING.toto.R32 + SCORING.exact.R32;
 
-  it("counts caught points on a played match and full toto+exact on an unplayed one", () => {
-    const b = bracket({
-      knockoutTreeLive: {
-        r32l_0: { score1: 2, score2: 1, winner: "KOR" }, // exact hit → toto+exact
-        r32l_1: { score1: 1, score2: 0, winner: "GER" }, // unplayed → full value open
-      },
-    });
-    const c = computeKnockoutCeiling(b, tree, SCORING);
-    expect(c.caught).toBe(SCORING.toto.R32 + SCORING.exact.R32);
-    expect(c.open).toBe(SCORING.toto.R32 + SCORING.exact.R32);
-    expect(c.total).toBe(c.caught + c.open);
+  it("caught counts only the bettor's prediction on a played match", () => {
+    const b = bracket({ knockoutTreeLive: { r32l_0: { score1: 2, score2: 1, winner: "KOR" } } }); // exact hit
+    expect(computeKnockoutCeiling(b, tree, SCORING).caught).toBe(KO_R32);
   });
 
-  it("ignores slots with no prediction", () => {
+  it("open is EQUAL regardless of whether the bettor pre-filled it (equal opportunity)", () => {
+    const filled = bracket({ knockoutTreeLive: { r32l_1: { score1: 1, score2: 0, winner: "GER" } } });
+    const blank = bracket();
+    // Only r32l_1 is a set-but-unplayed matchup; r16l_0 (no teams) isn't bettable yet.
+    expect(computeKnockoutCeiling(filled, tree, SCORING).open).toBe(KO_R32);
+    expect(computeKnockoutCeiling(blank, tree, SCORING).open).toBe(KO_R32);
+  });
+
+  it("a bettor who predicted nothing still has the open opportunity, just no caught", () => {
     const c = computeKnockoutCeiling(bracket(), tree, SCORING);
-    expect(c.total).toBe(0);
+    expect(c.caught).toBe(0);
+    expect(c.open).toBe(KO_R32);
+    expect(c.total).toBe(KO_R32);
   });
 });
 

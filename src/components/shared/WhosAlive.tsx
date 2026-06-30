@@ -295,7 +295,7 @@ export default function WhosAlive({
           מי עוד בחיים?
         </h2>
         <p className="text-base text-gray-600 mt-1">
-          הנקודות שעוד &quot;חיות&quot; לכל מהמר — עולות (לפי הבראקט הרשמי; נבחרות שנפגשות נספרות פעם אחת) + נוקאאוט (תוצאות שנתפסו ומשחקים שעוד פתוחים) + מיוחדים שאתה בדרך אליהם. מדורג מהכי חי
+          הנקודות שעוד &quot;חיות&quot; לכל מהמר — עולות (לפי הבראקט הרשמי; נבחרות שנפגשות נספרות פעם אחת) + נוקאאוט (תוצאות שנתפסו + כל המשחקים שעוד לפנינו, פתוחים לכולם) + מיוחדים שנתפסים כרגע. מדורג מהכי חי
         </p>
       </motion.div>
 
@@ -372,7 +372,7 @@ export default function WhosAlive({
               <span className="text-gray-300">·</span>
               <span>נוקאאוט <b className="text-gray-600 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{koPoints}</b></span>
               <span className="text-gray-300">·</span>
-              <span>מיוחדים <b className="text-gray-600 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{specialPoints}</b></span>
+              <span>מיוחדים שנתפסים כרגע <b className="text-gray-600 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{specialPoints}</b></span>
             </div>
 
             {/* Special bets (only when provided) */}

@@ -8,6 +8,7 @@ import { GROUPS } from "@/lib/tournament/groups";
 import { MatchReactions, MOCK_REACTIONS } from "@/components/shared/MatchReactions";
 import WhosAlive from "@/components/shared/WhosAlive";
 import { useSharedData } from "@/hooks/useSharedData";
+import { useEliminatedTeams } from "@/hooks/useEliminatedTeams";
 import { useScoring } from "@/hooks/useScoring";
 import { isLocked } from "@/lib/constants";
 import { LiveGroupsAndBracket } from "@/components/shared/LiveGroupsAndBracket";
@@ -1025,31 +1026,30 @@ function SimulationTab() {
 }
 
 function WhosAliveTab({ advancements }: { advancements: BettorAdvancement[] }) {
-  // Build WhosAlive data from real advancements, or fall back to mock
+  // Diff each bettor's advancement picks against the teams actually eliminated
+  // from the real bracket, so a pick whose team is out (incl. the champion)
+  // shows dead instead of everyone reading as fully alive.
+  const { eliminated } = useEliminatedTeams();
   const bettors = useMemo(() => {
     if (advancements.length === 0) return [];
 
-    const realData = advancements.map(a => {
+    return advancements.map(a => {
       const allPicked = [
         ...a.advanceToQF,
         ...a.advanceToSF,
         ...a.advanceToFinal,
         ...(a.winner ? [a.winner] : []),
       ];
-      // For now, treat all picked teams as alive (actual alive/dead status
-      // would require tournament results data which is not yet available)
       return {
         name: a.displayName,
         champion: a.winner,
         semifinalists: a.advanceToSF,
         quarterfinalists: a.advanceToQF,
-        alive: allPicked,
-        dead: [] as string[],
+        alive: allPicked.filter((t) => !eliminated.has(t)),
+        dead: allPicked.filter((t) => eliminated.has(t)),
       };
     });
-
-    return realData;
-  }, [advancements]);
+  }, [advancements, eliminated]);
 
   return <WhosAlive bettors={bettors} />;
 }

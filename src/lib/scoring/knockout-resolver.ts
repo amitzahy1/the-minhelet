@@ -13,6 +13,7 @@ import type { GroupMatchPrediction } from "@/types";
 import {
   buildR32Matchups,
   LATER_FEEDERS,
+  LIVE_FEEDERS,
   resolveGroupSlot,
 } from "@/lib/tournament/knockout-derivation";
 import {
@@ -318,6 +319,46 @@ export function indexKnockoutResultsBySlot(
     };
   }
   return out;
+}
+
+/**
+ * Set of teams ELIMINATED from the tournament, derived from finished matches.
+ * A team is out when:
+ *   - it lost a decided knockout match (the resolved slot's non-winner — this
+ *     correctly covers ties decided on penalties, since `winner` already folds
+ *     in the shootout), or
+ *   - the group stage is complete and it isn't one of the 32 R32 participants.
+ *
+ * A team ABSENT from this set is still alive (or its fate isn't decided yet) —
+ * so before the group stage finishes nothing is marked dead, and an in-progress
+ * knockout match keeps both teams alive until a winner is resolved. Uses
+ * `LIVE_FEEDERS` (the official bracket) to match the real-data tree.
+ */
+export function computeEliminatedTeams(matches: FinishedMatch[]): Set<string> {
+  const tree = resolveKnockoutTree(matches, null, undefined, LIVE_FEEDERS);
+  const eliminated = new Set<string>();
+  // Knockout losers — the non-winning side of every decided slot.
+  for (const slot of Object.values(tree)) {
+    if (slot.winner && slot.team1 && slot.team2) {
+      eliminated.add(slot.winner === slot.team1 ? slot.team2 : slot.team1);
+    }
+  }
+  // Group-stage non-qualifiers — only once all 12 groups are decided, otherwise
+  // the R32 slots aren't fully resolved and we'd wrongly bury qualifiers.
+  const groupStageComplete = Object.keys(computeGroupOrders(matches)).length === 12;
+  if (groupStageComplete) {
+    const r32Teams = new Set<string>();
+    for (const key of KO_SLOT_KEYS) {
+      if (!key.startsWith("r32")) continue;
+      const s = tree[key];
+      if (s.team1) r32Teams.add(s.team1);
+      if (s.team2) r32Teams.add(s.team2);
+    }
+    for (const teams of Object.values(GROUPS)) {
+      for (const t of teams) if (!r32Teams.has(t.code)) eliminated.add(t.code);
+    }
+  }
+  return eliminated;
 }
 
 /** Minimal match shape for kickoff lookup — includes scheduled (un-played) matches. */

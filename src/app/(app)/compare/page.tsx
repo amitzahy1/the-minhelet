@@ -11,6 +11,7 @@ import { FLAGS, getFlag, getTeamNameHe } from "@/lib/flags";
 import { SpecialTrackerView } from "@/components/shared/SpecialTrackerView";
 import { AgreementMatrix } from "@/components/shared/AgreementMatrix";
 import WhosAlive from "@/components/shared/WhosAlive";
+import { useEliminatedTeams } from "@/hooks/useEliminatedTeams";
 import type { BettorAdvancement } from "@/lib/supabase/shared-data";
 import { formatLockDeadline } from "@/lib/constants";
 import Link from "next/link";
@@ -666,13 +667,13 @@ function ResultsView({ matches, brackets, currentUserId, loading }: ResultsViewP
 // ---------------------------------------------------------------------------
 // WhosAliveFromAdvancements
 // Wraps the existing WhosAlive component, building its props from each
-// bettor's advancement picks. Replaces the previous /live tab of the same
-// name. Until real tournament results are available we treat every pick
-// as "alive"; once we wire to live results we'll diff against eliminated
-// teams.
+// bettor's advancement picks. Diffs every pick against the teams actually
+// eliminated from the real bracket, so a knocked-out pick (incl. the champion)
+// reads dead rather than everyone showing fully alive.
 // ---------------------------------------------------------------------------
 
 function WhosAliveFromAdvancements({ advancements }: { advancements: BettorAdvancement[] }) {
+  const { eliminated } = useEliminatedTeams();
   const bettors = useMemo(() => {
     if (advancements.length === 0) return [];
     return advancements.map((a) => {
@@ -687,11 +688,11 @@ function WhosAliveFromAdvancements({ advancements }: { advancements: BettorAdvan
         champion: a.winner,
         semifinalists: a.advanceToSF,
         quarterfinalists: a.advanceToQF,
-        alive: allPicked,
-        dead: [] as string[],
+        alive: allPicked.filter((t) => !eliminated.has(t)),
+        dead: allPicked.filter((t) => eliminated.has(t)),
       };
     });
-  }, [advancements]);
+  }, [advancements, eliminated]);
 
   if (bettors.length === 0) {
     return (

@@ -10,11 +10,22 @@
 
 import { useEffect, useState } from "react";
 import { loadRealFixtures } from "@/lib/fixtures-client";
-import { computeEliminatedTeams } from "@/lib/scoring/knockout-resolver";
+import {
+  computeEliminatedTeams,
+  resolveKnockoutTree,
+  type KoSlotKey,
+  type SlotState,
+} from "@/lib/scoring/knockout-resolver";
+import { LIVE_FEEDERS } from "@/lib/tournament/knockout-derivation";
 import type { FinishedMatch } from "@/lib/results-hits";
 
-export function useEliminatedTeams(): { eliminated: Set<string>; ready: boolean } {
+type KoTree = Record<KoSlotKey, SlotState>;
+
+export function useEliminatedTeams(): { eliminated: Set<string>; tree: KoTree | null; ready: boolean } {
   const [eliminated, setEliminated] = useState<Set<string>>(() => new Set());
+  // The LIVE_FEEDERS-resolved bracket, so callers can map each pick to its real
+  // bracket region (collision-aware "who can still reach stage X").
+  const [tree, setTree] = useState<KoTree | null>(null);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -33,6 +44,7 @@ export function useEliminatedTeams(): { eliminated: Set<string>; ready: boolean 
             winner: m.winner ?? null,
           }));
         setEliminated(computeEliminatedTeams(scored));
+        setTree(resolveKnockoutTree(scored, null, undefined, LIVE_FEEDERS));
         setReady(true);
       });
     run();
@@ -40,5 +52,5 @@ export function useEliminatedTeams(): { eliminated: Set<string>; ready: boolean 
     return () => { alive = false; clearInterval(id); };
   }, []);
 
-  return { eliminated, ready };
+  return { eliminated, tree, ready };
 }

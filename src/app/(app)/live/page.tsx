@@ -1029,7 +1029,7 @@ function WhosAliveTab({ advancements }: { advancements: BettorAdvancement[] }) {
   // Per-stage survival: keep each bettor's picks split by the round they bet a
   // team to reach, so the card shows how many survive at שמינית/רבע/חצי/גמר/זוכה.
   // The teams actually out come from the real bracket (useEliminatedTeams).
-  const { eliminated } = useEliminatedTeams();
+  const { eliminated, tree } = useEliminatedTeams();
   const scoring = useScoring();
   const bettors = useMemo(
     () =>
@@ -1044,6 +1044,6 @@ function WhosAliveTab({ advancements }: { advancements: BettorAdvancement[] }) {
     [advancements],
   );
 
-  return <WhosAlive bettors={bettors} eliminated={eliminated} weights={scoring.advancement} />;
+  return <WhosAlive bettors={bettors} eliminated={eliminated} tree={tree} weights={scoring.advancement} />;
 }
 

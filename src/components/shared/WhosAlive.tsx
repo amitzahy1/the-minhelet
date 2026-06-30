@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { getFlag, getTeamNameHe } from "@/lib/flags";
 import { SCORING, type ScoringValues } from "@/types";
+import { computeReachableStages, type KoSlotKey, type SlotState } from "@/lib/scoring/knockout-resolver";
 
 interface SpecialBets {
   topScorer: { player: string; team: string };
@@ -31,6 +32,9 @@ interface WhosAliveProps {
   bettors: WhosAliveBettor[];
   /** Teams knocked out of the tournament (from the real bracket). */
   eliminated?: Set<string>;
+  /** LIVE_FEEDERS-resolved bracket — lets us count collision-aware reachers
+   *  (two picks destined to meet can't both reach the round they share). */
+  tree?: Record<KoSlotKey, SlotState> | null;
   /** Per-stage advancement point values (DB-driven scoring config). */
   weights?: ScoringValues["advancement"];
 }
@@ -226,37 +230,40 @@ const item = {
 export default function WhosAlive({
   bettors = MOCK_BETTORS,
   eliminated = new Set<string>(),
+  tree = null,
   weights = SCORING.advancement,
 }: Partial<WhosAliveProps>) {
   // Per-bettor survival, broken out by stage + scored by the MAX advancement
-  // points still reachable (each surviving pick × its stage's point value).
-  // That weighted "points alive" is the ranking key — keeping a champion +
-  // both finalists outweighs having more shallow R16 teams alive.
+  // points still reachable. "Reachable" is COLLISION-AWARE: per the real
+  // bracket, two picks destined to meet before a round can't both reach it, so
+  // we count distinct bracket regions, not raw surviving picks (see
+  // computeReachableStages). That weighted "points alive" is the ranking key.
   const rows = useMemo(() => {
-    const isAlive = (t: string) => !!t && !eliminated.has(t);
-    const stage = (picks: string[]) => ({
-      alive: picks.filter(isAlive).length,
-      total: picks.length,
-    });
+    const safeTree = (tree ?? {}) as Record<KoSlotKey, SlotState>;
     return bettors
       .map((b) => {
-        const r16 = stage(b.r16);
-        const qf = stage(b.qf);
-        const sf = stage(b.sf);
-        const fin = stage(b.final);
-        const championAlive = isAlive(b.champion);
+        const reach = computeReachableStages(
+          { r16: b.r16, qf: b.qf, sf: b.sf, final: b.final, champion: b.champion },
+          safeTree,
+          eliminated,
+        );
+        const r16 = { alive: reach.r16, total: b.r16.length };
+        const qf = { alive: reach.qf, total: b.qf.length };
+        const sf = { alive: reach.sf, total: b.sf.length };
+        const fin = { alive: reach.final, total: b.final.length };
         const championPicked = !!b.champion;
+        const championAlive = reach.champion === 1;
         const alivePoints =
-          r16.alive * weights.r16 +
-          qf.alive * weights.qf +
-          sf.alive * weights.sf +
-          fin.alive * weights.final +
-          (championAlive ? weights.winner : 0);
+          reach.r16 * weights.r16 +
+          reach.qf * weights.qf +
+          reach.sf * weights.sf +
+          reach.final * weights.final +
+          reach.champion * weights.winner;
         const totalPoints =
-          r16.total * weights.r16 +
-          qf.total * weights.qf +
-          sf.total * weights.sf +
-          fin.total * weights.final +
+          b.r16.length * weights.r16 +
+          b.qf.length * weights.qf +
+          b.sf.length * weights.sf +
+          b.final.length * weights.final +
           (championPicked ? weights.winner : 0);
         const pct = totalPoints ? Math.round((alivePoints / totalPoints) * 100) : 0;
         return { b, r16, qf, sf, fin, championAlive, championPicked, alivePoints, totalPoints, pct };
@@ -268,7 +275,7 @@ export default function WhosAlive({
           Number(z.championAlive) - Number(a.championAlive) ||
           a.b.name.localeCompare(z.b.name, "he"),
       );
-  }, [bettors, eliminated, weights]);
+  }, [bettors, eliminated, tree, weights]);
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6">
@@ -285,7 +292,7 @@ export default function WhosAlive({
           מי עוד בחיים?
         </h2>
         <p className="text-base text-gray-600 mt-1">
-          כמה מהניחושים של כל מהמר עדיין יכולים להתממש — לפי שלב, ומדורג לפי הנקודות שעוד פתוחות
+          כמה מהניחושים של כל מהמר עוד יכולים להתממש, לפי הבראקט הרשמי — שתי נבחרות שנפגשות בדרך נספרות פעם אחת. מדורג לפי הנקודות שעוד פתוחות
         </p>
       </motion.div>
 
@@ -355,22 +362,6 @@ export default function WhosAlive({
                 </span>
               )}
             </div>
-
-            {/* The core 8 (quarterfinal picks) — which teams specifically survived */}
-            {qf.total > 0 && (
-              <div className="px-4 pb-2.5 flex flex-wrap gap-1.5">
-                {b.qf
-                  .filter((t) => t !== b.champion)
-                  .map((team) => (
-                    <TeamTag
-                      key={team}
-                      code={team}
-                      isAlive={!eliminated.has(team)}
-                      isChampion={false}
-                    />
-                  ))}
-              </div>
-            )}
 
             {/* Special bets (only when provided) */}
             {b.specialBets && (

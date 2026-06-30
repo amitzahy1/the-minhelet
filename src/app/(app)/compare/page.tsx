@@ -340,11 +340,11 @@ export default function ComparePage() {
         {[
           { key: "specials" as View, label: "הימורים מיוחדים" },
           { key: "advancement" as View, label: "עולות + זוכה" },
+          { key: "alive" as View, label: "מי חי?" },
           { key: "results" as View, label: "תוצאות ותפיסות" },
           { key: "groups" as View, label: "עולות מהבתים" },
           { key: "matrix" as View, label: "מטריצה" },
           { key: "whatif" as View, label: "מה אם...?" },
-          { key: "alive" as View, label: "מי חי?" },
           { key: "sim" as View, label: "סימולציה" },
           { key: "heatmap" as View, label: "מפת חום" },
         ].map(tab => (
@@ -673,7 +673,7 @@ function ResultsView({ matches, brackets, currentUserId, loading }: ResultsViewP
 // ---------------------------------------------------------------------------
 
 function WhosAliveFromAdvancements({ advancements }: { advancements: BettorAdvancement[] }) {
-  const { eliminated } = useEliminatedTeams();
+  const { eliminated, tree } = useEliminatedTeams();
   const scoring = useScoring();
   const bettors = useMemo(
     () =>
@@ -695,7 +695,7 @@ function WhosAliveFromAdvancements({ advancements }: { advancements: BettorAdvan
       </p>
     );
   }
-  return <WhosAlive bettors={bettors} eliminated={eliminated} weights={scoring.advancement} />;
+  return <WhosAlive bettors={bettors} eliminated={eliminated} tree={tree} weights={scoring.advancement} />;
 }
 
 // ---------------------------------------------------------------------------

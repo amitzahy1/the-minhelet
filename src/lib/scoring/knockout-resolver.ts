@@ -361,6 +361,85 @@ export function computeEliminatedTeams(matches: FinishedMatch[]): Set<string> {
   return eliminated;
 }
 
+// Child slot → the slot it feeds into, in the REAL bracket. Two teams whose
+// paths merge at slot S can never both get PAST S, so they can't both reach the
+// round that S decides. Built once from LIVE_FEEDERS.
+const PARENT_OF: Record<string, string> = (() => {
+  const out: Record<string, string> = {};
+  for (const [parent, [f1, f2]] of Object.entries(LIVE_FEEDERS)) {
+    out[f1] = parent;
+    out[f2] = parent;
+  }
+  return out;
+})();
+
+export interface ReachableStages {
+  r16: number;
+  qf: number;
+  sf: number;
+  final: number;
+  champion: number; // 0 or 1
+}
+
+/**
+ * Collision-aware count of how many of a bettor's per-stage picks can STILL
+ * reach each stage, given the REAL (LIVE_FEEDERS) bracket.
+ *
+ * Advancement is scored by set-membership ("did team T reach round X"), so the
+ * naive count is "picks not yet eliminated". But the official bracket can force
+ * two of a bettor's picks to meet BEFORE the round they both predicted — at
+ * which point only one can get there. (This is real here: the pre-tournament
+ * bets were placed on LATER_FEEDERS, whose R16 pairings differ from the live
+ * bracket.) So instead of counting surviving picks we count the DISTINCT bracket
+ * regions they occupy — the sub-tree that funnels into a single stage slot:
+ *   reach R16  ← win your R32 match     → region = the R32 match
+ *   reach QF   ← win your R16 match     → region = the R16 match
+ *   reach SF   ← win your QF match      → region = the QF match
+ *   reach Final← win your SF match      → region = the SF match
+ * Two alive picks sharing a region collapse to 1 — they're destined to meet.
+ *
+ * `tree` is a LIVE_FEEDERS-resolved tree (see resolveKnockoutTree). A pick whose
+ * bracket position can't be resolved (tree not built yet) degrades gracefully to
+ * its own unique region, i.e. the plain not-eliminated count.
+ */
+export function computeReachableStages(
+  picks: { r16: string[]; qf: string[]; sf: string[]; final: string[]; champion: string },
+  tree: Record<KoSlotKey, SlotState>,
+  eliminated: Set<string>,
+): ReachableStages {
+  // team code → its R32 match slot (the bracket leaf it entered at).
+  const teamToR32: Record<string, string> = {};
+  for (const key of KO_SLOT_KEYS) {
+    if (!key.startsWith("r32")) continue;
+    const s = tree[key];
+    if (s?.team1) teamToR32[s.team1] = key;
+    if (s?.team2) teamToR32[s.team2] = key;
+  }
+  // Region id for `team` at a given depth above its R32 match (0=R32 match,
+  // 1=R16 match, 2=QF match, 3=SF match). Unknown position → unique per team.
+  const regionAt = (team: string, depth: number): string => {
+    let region = teamToR32[team];
+    if (!region) return `team:${team}`;
+    for (let i = 0; i < depth; i++) region = PARENT_OF[region] ?? region;
+    return region;
+  };
+  const distinct = (codes: string[], depth: number): number => {
+    const regions = new Set<string>();
+    for (const t of codes) {
+      if (!t || eliminated.has(t)) continue;
+      regions.add(regionAt(t, depth));
+    }
+    return regions.size;
+  };
+  return {
+    r16: distinct(picks.r16, 0),
+    qf: distinct(picks.qf, 1),
+    sf: distinct(picks.sf, 2),
+    final: distinct(picks.final, 3),
+    champion: picks.champion && !eliminated.has(picks.champion) ? 1 : 0,
+  };
+}
+
 /** Minimal match shape for kickoff lookup — includes scheduled (un-played) matches. */
 export interface ScheduleMatch {
   homeTla: string;

@@ -402,11 +402,17 @@ export function computeTodayScores(
 }
 
 /**
- * Per-user cumulative-points series across the sequence of finished matches
- * (chronological). Used to draw the "trend" sparkline on the leaderboard.
- * Returns `[0, ...afterEachMatch]` so the line always starts at zero and
- * grows as matches complete. If fewer than 2 finished matches exist, returns
- * a flat two-point series so the sparkline renders without NaN.
+ * Per-user cumulative MATCH-points series (group toto/exact + knockout
+ * toto/exact) across the sequence of finished matches in chronological order.
+ * Drives the "trend" sparkline on the leaderboard. Returns `[0, ...afterEach]`
+ * so the line starts at zero and grows as matches complete.
+ *
+ * KO matches are included (advancement + specials aren't — they don't resolve
+ * per match), so the trend keeps MOVING through the knockout stage instead of
+ * freezing at the end of the groups, which is what made every line look the
+ * same. KO points are scored with the SAME engine as the live leaderboard:
+ * resolve the LIVE_FEEDERS tree once, then attribute each finished slot's
+ * toto/exact to the chronological match that produced it (matched by team pair).
  */
 export function computePlayerHistories(
   brackets: BettorBracket[],
@@ -419,20 +425,46 @@ export function computePlayerHistories(
   const cumulative: Record<string, number[]> = {};
   for (const b of brackets) cumulative[b.userId] = [0];
 
-  for (const match of sorted) {
-    const isGroup = match.stage === "GROUP_STAGE" || match.stage === "GROUP";
-    if (!isGroup) continue;
+  // Resolve the real bracket once and index every SCORED slot by its team pair,
+  // so each KO match below maps back to the slot whose result it decided.
+  const pk = (a: string, b: string) => [a, b].sort().join("|");
+  const liveTree = resolveKnockoutTree(matches, null, undefined, LIVE_FEEDERS);
+  const slotByPair: Record<string, SlotState> = {};
+  for (const slot of Object.values(liveTree)) {
+    if (slot.score1 === null || slot.score2 === null || !slot.team1 || !slot.team2) continue;
+    slotByPair[pk(slot.team1, slot.team2)] = slot;
+  }
 
-    const hits = computeGroupHits(match, brackets);
+  for (const match of sorted) {
     const deltaByUser: Record<string, number> = {};
-    for (const h of hits) {
-      if (h.hit === "exact") deltaByUser[h.userId] = scoring.toto.GROUP + scoring.exact.GROUP;
-      else if (h.hit === "toto") deltaByUser[h.userId] = scoring.toto.GROUP;
+    const isGroup = match.stage === "GROUP_STAGE" || match.stage === "GROUP";
+    if (isGroup) {
+      const hits = computeGroupHits(match, brackets);
+      for (const h of hits) {
+        if (h.hit === "exact") deltaByUser[h.userId] = scoring.toto.GROUP + scoring.exact.GROUP;
+        else if (h.hit === "toto") deltaByUser[h.userId] = scoring.toto.GROUP;
+      }
+    } else {
+      const slot = slotByPair[pk(match.homeTla, match.awayTla)];
+      if (slot && slot.score1 !== null && slot.score2 !== null && slot.team1 && slot.team2) {
+        const stage = stageForSlot(slot.key);
+        const penaltyWinner = slot.score1 === slot.score2 ? slot.winner : null;
+        for (const b of brackets) {
+          const pick = knockoutPick(b, slot.key);
+          if (!pick) continue;
+          const r = calculateKnockoutScore(
+            stage,
+            { homeGoals: slot.score1, awayGoals: slot.score2, penaltyWinner, team1: slot.team1, team2: slot.team2 },
+            pick,
+            scoring,
+          );
+          if (r.total > 0) deltaByUser[b.userId] = r.total;
+        }
+      }
     }
     for (const uid of Object.keys(cumulative)) {
       const series = cumulative[uid];
-      const last = series[series.length - 1];
-      series.push(last + (deltaByUser[uid] || 0));
+      series.push(series[series.length - 1] + (deltaByUser[uid] || 0));
     }
   }
 

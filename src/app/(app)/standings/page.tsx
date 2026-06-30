@@ -173,14 +173,36 @@ function MissingBetsBanner({ matches }: { matches: { date: string; group?: strin
   );
 }
 
-function Sparkline({ data, highlight }: { data: number[]; highlight?: boolean }) {
-  const max = Math.max(...data), min = Math.min(...data), range = max - min || 1;
-  const w = 80, h = 24;
-  const points = data.map((v, i) => `${(i / (data.length - 1)) * w},${h - ((v - min) / range) * h}`).join(" ");
+// Trend sparkline. Uses a SHARED y-scale (0…scaleMax across all bettors) so a
+// leader's line literally sits higher than a laggard's — instead of each line
+// being stretched to its own min/max, which made every climb look identical.
+// The colour encodes RECENT momentum (gain over the last ~20% of matches):
+// green = heating up, slate = flat lately. "You" stays blue.
+function Sparkline({ data, scaleMax, highlight }: { data: number[]; scaleMax: number; highlight?: boolean }) {
+  const w = 80, h = 24, pad = 2;
+  const top = Math.max(1, scaleMax);
+  const n = data.length;
+  const x = (i: number) => (n <= 1 ? 0 : (i / (n - 1)) * w);
+  const y = (v: number) => h - pad - Math.min(1, Math.max(0, v / top)) * (h - pad * 2);
+  const pts = data.map((v, i) => `${x(i)},${y(v)}`);
+  const line = pts.join(" ");
+  // Recent momentum: points gained over the last ~20% of the series.
+  const back = Math.max(1, Math.floor((n - 1) * 0.2));
+  const recentGain = data[n - 1] - data[Math.max(0, n - 1 - back)];
+  const color = highlight ? "#3B82F6" : recentGain > 0 ? "#16A34A" : "#94A3B8";
+  const lastY = y(data[n - 1]);
+  const gid = `spark-${highlight ? "you" : "x"}-${Math.round(top)}`;
   return (
     <svg width={w} height={h} className="overflow-visible" style={{ direction: "ltr" }}>
-      <polyline points={points} fill="none" stroke={highlight ? "#3B82F6" : "#94A3B8"} strokeWidth={highlight ? 2 : 1.5} strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx={w} cy={h - ((data[data.length - 1] - min) / range) * h} r={2.5} fill={highlight ? "#3B82F6" : "#94A3B8"} />
+      <defs>
+        <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity="0.18" />
+          <stop offset="100%" stopColor={color} stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <polygon points={`${x(0)},${h} ${line} ${x(n - 1)},${h}`} fill={`url(#${gid})`} stroke="none" />
+      <polyline points={line} fill="none" stroke={color} strokeWidth={highlight ? 2 : 1.5} strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx={x(n - 1)} cy={lastY} r={2.5} fill={color} />
     </svg>
   );
 }
@@ -615,6 +637,13 @@ export default function StandingsPage() {
     () => computePlayerHistories(brackets, finishedMatches, scoring),
     [brackets, finishedMatches, scoring]
   );
+  // Shared y-scale for every trend line, so line height reflects real standing
+  // (not each line stretched to its own range → all looking identical).
+  const trendMax = useMemo(() => {
+    let m = 0;
+    for (const h of Object.values(playerHistories)) m = Math.max(m, h[h.length - 1] || 0);
+    return m || 1;
+  }, [playerHistories]);
 
   // Pool-level special-bets status (won / void / pending per category) — shared
   // by every bettor's breakdown modal to label bets nobody caught.
@@ -895,7 +924,7 @@ export default function StandingsPage() {
               <span className={`w-14 text-center text-sm font-medium hidden sm:block ${activeTab === "advPts" ? "text-blue-600 font-bold" : "text-gray-600"}`} style={{ fontFamily: "var(--font-inter)" }}>{p.advPts}</span>
               <span className={`w-14 text-center text-sm font-medium hidden sm:block ${activeTab === "specPts" ? "text-blue-600 font-bold" : "text-gray-600"}`} style={{ fontFamily: "var(--font-inter)" }}>{p.specPts}</span>
               <div className="w-20 hidden sm:flex justify-center">
-                <Sparkline data={history} highlight={!!p.isYou} />
+                <Sparkline data={history} scaleMax={trendMax} highlight={!!p.isYou} />
               </div>
               <span className="w-12 text-center text-sm text-green-600 font-bold" style={{ fontFamily: "var(--font-inter)" }}>{p.today}</span>
               <span className="w-16 text-center font-black text-lg text-gray-900 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>

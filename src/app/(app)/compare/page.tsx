@@ -674,25 +674,19 @@ function ResultsView({ matches, brackets, currentUserId, loading }: ResultsViewP
 
 function WhosAliveFromAdvancements({ advancements }: { advancements: BettorAdvancement[] }) {
   const { eliminated } = useEliminatedTeams();
-  const bettors = useMemo(() => {
-    if (advancements.length === 0) return [];
-    return advancements.map((a) => {
-      const allPicked = [
-        ...a.advanceToQF,
-        ...a.advanceToSF,
-        ...a.advanceToFinal,
-        ...(a.winner ? [a.winner] : []),
-      ];
-      return {
+  const scoring = useScoring();
+  const bettors = useMemo(
+    () =>
+      advancements.map((a) => ({
         name: a.displayName || "ללא שם",
         champion: a.winner,
-        semifinalists: a.advanceToSF,
-        quarterfinalists: a.advanceToQF,
-        alive: allPicked.filter((t) => !eliminated.has(t)),
-        dead: allPicked.filter((t) => eliminated.has(t)),
-      };
-    });
-  }, [advancements, eliminated]);
+        r16: a.advanceToR16,
+        qf: a.advanceToQF,
+        sf: a.advanceToSF,
+        final: a.advanceToFinal,
+      })),
+    [advancements],
+  );
 
   if (bettors.length === 0) {
     return (
@@ -701,7 +695,7 @@ function WhosAliveFromAdvancements({ advancements }: { advancements: BettorAdvan
       </p>
     );
   }
-  return <WhosAlive bettors={bettors} />;
+  return <WhosAlive bettors={bettors} eliminated={eliminated} weights={scoring.advancement} />;
 }
 
 // ---------------------------------------------------------------------------

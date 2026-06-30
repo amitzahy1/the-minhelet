@@ -1026,31 +1026,24 @@ function SimulationTab() {
 }
 
 function WhosAliveTab({ advancements }: { advancements: BettorAdvancement[] }) {
-  // Diff each bettor's advancement picks against the teams actually eliminated
-  // from the real bracket, so a pick whose team is out (incl. the champion)
-  // shows dead instead of everyone reading as fully alive.
+  // Per-stage survival: keep each bettor's picks split by the round they bet a
+  // team to reach, so the card shows how many survive at שמינית/רבע/חצי/גמר/זוכה.
+  // The teams actually out come from the real bracket (useEliminatedTeams).
   const { eliminated } = useEliminatedTeams();
-  const bettors = useMemo(() => {
-    if (advancements.length === 0) return [];
-
-    return advancements.map(a => {
-      const allPicked = [
-        ...a.advanceToQF,
-        ...a.advanceToSF,
-        ...a.advanceToFinal,
-        ...(a.winner ? [a.winner] : []),
-      ];
-      return {
+  const scoring = useScoring();
+  const bettors = useMemo(
+    () =>
+      advancements.map((a) => ({
         name: a.displayName,
         champion: a.winner,
-        semifinalists: a.advanceToSF,
-        quarterfinalists: a.advanceToQF,
-        alive: allPicked.filter((t) => !eliminated.has(t)),
-        dead: allPicked.filter((t) => eliminated.has(t)),
-      };
-    });
-  }, [advancements, eliminated]);
+        r16: a.advanceToR16,
+        qf: a.advanceToQF,
+        sf: a.advanceToSF,
+        final: a.advanceToFinal,
+      })),
+    [advancements],
+  );
 
-  return <WhosAlive bettors={bettors} />;
+  return <WhosAlive bettors={bettors} eliminated={eliminated} weights={scoring.advancement} />;
 }
 

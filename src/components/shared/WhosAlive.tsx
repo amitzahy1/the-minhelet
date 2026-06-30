@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { getFlag, getTeamNameHe } from "@/lib/flags";
+import { SCORING, type ScoringValues } from "@/types";
 
 interface SpecialBets {
   topScorer: { player: string; team: string };
@@ -12,109 +13,45 @@ interface SpecialBets {
   matchup: string;
 }
 
-interface WhosAliveProps {
-  bettors: {
-    name: string;
-    champion: string;
-    semifinalists: string[];
-    quarterfinalists: string[];
-    alive: string[];
-    dead: string[];
-    specialBets?: SpecialBets;
-  }[];
+// Each bettor's advancement picks, kept SEPARATE per stage so we can show how
+// many survive at every future round (R16 → champion) instead of one flat
+// count. "Alive" = the picked team is still in the tournament (not eliminated),
+// i.e. the bet can still come true.
+interface WhosAliveBettor {
+  name: string;
+  champion: string;
+  r16: string[]; // 16 teams predicted to reach the round of 16
+  qf: string[]; // 8 → quarterfinal
+  sf: string[]; // 4 → semifinal
+  final: string[]; // 2 → final
+  specialBets?: SpecialBets;
 }
 
-// Mock data
-const MOCK_BETTORS: WhosAliveProps["bettors"] = [
+interface WhosAliveProps {
+  bettors: WhosAliveBettor[];
+  /** Teams knocked out of the tournament (from the real bracket). */
+  eliminated?: Set<string>;
+  /** Per-stage advancement point values (DB-driven scoring config). */
+  weights?: ScoringValues["advancement"];
+}
+
+// Mock data — only used when the component is rendered with no real bettors.
+const MOCK_BETTORS: WhosAliveBettor[] = [
   {
     name: "אמית",
     champion: "ARG",
-    semifinalists: ["ARG", "GER", "FRA", "BRA"],
-    quarterfinalists: ["ARG", "GER", "FRA", "BRA", "ESP", "ENG", "NED", "POR"],
-    alive: ["ARG", "FRA", "BRA", "ESP", "ENG", "NED", "POR"],
-    dead: ["GER"],
-    specialBets: {
-      topScorer: { player: "Messi", team: "ARG" },
-      topAssists: { player: "De Bruyne", team: "BEL" },
-      bestAttack: "GER",
-      dirtiestTeam: "URU",
-      matchup: "1",
-    },
+    r16: ["ARG", "GER", "FRA", "BRA", "ESP", "ENG", "NED", "POR", "CRO", "BEL", "URU", "MAR", "JPN", "USA", "MEX", "SUI"],
+    qf: ["ARG", "GER", "FRA", "BRA", "ESP", "ENG", "NED", "POR"],
+    sf: ["ARG", "GER", "FRA", "BRA"],
+    final: ["ARG", "GER"],
   },
   {
     name: "דני",
     champion: "NZL",
-    semifinalists: ["ARG", "FRA", "BRA", "GER"],
-    quarterfinalists: ["ARG", "FRA", "BRA", "GER", "ESP", "POR", "ENG", "NED"],
-    alive: ["ARG", "FRA", "BRA", "ESP", "ENG", "NED"],
-    dead: ["NZL", "GER", "POR"],
-    specialBets: {
-      topScorer: { player: "Mbappé", team: "FRA" },
-      topAssists: { player: "Pedri", team: "ESP" },
-      bestAttack: "FRA",
-      dirtiestTeam: "ARG",
-      matchup: "X",
-    },
-  },
-  {
-    name: "יוני",
-    champion: "FRA",
-    semifinalists: ["FRA", "BRA", "ENG", "ARG"],
-    quarterfinalists: ["FRA", "BRA", "ENG", "ARG", "GER", "ESP", "NED", "POR"],
-    alive: ["FRA", "BRA", "ENG", "ARG", "ESP", "NED", "POR"],
-    dead: ["GER"],
-    specialBets: {
-      topScorer: { player: "Haaland", team: "NOR" },
-      topAssists: { player: "Saka", team: "ENG" },
-      bestAttack: "BRA",
-      dirtiestTeam: "MAR",
-      matchup: "2",
-    },
-  },
-  {
-    name: "רון ב",
-    champion: "ENG",
-    semifinalists: ["ENG", "FRA", "BRA", "POR"],
-    quarterfinalists: ["ENG", "FRA", "BRA", "POR", "ARG", "GER", "ESP", "NED"],
-    alive: ["ENG", "FRA", "BRA", "ARG", "ESP", "NED"],
-    dead: ["POR", "GER"],
-    specialBets: {
-      topScorer: { player: "Kane", team: "ENG" },
-      topAssists: { player: "Messi", team: "ARG" },
-      bestAttack: "ARG",
-      dirtiestTeam: "GER",
-      matchup: "1",
-    },
-  },
-  {
-    name: "רועי",
-    champion: "GER",
-    semifinalists: ["GER", "FRA", "ARG", "BRA"],
-    quarterfinalists: ["GER", "FRA", "ARG", "BRA", "ESP", "ENG", "NED", "POR"],
-    alive: ["FRA", "ARG", "BRA", "ESP", "ENG", "NED", "POR"],
-    dead: ["GER"],
-    specialBets: {
-      topScorer: { player: "Vinícius Jr", team: "BRA" },
-      topAssists: { player: "Griezmann", team: "FRA" },
-      bestAttack: "ESP",
-      dirtiestTeam: "NED",
-      matchup: "X",
-    },
-  },
-  {
-    name: "עידן",
-    champion: "FRA",
-    semifinalists: ["FRA", "ARG", "BRA", "ENG"],
-    quarterfinalists: ["FRA", "ARG", "BRA", "ENG", "GER", "ESP", "NED", "POR"],
-    alive: ["FRA", "ARG", "BRA", "ENG", "ESP", "NED", "POR"],
-    dead: ["GER"],
-    specialBets: {
-      topScorer: { player: "Mbappé", team: "FRA" },
-      topAssists: { player: "Bruno Fernandes", team: "POR" },
-      bestAttack: "ENG",
-      dirtiestTeam: "CRO",
-      matchup: "2",
-    },
+    r16: ["ARG", "FRA", "BRA", "GER", "ESP", "POR", "ENG", "NED", "NZL", "CRO", "URU", "SEN", "JPN", "USA", "MEX", "SUI"],
+    qf: ["ARG", "FRA", "BRA", "GER", "ESP", "POR", "ENG", "NED"],
+    sf: ["ARG", "FRA", "BRA", "GER"],
+    final: ["ARG", "FRA"],
   },
 ];
 
@@ -156,6 +93,27 @@ function TeamTag({
     <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-gray-100 border border-gray-200 text-xs opacity-40">
       <span>{getFlag(code)}</span>
       <span className="font-bold text-gray-400 line-through">{code}</span>
+    </span>
+  );
+}
+
+// One per-stage survival pill: "רבע 6/8", coloured by how many survive.
+function StageChip({ label, alive, total }: { label: string; alive: number; total: number }) {
+  const ratio = total ? alive / total : 0;
+  const cls =
+    alive === total
+      ? "bg-green-50 border-green-200 text-green-700"
+      : ratio >= 0.5
+      ? "bg-amber-50 border-amber-200 text-amber-700"
+      : alive > 0
+      ? "bg-orange-50 border-orange-200 text-orange-700"
+      : "bg-red-50 border-red-200 text-red-500";
+  return (
+    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-xs ${cls}`}>
+      <span className="font-bold">{label}</span>
+      <span className="tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>
+        {alive}/{total}
+      </span>
     </span>
   );
 }
@@ -267,17 +225,50 @@ const item = {
 
 export default function WhosAlive({
   bettors = MOCK_BETTORS,
+  eliminated = new Set<string>(),
+  weights = SCORING.advancement,
 }: Partial<WhosAliveProps>) {
-  // Sort by most alive predictions first
-  const sorted = useMemo(() => {
-    return [...bettors].sort((a, b) => {
-      const aTotal = a.alive.length + a.dead.length;
-      const bTotal = b.alive.length + b.dead.length;
-      const aRatio = a.alive.length / (aTotal || 1);
-      const bRatio = b.alive.length / (bTotal || 1);
-      return bRatio - aRatio;
+  // Per-bettor survival, broken out by stage + scored by the MAX advancement
+  // points still reachable (each surviving pick × its stage's point value).
+  // That weighted "points alive" is the ranking key — keeping a champion +
+  // both finalists outweighs having more shallow R16 teams alive.
+  const rows = useMemo(() => {
+    const isAlive = (t: string) => !!t && !eliminated.has(t);
+    const stage = (picks: string[]) => ({
+      alive: picks.filter(isAlive).length,
+      total: picks.length,
     });
-  }, [bettors]);
+    return bettors
+      .map((b) => {
+        const r16 = stage(b.r16);
+        const qf = stage(b.qf);
+        const sf = stage(b.sf);
+        const fin = stage(b.final);
+        const championAlive = isAlive(b.champion);
+        const championPicked = !!b.champion;
+        const alivePoints =
+          r16.alive * weights.r16 +
+          qf.alive * weights.qf +
+          sf.alive * weights.sf +
+          fin.alive * weights.final +
+          (championAlive ? weights.winner : 0);
+        const totalPoints =
+          r16.total * weights.r16 +
+          qf.total * weights.qf +
+          sf.total * weights.sf +
+          fin.total * weights.final +
+          (championPicked ? weights.winner : 0);
+        const pct = totalPoints ? Math.round((alivePoints / totalPoints) * 100) : 0;
+        return { b, r16, qf, sf, fin, championAlive, championPicked, alivePoints, totalPoints, pct };
+      })
+      .sort(
+        (a, z) =>
+          z.alivePoints - a.alivePoints ||
+          z.pct - a.pct ||
+          Number(z.championAlive) - Number(a.championAlive) ||
+          a.b.name.localeCompare(z.b.name, "he"),
+      );
+  }, [bettors, eliminated, weights]);
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6">
@@ -294,7 +285,7 @@ export default function WhosAlive({
           מי עוד בחיים?
         </h2>
         <p className="text-base text-gray-600 mt-1">
-          מצב הניחושים של כל מהמר — מי שרד ומי נפל
+          כמה מהניחושים של כל מהמר עדיין יכולים להתממש — לפי שלב, ומדורג לפי הנקודות שעוד פתוחות
         </p>
       </motion.div>
 
@@ -305,95 +296,96 @@ export default function WhosAlive({
         animate="show"
         className="space-y-3"
       >
-        {sorted.map((bettor) => {
-          const allPicks = [
-            ...new Set([
-              bettor.champion,
-              ...bettor.semifinalists,
-              ...bettor.quarterfinalists,
-            ]),
-          ];
-          const aliveCount = allPicks.filter((t) =>
-            bettor.alive.includes(t)
-          ).length;
-          const totalPicks = allPicks.length;
-          const pct = Math.round((aliveCount / totalPicks) * 100);
-          const championAlive = bettor.alive.includes(bettor.champion);
+        {rows.map(({ b, r16, qf, sf, fin, championAlive, championPicked, alivePoints, totalPoints, pct }) => (
+          <motion.div
+            key={b.name}
+            variants={item}
+            className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow"
+          >
+            {/* Header row: name · champion · points still alive */}
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
+              <span className="text-base font-black text-gray-900 min-w-[60px]">
+                {b.name}
+              </span>
 
-          return (
-            <motion.div
-              key={bettor.name}
-              variants={item}
-              className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow"
-            >
-              {/* Header row */}
-              <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
-                {/* Name */}
-                <span className="text-base font-black text-gray-900 min-w-[60px]">
-                  {bettor.name}
-                </span>
+              {championPicked && (
+                <TeamTag code={b.champion} isAlive={championAlive} isChampion />
+              )}
 
-                {/* Champion pick */}
-                <TeamTag
-                  code={bettor.champion}
-                  isAlive={championAlive}
-                  isChampion
-                />
+              <div className="flex-1" />
 
-                {/* Spacer */}
-                <div className="flex-1" />
-
-                {/* Damage meter */}
-                <div className="flex items-center gap-2 min-w-[140px]">
-                  <div className="flex-1 h-2.5 bg-gray-100 rounded-full overflow-hidden">
-                    <motion.div
-                      className={`h-full rounded-full ${
-                        pct >= 75
-                          ? "bg-green-500"
-                          : pct >= 50
-                          ? "bg-amber-500"
-                          : "bg-red-500"
-                      }`}
-                      initial={{ width: 0 }}
-                      animate={{ width: `${pct}%` }}
-                      transition={{ duration: 0.8, delay: 0.3 }}
-                    />
-                  </div>
-                  <span
-                    className="text-xs font-bold text-gray-600 whitespace-nowrap"
-                    style={{ fontFamily: "var(--font-inter)" }}
-                  >
-                    {aliveCount}/{totalPicks}
-                  </span>
-                  <span className="text-[11px] text-gray-400">בחיים</span>
+              {/* Points-alive meter (max reachable advancement points still open) */}
+              <div className="flex items-center gap-2 min-w-[150px]">
+                <div className="flex-1 h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                  <motion.div
+                    className={`h-full rounded-full ${
+                      pct >= 75 ? "bg-green-500" : pct >= 50 ? "bg-amber-500" : "bg-red-500"
+                    }`}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${pct}%` }}
+                    transition={{ duration: 0.8, delay: 0.3 }}
+                  />
                 </div>
+                <span
+                  className="text-xs font-bold text-gray-700 whitespace-nowrap tabular-nums"
+                  style={{ fontFamily: "var(--font-inter)" }}
+                >
+                  {alivePoints}/{totalPoints}
+                </span>
+                <span className="text-[11px] text-gray-400 whitespace-nowrap">נק׳ חיות</span>
               </div>
+            </div>
 
-              {/* Picks detail row */}
-              <div className="px-4 py-2.5 flex flex-wrap gap-1.5">
-                {allPicks
-                  .filter((t) => t !== bettor.champion)
+            {/* Per-stage survival chips */}
+            <div className="px-4 py-2.5 flex flex-wrap items-center gap-1.5">
+              {r16.total > 0 && <StageChip label="שמינית" alive={r16.alive} total={r16.total} />}
+              {qf.total > 0 && <StageChip label="רבע גמר" alive={qf.alive} total={qf.total} />}
+              {sf.total > 0 && <StageChip label="חצי גמר" alive={sf.alive} total={sf.total} />}
+              {fin.total > 0 && <StageChip label="גמר" alive={fin.alive} total={fin.total} />}
+              {championPicked && (
+                <span
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-xs ${
+                    championAlive
+                      ? "bg-green-50 border-green-200 text-green-700"
+                      : "bg-red-50 border-red-200 text-red-500"
+                  }`}
+                >
+                  <span className="font-bold">זוכה</span>
+                  <span>{championAlive ? "✓" : "💀"}</span>
+                </span>
+              )}
+            </div>
+
+            {/* The core 8 (quarterfinal picks) — which teams specifically survived */}
+            {qf.total > 0 && (
+              <div className="px-4 pb-2.5 flex flex-wrap gap-1.5">
+                {b.qf
+                  .filter((t) => t !== b.champion)
                   .map((team) => (
                     <TeamTag
                       key={team}
                       code={team}
-                      isAlive={bettor.alive.includes(team)}
+                      isAlive={!eliminated.has(team)}
                       isChampion={false}
                     />
                   ))}
               </div>
+            )}
 
-              {/* Special bets */}
-              {bettor.specialBets && (
-                <SpecialBetsSection
-                  specialBets={bettor.specialBets}
-                  alive={bettor.alive}
-                  dead={bettor.dead}
-                />
-              )}
-            </motion.div>
-          );
-        })}
+            {/* Special bets (only when provided) */}
+            {b.specialBets && (
+              <SpecialBetsSection
+                specialBets={b.specialBets}
+                alive={[...new Set([...b.r16, ...b.qf, ...b.sf, ...b.final, b.champion])].filter(
+                  (t) => t && !eliminated.has(t),
+                )}
+                dead={[...new Set([...b.r16, ...b.qf, ...b.sf, ...b.final, b.champion])].filter(
+                  (t) => t && eliminated.has(t),
+                )}
+              />
+            )}
+          </motion.div>
+        ))}
       </motion.div>
     </div>
   );

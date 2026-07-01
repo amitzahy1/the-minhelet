@@ -18,15 +18,7 @@
     },
     {
       "path": "/api/admin/sync-fd-details",
-      "schedule": "0 13 * * *"
-    },
-    {
-      "path": "/api/admin/sync-fd-details",
       "schedule": "0 18 * * *"
-    },
-    {
-      "path": "/api/admin/sync-fd-details",
-      "schedule": "0 22 * * *"
     }
   ]
 }

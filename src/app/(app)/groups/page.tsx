@@ -95,7 +95,7 @@ function GroupView({ groupId }: { groupId: string }) {
     // the live-mode interval force-refreshes so locks flip and results land.
     const load = (force: boolean) => loadRealFixtures(force).then(matches => { if (active) setAllFixtures(matches); });
     load(false);
-    const id = liveMode ? setInterval(() => load(true), 90_000) : null;
+    const id = liveMode ? setInterval(() => load(true), 120_000) : null;
     return () => { active = false; if (id) clearInterval(id); };
   }, [liveMode]);
 

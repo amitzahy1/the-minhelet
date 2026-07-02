@@ -108,6 +108,10 @@ export default function ComparePage() {
   // Load real data from Supabase (after lock, uses server API to bypass RLS)
   const { brackets, specialBets, advancements, currentUserId, loading } = useSharedData();
 
+  // Teams eliminated from the real bracket — an eliminated pick can't reach ANY
+  // further stage, so the advancement table greys it out in every row it fills.
+  const { eliminated } = useEliminatedTeams();
+
   // Finished matches for the "תוצאות" tab
   const [allMatches, setAllMatches] = useState<MatchApi[]>([]);
   const [loadingMatches, setLoadingMatches] = useState(true);
@@ -450,6 +454,7 @@ export default function ComparePage() {
             bettors={fBettors}
             colorMap={advColors}
             highlightTeam={advTeamFilter}
+            eliminated={eliminated}
             rows={[
               { label: "זוכה", section: "winner" as const, render: (b) => ({ val: b.winner, node: <span className="font-bold text-amber-700">{F[b.winner]} {b.winner}</span> }), highlight: true },
               { label: "גמר 1", section: "final" as const, render: (b) => ({ val: b.finalist1, node: <span className="text-gray-700">{F[b.finalist1]} {b.finalist1}</span> }) },
@@ -781,32 +786,35 @@ function TransposedBetTable({
   rows,
   colorMap,
   highlightTeam = "",
+  eliminated,
 }: {
   bettors: Bettor[];
   rows: TransposedRow[];
   colorMap: Record<string, string>;
   /** When set, cells matching this team code are ringed and the rest dimmed. */
   highlightTeam?: string;
+  /** Teams out of the tournament — their cells are greyed (they can't advance). */
+  eliminated?: Set<string>;
 }) {
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
+      <table className="w-full text-xs">
         <thead>
           <tr
-            className="bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/40 border-b border-blue-100/50 text-xs font-bold text-gray-600"
+            className="bg-gradient-to-l from-white via-blue-50/30 to-indigo-50/40 border-b border-blue-100/50 text-[11px] font-bold text-gray-600"
             style={{ fontFamily: "var(--font-inter)" }}
           >
-            <th className="py-3 px-3 text-start sticky start-0 bg-white z-10 border-e border-gray-100 min-w-[7rem] w-[7rem]">
+            <th className="py-2 px-2 text-start sticky start-0 bg-white z-10 border-e border-gray-100 w-[4rem]">
               הימור
             </th>
             {bettors.map((b) => (
               <th
                 key={b.name}
-                className={`py-3 px-2 text-center whitespace-nowrap min-w-[5.5rem] w-[5.5rem] border-e border-gray-100 last:border-e-0 ${
+                className={`py-2 px-1 text-center leading-tight min-w-[3.25rem] w-[3.25rem] border-e border-gray-100 last:border-e-0 ${
                   b.isYou ? "bg-blue-50/60" : ""
                 }`}
               >
-                <div className="font-bold text-gray-900" style={{ fontFamily: "var(--font-secular)" }}>
+                <div className="font-bold text-gray-900 text-[10px] break-words" style={{ fontFamily: "var(--font-secular)" }}>
                   {b.name}
                 </div>
                 {b.isYou && (
@@ -837,7 +845,7 @@ function TransposedBetTable({
             >
               <th
                 scope="row"
-                className="py-1.5 px-3 text-start font-bold text-[11px] sticky start-0 z-10 border-e border-gray-100 whitespace-nowrap bg-white text-gray-600"
+                className="py-1.5 px-2 text-start font-bold text-[10px] sticky start-0 z-10 border-e border-gray-100 whitespace-nowrap bg-white text-gray-600"
               >
                 {row.label}
               </th>
@@ -845,12 +853,17 @@ function TransposedBetTable({
                 const { val, node } = row.render(b);
                 const isHit = highlightTeam !== "" && val === highlightTeam;
                 const isDim = highlightTeam !== "" && val !== highlightTeam;
+                // Eliminated pick → neutral grey, muted: it can't reach this (or
+                // any later) stage. Overrides the per-team pick colour.
+                const isElim = !!val && !!eliminated?.has(val);
                 return (
                   <td
                     key={b.name}
-                    className={`py-1.5 px-2 text-center text-xs border-e border-gray-100 last:border-e-0 ${getValueColor(val, colorMap)} ${
-                      b.isYou ? "ring-1 ring-inset ring-blue-200" : ""
-                    } ${isHit ? "ring-2 ring-inset ring-amber-500 font-black" : ""} ${isDim ? "opacity-25" : ""}`}
+                    className={`py-1 px-1 text-center text-[11px] border-e border-gray-100 last:border-e-0 ${
+                      isElim ? "bg-gray-100 grayscale opacity-50" : getValueColor(val, colorMap)
+                    } ${b.isYou ? "ring-1 ring-inset ring-blue-200" : ""} ${
+                      isHit ? "ring-2 ring-inset ring-amber-500 font-black" : ""
+                    } ${isDim ? "opacity-25" : ""}`}
                   >
                     {node}
                   </td>

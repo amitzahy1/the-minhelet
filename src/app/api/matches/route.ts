@@ -4,7 +4,7 @@ import fdMatchDetailsBundled from "@/lib/tournament/fd-match-details.json";
 import { toAppCode, findUnmappedTeams } from "@/lib/fd-team-mapping";
 import { buildResultRows, syncCardBoard, reconcileFinishedRows } from "@/lib/sync-results";
 import { getEspnResults } from "@/lib/api-espn";
-import type { MatchResult } from "@/lib/api-football-data";
+import { ninetyMinuteScore, type MatchResult } from "@/lib/api-football-data";
 import { resolveKnockoutTree, type KoSlotKey } from "@/lib/scoring/knockout-resolver";
 import { LIVE_FEEDERS } from "@/lib/tournament/knockout-derivation";
 import { normalizeTla, normalizeGroupLetter, type FinishedMatch } from "@/lib/results-hits";
@@ -167,6 +167,9 @@ export async function GET() {
     const key = String(m.id);
     seen.add(key);
     const demo = demoById[key];
+    // Live 90' fallback for matches not yet in our demo table (e.g. the window
+    // between FT and the self-heal persisting the row).
+    const reg = ninetyMinuteScore(m.score);
     merged.push({
       id: m.id,
       date: m.utcDate,
@@ -178,13 +181,11 @@ export async function GET() {
       stage: m.stage,
       // Demo data wins — admin-entered scores are authoritative for the demo.
       status: demo?.status ?? m.status,
-      // 90-MINUTE score only. football-data's `score.fullTime` AGGREGATES the
-      // shootout for penalty matches (verified: fullTime 1–5 vs regularTime 0–1),
-      // so we prefer `regularTime` (present once a match passes 90') and fall
-      // back to fullTime for group + regulation-decided matches (where they're
-      // equal). ET & shootout never enter the scoreline; they decide `winner`.
-      homeGoals: demo?.home_goals ?? m.score?.regularTime?.home ?? m.score?.fullTime?.home ?? null,
-      awayGoals: demo?.away_goals ?? m.score?.regularTime?.away ?? m.score?.fullTime?.away ?? null,
+      // 90-MINUTE score only — demo row wins; else the FD-derived 90' score
+      // (ninetyMinuteScore strips ET + shootout goals off the aggregate). ET &
+      // shootout never enter the scoreline; they decide `winner`.
+      homeGoals: demo?.home_goals ?? reg.home,
+      awayGoals: demo?.away_goals ?? reg.away,
       homePenalties: demo?.home_penalties ?? m.score?.penalties?.home ?? null,
       awayPenalties: demo?.away_penalties ?? m.score?.penalties?.away ?? null,
       winner: m.score?.winner ?? null,

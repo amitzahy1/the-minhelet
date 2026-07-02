@@ -36,6 +36,45 @@ async function fetchAPI(endpoint: string, opts?: { fresh?: boolean }) {
 }
 
 // ============================================================================
+// 90-minute score selection (shared by every score-persisting path)
+// ============================================================================
+
+type ScoreLike = {
+  fullTime?: { home?: number | null; away?: number | null };
+  regularTime?: { home?: number | null; away?: number | null };
+  extraTime?: { home?: number | null; away?: number | null };
+  penalties?: { home?: number | null; away?: number | null };
+} | null | undefined;
+
+/**
+ * The 90-minute (regulation) score — the ONLY score the exact/toto bet is judged
+ * on. Football-Data reports it three different ways depending on how a KO match
+ * ended, and the naive `regularTime ?? fullTime` gets ONE of them wrong:
+ *   - REGULAR (decided in 90'): only `fullTime` is set, and it IS the 90' score.
+ *   - PENALTY_SHOOTOUT: `regularTime` carries the clean 90' score; `fullTime`
+ *     AGGREGATES the shootout (verified: fullTime 4–5 / regularTime 1–1).
+ *   - EXTRA_TIME (won in ET, NO shootout): `fullTime` is the 120' aggregate and
+ *     `regularTime` is left NULL (verified live 2026-07-01, BEL–SEN R32:
+ *     fullTime 3–2, regularTime null, extraTime 1–0 → real 90' = 2–2). The old
+ *     `regularTime ?? fullTime` returned the 120' score (3–2) here — the bug.
+ * So: prefer a populated `regularTime`; else strip ET + shootout goals off
+ * `fullTime`. We key off the PRESENCE of extra/penalty goals, NOT the `duration`
+ * label — FD's free tier flip-flops that label between REGULAR and EXTRA_TIME on
+ * the same match, so it can't be trusted.
+ */
+export function ninetyMinuteScore(score: ScoreLike): { home: number | null; away: number | null } {
+  const rt = score?.regularTime;
+  if (rt?.home != null && rt?.away != null) return { home: rt.home, away: rt.away };
+  const ft = score?.fullTime;
+  if (ft?.home == null || ft?.away == null) return { home: null, away: null };
+  const etH = score?.extraTime?.home ?? 0;
+  const etA = score?.extraTime?.away ?? 0;
+  const pkH = score?.penalties?.home ?? 0;
+  const pkA = score?.penalties?.away ?? 0;
+  return { home: ft.home - etH - pkH, away: ft.away - etA - pkA };
+}
+
+// ============================================================================
 // Match Results
 // ============================================================================
 
@@ -192,12 +231,10 @@ export async function syncMatchResults() {
         id: m.id,
         homeTeam: m.homeTeam.tla,
         awayTeam: m.awayTeam.tla,
-        // 90-minute score only: prefer regularTime (present once a KO match goes
-        // past 90'); else fullTime (group + regulation-decided matches, where
-        // fullTime IS the 90' score). NEVER raw fullTime for shootouts — it
-        // aggregates the shootout. ET/shootout affect only `winner`/`penalties`.
-        homeGoals: m.score.regularTime?.home ?? m.score.fullTime.home,
-        awayGoals: m.score.regularTime?.away ?? m.score.fullTime.away,
+        // 90-minute score only — see ninetyMinuteScore for why raw
+        // `regularTime ?? fullTime` mis-reads an ET-decided match.
+        homeGoals: ninetyMinuteScore(m.score).home,
+        awayGoals: ninetyMinuteScore(m.score).away,
         homePenalties: m.score.penalties?.home ?? null,
         awayPenalties: m.score.penalties?.away ?? null,
         // True qualifier (incl. ET + shootout) — used for KO advancement, not goals.

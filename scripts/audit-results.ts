@@ -17,6 +17,7 @@ import { readFileSync, writeFileSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 import { toAppCode } from "../src/lib/fd-team-mapping";
+import { ninetyMinuteScore } from "../src/lib/api-football-data";
 import { getEspnResults, getEspnPlayerStats, getEspnCardBoard } from "../src/lib/api-espn";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -64,8 +65,7 @@ async function main() {
   const fdFinished = fdMatches.filter((m) => m.status === "FINISHED");
   for (const m of fdFinished) {
     const id = String(m.id);
-    const fh = m.score?.regularTime?.home ?? m.score?.fullTime?.home;
-    const fa = m.score?.regularTime?.away ?? m.score?.fullTime?.away;
+    const { home: fh, away: fa } = ninetyMinuteScore(m.score);
     const stored = demoById.get(id);
     const home = toAppCode(m.homeTeam?.tla);
     const away = toAppCode(m.awayTeam?.tla);

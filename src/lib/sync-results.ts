@@ -7,7 +7,7 @@
 // with no score.
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { MatchResult } from "@/lib/api-football-data";
+import { ninetyMinuteScore, type MatchResult } from "@/lib/api-football-data";
 import { toAppCode } from "@/lib/fd-team-mapping";
 import { normalizeGroupLetter } from "@/lib/results-hits";
 import { getTsdbCardBoard } from "@/lib/api-thesportsdb";
@@ -52,12 +52,11 @@ export function buildResultRows(matches: MatchResult[], enteredBy: string): Demo
   const rows: DemoResultRow[] = [];
   for (const m of matches) {
     if (m.status !== "FINISHED") continue;
-    // 90-minute score only: prefer regularTime (present once a KO match goes
-    // past 90'); else fullTime (group + regulation-decided matches, where
-    // fullTime IS the 90' score). NEVER raw fullTime for shootouts — it
-    // aggregates the shootout into the scoreline.
-    const homeGoals = m.score?.regularTime?.home ?? m.score?.fullTime?.home;
-    const awayGoals = m.score?.regularTime?.away ?? m.score?.fullTime?.away;
+    // 90-minute score only. ninetyMinuteScore strips ET/shootout goals off the
+    // FD aggregate — crucially it also handles the ET-win-no-shootout case where
+    // FD leaves regularTime null, which the old `regularTime ?? fullTime`
+    // silently stored as the 120' score.
+    const { home: homeGoals, away: awayGoals } = ninetyMinuteScore(m.score);
     if (homeGoals == null || awayGoals == null) continue;
     rows.push({
       match_id: String(m.id),

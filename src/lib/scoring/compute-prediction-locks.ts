@@ -38,6 +38,12 @@ export interface LockSyncMatch {
   awayGoals?: number | null;
   homePenalties?: number | null;
   awayPenalties?: number | null;
+  /** True match winner incl. ET + shootout (FD score.winner). REQUIRED for an
+   *  ET-win-no-shootout KO match: its 90' score is a draw with null penalties,
+   *  so `winner` is the ONLY signal that resolves the qualifier — without it the
+   *  NEXT round's slot never resolves, gets no lock row, and every pick on that
+   *  match is silently unsaveable (save RPC fails closed). */
+  winner?: "HOME_TEAM" | "AWAY_TEAM" | "DRAW" | null;
 }
 
 export interface PredictionLockRow {
@@ -99,6 +105,9 @@ export function computePredictionLockRows(
       awayGoals: m.awayGoals as number,
       homePenalties: m.homePenalties ?? null,
       awayPenalties: m.awayPenalties ?? null,
+      // Thread the true winner so a 90'-draw KO (ET/shootout) advances the real
+      // qualifier and the next round's slot resolves → gets a lock row.
+      winner: m.winner ?? null,
     }));
   const schedule: ScheduleMatch[] = matches.map((m) => ({
     homeTla: m.homeTla,

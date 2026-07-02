@@ -3,6 +3,7 @@ import {
   computePredictionLockRows,
   type LockSyncMatch,
 } from "@/lib/scoring/compute-prediction-locks";
+import { GROUPS, GROUP_LETTERS } from "@/lib/tournament/groups";
 
 // ============================================================================
 // These lock rows are the single source of truth for THREE things that must
@@ -73,5 +74,55 @@ describe("computePredictionLockRows — knockout reveal", () => {
     const tp = rows.find((r) => r.lock_key === "third_place");
     expect(tp?.scope).toBe("ko");
     expect(tp?.lock_at).toBe("2026-07-18T18:30:00.000Z");
+  });
+
+  // Regression (2026-07-02): an R32 won in EXTRA TIME with NO shootout has a 90'
+  // DRAW and null penalties — the qualifier is knowable ONLY from the feed
+  // `winner`. If the lock DTO drops `winner`, the next round's slot never
+  // resolves, gets no lock row, and every pick on that match is silently
+  // UNSAVEABLE (save RPC fails closed → "המשחק ננעל"). Live case: BEL beat SEN
+  // in ET, so the USA–BEL R16 slot lost its lock row the moment the 90' score
+  // was corrected to 2–2. Pin that `winner` is threaded end-to-end.
+  describe("ET-win-no-shootout feeder resolves the next slot's lock", () => {
+    let mid = 1;
+    const gm = (h: string, a: string, hg: number, ag: number, g: string): LockSyncMatch =>
+      ({ id: mid++, date: "2026-06-15T16:00:00Z", homeTla: h, awayTla: a, group: g, stage: "GROUP_STAGE", status: "FINISHED", homeGoals: hg, awayGoals: ag });
+    // All 12 groups played deterministically (t0 wins all, t1 > t2,t3, t2 > t3)
+    // so every group order is [0,1,2,3] and the whole R32 resolves.
+    const allGroups: LockSyncMatch[] = [];
+    for (const L of GROUP_LETTERS) {
+      const t = GROUPS[L].map((x) => x.code);
+      allGroups.push(
+        gm(t[0], t[1], 1, 0, L), gm(t[0], t[2], 1, 0, L), gm(t[0], t[3], 1, 0, L),
+        gm(t[1], t[2], 1, 0, L), gm(t[1], t[3], 1, 0, L), gm(t[2], t[3], 1, 0, L),
+      );
+    }
+    // With this ordering r16l_0 = W(r32l_1: GER-TUR) vs W(r32r_0: FRA-SWE).
+    const ko = (
+      h: string, a: string, hg: number, ag: number,
+      extra: Partial<LockSyncMatch> = {},
+    ): LockSyncMatch =>
+      ({ id: mid++, date: "2026-06-30T18:00:00Z", homeTla: h, awayTla: a, group: null, stage: "LAST_32", status: "FINISHED", homeGoals: hg, awayGoals: ag, ...extra });
+
+    // GER win in ET (2–2, no shootout) → winner ONLY from the feed field.
+    const gerEt = (withWinner: boolean) =>
+      ko("GER", "TUR", 2, 2, withWinner ? { winner: "HOME_TEAM" } : {});
+    const fraWin = ko("FRA", "SWE", 1, 0, { winner: "HOME_TEAM" });
+    // The resolved R16 fixture (GER vs FRA), still to be played.
+    const r16Fixture: LockSyncMatch = {
+      id: 900, date: "2026-07-07T00:00:00Z", homeTla: "GER", awayTla: "FRA",
+      group: null, stage: "LAST_16", status: "TIMED",
+    };
+
+    it("writes the R16 lock row when winner IS threaded", () => {
+      const rows = computePredictionLockRows([...allGroups, gerEt(true), fraWin, r16Fixture]);
+      const r16 = rows.find((r) => r.lock_key === "r16l_0");
+      expect(r16?.lock_at).toBe("2026-07-06T23:30:00.000Z"); // kickoff − 30 min
+    });
+
+    it("(the bug) drops the R16 lock row when winner is missing on the ET match", () => {
+      const rows = computePredictionLockRows([...allGroups, gerEt(false), fraWin, r16Fixture]);
+      expect(rows.find((r) => r.lock_key === "r16l_0")).toBeUndefined();
+    });
   });
 });

@@ -215,7 +215,7 @@ type Breakdown = {
   advSF: number; advFinal: number; winner: number;
   topScorer: number; topAssists: number; bestAttack: number;
   prolificGroup: number; driestGroup: number; dirtiestTeam: number;
-  matchups: number; penalties: number;
+  matchups: number;
 };
 // Player row type — reuse the mock's non-breakdown fields, swap in the real
 // Breakdown shape, and carry the "was this relative?" flags for the יחסי tag.
@@ -227,7 +227,8 @@ type PlayerRow = Omit<(typeof MOCK_PLAYERS)[number], "breakdown"> & {
   specInterim?: Partial<Record<SpecialCategory, boolean>>;
 };
 
-// The 8 special-bet rows, in display order.
+// The special-bet rows, in display order. (Penalties over/under was removed
+// from the game 2026-06-13 and has no row.)
 const SPECIAL_ROWS: [string, SpecialCategory][] = [
   ["מלך שערים", "topScorer"],
   ["מלך בישולים", "topAssists"],
@@ -236,7 +237,6 @@ const SPECIAL_ROWS: [string, SpecialCategory][] = [
   ["בית יבש", "driestGroup"],
   ["כסחנית", "dirtiestTeam"],
   ["מאצ׳אפים", "matchups"],
-  ["פנדלים", "penalties"],
 ];
 
 // Tooltip — mobile: bottom sheet with close button, desktop: hover popup
@@ -384,7 +384,6 @@ const REASON_TO_BUCKET: Record<string, keyof Breakdown> = {
   driest_group: "driestGroup",
   dirtiest_team: "dirtiestTeam",
   matchup: "matchups",
-  penalties_over_under: "penalties",
 };
 
 // Map scoring reason to the high-level category
@@ -667,7 +666,7 @@ export default function StandingsPage() {
         groupAdvExact: 0, groupAdvPartial: 0, advQF: 0, advSF: 0,
         advR16: 0, advFinal: 0, winner: 0, topScorer: 0, topAssists: 0,
         bestAttack: 0, prolificGroup: 0, driestGroup: 0, dirtiestTeam: 0,
-        matchups: 0, penalties: 0,
+        matchups: 0,
       };
       // Which relative lines were awarded (drives the "יחסי" tag in the modal).
       const specRelative = { topScorer: false, topAssists: false };
@@ -702,7 +701,7 @@ export default function StandingsPage() {
         if (live.specBreakdown) {
           breakdown.topScorer = 0; breakdown.topAssists = 0; breakdown.bestAttack = 0;
           breakdown.prolificGroup = 0; breakdown.driestGroup = 0; breakdown.dirtiestTeam = 0;
-          breakdown.matchups = 0; breakdown.penalties = 0;
+          breakdown.matchups = 0;
           for (const line of live.specBreakdown.lines) {
             const cat = specialReasonToCategory(line.reason);
             if (cat) {
@@ -718,7 +717,7 @@ export default function StandingsPage() {
       // Totals by bucket
       const matchPts = breakdown.totoGroup + breakdown.exactGroup + breakdown.totoKnockout + breakdown.exactKnockout;
       const advPts = live?.advPts ?? (breakdown.groupAdvExact + breakdown.groupAdvPartial + breakdown.advR16 + breakdown.advQF + breakdown.advSF + breakdown.advFinal + breakdown.winner);
-      const specPts = live?.specPts ?? (breakdown.topScorer + breakdown.topAssists + breakdown.bestAttack + breakdown.prolificGroup + breakdown.driestGroup + breakdown.dirtiestTeam + breakdown.matchups + breakdown.penalties);
+      const specPts = live?.specPts ?? (breakdown.topScorer + breakdown.topAssists + breakdown.bestAttack + breakdown.prolificGroup + breakdown.driestGroup + breakdown.dirtiestTeam + breakdown.matchups);
       const total = matchPts + advPts + specPts;
       const specHasInterim = live?.specHasInterim ?? false;
       // Provisional points from matches in play (0 unless a match is live).

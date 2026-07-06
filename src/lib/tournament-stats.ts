@@ -228,6 +228,14 @@ async function fetchActuals(): Promise<TournamentActuals | null> {
       .maybeSingle();
     const actuals = (data as TournamentActuals | null) ?? null;
     if (actuals) {
+      // The admin form / sync jobs persist "" (not null) for untouched text
+      // fields. Scoring already guards against that, but display consumers
+      // (SpecialTrackerView's `actualKey != null` decided-checks) do not — an
+      // "" top_scorer_player once rendered the whole card as green/decided.
+      // Normalize here so every consumer sees null for unset fields.
+      for (const k of Object.keys(actuals) as (keyof TournamentActuals)[]) {
+        if ((actuals[k] as unknown) === "") (actuals as unknown as Record<string, unknown>)[k] = null;
+      }
       // OVER/UNDER is always derived from the entered total vs PENALTIES_LINE —
       // never the stored column — so a line change re-resolves correctly and a
       // stale/blank stored value can't mis-score. (Includes ET, excludes shootouts.)

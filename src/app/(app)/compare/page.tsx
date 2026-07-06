@@ -691,7 +691,7 @@ function WhosAliveFromAdvancements({
 }) {
   const { eliminated, tree } = useEliminatedTeams();
   const scoring = useScoring();
-  const { actuals, playerStats } = useLiveSpecials();
+  const { actuals, playerStats, teamGoals } = useLiveSpecials();
 
   // KO match-points: only what's still CATCHABLE — the set-but-unplayed matchups
   // (c.open), which everyone can bet, so it's identical for every bettor. Points
@@ -717,18 +717,20 @@ function WhosAliveFromAdvancements({
       (sb.prolificGroup ? sp.prolific_group : 0) +
       (sb.driestGroup ? sp.driest_group : 0) +
       (sb.dirtiestTeam ? sp.dirtiest_team : 0) +
-      (sb.penaltiesOverUnder ? sp.penalties_over_under : 0) +
+      // penalties over/under removed from the game 2026-06-13 — stored picks don't count
       (sb.matchupPick || "").split(",").filter(Boolean).length * sp.matchup;
     const m: Record<string, { alive: number; pot: number }> = {};
-    const pool = computeSpecialBetsPool(specialBets, actuals, playerStats, scoring);
+    // teamGoals threads the best-attack live-tentative path — without it an
+    // interim BEST_ATTACK line counted on standings but not here.
+    const pool = computeSpecialBetsPool(specialBets, actuals, playerStats, scoring, teamGoals);
     for (const sb of specialBets) {
       m[sb.userId] = {
-        alive: scoreSpecialBetsForUser(sb, actuals, playerStats, scoring, pool.relative).total,
+        alive: scoreSpecialBetsForUser(sb, actuals, playerStats, scoring, pool.relative, teamGoals).total,
         pot: potOf(sb),
       };
     }
     return m;
-  }, [specialBets, actuals, playerStats, scoring]);
+  }, [specialBets, actuals, playerStats, teamGoals, scoring]);
 
   const bettors = useMemo(
     () =>

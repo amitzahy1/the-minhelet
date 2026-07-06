@@ -10,7 +10,6 @@ import { getFlag } from "@/lib/flags";
 import { PlayerSelect } from "@/components/shared/PlayerSelect";
 import { CardTieAlert } from "./CardTieAlert";
 import { MATCHUPS } from "@/lib/matchups";
-import { PENALTIES_LINE, penaltiesResult } from "@/lib/constants";
 import { useScoring } from "@/hooks/useScoring";
 
 /** One row of the dirtiest-team leaderboard (admin-maintained, no auto feed). */
@@ -351,41 +350,11 @@ export function SpecialResultsEntry() {
           </div>
         </Section>
 
-        {/* Penalties + champion */}
-        <Section title="⚖️ פנדלים ואלוף">
+        {/* Champion. (The penalties over/under bet was removed from the game
+            2026-06-13 — its entry field was dropped so a filled total can
+            never silently award points for a dead bet.) */}
+        <Section title="🏆 אלוף">
           <div className="grid sm:grid-cols-2 gap-3">
-            <Field label="סה״כ פנדלים בטורניר (כולל הארכות, ללא דו-קרב פנדלים)">
-              <Input
-                type="number"
-                min={0}
-                value={actuals.total_penalties ?? ""}
-                onChange={(e) => set("total_penalties", e.target.value === "" ? null : Math.max(0, parseInt(e.target.value) || 0))}
-                dir="ltr"
-              />
-            </Field>
-            <Field label={`מעל / מתחת ${PENALTIES_LINE} (מחושב אוטומטית)`}>
-              {(() => {
-                const derived = penaltiesResult(actuals.total_penalties);
-                if (!derived) {
-                  return (
-                    <div className="py-2 px-3 rounded-lg border border-dashed border-gray-200 text-xs text-gray-400">
-                      הזן סה״כ פנדלים כדי לחשב
-                    </div>
-                  );
-                }
-                return (
-                  <div
-                    className={`py-2 px-3 rounded-lg border text-xs font-bold ${
-                      derived === "OVER"
-                        ? "bg-emerald-600 text-white border-emerald-600"
-                        : "bg-blue-600 text-white border-blue-600"
-                    }`}
-                  >
-                    {derived === "OVER" ? `⬆ מעל ${PENALTIES_LINE}` : `⬇ מתחת ${PENALTIES_LINE}`}
-                  </div>
-                );
-              })()}
-            </Field>
             <Field label="אלוף העולם">
               <TeamPicker value={actuals.champion} onChange={(v) => set("champion", v)} />
             </Field>

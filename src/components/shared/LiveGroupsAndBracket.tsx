@@ -291,7 +291,9 @@ export function LiveGroupsAndBracket() {
   // the scored standings when a tie comes down to cards.
   const [dirtyBoard, setDirtyBoard] = useState<Array<{ team: string; yellow: number; red: number }>>([]);
   // All bettors' special-bet picks → drives the "who currently holds each bet" view.
-  const { specialBets, currentUserId } = useSharedData();
+  // advancements supplies each bettor's champion pick — without it the tracker's
+  // "אלופת העולם" card renders with no chips (everyone counted as "טרם בחרו").
+  const { specialBets, advancements, currentUserId } = useSharedData();
 
   const loadLiveData = useCallback(async (aliveRef?: { current: boolean }) => {
     const alive = () => aliveRef?.current !== false;
@@ -464,7 +466,7 @@ export function LiveGroupsAndBracket() {
         </div>
       )}
 
-      {tab === "specials" && <SpecialTrackerView specialBets={specialBets} currentUserId={currentUserId} started={tournamentStarted} />}
+      {tab === "specials" && <SpecialTrackerView specialBets={specialBets} advancements={advancements} currentUserId={currentUserId} started={tournamentStarted} />}
     </div>
   );
 }

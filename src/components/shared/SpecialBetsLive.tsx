@@ -10,7 +10,6 @@ import { useEffect, useMemo, useState } from "react";
 import { GROUPS, GROUP_LETTERS } from "@/lib/tournament/groups";
 import { getFlag, getTeamNameHe } from "@/lib/flags";
 import { normalizeGroupLetter } from "@/lib/results-hits";
-import { PENALTIES_LINE } from "@/lib/constants";
 
 interface MatchApi {
   id: number;
@@ -249,17 +248,7 @@ export function SpecialBetsLive({ matches }: { matches: MatchApi[] }) {
         })() : <PendingState />}
       </Card>
 
-      {/* Penalties O/U */}
-      <Card title={`סה״כ פנדלים (אובר/אנדר ${PENALTIES_LINE})`} source={data?.penalties ? "manual" : undefined} updatedAt={data?.lastUpdated}>
-        {data?.penalties ? (
-          <div className="flex items-center justify-between bg-amber-50 rounded-lg px-3 py-2 border border-amber-200">
-            <span className="font-bold text-amber-900 text-sm">{String(data.penalties.result).toUpperCase() === "OVER" ? `אובר ${PENALTIES_LINE}` : `אנדר ${PENALTIES_LINE}`}</span>
-            {data.penalties.total != null && (
-              <span className="font-black text-amber-700 tabular-nums" style={{ fontFamily: "var(--font-inter)" }}>{data.penalties.total} פנדלים</span>
-            )}
-          </div>
-        ) : <PendingState />}
-      </Card>
+      {/* (Penalties O/U card removed — the bet was dropped from the game 2026-06-13.) */}
 
       {/* Matchups */}
       <Card title="מאצ׳אפים" source={data?.matchups.some(m => m) ? "manual" : undefined} updatedAt={data?.lastUpdated}>

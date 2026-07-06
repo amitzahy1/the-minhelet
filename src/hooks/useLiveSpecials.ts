@@ -10,9 +10,16 @@
 import { useEffect, useState } from "react";
 import type { TournamentActuals, PlayerStat } from "@/lib/scoring/special-bets-scorer";
 
-export function useLiveSpecials(): { actuals: TournamentActuals | null; playerStats: PlayerStat[]; ready: boolean } {
+export function useLiveSpecials(): {
+  actuals: TournamentActuals | null;
+  playerStats: PlayerStat[];
+  /** Tournament-cumulative goals-for per team — feeds the best-attack live-tentative path. */
+  teamGoals: Record<string, number>;
+  ready: boolean;
+} {
   const [actuals, setActuals] = useState<TournamentActuals | null>(null);
   const [playerStats, setPlayerStats] = useState<PlayerStat[]>([]);
+  const [teamGoals, setTeamGoals] = useState<Record<string, number>>({});
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -45,6 +52,11 @@ export function useLiveSpecials(): { actuals: TournamentActuals | null; playerSt
             })),
           );
         }
+        if (Array.isArray(data?.teamStats)) {
+          const tg: Record<string, number> = {};
+          for (const t of data.teamStats as { code: string; goalsFor?: number }[]) tg[t.code] = t.goalsFor ?? 0;
+          setTeamGoals(tg);
+        }
         setReady(true);
       } catch {
         if (alive) setReady(true);
@@ -55,5 +67,5 @@ export function useLiveSpecials(): { actuals: TournamentActuals | null; playerSt
     return () => { alive = false; clearInterval(id); };
   }, []);
 
-  return { actuals, playerStats, ready };
+  return { actuals, playerStats, teamGoals, ready };
 }

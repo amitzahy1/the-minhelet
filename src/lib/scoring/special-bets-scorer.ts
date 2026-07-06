@@ -78,7 +78,9 @@ export interface SpecialBetsBreakdown {
   lines: SpecialBetLine[];
 }
 
-/** The 8 special-bet categories shown as their own row in the breakdown UI. */
+/** The special-bet categories shown as their own row in the breakdown UI.
+ *  (The penalties over/under bet was removed from the game on 2026-06-13 —
+ *  stored picks remain in the DB but are never scored or displayed.) */
 export type SpecialCategory =
   | "topScorer"
   | "topAssists"
@@ -86,8 +88,7 @@ export type SpecialCategory =
   | "prolificGroup"
   | "driestGroup"
   | "dirtiestTeam"
-  | "matchups"
-  | "penalties";
+  | "matchups";
 
 /**
  * Pool-level "closest among bettors" relative winner values. A pick wins the
@@ -127,8 +128,6 @@ export function specialReasonToCategory(reason: ScoreReason): SpecialCategory | 
       return "dirtiestTeam";
     case "MATCHUP":
       return "matchups";
-    case "PENALTIES_OVER_UNDER":
-      return "penalties";
     default:
       return null;
   }
@@ -166,6 +165,15 @@ function computeLiveLeaders(stats: PlayerStat[]): LiveLeaderInfo {
 // does NOT collide with squad-mate "Harry Maguire" (requires "kane" too).
 const deburrName = (s: string) =>
   s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z ]/g, " ").replace(/\s+/g, " ").trim();
+
+// EXACT-pick equality must tolerate accent/case drift between the stored pick
+// and the feed / admin-entered name: real picks include "Harry kane" (vs the
+// feed's "Harry Kane") and "Vinícius Júnior" (vs FD's "Vinicius Junior"). A
+// strict === here silently downgraded a correct golden-boot pick from the
+// exact award to the relative one. Full-string deburr equality only — no
+// substring matching, so "Harry Kane" still never collides with "Harry Maguire".
+const sameName = (a: string | null | undefined, b: string | null | undefined): boolean =>
+  !!a && !!b && (a === b || deburrName(a) === deburrName(b));
 
 function findStat(stats: PlayerStat[], name: string | null | undefined): PlayerStat | null {
   if (!name) return null;
@@ -265,7 +273,7 @@ export function scoreSpecialBetsForUser(
   if (bets.topScorerPlayer) {
     if (finalScorer) {
       // Final: exact or relative.
-      if (bets.topScorerPlayer === finalScorer) {
+      if (sameName(bets.topScorerPlayer, finalScorer)) {
         lines.push({
           reason: "TOP_SCORER_EXACT",
           points: scoring.specials.top_scorer_exact,
@@ -286,7 +294,7 @@ export function scoreSpecialBetsForUser(
     } else if (leaders.topScorer) {
       // Tentative: live-leading or relative threshold.
       const stat = findStat(playerStats, bets.topScorerPlayer);
-      if (bets.topScorerPlayer === leaders.topScorer.name) {
+      if (sameName(bets.topScorerPlayer, leaders.topScorer.name)) {
         lines.push({
           reason: "TOP_SCORER_EXACT",
           points: scoring.specials.top_scorer_exact,
@@ -310,7 +318,7 @@ export function scoreSpecialBetsForUser(
   const finalAssists = actuals?.top_assists_player ?? null;
   if (bets.topAssistsPlayer) {
     if (finalAssists) {
-      if (bets.topAssistsPlayer === finalAssists) {
+      if (sameName(bets.topAssistsPlayer, finalAssists)) {
         lines.push({
           reason: "TOP_ASSISTS_EXACT",
           points: scoring.specials.top_assists_exact,
@@ -330,7 +338,7 @@ export function scoreSpecialBetsForUser(
       }
     } else if (leaders.topAssists) {
       const stat = findStat(playerStats, bets.topAssistsPlayer);
-      if (bets.topAssistsPlayer === leaders.topAssists.name) {
+      if (sameName(bets.topAssistsPlayer, leaders.topAssists.name)) {
         lines.push({
           reason: "TOP_ASSISTS_EXACT",
           points: scoring.specials.top_assists_exact,
@@ -431,19 +439,8 @@ export function scoreSpecialBetsForUser(
     }
   }
 
-  // -- Penalties over/under --
-  if (
-    bets.penaltiesOverUnder &&
-    actuals?.penalties_over_under &&
-    bets.penaltiesOverUnder === actuals.penalties_over_under
-  ) {
-    lines.push({
-      reason: "PENALTIES_OVER_UNDER",
-      points: scoring.specials.penalties_over_under,
-      interim: false,
-      pick: bets.penaltiesOverUnder,
-    });
-  }
+  // (No penalties over/under scoring — the bet was removed from the game on
+  // 2026-06-13. Stored picks and the actuals column are intentionally ignored.)
 
   const total = lines.reduce((sum, l) => sum + l.points, 0);
   const hasInterim = lines.some((l) => l.interim);
@@ -492,11 +489,11 @@ export function computeSpecialBetsPool(
     floor: number,
   ): number | null => {
     if (!winnerName) return null;
-    // Exact suppresses relative entirely.
-    if (picks.some((p) => p != null && p === winnerName)) return null;
+    // Exact suppresses relative entirely (same name-equality as the per-user scorer).
+    if (picks.some((p) => sameName(p, winnerName))) return null;
     let best: number | null = null;
     for (const p of picks) {
-      if (!p || p === winnerName) continue;
+      if (!p || sameName(p, winnerName)) continue;
       const st = findStat(playerStats, p);
       const v = st ? st[statKey] : 0;
       if (v >= floor && (best === null || v > best)) best = v;
@@ -522,7 +519,7 @@ export function computeSpecialBetsPool(
   // Who scored each category? Reuse the per-user scorer with the pool relative.
   const anyScored: Record<SpecialCategory, boolean> = {
     topScorer: false, topAssists: false, bestAttack: false, prolificGroup: false,
-    driestGroup: false, dirtiestTeam: false, matchups: false, penalties: false,
+    driestGroup: false, dirtiestTeam: false, matchups: false,
   };
   for (const bets of allBets) {
     const bd = scoreSpecialBetsForUser(bets, actuals, playerStats, scoring, relative, liveTeamGoals);
@@ -545,12 +542,11 @@ export function computeSpecialBetsPool(
       set(actuals?.matchup_result_1) ||
       set(actuals?.matchup_result_2) ||
       set(actuals?.matchup_result_3),
-    penalties: set(actuals?.penalties_over_under),
   };
 
   const cats: SpecialCategory[] = [
     "topScorer", "topAssists", "bestAttack", "prolificGroup",
-    "driestGroup", "dirtiestTeam", "matchups", "penalties",
+    "driestGroup", "dirtiestTeam", "matchups",
   ];
   const status = {} as Record<SpecialCategory, SpecialCatStatus>;
   for (const c of cats) {

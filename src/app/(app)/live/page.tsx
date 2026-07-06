@@ -740,7 +740,6 @@ const SPECIAL_CATS = [
   { key: "prolificGroup", label: "בית פורה", pts: 6 },
   { key: "driestGroup", label: "בית יבש", pts: 6 },
   { key: "matchup", label: "מאצ׳אפ", pts: 6 },
-  { key: "penalties", label: "פנדלים", pts: 6 },
 ] as const;
 
 const MOCK_BETTOR_SPECIALS: Record<string, Record<string, string>> = {
@@ -1005,15 +1004,11 @@ function SimulationTab() {
                     <option value="">בחרו בית</option>
                     {"ABCDEFGHIJKL".split("").map(g => <option key={g} value={g}>בית {g}</option>)}
                   </select>
-                ) : cat.key === "matchup" ? (
+                ) : (
+                  // matchup 1/X/2 (the penalties over/under branch was removed with the bet)
                   <select value={specialResults[cat.key] || ""} onChange={e => onChange(e.target.value)} className={selectCls}>
                     <option value="">בחרו</option>
                     <option value="1">1</option><option value="X">X</option><option value="2">2</option>
-                  </select>
-                ) : (
-                  <select value={specialResults[cat.key] || ""} onChange={e => onChange(e.target.value)} className={selectCls}>
-                    <option value="">בחרו</option>
-                    <option value="OVER">אובר</option><option value="UNDER">אנדר</option>
                   </select>
                 )}
               </div>

@@ -133,31 +133,32 @@ export function specialReasonToCategory(reason: ScoreReason): SpecialCategory | 
   }
 }
 
-interface LiveLeaderInfo {
-  topScorer: { name: string; goals: number } | null;
-  topAssists: { name: string; assists: number } | null;
-}
+const isSet = (v: string | null | undefined): boolean => v != null && v !== "";
 
-function computeLiveLeaders(stats: PlayerStat[]): LiveLeaderInfo {
-  if (!stats.length) return { topScorer: null, topAssists: null };
-  // Top scorer: goals desc, then assists desc, then fewest minutes asc (FIFA Golden Boot tiebreak).
-  const byGoals = [...stats].sort(
-    (a, b) =>
-      b.goals - a.goals ||
-      b.assists - a.assists ||
-      (a.minutes ?? Infinity) - (b.minutes ?? Infinity),
-  );
-  const topScorer = byGoals[0]?.goals > 0 ? { name: byGoals[0].name, goals: byGoals[0].goals } : null;
-  // Top assists: assists desc, then goals desc, then minutes asc.
-  const byAssists = [...stats].sort(
-    (a, b) =>
-      b.assists - a.assists ||
-      b.goals - a.goals ||
-      (a.minutes ?? Infinity) - (b.minutes ?? Infinity),
-  );
-  const topAssists =
-    byAssists[0]?.assists > 0 ? { name: byAssists[0].name, assists: byAssists[0].assists } : null;
-  return { topScorer, topAssists };
+/**
+ * Names that hold a category crown by `key` (goals / assists). Ties SHARE the
+ * crown with NO tiebreak — every player level on the top count is a co-king, so
+ * a bettor who picked ANY of them earns the exact award (league rule: "there
+ * can be several top scorers if they have the most"). Empty when nobody has
+ * scored/assisted yet. Used for both the live-tentative path (no `finalName`)
+ * and the final path (`finalName` = admin-entered winner; ties on that winner's
+ * count still share, so co-scorers the admin didn't type are credited too).
+ */
+function kingNames(finalName: string | null, stats: PlayerStat[], key: "goals" | "assists"): string[] {
+  if (finalName) {
+    const ws = findStat(stats, finalName);
+    if (ws && ws[key] > 0) {
+      const tied = stats.filter((s) => s[key] === ws[key]).map((s) => s.name);
+      // Guarantee the admin's name is present even if the feed lacks its stat.
+      if (!tied.some((n) => sameName(n, finalName))) tied.push(finalName);
+      return tied;
+    }
+    return [finalName];
+  }
+  if (!stats.length) return [];
+  const max = Math.max(...stats.map((s) => s[key]));
+  if (max <= 0) return [];
+  return stats.filter((s) => s[key] === max).map((s) => s.name);
 }
 
 // Accent-insensitive, all-significant-tokens match — so a stored pick like
@@ -264,20 +265,26 @@ export function scoreSpecialBetsForUser(
   liveTeamGoals: Record<string, number> = {},
 ): SpecialBetsBreakdown {
   const lines: SpecialBetLine[] = [];
-  const leaders = computeLiveLeaders(playerStats);
   const bestAttackLeaders = bestAttackLeaderSet(liveTeamGoals);
   const dirtiestLeaders = dirtiestLeaderSet(actuals?.dirtiest_board);
 
   // -- Top scorer --
-  const finalScorer = actuals?.top_scorer_player ?? null;
+  // Ties SHARE the crown: every player level on the most goals is a co-king, so
+  // any bettor who picked one earns the EXACT award (no golden-boot tiebreak).
+  // A caught king suppresses the relative line pool-wide (see the pool). When a
+  // final winner is entered, `interim` flips to false but the tie rule stays.
+  const finalScorer = isSet(actuals?.top_scorer_player) ? actuals!.top_scorer_player! : null;
   if (bets.topScorerPlayer) {
-    if (finalScorer) {
-      // Final: exact or relative.
-      if (sameName(bets.topScorerPlayer, finalScorer)) {
+    const kings = kingNames(finalScorer, playerStats, "goals");
+    if (finalScorer || kings.length) {
+      const interim = !finalScorer;
+      const liveLeader = interim ? kings.join("/") : undefined;
+      if (kings.some((n) => sameName(bets.topScorerPlayer, n))) {
         lines.push({
           reason: "TOP_SCORER_EXACT",
           points: scoring.specials.top_scorer_exact,
-          interim: false,
+          interim,
+          liveLeader,
           pick: bets.topScorerPlayer,
         });
       } else {
@@ -286,43 +293,28 @@ export function scoreSpecialBetsForUser(
           lines.push({
             reason: "TOP_SCORER_RELATIVE",
             points: scoring.specials.top_scorer_relative,
-            interim: false,
+            interim,
+            liveLeader,
             pick: bets.topScorerPlayer,
           });
         }
       }
-    } else if (leaders.topScorer) {
-      // Tentative: live-leading or relative threshold.
-      const stat = findStat(playerStats, bets.topScorerPlayer);
-      if (sameName(bets.topScorerPlayer, leaders.topScorer.name)) {
-        lines.push({
-          reason: "TOP_SCORER_EXACT",
-          points: scoring.specials.top_scorer_exact,
-          interim: true,
-          liveLeader: leaders.topScorer.name,
-          pick: bets.topScorerPlayer,
-        });
-      } else if (relative.topScorerGoals != null && stat && stat.goals === relative.topScorerGoals) {
-        lines.push({
-          reason: "TOP_SCORER_RELATIVE",
-          points: scoring.specials.top_scorer_relative,
-          interim: true,
-          liveLeader: leaders.topScorer.name,
-          pick: bets.topScorerPlayer,
-        });
-      }
     }
   }
 
-  // -- Top assists --
-  const finalAssists = actuals?.top_assists_player ?? null;
+  // -- Top assists -- (same tie-shares-the-crown rule as top scorer)
+  const finalAssists = isSet(actuals?.top_assists_player) ? actuals!.top_assists_player! : null;
   if (bets.topAssistsPlayer) {
-    if (finalAssists) {
-      if (sameName(bets.topAssistsPlayer, finalAssists)) {
+    const kings = kingNames(finalAssists, playerStats, "assists");
+    if (finalAssists || kings.length) {
+      const interim = !finalAssists;
+      const liveLeader = interim ? kings.join("/") : undefined;
+      if (kings.some((n) => sameName(bets.topAssistsPlayer, n))) {
         lines.push({
           reason: "TOP_ASSISTS_EXACT",
           points: scoring.specials.top_assists_exact,
-          interim: false,
+          interim,
+          liveLeader,
           pick: bets.topAssistsPlayer,
         });
       } else {
@@ -331,29 +323,11 @@ export function scoreSpecialBetsForUser(
           lines.push({
             reason: "TOP_ASSISTS_RELATIVE",
             points: scoring.specials.top_assists_relative,
-            interim: false,
+            interim,
+            liveLeader,
             pick: bets.topAssistsPlayer,
           });
         }
-      }
-    } else if (leaders.topAssists) {
-      const stat = findStat(playerStats, bets.topAssistsPlayer);
-      if (sameName(bets.topAssistsPlayer, leaders.topAssists.name)) {
-        lines.push({
-          reason: "TOP_ASSISTS_EXACT",
-          points: scoring.specials.top_assists_exact,
-          interim: true,
-          liveLeader: leaders.topAssists.name,
-          pick: bets.topAssistsPlayer,
-        });
-      } else if (relative.topAssistsCount != null && stat && stat.assists === relative.topAssistsCount) {
-        lines.push({
-          reason: "TOP_ASSISTS_RELATIVE",
-          points: scoring.specials.top_assists_relative,
-          interim: true,
-          liveLeader: leaders.topAssists.name,
-          pick: bets.topAssistsPlayer,
-        });
       }
     }
   }
@@ -468,32 +442,28 @@ export function computeSpecialBetsPool(
   scoring: ScoringValues = SCORING,
   liveTeamGoals: Record<string, number> = {},
 ): SpecialBetsPool {
-  const leaders = computeLiveLeaders(playerStats);
-
   // Treat empty strings as "unset" — the actuals row stores "" (not null) for
-  // fields the admin hasn't filled, so a raw `?? leaders…` would wrongly keep
-  // "" and skip the live-leader fallback (relative would never resolve).
+  // fields the admin hasn't filled.
   const set = (v: string | null | undefined): boolean => v != null && v !== "";
-  const orNull = (v: string | null | undefined): string | null => (set(v) ? (v as string) : null);
 
-  // "Winner" reference is the admin-entered actual when present, else the live
-  // leader (interim). Mirrors `scoreSpecialBetsForUser`'s exact-match basis
-  // (strict string equality on the stored pick).
-  const topScorerWinner = orNull(actuals?.top_scorer_player) ?? leaders.topScorer?.name ?? null;
-  const topAssistsWinner = orNull(actuals?.top_assists_player) ?? leaders.topAssists?.name ?? null;
+  // Co-king sets (ties share), identical to the per-user scorer's basis. Relative
+  // is awarded to the closest-among-bettors ONLY when nobody caught a king.
+  const scorerKings = kingNames(set(actuals?.top_scorer_player) ? actuals!.top_scorer_player! : null, playerStats, "goals");
+  const assistsKings = kingNames(set(actuals?.top_assists_player) ? actuals!.top_assists_player! : null, playerStats, "assists");
 
   const relativeValue = (
     picks: (string | null)[],
-    winnerName: string | null,
+    kings: string[],
     statKey: "goals" | "assists",
     floor: number,
   ): number | null => {
-    if (!winnerName) return null;
-    // Exact suppresses relative entirely (same name-equality as the per-user scorer).
-    if (picks.some((p) => sameName(p, winnerName))) return null;
+    if (!kings.length) return null;
+    const isKing = (p: string | null) => kings.some((k) => sameName(p, k));
+    // Any bettor holding a co-king suppresses relative entirely.
+    if (picks.some((p) => p != null && isKing(p))) return null;
     let best: number | null = null;
     for (const p of picks) {
-      if (!p || sameName(p, winnerName)) continue;
+      if (!p || isKing(p)) continue;
       const st = findStat(playerStats, p);
       const v = st ? st[statKey] : 0;
       if (v >= floor && (best === null || v > best)) best = v;
@@ -504,13 +474,13 @@ export function computeSpecialBetsPool(
   const relative: SpecialBetsRelative = {
     topScorerGoals: relativeValue(
       allBets.map((b) => b.topScorerPlayer),
-      topScorerWinner,
+      scorerKings,
       "goals",
       scoring.relative_minimums.top_scorer_goals,
     ),
     topAssistsCount: relativeValue(
       allBets.map((b) => b.topAssistsPlayer),
-      topAssistsWinner,
+      assistsKings,
       "assists",
       scoring.relative_minimums.top_assists,
     ),

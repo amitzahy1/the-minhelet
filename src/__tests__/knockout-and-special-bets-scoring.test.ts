@@ -303,6 +303,53 @@ describe("scoreSpecialBetsForUser — live tentative path", () => {
   });
 });
 
+describe("scoreSpecialBetsForUser — co-kings share the crown (ties, no tiebreak)", () => {
+  // Three players TIED at 7 goals — all three are top scorers; the second-place
+  // player (Haaland, 4) is NOT. Different assists/minutes must NOT break the tie.
+  const stats: PlayerStat[] = [
+    { name: "Mbappé", goals: 7, assists: 2, minutes: 300 },
+    { name: "Messi", goals: 7, assists: 0, minutes: 320 },
+    { name: "Erling Haaland", goals: 7, assists: 0, minutes: 300 },
+    { name: "Kane", goals: 4, assists: 1, minutes: 300 },
+  ];
+
+  it("every bettor on a co-leader earns the exact award (interim), regardless of tiebreak stats", () => {
+    for (const pick of ["Mbappé", "Messi", "Erling Haaland"]) {
+      const r = scoreSpecialBetsForUser(baseBet({ topScorerPlayer: pick }), null, stats);
+      expect(r.total, `pick=${pick}`).toBe(SCORING.specials.top_scorer_exact);
+      expect(r.hasInterim).toBe(true);
+    }
+  });
+
+  it("a caught co-king suppresses the relative line pool-wide", () => {
+    const bets = [
+      baseBet({ userId: "a", topScorerPlayer: "Erling Haaland" }), // co-king (7)
+      baseBet({ userId: "b", topScorerPlayer: "Kane" }),           // 4 → would-be relative
+    ];
+    const pool = computeSpecialBetsPool(bets, null, stats);
+    expect(pool.relative.topScorerGoals).toBeNull();
+    expect(scoreSpecialBetsForUser(bets[0], null, stats, SCORING, pool.relative).total).toBe(SCORING.specials.top_scorer_exact);
+    expect(scoreSpecialBetsForUser(bets[1], null, stats, SCORING, pool.relative).total).toBe(0);
+  });
+
+  it("accent/case drift still matches a co-king (Vinícius / Harry kane)", () => {
+    const s: PlayerStat[] = [
+      { name: "Vinicius Junior", goals: 6, assists: 0, minutes: 300 },
+      { name: "Harry Kane", goals: 6, assists: 0, minutes: 300 },
+    ];
+    expect(scoreSpecialBetsForUser(baseBet({ topScorerPlayer: "Vinícius Júnior" }), null, s).total).toBe(SCORING.specials.top_scorer_exact);
+    expect(scoreSpecialBetsForUser(baseBet({ topScorerPlayer: "Harry kane" }), null, s).total).toBe(SCORING.specials.top_scorer_exact);
+  });
+
+  it("final path: a co-scorer the admin didn't type still shares the crown", () => {
+    // Admin entered Mbappé; Messi tied on goals → a Messi pick also scores exact.
+    const actuals: TournamentActuals = { ...noActuals, top_scorer_player: "Mbappé" };
+    const r = scoreSpecialBetsForUser(baseBet({ topScorerPlayer: "Messi" }), actuals, stats);
+    expect(r.total).toBe(SCORING.specials.top_scorer_exact);
+    expect(r.hasInterim).toBe(false);
+  });
+});
+
 describe("computeSpecialBetsPool — closest-among-bettors relative + void status", () => {
   const stats: PlayerStat[] = [
     { name: "Mbappé", goals: 8, assists: 3 },

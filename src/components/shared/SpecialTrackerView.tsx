@@ -237,7 +237,7 @@ const deburrName = (s: string) =>
 function buildRankedRows(opts: {
   bettors: BettorLike[];
   getPick: (b: BettorLike) => string | null;
-  ranked: { key: string; label: ReactNode; sub?: ReactNode; value2?: ReactNode; value?: ReactNode }[];
+  ranked: { key: string; label: ReactNode; sub?: ReactNode; value2?: ReactNode; value?: ReactNode; rankValue?: number }[];
   topN: number;
   actualKey: string | null;
   fuzzy?: boolean;
@@ -250,9 +250,16 @@ function buildRankedRows(opts: {
   // used for the matchup cells, so every name match in this file agrees.
   const eq = (a: string, b: string) =>
     fuzzy ? deburrName(a).includes(deburrName(b)) || deburrName(b).includes(deburrName(a)) : a === b;
+  // Competition ranking when a numeric `rankValue` is supplied: everyone tied at
+  // the top shares rank #1 (WC king has no tiebreak — several co-leaders lead
+  // together, matching how the scorer awards them all the exact points). Falls
+  // back to positional index for lists without a numeric basis.
   const rankOf = (key: string) => {
     const i = ranked.findIndex((r) => eq(r.key, key));
-    return i >= 0 ? i + 1 : null;
+    if (i < 0) return null;
+    const rv = ranked[i].rankValue;
+    if (rv == null) return i + 1;
+    return 1 + ranked.filter((r) => (r.rankValue ?? -Infinity) > rv).length;
   };
   const picks = bettors
     .map((b) => ({ b, pick: getPick(b) }))
@@ -496,12 +503,13 @@ export function SpecialTrackerView({
       </span>
     );
 
+    // rankValue drives tie-aware competition ranking (co-leaders share rank #1).
     const scorerRanked = [...stats.scorers].sort((a, b) => b.goals - a.goals || b.assists - a.assists)
-      .map((s) => ({ key: s.name, label: playerLabel(s.name, s.team), value: `${s.goals}` }));
+      .map((s) => ({ key: s.name, label: playerLabel(s.name, s.team), value: `${s.goals}`, rankValue: s.goals }));
     const assistRanked = [...stats.assistsLeaders].sort((a, b) => b.assists - a.assists || b.goals - a.goals)
-      .map((s) => ({ key: s.name, label: playerLabel(s.name, s.team), value: `${s.assists}` }));
+      .map((s) => ({ key: s.name, label: playerLabel(s.name, s.team), value: `${s.assists}`, rankValue: s.assists }));
     const attackRanked = [...stats.teamStats].sort((a, b) => b.goalsFor - a.goalsFor)
-      .map((t) => ({ key: t.code, label: flagName(t.code), value: `${t.goalsFor}` }));
+      .map((t) => ({ key: t.code, label: flagName(t.code), value: `${t.goalsFor}`, rankValue: t.goalsFor }));
     // Dirtiest: ranked by a weighted score (red counts triple). value2 = the
     // weighted score (headline), value = the yellow/red breakdown. There's no
     // automatic card feed, so the admin maintains `dirtiest_board`; fall back to
@@ -511,14 +519,15 @@ export function SpecialTrackerView({
       ? dirtyBoard.map((r) => ({ code: r.team, yellowCards: r.yellow, redCards: r.red }))
       : stats.teamStats.map((t) => ({ code: t.code, yellowCards: t.yellowCards, redCards: t.redCards }));
     const dirtyRanked = [...dirtySource].sort((a, b) => (b.yellowCards * YEL_W + b.redCards * RED_W) - (a.yellowCards * YEL_W + a.redCards * RED_W))
-      .map((t) => ({ key: t.code, label: flagName(t.code), value2: `${t.yellowCards * YEL_W + t.redCards * RED_W}`, value: cardVal(t.yellowCards, t.redCards) }));
+      .map((t) => ({ key: t.code, label: flagName(t.code), value2: `${t.yellowCards * YEL_W + t.redCards * RED_W}`, value: cardVal(t.yellowCards, t.redCards), rankValue: t.yellowCards * YEL_W + t.redCards * RED_W }));
     const prolificRanked = [...stats.groupStats].sort((a, b) => b.goals - a.goals)
-      .map((g) => ({ key: g.letter, label: `בית ${g.letter}`, sub: groupTeams(g.letter), value: `${g.goals}` }));
+      .map((g) => ({ key: g.letter, label: `בית ${g.letter}`, sub: groupTeams(g.letter), value: `${g.goals}`, rankValue: g.goals }));
+    // Driest = fewest goals ranks first, so negate for competition ranking.
     const driestRanked = [...stats.groupStats].sort((a, b) => a.goals - b.goals)
-      .map((g) => ({ key: g.letter, label: `בית ${g.letter}`, sub: groupTeams(g.letter), value: `${g.goals}` }));
+      .map((g) => ({ key: g.letter, label: `בית ${g.letter}`, sub: groupTeams(g.letter), value: `${g.goals}`, rankValue: -g.goals }));
 
     const sp = scoring.specials;
-    type RankList = { key: string; label: ReactNode; sub?: ReactNode; value2?: ReactNode; value?: ReactNode }[];
+    type RankList = { key: string; label: ReactNode; sub?: ReactNode; value2?: ReactNode; value?: ReactNode; rankValue?: number }[];
     const ranked = (o: {
       title: string; points: string; nameHeader: string; valueHeader?: string; valueHeader2?: string;
       updatedAt: Date | null; getPick: (b: BettorLike) => string | null; list: RankList;

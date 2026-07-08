@@ -109,8 +109,31 @@ export default function ComparePage() {
   const { brackets, specialBets, advancements, currentUserId, loading } = useSharedData();
 
   // Teams eliminated from the real bracket — an eliminated pick can't reach ANY
-  // further stage, so the advancement table greys it out in every row it fills.
-  const { eliminated } = useEliminatedTeams();
+  // FURTHER stage. But each advancement section is judged at its own stage's
+  // point in time: a pick that already REACHED the section's stage banked the
+  // hit, so it keeps its color there even if the team was knocked out later
+  // (BRA reached the R16 → colored under "עולות לשמינית" forever; grey in the
+  // QF+ sections it never reached). Grey = didn't reach AND no longer can.
+  const { eliminated, tree } = useEliminatedTeams();
+  const reachedByStage = useMemo(() => {
+    const stageSet = (stage: "R16" | "QF" | "SF" | "FINAL") => {
+      const out = new Set<string>();
+      for (const s of Object.values(tree ?? {})) {
+        if (s.stage !== stage) continue;
+        if (s.team1) out.add(s.team1);
+        if (s.team2) out.add(s.team2);
+      }
+      return out;
+    };
+    const champion = tree?.final?.winner ?? null;
+    return {
+      r16: stageSet("R16"),
+      quarter: stageSet("QF"),
+      semi: stageSet("SF"),
+      final: stageSet("FINAL"),
+      winner: new Set(champion ? [champion] : []),
+    };
+  }, [tree]);
 
   // Finished matches for the "תוצאות" tab
   const [allMatches, setAllMatches] = useState<MatchApi[]>([]);
@@ -455,6 +478,7 @@ export default function ComparePage() {
             colorMap={advColors}
             highlightTeam={advTeamFilter}
             eliminated={eliminated}
+            reachedByStage={reachedByStage}
             rows={[
               { label: "זוכה", section: "winner" as const, render: (b) => ({ val: b.winner, node: <span className="font-bold text-amber-700">{F[b.winner]} {b.winner}</span> }), highlight: true },
               { label: "גמר 1", section: "final" as const, render: (b) => ({ val: b.finalist1, node: <span className="text-gray-700">{F[b.finalist1]} {b.finalist1}</span> }) },
@@ -789,6 +813,7 @@ function TransposedBetTable({
   colorMap,
   highlightTeam = "",
   eliminated,
+  reachedByStage,
 }: {
   bettors: Bettor[];
   rows: TransposedRow[];
@@ -797,6 +822,10 @@ function TransposedBetTable({
   highlightTeam?: string;
   /** Teams out of the tournament — their cells are greyed (they can't advance). */
   eliminated?: Set<string>;
+  /** Teams that already REACHED each section's stage. A pick that reached the
+   *  stage banked the hit — it stays colored in that section even if the team
+   *  was eliminated later; grey means "didn't reach and no longer can". */
+  reachedByStage?: Partial<Record<NonNullable<TransposedRow["section"]>, Set<string>>>;
 }) {
   return (
     <div className="overflow-x-auto">
@@ -855,9 +884,12 @@ function TransposedBetTable({
                 const { val, node } = row.render(b);
                 const isHit = highlightTeam !== "" && val === highlightTeam;
                 const isDim = highlightTeam !== "" && val !== highlightTeam;
-                // Eliminated pick → neutral grey, muted: it can't reach this (or
-                // any later) stage. Overrides the per-team pick colour.
-                const isElim = !!val && !!eliminated?.has(val);
+                // Grey = the pick did NOT reach this row's stage and no longer
+                // can. A pick that already reached the stage BANKED the hit, so
+                // it keeps its color here even if the team was eliminated in a
+                // later round — each section reflects its own point in time.
+                const banked = !!val && !!row.section && !!reachedByStage?.[row.section]?.has(val);
+                const isElim = !!val && !banked && !!eliminated?.has(val);
                 return (
                   <td
                     key={b.name}

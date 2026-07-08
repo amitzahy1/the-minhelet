@@ -512,6 +512,97 @@ export function findKickoffForSlot(
   return { date: m.date, status: m.status ?? null };
 }
 
+// FD/app stage labels → the slot tree's stage buckets (THIRD_PLACE excluded —
+// it has no slot).
+const FIXTURE_STAGE_TO_SLOT_STAGE: Record<string, SlotState["stage"]> = {
+  LAST_32: "R32", ROUND_OF_32: "R32", R32: "R32",
+  LAST_16: "R16", ROUND_OF_16: "R16", R16: "R16",
+  QUARTER_FINALS: "QF", QF: "QF",
+  SEMI_FINALS: "SF", SF: "SF",
+  FINAL: "FINAL",
+};
+
+/** Minimal mutable fixture shape (matches /api/matches' Match). */
+export interface FillableKoFixture {
+  stage?: string | null;
+  homeTla: string;
+  awayTla: string;
+  homeTeam?: string;
+  awayTeam?: string;
+}
+
+/**
+ * Fill TBD sides of knockout FIXTURES from the resolved bracket TREE, so the
+ * schedule (and everything downstream of it: kickoff lookup → prediction-lock
+ * rows → saveability of picks) shows the real matchup even when the feed
+ * hasn't assigned the teams. Real case (2026-07-08): FD published the SUI–COL
+ * R16 shootout with winner:null, so FD ALSO left the ARG–SUI QF fixture as
+ * TBD-vs-TBD — while our tree (via koWinnerFromScore) already knew both teams.
+ *
+ * Per stage: fixtures already carrying both teams anchor to their slot by team
+ * pair; a fixture with ONE known side fills from the resolved slot containing
+ * that team; fully-TBD fixtures are filled only when exactly one of them and
+ * exactly one unconsumed resolved slot remain (any wider mapping would be a
+ * guess). Mutates `fixtures` in place; returns the number of fixtures filled.
+ */
+export function fillKnockoutFixturesFromTree(
+  fixtures: FillableKoFixture[],
+  tree: Record<KoSlotKey, SlotState>,
+): number {
+  const isTbd = (t: string | null | undefined) => !t || t === "TBD";
+  const pairEq = (s: SlotState, a: string, b: string) =>
+    (s.team1 === a && s.team2 === b) || (s.team1 === b && s.team2 === a);
+  const setSide = (f: FillableKoFixture, side: "home" | "away", code: string) => {
+    if (side === "home") { f.homeTla = code; f.homeTeam = code; }
+    else { f.awayTla = code; f.awayTeam = code; }
+  };
+
+  let filled = 0;
+  const stages: SlotState["stage"][] = ["R32", "R16", "QF", "SF", "FINAL"];
+  for (const stage of stages) {
+    const remaining = KO_SLOT_KEYS
+      .map((k) => tree[k])
+      .filter((s) => s && s.stage === stage && s.team1 && s.team2);
+    const fx = fixtures.filter(
+      (f) => FIXTURE_STAGE_TO_SLOT_STAGE[(f.stage || "").toUpperCase()] === stage,
+    );
+
+    // Pass 1 — fixtures with both teams anchor (consume) their slot.
+    const pending: FillableKoFixture[] = [];
+    for (const f of fx) {
+      if (!isTbd(f.homeTla) && !isTbd(f.awayTla)) {
+        const i = remaining.findIndex((s) => pairEq(s, f.homeTla, f.awayTla));
+        if (i >= 0) remaining.splice(i, 1);
+      } else {
+        pending.push(f);
+      }
+    }
+
+    // Pass 2 — one known side: its slot names the opponent.
+    const fullyTbd: FillableKoFixture[] = [];
+    for (const f of pending) {
+      const known = !isTbd(f.homeTla) ? f.homeTla : !isTbd(f.awayTla) ? f.awayTla : null;
+      if (!known) { fullyTbd.push(f); continue; }
+      const i = remaining.findIndex((s) => s.team1 === known || s.team2 === known);
+      if (i < 0) continue;
+      const s = remaining.splice(i, 1)[0];
+      const opp = (s.team1 === known ? s.team2 : s.team1) as string;
+      setSide(f, isTbd(f.homeTla) ? "home" : "away", opp);
+      filled++;
+    }
+
+    // Pass 3 — fully TBD: only the unambiguous one-fixture-one-slot case.
+    if (fullyTbd.length === 1 && remaining.length === 1) {
+      const [f] = fullyTbd;
+      const [s] = remaining;
+      setSide(f, "home", s.team1 as string);
+      setSide(f, "away", s.team2 as string);
+      filled++;
+    }
+  }
+  return filled;
+}
+
 /**
  * Separate path for the third-place play-off. The bracket tree doesn't have
  * a slot for it (it's outside the main knockout chain), but users can predict

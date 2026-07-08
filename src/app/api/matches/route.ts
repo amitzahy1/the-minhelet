@@ -4,8 +4,8 @@ import fdMatchDetailsBundled from "@/lib/tournament/fd-match-details.json";
 import { toAppCode, findUnmappedTeams } from "@/lib/fd-team-mapping";
 import { buildResultRows, syncCardBoard, reconcileFinishedRows } from "@/lib/sync-results";
 import { getEspnResults } from "@/lib/api-espn";
-import { ninetyMinuteScore, type MatchResult } from "@/lib/api-football-data";
-import { resolveKnockoutTree, type KoSlotKey } from "@/lib/scoring/knockout-resolver";
+import { ninetyMinuteScore, koWinnerFromScore, decisivePenalties, type MatchResult } from "@/lib/api-football-data";
+import { resolveKnockoutTree, fillKnockoutFixturesFromTree } from "@/lib/scoring/knockout-resolver";
 import { LIVE_FEEDERS } from "@/lib/tournament/knockout-derivation";
 import { normalizeTla, normalizeGroupLetter, type FinishedMatch } from "@/lib/results-hits";
 import { computePredictionLockRows, type LockSyncMatch } from "@/lib/scoring/compute-prediction-locks";
@@ -186,9 +186,12 @@ export async function GET() {
       // shootout never enter the scoreline; they decide `winner`.
       homeGoals: demo?.home_goals ?? reg.home,
       awayGoals: demo?.away_goals ?? reg.away,
-      homePenalties: demo?.home_penalties ?? m.score?.penalties?.home ?? null,
-      awayPenalties: demo?.away_penalties ?? m.score?.penalties?.away ?? null,
-      winner: m.score?.winner ?? null,
+      homePenalties: demo?.home_penalties ?? decisivePenalties(m.score).home,
+      awayPenalties: demo?.away_penalties ?? decisivePenalties(m.score).away,
+      // koWinnerFromScore survives FD leaving `winner` null on a decided
+      // shootout (fullTime aggregates the pens, so a decisive fullTime tells
+      // us the qualifier) — without it the next KO round never resolves.
+      winner: koWinnerFromScore(m.score, demo?.status ?? m.status),
       venue: detailFor(m.id, dynamicDetails)?.venue ?? null,
       referees: detailFor(m.id, dynamicDetails)?.referees ?? [],
     });
@@ -223,7 +226,7 @@ export async function GET() {
   //    resolve the real bracket from finished group results. Overlay the
   //    resolved opponent so the schedule shows the true matchup (e.g. "Germany
   //    vs Paraguay") instead of "Germany vs TBD".
-  fillKnockoutOpponents(merged, ourResults ?? []);
+  fillKnockoutOpponents(merged);
 
   // Loud identity guard: any real (non-TBD) team whose code the app doesn't
   // recognise means a missing TLA alias — the bug that scrambled the matchday
@@ -269,50 +272,35 @@ export async function GET() {
 }
 
 /**
- * Fill the best-third opponent FD leaves as "TBD" on R32 fixtures, using the
- * real bracket resolved from finished group results. ONLY R32 fixtures with
- * exactly one known team (the group-winner side) are filled; later rounds keep
- * their TBD until the feeding matches are played — you bet one stage at a time
- * on the match that actually exists. Never throws — a resolution hiccup must
- * not blank the schedule.
+ * Fill TBD sides of knockout fixtures from the real bracket, resolved from ALL
+ * finished results (groups seed R32; KO winners — incl. the synthesized
+ * shootout winner — seed each later round). R32 best-third opponents, and any
+ * later-round fixture the feed left TBD even though our tree already knows the
+ * teams (the SUI–COL winner:null case blanked the ARG QF fixture), are filled
+ * so the schedule, kickoff lookup and prediction locks always reflect the true
+ * matchup. Never throws — a resolution hiccup must not blank the schedule.
  */
-function fillKnockoutOpponents(merged: Match[], ourResults: DemoResult[]): void {
+function fillKnockoutOpponents(merged: Match[]): void {
   try {
-    const finishedGroup: FinishedMatch[] = [];
-    let idc = 1;
-    for (const r of ourResults) {
-      const isGroup = r.stage === "GROUP" || r.stage === "GROUP_STAGE";
-      if (!isGroup || r.status !== "FINISHED") continue;
-      if (r.home_goals == null || r.away_goals == null || !r.home_team || !r.away_team) continue;
-      finishedGroup.push({
-        id: idc++, date: r.scheduled_at || "",
-        homeTla: normalizeTla(r.home_team), awayTla: normalizeTla(r.away_team),
-        group: normalizeGroupLetter(r.group_id) || (r.group_id || "").toUpperCase(), stage: "GROUP",
-        homeGoals: r.home_goals, awayGoals: r.away_goals,
-        homePenalties: r.home_penalties, awayPenalties: r.away_penalties,
+    const finished: FinishedMatch[] = [];
+    for (const m of merged) {
+      if (m.status !== "FINISHED" || m.homeGoals == null || m.awayGoals == null) continue;
+      if (!m.homeTla || m.homeTla === "TBD" || !m.awayTla || m.awayTla === "TBD") continue;
+      finished.push({
+        id: m.id, date: m.date,
+        homeTla: normalizeTla(m.homeTla), awayTla: normalizeTla(m.awayTla),
+        group: normalizeGroupLetter(m.group), stage: m.stage || "",
+        homeGoals: m.homeGoals, awayGoals: m.awayGoals,
+        homePenalties: m.homePenalties ?? null, awayPenalties: m.awayPenalties ?? null,
+        winner: m.winner ?? null,
       });
     }
-    // Resolve R32 only once the whole group stage is in — a partial set would
+    // Resolve only once the whole group stage is in — a partial set would
     // mis-seed the best-thirds and show a wrong opponent.
-    if (finishedGroup.length < 72) return;
-    const tree = resolveKnockoutTree(finishedGroup, null, undefined, LIVE_FEEDERS);
-    const oppByTeam: Record<string, string> = {};
-    for (const k of Object.keys(tree)) {
-      if (!k.startsWith("r32")) continue;
-      const s = tree[k as KoSlotKey];
-      if (s.team1 && s.team2) { oppByTeam[s.team1] = s.team2; oppByTeam[s.team2] = s.team1; }
-    }
-    for (const m of merged) {
-      if (m.stage !== "LAST_32" && m.stage !== "ROUND_OF_32") continue;
-      const homeTBD = !m.homeTla || m.homeTla === "TBD";
-      const awayTBD = !m.awayTla || m.awayTla === "TBD";
-      if (homeTBD === awayTBD) continue; // need exactly one resolved side
-      const known = homeTBD ? m.awayTla : m.homeTla;
-      const opp = oppByTeam[known];
-      if (!opp) continue;
-      if (homeTBD) { m.homeTla = opp; m.homeTeam = opp; }
-      else { m.awayTla = opp; m.awayTeam = opp; }
-    }
+    const groupCount = finished.filter((f) => (f.stage || "").toUpperCase().includes("GROUP")).length;
+    if (groupCount < 72) return;
+    const tree = resolveKnockoutTree(finished, null, undefined, LIVE_FEEDERS);
+    fillKnockoutFixturesFromTree(merged, tree);
   } catch { /* never block the schedule on a resolution hiccup */ }
 }
 

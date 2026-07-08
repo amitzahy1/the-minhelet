@@ -21,6 +21,7 @@ import {
   type PlayerScore,
 } from "@/lib/scoring/live-scorer";
 import { normalizeGroupLetter, type FinishedMatch } from "@/lib/results-hits";
+import { koWinnerFromScore, decisivePenalties } from "@/lib/api-football-data";
 import { toAppCode } from "@/lib/fd-team-mapping";
 import type { BettorBracket, BettorAdvancement, BettorSpecialBets } from "@/lib/supabase/shared-data";
 import type { TournamentActuals, PlayerStat } from "@/lib/scoring/special-bets-scorer";
@@ -104,9 +105,10 @@ async function loadFinishedMatches(): Promise<FinishedMatch[]> {
       stage: m.stage || "GROUP_STAGE",
       homeGoals,
       awayGoals,
-      homePenalties: demo?.home_penalties ?? m.score?.penalties?.home ?? null,
-      awayPenalties: demo?.away_penalties ?? m.score?.penalties?.away ?? null,
-      winner: m.score?.winner ?? null,
+      homePenalties: demo?.home_penalties ?? decisivePenalties(m.score).home,
+      awayPenalties: demo?.away_penalties ?? decisivePenalties(m.score).away,
+      // Survives FD's winner:null on a decided shootout (see koWinnerFromScore).
+      winner: koWinnerFromScore(m.score, status),
     });
   }
   return finished;

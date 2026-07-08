@@ -40,6 +40,7 @@ async function fetchAPI(endpoint: string, opts?: { fresh?: boolean }) {
 // ============================================================================
 
 type ScoreLike = {
+  winner?: "HOME_TEAM" | "AWAY_TEAM" | "DRAW" | null;
   fullTime?: { home?: number | null; away?: number | null };
   regularTime?: { home?: number | null; away?: number | null };
   extraTime?: { home?: number | null; away?: number | null };
@@ -72,6 +73,42 @@ export function ninetyMinuteScore(score: ScoreLike): { home: number | null; away
   const pkH = score?.penalties?.home ?? 0;
   const pkA = score?.penalties?.away ?? 0;
   return { home: ft.home - etH - pkH, away: ft.away - etA - pkA };
+}
+
+/**
+ * True qualifier of a FINISHED match, surviving FD free-tier garbage.
+ *
+ * FD's `score.winner` is the authoritative signal, but the free tier can leave
+ * it NULL on a decided match (seen live 2026-07-07, SUI–COL R16: winner null +
+ * penalties 3–3 — a shootout can't tie — while fullTime held the real 4–3).
+ * Without a winner the resolver can't advance the qualifier, the next round's
+ * slot never resolves, advancement points go missing and the slot gets no lock
+ * row (unsaveable picks). Since `fullTime` AGGREGATES ET + shootout goals, a
+ * decisive fullTime on a FINISHED match identifies the winner even when both
+ * `winner` and `penalties` are broken.
+ */
+export function koWinnerFromScore(
+  score: ScoreLike,
+  status: string | null | undefined,
+): "HOME_TEAM" | "AWAY_TEAM" | "DRAW" | null {
+  if (score?.winner) return score.winner;
+  if (status !== "FINISHED") return null;
+  const ft = score?.fullTime;
+  if (ft?.home == null || ft?.away == null || ft.home === ft.away) return null;
+  return ft.home > ft.away ? "HOME_TEAM" : "AWAY_TEAM";
+}
+
+/**
+ * Shootout score, dropping feed garbage. A FINISHED shootout can never be tied,
+ * so equal non-null penalties (the SUI–COL 3–3 above) are a mid-publish
+ * artifact — return nulls rather than persist/serve them.
+ */
+export function decisivePenalties(
+  score: ScoreLike,
+): { home: number | null; away: number | null } {
+  const p = score?.penalties;
+  if (p?.home == null || p?.away == null || p.home === p.away) return { home: null, away: null };
+  return { home: p.home, away: p.away };
 }
 
 // ============================================================================
@@ -235,10 +272,10 @@ export async function syncMatchResults() {
         // `regularTime ?? fullTime` mis-reads an ET-decided match.
         homeGoals: ninetyMinuteScore(m.score).home,
         awayGoals: ninetyMinuteScore(m.score).away,
-        homePenalties: m.score.penalties?.home ?? null,
-        awayPenalties: m.score.penalties?.away ?? null,
+        homePenalties: decisivePenalties(m.score).home,
+        awayPenalties: decisivePenalties(m.score).away,
         // True qualifier (incl. ET + shootout) — used for KO advancement, not goals.
-        winner: m.score.winner,
+        winner: koWinnerFromScore(m.score, m.status),
         status: m.status,
         date: m.utcDate,
         stage: m.stage,

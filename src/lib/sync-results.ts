@@ -7,7 +7,7 @@
 // with no score.
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { ninetyMinuteScore, type MatchResult } from "@/lib/api-football-data";
+import { ninetyMinuteScore, decisivePenalties, type MatchResult } from "@/lib/api-football-data";
 import { toAppCode } from "@/lib/fd-team-mapping";
 import { normalizeGroupLetter } from "@/lib/results-hits";
 import { getTsdbCardBoard } from "@/lib/api-thesportsdb";
@@ -68,9 +68,11 @@ export function buildResultRows(matches: MatchResult[], enteredBy: string): Demo
       away_goals: awayGoals,
       // Shootout score (knockouts decided on penalties) — kept separate from
       // goals so it never pollutes the 90' scoreline; the resolver uses it +
-      // `winner` to advance the real qualifier.
-      home_penalties: m.score?.penalties?.home ?? null,
-      away_penalties: m.score?.penalties?.away ?? null,
+      // `winner` to advance the real qualifier. decisivePenalties drops a TIED
+      // pens pair (feed garbage — a decided shootout can't tie): persisting it
+      // would freeze the garbage in the DB, shadowing FD's later correction.
+      home_penalties: decisivePenalties(m.score).home,
+      away_penalties: decisivePenalties(m.score).away,
       status: "FINISHED",
       scheduled_at: m.utcDate ?? null,
       entered_by: enteredBy,

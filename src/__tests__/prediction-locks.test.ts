@@ -59,7 +59,7 @@ describe("computePredictionLockRows — group reveal", () => {
 });
 
 describe("computePredictionLockRows — knockout reveal", () => {
-  it("locks the third-place play-off 30 min before its kickoff", () => {
+  it("gives the third-place play-off NO lock row (it isn't bettable)", () => {
     const rows = computePredictionLockRows([
       {
         id: 99,
@@ -71,9 +71,7 @@ describe("computePredictionLockRows — knockout reveal", () => {
         status: "SCHEDULED",
       },
     ]);
-    const tp = rows.find((r) => r.lock_key === "third_place");
-    expect(tp?.scope).toBe("ko");
-    expect(tp?.lock_at).toBe("2026-07-18T18:30:00.000Z");
+    expect(rows.find((r) => r.lock_key === "third_place")).toBeUndefined();
   });
 
   // Regression (2026-07-02): an R32 won in EXTRA TIME with NO shootout has a 90'

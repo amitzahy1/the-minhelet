@@ -86,7 +86,6 @@ const initialKnockoutTree: KnockoutTree = {
   r16: [],
   qf: [],
   sf: [],
-  third_place: null,
   final: null,
 };
 
@@ -228,9 +227,7 @@ export const useBracketStore = create<BracketState & BracketActions>()(
     // Knockout
     setKnockoutMatchResult: (stage, matchIndex, prediction) =>
       set((state) => {
-        if (stage === "third_place") {
-          state.knockoutTree.third_place = prediction;
-        } else if (stage === "final") {
+        if (stage === "final") {
           state.knockoutTree.final = prediction;
           state.champion = prediction.winner_code;
         } else {
@@ -275,8 +272,7 @@ export const useBracketStore = create<BracketState & BracketActions>()(
           state.knockoutTree.r16.length === 8 &&
           state.knockoutTree.qf.length === 4 &&
           state.knockoutTree.sf.length === 2 &&
-          state.knockoutTree.final !== null &&
-          state.knockoutTree.third_place !== null,
+          state.knockoutTree.final !== null,
         isFullyComplete:
           validGroups === 12 &&
           state.thirdPlaceQualifiers.length === 8 &&

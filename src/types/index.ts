@@ -150,7 +150,6 @@ export interface KnockoutTree {
   r16: KnockoutMatchPrediction[];
   qf: KnockoutMatchPrediction[];
   sf: KnockoutMatchPrediction[];
-  third_place: KnockoutMatchPrediction | null;
   final: KnockoutMatchPrediction | null;
 }
 

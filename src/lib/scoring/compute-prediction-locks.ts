@@ -48,7 +48,7 @@ export interface LockSyncMatch {
 
 export interface PredictionLockRow {
   scope: "group" | "ko";
-  /** group: `${letter}:${pairIdx}` (e.g. "A:0"); ko: slot key or "third_place". */
+  /** group: `${letter}:${pairIdx}` (e.g. "A:0"); ko: bracket slot key. */
   lock_key: string;
   match_id: string | null;
   kickoff: string | null;
@@ -122,19 +122,8 @@ export function computePredictionLockRows(
     const ko = findKickoffForSlot(key, tree, schedule);
     rows.push({ scope: "ko", lock_key: key, match_id: null, kickoff: ko?.date ?? null, lock_at: lockAt });
   }
-
-  // Third-place play-off (separate from the main slot tree): its match carries a
-  // fixed date in the schedule, so lock it directly 30 min before kickoff.
-  const third = matches.find((m) => (m.stage || "").toUpperCase().startsWith("THIRD"));
-  if (third?.date) {
-    rows.push({
-      scope: "ko",
-      lock_key: "third_place",
-      match_id: third.id != null ? String(third.id) : null,
-      kickoff: third.date,
-      lock_at: new Date(new Date(third.date).getTime() - KO_LOCK_BEFORE_MIN * 60_000).toISOString(),
-    });
-  }
+  // NOTE: the third-place play-off gets NO lock row — it isn't bettable (no slot
+  // in the prediction tree), so there's nothing to gate or reveal for it.
 
   return rows;
 }

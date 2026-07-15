@@ -13,7 +13,6 @@ import { matchDayKey } from "../tournament/group-live-state";
 import {
   resolveKnockoutTree,
   computeGroupOrders,
-  findThirdPlaceMatch,
   fairPlayFromBoard,
   KO_SLOT_KEYS,
   type SlotState,
@@ -132,7 +131,6 @@ function stageForSlot(key: string): MatchStage {
   if (key.startsWith("r16")) return "R16";
   if (key.startsWith("qf")) return "QF";
   if (key.startsWith("sf")) return "SF";
-  if (key === "third_place" || key === "third") return "THIRD";
   return "FINAL";
 }
 
@@ -271,7 +269,6 @@ export function computeLiveScores(
   // Uses LIVE_FEEDERS (the official FIFA bracket) so each slot maps to the real
   // R16→Final matchup — NOT the legacy LATER_FEEDERS used by advancement below.
   const liveTree = resolveKnockoutTree(matchResults, options.bestThirdsOverride ?? null, fairPlay, LIVE_FEEDERS);
-  const thirdPlace = findThirdPlaceMatch(matchResults);
 
   for (const slot of Object.values(liveTree)) {
     if (slot.score1 === null || slot.score2 === null || !slot.team1 || !slot.team2) continue;
@@ -307,36 +304,9 @@ export function computeLiveScores(
     }
   }
 
-  // Third-place play-off — scored separately (not part of the bracket tree).
-  if (thirdPlace) {
-    const stage: MatchStage = "THIRD";
-    const actualDraw = thirdPlace.score1 === thirdPlace.score2;
-    const penaltyWinner = actualDraw ? thirdPlace.winner : null;
-    for (const b of brackets) {
-      const pick = knockoutPick(b, "third_place");
-      if (!pick) continue;
-      const score = byUser[b.userId];
-      if (!score) continue;
-      score.totalFinished += 1;
-      const result = calculateKnockoutScore(
-        stage,
-        {
-          homeGoals: thirdPlace.score1,
-          awayGoals: thirdPlace.score2,
-          penaltyWinner,
-          team1: thirdPlace.team1,
-          team2: thirdPlace.team2,
-        },
-        pick,
-        scoring,
-      );
-      if (result.toto > 0) score.totoHits += 1;
-      if (result.exact > 0) score.exactHits += 1;
-      else if (result.toto === 0) score.missHits += 1;
-      score.totoKnockout += result.toto;
-      score.exactKnockout += result.exact;
-    }
-  }
+  // NOTE: the third-place play-off is intentionally NOT scored here. It is not
+  // part of the prediction tree (no bettable slot) — it exists only so its
+  // goals/assists/cards feed the special bets. See src/app/(app)/rules/page.tsx.
 
   // -------- Advancement scoring (FINISHED-only — never moves live) --------
   // Resolve who advances / the bracket / champion from the FINISHED `matches`

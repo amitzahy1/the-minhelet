@@ -487,21 +487,13 @@ export interface ScheduleMatch {
  * (default 30 → 30 min before kickoff); the slot reveals to opponents at`date`.
  */
 export function findKickoffForSlot(
-  slotKey: KoSlotKey | "third_place",
+  slotKey: KoSlotKey,
   tree: Record<KoSlotKey, SlotState>,
   schedule: ScheduleMatch[],
-  thirdPlaceTeams?: { team1: string | null; team2: string | null } | null,
 ): { date: string; status: string | null } | null {
-  let team1: string | null = null;
-  let team2: string | null = null;
-  if (slotKey === "third_place") {
-    team1 = thirdPlaceTeams?.team1 ?? null;
-    team2 = thirdPlaceTeams?.team2 ?? null;
-  } else {
-    const slot = tree[slotKey];
-    team1 = slot?.team1 ?? null;
-    team2 = slot?.team2 ?? null;
-  }
+  const slot = tree[slotKey];
+  const team1: string | null = slot?.team1 ?? null;
+  const team2: string | null = slot?.team2 ?? null;
   if (!team1 || !team2) return null;
   const m = schedule.find(
     (x) =>
@@ -601,32 +593,4 @@ export function fillKnockoutFixturesFromTree(
     }
   }
   return filled;
-}
-
-/**
- * Separate path for the third-place play-off. The bracket tree doesn't have
- * a slot for it (it's outside the main knockout chain), but users can predict
- * it via a dedicated `third_place` key in `knockoutTree`. Look up the actual
- * THIRD_PLACE match if present.
- */
-export function findThirdPlaceMatch(
-  matches: FinishedMatch[],
-): { score1: number; score2: number; winner: string | null; team1: string; team2: string } | null {
-  const m = matches.find(
-    (x) => x.stage === "THIRD_PLACE" || x.stage === "THIRD",
-  );
-  if (!m) return null;
-  let winner: string | null = null;
-  if (m.homeGoals > m.awayGoals) winner = m.homeTla;
-  else if (m.awayGoals > m.homeGoals) winner = m.awayTla;
-  else if (m.homePenalties != null && m.awayPenalties != null && m.homePenalties !== m.awayPenalties) {
-    winner = m.homePenalties > m.awayPenalties ? m.homeTla : m.awayTla;
-  }
-  return {
-    team1: m.homeTla,
-    team2: m.awayTla,
-    score1: m.homeGoals,
-    score2: m.awayGoals,
-    winner,
-  };
 }

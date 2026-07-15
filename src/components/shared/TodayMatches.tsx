@@ -526,6 +526,20 @@ export function TodayMatches() {
                     on the home page has a bet action. mt-auto + min-h match the
                     group footer so all cards keep equal height (mobile + desktop). */}
                 {!groupLetter && (() => {
+                  // The 3rd-place play-off is deliberately NOT bettable (see the
+                  // rules page): it has no slot in the bracket tree. It only
+                  // appears here so its goals/assists/cards feed the special
+                  // bets. Show that instead of a bet CTA.
+                  const isThirdPlace = (m.stage || "").toUpperCase().startsWith("THIRD");
+                  if (isThirdPlace) {
+                    return (
+                      <div className="mt-auto pt-2 flex items-center justify-center min-h-[28px]">
+                        <span className="text-[9px] font-medium text-gray-400 leading-tight text-center">
+                          🥉 לא מהמרים · נספר להימורים המיוחדים
+                        </span>
+                      </div>
+                    );
+                  }
                   const isReal = !!m.homeTla && !!m.awayTla && m.homeTla !== "TBD" && m.awayTla !== "TBD";
                   const editable = !isFinished && !isLive && isReal;
                   // The viewer's OWN real-tree pick: map fixture → slot → store,
@@ -743,6 +757,16 @@ export function TodayMatches() {
                               advanced. Source is the lock-redacted /api/shared-bets, so a
                               slot's picks appear only once it has LOCKED. Stage-generic. */}
                           {!groupLetter && (() => {
+                            // 3rd-place play-off: not bettable. Don't offer a
+                            // score/advancement list or an "no bets" prompt — its
+                            // relevance is the special bets shown above.
+                            if ((m.stage || "").toUpperCase().startsWith("THIRD")) {
+                              return (
+                                <p className="text-[11px] text-gray-400 text-center py-1">
+                                  🥉 על משחק המקום ה-3 לא מהמרים — השערים, הבישולים והכרטיסים שבו נספרים להימורים המיוחדים בלבד
+                                </p>
+                              );
+                            }
                             const slot = koSlotByPair.get(pairKey(m.homeTla, m.awayTla));
                             if (!slot) return null;
                             const koActual = (isLive || isFinished) && m.homeGoals !== null && m.awayGoals !== null

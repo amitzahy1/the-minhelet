@@ -107,6 +107,14 @@ export type SpecialCatStatus = "won" | "void" | "pending";
 export interface SpecialBetsPool {
   relative: SpecialBetsRelative;
   status: Record<SpecialCategory, SpecialCatStatus>;
+  /**
+   * Whether each category's FINAL actual is entered — i.e. the bet is truly
+   * locked and can no longer change. Distinct from `status: "won"`, which for
+   * top scorer / top assists only means someone is CURRENTLY (interim) catching
+   * it. Displays use this to decide "🔒 נסגר" vs "⏱ זמני" for a bettor who has
+   * no line in the category (so no per-line `interim` flag to read).
+   */
+  resolved: Record<SpecialCategory, boolean>;
 }
 
 /** Map a special-bet score reason to its breakdown category (null = not special). */
@@ -530,5 +538,5 @@ export function computeSpecialBetsPool(
     }
   }
 
-  return { relative, status };
+  return { relative, status, resolved };
 }

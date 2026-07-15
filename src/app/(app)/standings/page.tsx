@@ -240,7 +240,7 @@ const SPECIAL_ROWS: [string, SpecialCategory][] = [
 ];
 
 // Tooltip — mobile: bottom sheet with close button, desktop: hover popup
-function PlayerTooltip({ player, specStatus, visible, onClose }: { player: PlayerRow & { specHasInterim?: boolean }; specStatus: Record<SpecialCategory, SpecialCatStatus>; visible: boolean; onClose: () => void }) {
+function PlayerTooltip({ player, specStatus, specResolved, visible, onClose }: { player: PlayerRow & { specHasInterim?: boolean }; specStatus: Record<SpecialCategory, SpecialCatStatus>; specResolved: Record<SpecialCategory, boolean>; visible: boolean; onClose: () => void }) {
   if (!visible) return null;
   const b = player.breakdown;
   return (
@@ -300,9 +300,13 @@ function PlayerTooltip({ player, specStatus, visible, onClose }: { player: Playe
               // DECIDED = the bet is locked and can no longer change (group bets
               // after the group stage, any bet whose actual is in). TENTATIVE =
               // still in play (e.g. top scorer mid-tournament). interim is the
-              // authoritative per-line signal; fall back to the pool status.
-              const decided = interim === false || (interim === undefined && (st === "won" || st === "void"));
-              const tentative = interim === true || (interim === undefined && st === "pending");
+              // authoritative per-line signal; for a bettor with NO line, fall
+              // back to whether the category's FINAL actual is in (resolved) —
+              // NOT status "won", which for top scorer/assists only means
+              // someone is CURRENTLY leading it (still changeable until the end).
+              const resolved = specResolved[cat];
+              const decided = interim === false || (interim === undefined && resolved);
+              const tentative = interim === true || (interim === undefined && !resolved);
               return (
                 <Fragment key={cat}>
                   <span className="text-gray-500 flex flex-wrap items-center gap-1">
@@ -929,7 +933,7 @@ export default function StandingsPage() {
                 {p.isYou && <span className="text-xs text-blue-500 ms-1.5 bg-blue-100 rounded px-1.5 py-0.5 font-bold">אתה</span>}
                 {p.id === lifterId && <span className="text-xs text-amber-700 ms-1.5 bg-amber-100 border border-amber-200 rounded px-1.5 py-0.5 font-bold whitespace-nowrap">🏆 מניף</span>}
                 {p.id === sheepId && <span className="text-xs text-gray-600 ms-1.5 bg-gray-100 border border-gray-200 rounded px-1.5 py-0.5 font-bold whitespace-nowrap">🐑 הכבש?</span>}
-                <PlayerTooltip player={p} specStatus={specPool.status} visible={hoveredPlayer === p.id} onClose={() => setHoveredPlayer(null)} />
+                <PlayerTooltip player={p} specStatus={specPool.status} specResolved={specPool.resolved} visible={hoveredPlayer === p.id} onClose={() => setHoveredPlayer(null)} />
               </div>
               {/* Desktop: show all 3 + sparkline */}
               <span className={`w-14 text-center text-sm font-medium hidden sm:block ${activeTab === "matchPts" ? "text-blue-600 font-bold" : "text-gray-600"}`} style={{ fontFamily: "var(--font-inter)" }}>{p.matchPts}</span>

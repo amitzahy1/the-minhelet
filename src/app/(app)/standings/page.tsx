@@ -426,6 +426,9 @@ export default function StandingsPage() {
   // feeds the advancement + special-bet scoring paths.
   const [tournamentActuals, setTournamentActuals] = useState<import("@/lib/scoring/special-bets-scorer").TournamentActuals | null>(null);
   const [playerStats, setPlayerStats] = useState<import("@/lib/scoring/special-bets-scorer").PlayerStat[]>([]);
+  // 120'-aware goals-for per team (regulation + ET, excl. shootout) — the
+  // best-attack special bet counts the full match, not just 90'.
+  const [teamGoals120, setTeamGoals120] = useState<Record<string, number>>({});
   const [bestThirdsOverride, setBestThirdsOverride] = useState<string[] | null>(null);
   const loadScoringData = useCallback(async (aliveRef?: { current: boolean }) => {
     const alive = () => aliveRef?.current !== false;
@@ -494,6 +497,15 @@ export default function StandingsPage() {
               minutes: s.played ?? 0,
             }))
           );
+        }
+        // teamStats.goalsFor is the 120' tally (regulation + ET, excl. shootout)
+        // — feeds the best-attack live-tentative leader so it matches the tracker.
+        if (Array.isArray(statsRes?.teamStats)) {
+          const tg: Record<string, number> = {};
+          for (const t of statsRes.teamStats as { code: string; goalsFor?: number }[]) {
+            tg[t.code] = t.goalsFor ?? 0;
+          }
+          setTeamGoals120(tg);
         }
         const override = thirdsRes?.override;
         setBestThirdsOverride(Array.isArray(override) && override.length === 8 ? override : null);
@@ -594,11 +606,12 @@ export default function StandingsPage() {
       specialBets,
       tournamentActuals,
       playerStats,
+      teamGoals120,
       bestThirdsOverride,
       scoring,
       liveMatches,
     }),
-    [brackets, finishedMatches, liveMatches, advancements, specialBets, tournamentActuals, playerStats, bestThirdsOverride, scoring]
+    [brackets, finishedMatches, liveMatches, advancements, specialBets, tournamentActuals, playerStats, teamGoals120, bestThirdsOverride, scoring]
   );
   const todayScores = useMemo(
     () => computeTodayScores(brackets, liveMatches, scoring),
@@ -627,9 +640,9 @@ export default function StandingsPage() {
   // match points. Identical to liveScores whenever nothing is live (delta 0).
   const finishedScores = useMemo(
     () => computeLiveScores(brackets, finishedMatches, {
-      advancements, specialBets, tournamentActuals, playerStats, bestThirdsOverride, scoring,
+      advancements, specialBets, tournamentActuals, playerStats, teamGoals120, bestThirdsOverride, scoring,
     }),
-    [brackets, finishedMatches, advancements, specialBets, tournamentActuals, playerStats, bestThirdsOverride, scoring]
+    [brackets, finishedMatches, advancements, specialBets, tournamentActuals, playerStats, teamGoals120, bestThirdsOverride, scoring]
   );
   // RANK trajectory per bettor — drives the "מגמה" sparkline. Cumulative points
   // are monotonic and look identical for everyone; rank moves up/down so each
@@ -647,8 +660,8 @@ export default function StandingsPage() {
   // Pool-level special-bets status (won / void / pending per category) — shared
   // by every bettor's breakdown modal to label bets nobody caught.
   const specPool = useMemo(
-    () => computeSpecialBetsPool(specialBets, tournamentActuals, playerStats, scoring),
-    [specialBets, tournamentActuals, playerStats, scoring]
+    () => computeSpecialBetsPool(specialBets, tournamentActuals, playerStats, scoring, teamGoals120),
+    [specialBets, tournamentActuals, playerStats, scoring, teamGoals120]
   );
 
   // Build real players from Supabase profiles + live scoring

@@ -202,12 +202,17 @@ export async function POST() {
     assists: s.assists ?? 0,
     minutes: s.played ?? 0,
   }));
+  // 120'-aware goals-for per team (regulation + ET, excl. shootout) for the
+  // best-attack live-tentative leader — matches the tracker/standings source.
+  const teamGoals120: Record<string, number> = {};
+  for (const t of stats?.teamStats || []) teamGoals120[t.code] = t.goalsFor ?? 0;
 
   const scores = computeLiveScores(brackets, finished, {
     advancements,
     specialBets,
     tournamentActuals,
     playerStats,
+    teamGoals120,
     scoring,
   });
 

@@ -76,6 +76,29 @@ export function ninetyMinuteScore(score: ScoreLike): { home: number | null; away
 }
 
 /**
+ * The 120-minute score — regulation + extra time, EXCLUDING the shootout. This
+ * is the tally the SPECIAL BETS count (best-attack team goals, and real
+ * "goals scored" convention): an extra-time goal counts, a shootout kick never
+ * does. Contrast `ninetyMinuteScore` (90' only, for the exact/toto MATCH bet).
+ *   - prefer `regularTime` (clean 90') + `extraTime` goals, OR
+ *   - strip only the shootout off `fullTime` (which already includes ET).
+ * Verified against the three FD shapes (see `ninetyMinuteScore`): a 90' match →
+ * fullTime; ET-no-shootout (BEL–SEN, rt null, ft 3–2) → 3–2; a shootout
+ * (rt 1–1, ft 4–5, pk 3–4) → 1–1 (shootout dropped).
+ */
+export function fullTime120Score(score: ScoreLike): { home: number | null; away: number | null } {
+  const etH = score?.extraTime?.home ?? 0;
+  const etA = score?.extraTime?.away ?? 0;
+  const rt = score?.regularTime;
+  if (rt?.home != null && rt?.away != null) return { home: rt.home + etH, away: rt.away + etA };
+  const ft = score?.fullTime;
+  if (ft?.home == null || ft?.away == null) return { home: null, away: null };
+  const pkH = score?.penalties?.home ?? 0;
+  const pkA = score?.penalties?.away ?? 0;
+  return { home: ft.home - pkH, away: ft.away - pkA };
+}
+
+/**
  * True qualifier of a FINISHED match, surviving FD free-tier garbage.
  *
  * FD's `score.winner` is the authoritative signal, but the free tier can leave

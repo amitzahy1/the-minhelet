@@ -76,6 +76,10 @@ interface DemoResultRow {
   away_team: string;
   home_goals: number | null;
   away_goals: number | null;
+  /** 120' score (regulation + extra time, excl. shootout). Null on old rows /
+   *  manual entries → falls back to the 90' goals. */
+  home_goals_120: number | null;
+  away_goals_120: number | null;
   group_id: string | null;
   stage: string;
   status: string;
@@ -100,13 +104,18 @@ export function aggregateTeamStats(rows: DemoResultRow[]): TeamGoalStats[] {
   for (const r of rows) {
     if (r.status !== "FINISHED") continue;
     if (r.home_goals === null || r.away_goals === null) continue;
+    // Best-attack counts the FULL match (regulation + extra time, excl.
+    // shootout). Use the 120' columns, falling back to the 90' score for group
+    // matches / old rows where they're null (equal there anyway).
+    const hg = r.home_goals_120 ?? r.home_goals;
+    const ag = r.away_goals_120 ?? r.away_goals;
     const home = ensure(r.home_team);
     const away = ensure(r.away_team);
-    home.goalsFor += r.home_goals;
-    home.goalsAgainst += r.away_goals;
+    home.goalsFor += hg;
+    home.goalsAgainst += ag;
     home.played += 1;
-    away.goalsFor += r.away_goals;
-    away.goalsAgainst += r.home_goals;
+    away.goalsFor += ag;
+    away.goalsAgainst += hg;
     away.played += 1;
   }
 
@@ -208,7 +217,7 @@ async function fetchDemoResults(): Promise<DemoResultRow[]> {
     const supabase = createClient(url, anon);
     const { data } = await supabase
       .from("demo_match_results")
-      .select("home_team, away_team, home_goals, away_goals, group_id, stage, status");
+      .select("home_team, away_team, home_goals, away_goals, home_goals_120, away_goals_120, group_id, stage, status");
     return (data as DemoResultRow[]) || [];
   } catch {
     return [];

@@ -100,6 +100,14 @@ export interface LiveScoringOptions {
    * and behavior is identical to scoring `matches` alone (fully backward-compatible).
    */
   liveMatches?: FinishedMatch[];
+  /**
+   * Tournament-cumulative 120' goals-for per team (regulation + extra time,
+   * EXCLUDING shootout) for the best-attack special bet. When provided it is
+   * used verbatim; omit it and the best-attack live leader falls back to summing
+   * the 90' `matches` scorelines (misses extra-time goals — see the special-bets
+   * block). Sourced from the tournament-stats team totals (120'-aware).
+   */
+  teamGoals120?: Record<string, number>;
 }
 
 function emptyScore(userId: string, displayName: string): PlayerScore {
@@ -366,18 +374,26 @@ export function computeLiveScores(
   if (options.specialBets && options.specialBets.length > 0) {
     const actuals = options.tournamentActuals ?? null;
     const stats = options.playerStats ?? [];
-    // Tournament-cumulative goals-for per team (from FINISHED matches) — feeds
-    // the best-attack LIVE tentative path. Uses `matches` (finished), not the
-    // live-inclusive set, so an in-play goal doesn't flicker the bet.
-    const teamGoals: Record<string, number> = {};
-    for (const m of matches) {
-      if (m.homeGoals == null || m.awayGoals == null) continue;
-      // Defensive double-normalization, like the group-scoring path: map any ISO
-      // TLA (ZAF/CHE/DEU/…) the upstream toAppCode didn't catch into the app code
-      // space, so goals bucket under the SAME code as the bettor's pick.
-      const h = normalizeTla(m.homeTla), a = normalizeTla(m.awayTla);
-      teamGoals[h] = (teamGoals[h] ?? 0) + m.homeGoals;
-      teamGoals[a] = (teamGoals[a] ?? 0) + m.awayGoals;
+    // Tournament-cumulative goals-for per team — feeds the best-attack LIVE
+    // tentative path. Prefer the 120'-aware totals (regulation + extra time,
+    // excl. shootout) from tournament-stats; the special bets count the FULL
+    // match, not just 90'. Fall back to summing the 90' `matches` scorelines
+    // (finished only, so an in-play goal doesn't flicker the bet) when no
+    // 120' map is supplied — a safe floor that just misses extra-time goals.
+    let teamGoals: Record<string, number>;
+    if (options.teamGoals120) {
+      teamGoals = options.teamGoals120;
+    } else {
+      teamGoals = {};
+      for (const m of matches) {
+        if (m.homeGoals == null || m.awayGoals == null) continue;
+        // Defensive double-normalization, like the group-scoring path: map any ISO
+        // TLA (ZAF/CHE/DEU/…) the upstream toAppCode didn't catch into the app code
+        // space, so goals bucket under the SAME code as the bettor's pick.
+        const h = normalizeTla(m.homeTla), a = normalizeTla(m.awayTla);
+        teamGoals[h] = (teamGoals[h] ?? 0) + m.homeGoals;
+        teamGoals[a] = (teamGoals[a] ?? 0) + m.awayGoals;
+      }
     }
     // One pool pass decides the "closest among bettors" relative winners (top
     // scorer / assists) so the per-user scoring is consistent across everyone.

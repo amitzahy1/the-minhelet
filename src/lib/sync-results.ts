@@ -7,7 +7,7 @@
 // with no score.
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { ninetyMinuteScore, decisivePenalties, type MatchResult } from "@/lib/api-football-data";
+import { ninetyMinuteScore, fullTime120Score, decisivePenalties, type MatchResult } from "@/lib/api-football-data";
 import { toAppCode } from "@/lib/fd-team-mapping";
 import { normalizeGroupLetter } from "@/lib/results-hits";
 import { getTsdbCardBoard } from "@/lib/api-thesportsdb";
@@ -34,6 +34,10 @@ export interface DemoResultRow {
   away_team: string;
   home_goals: number;
   away_goals: number;
+  /** 120' score (regulation + extra time, EXCLUDING shootout) — what the
+   *  special bets (best-attack) count. Equals the 90' score for group matches. */
+  home_goals_120: number;
+  away_goals_120: number;
   home_penalties: number | null;
   away_penalties: number | null;
   status: "FINISHED";
@@ -58,6 +62,9 @@ export function buildResultRows(matches: MatchResult[], enteredBy: string): Demo
     // silently stored as the 120' score.
     const { home: homeGoals, away: awayGoals } = ninetyMinuteScore(m.score);
     if (homeGoals == null || awayGoals == null) continue;
+    // 120' score (regulation + ET, minus shootout) for the special bets. Falls
+    // back to the 90' score if FD hasn't populated fullTime yet (never below it).
+    const ft120 = fullTime120Score(m.score);
     rows.push({
       match_id: String(m.id),
       stage: FD_STAGE_TO_APP[m.stage] ?? m.stage ?? "GROUP",
@@ -66,6 +73,8 @@ export function buildResultRows(matches: MatchResult[], enteredBy: string): Demo
       away_team: toAppCode(m.awayTeam?.tla),
       home_goals: homeGoals,
       away_goals: awayGoals,
+      home_goals_120: ft120.home ?? homeGoals,
+      away_goals_120: ft120.away ?? awayGoals,
       // Shootout score (knockouts decided on penalties) — kept separate from
       // goals so it never pollutes the 90' scoreline; the resolver uses it +
       // `winner` to advance the real qualifier. decisivePenalties drops a TIED
@@ -154,7 +163,8 @@ export function reconcileFinishedRows(
           fd: `${row.home_goals}-${row.away_goals}`,
           espn: `${espn.home}-${espn.away}`,
         });
-        rows.push({ ...row, home_goals: espn.home, away_goals: espn.away, entered_by: "espn-corrected" });
+        // Group stage → 120' equals the 90' score, so mirror the correction.
+        rows.push({ ...row, home_goals: espn.home, away_goals: espn.away, home_goals_120: espn.home, away_goals_120: espn.away, entered_by: "espn-corrected" });
         continue;
       }
     }

@@ -105,6 +105,9 @@ export async function GET() {
         away_team: away,
         home_goals: flipped ? ev.awayGoals : ev.homeGoals,
         away_goals: flipped ? ev.homeGoals : ev.awayGoals,
+        // Group stage → no extra time, so the 120' tally equals the 90' score.
+        home_goals_120: flipped ? ev.awayGoals : ev.homeGoals,
+        away_goals_120: flipped ? ev.homeGoals : ev.awayGoals,
         home_penalties: null,
         away_penalties: null,
         status: "FINISHED",
